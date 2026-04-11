@@ -1,0 +1,90 @@
+<svg width="800" viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Comparativo de infra — Vercel vs Fly.io vs Railway</title>
+  <desc>Três colunas comparando Vercel Hobby, Fly.io Free e Railway Hobby em custo, configuração, suporte a Next.js, região Brasil e limites</desc>
+
+  <defs>
+    <style>
+      text { font-family: ui-sans-serif, system-ui, sans-serif; }
+      .opt-title { font-size: 15px; font-weight: 700; }
+      .opt-sub   { font-size: 11px; font-weight: 500; }
+      .row-label { font-size: 11px; font-weight: 600; fill: #888780; }
+      .val       { font-size: 12px; font-weight: 500; }
+      .val-good  { fill: #085041; }
+      .val-mid   { fill: #633806; }
+      .val-bad   { fill: #791F1F; }
+      .val-neu   { fill: #444441; }
+      .badge-rec { font-size: 10px; font-weight: 700; fill: #085041; }
+    </style>
+  </defs>
+
+  <rect width="800" height="340" fill="#ffffff" rx="12"/>
+
+  <!-- ── COLUMN HEADERS ── -->
+
+  <!-- Vercel (recommended) -->
+  <rect x="24" y="16" width="234" height="64" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="1"/>
+  <rect x="24" y="16" width="234" height="20" rx="8" fill="#1D9E75"/>
+  <rect x="24" y="28" width="234" height="8" fill="#1D9E75"/>
+  <text x="141" y="29" text-anchor="middle" class="badge-rec" fill="#ffffff">RECOMENDADO</text>
+  <text x="141" y="54" text-anchor="middle" class="opt-title" fill="#04342C">Vercel</text>
+  <text x="141" y="70" text-anchor="middle" class="opt-sub" fill="#0F6E56">Hobby — R$ 0/mês</text>
+
+  <!-- Fly.io -->
+  <rect x="282" y="16" width="234" height="64" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="399" y="54" text-anchor="middle" class="opt-title" fill="#26215C">Fly.io</text>
+  <text x="399" y="70" text-anchor="middle" class="opt-sub" fill="#534AB7">Free tier — R$ 0/mês</text>
+
+  <!-- Railway -->
+  <rect x="540" y="16" width="234" height="64" rx="8" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+  <text x="657" y="54" text-anchor="middle" class="opt-title" fill="#412402">Railway</text>
+  <text x="657" y="70" text-anchor="middle" class="opt-sub" fill="#633806">Hobby — ~R$ 28/mês</text>
+
+  <!-- ── ROW LABELS ── -->
+  <text x="0" y="106" class="row-label" text-anchor="start" x="8">Configuração</text>
+  <text x="8" y="140" class="row-label">Next.js</text>
+  <text x="8" y="174" class="row-label">Região BR</text>
+  <text x="8" y="208" class="row-label">Timeout</text>
+  <text x="8" y="242" class="row-label">Membros</text>
+  <text x="8" y="276" class="row-label">Preview / PR</text>
+  <text x="8" y="310" class="row-label">Lock-in</text>
+
+  <!-- dividers -->
+  <line x1="24" y1="88" x2="776" y2="88" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="24" y1="120" x2="776" y2="120" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="24" y1="154" x2="776" y2="154" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="24" y1="188" x2="776" y2="188" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="24" y1="222" x2="776" y2="222" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="24" y1="256" x2="776" y2="256" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="24" y1="290" x2="776" y2="290" stroke="#D3D1C7" stroke-width="0.5"/>
+
+  <!-- col separators -->
+  <line x1="270" y1="88" x2="270" y2="325" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="528" y1="88" x2="528" y2="325" stroke="#D3D1C7" stroke-width="0.5"/>
+
+  <!-- ── VERCEL VALUES ── -->
+  <text x="141" y="108" text-anchor="middle" class="val val-good">zero config</text>
+  <text x="141" y="142" text-anchor="middle" class="val val-good">nativo</text>
+  <text x="141" y="176" text-anchor="middle" class="val val-good">sim (edge global)</text>
+  <text x="141" y="210" text-anchor="middle" class="val val-mid">10s (Hobby)</text>
+  <text x="141" y="244" text-anchor="middle" class="val val-bad">1 (Hobby)</text>
+  <text x="141" y="278" text-anchor="middle" class="val val-good">sim</text>
+  <text x="141" y="312" text-anchor="middle" class="val val-bad">alto</text>
+
+  <!-- ── FLY.IO VALUES ── -->
+  <text x="399" y="108" text-anchor="middle" class="val val-bad">alta (Docker)</text>
+  <text x="399" y="142" text-anchor="middle" class="val val-mid">manual</text>
+  <text x="399" y="176" text-anchor="middle" class="val val-good">sim (gru)</text>
+  <text x="399" y="210" text-anchor="middle" class="val val-good">sem limite</text>
+  <text x="399" y="244" text-anchor="middle" class="val val-good">ilimitados</text>
+  <text x="399" y="278" text-anchor="middle" class="val val-bad">não</text>
+  <text x="399" y="312" text-anchor="middle" class="val val-good">baixo</text>
+
+  <!-- ── RAILWAY VALUES ── -->
+  <text x="657" y="108" text-anchor="middle" class="val val-good">baixa</text>
+  <text x="657" y="142" text-anchor="middle" class="val val-good">bom</text>
+  <text x="657" y="176" text-anchor="middle" class="val val-bad">não</text>
+  <text x="657" y="210" text-anchor="middle" class="val val-good">sem limite</text>
+  <text x="657" y="244" text-anchor="middle" class="val val-good">ilimitados</text>
+  <text x="657" y="278" text-anchor="middle" class="val val-mid">não</text>
+  <text x="657" y="312" text-anchor="middle" class="val val-mid">médio</text>
+</svg>
