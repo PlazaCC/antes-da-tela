@@ -1,0 +1,109 @@
+<svg width="800" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Stack por camadas — Antes da Tela</title>
+  <desc>Visão geral da stack do projeto organizada em seis camadas: deploy, frontend, API, dados, storage e serviços externos</desc>
+
+  <defs>
+    <style>
+      text { font-family: ui-sans-serif, system-ui, sans-serif; }
+      .layer-label { font-size: 11px; font-weight: 600; fill: #888780; letter-spacing: 0.06em; text-transform: uppercase; }
+      .chip-title { font-size: 13px; font-weight: 600; }
+      .chip-sub   { font-size: 11px; }
+    </style>
+  </defs>
+
+  <!-- background -->
+  <rect width="800" height="400" fill="#ffffff" rx="12"/>
+
+  <!-- === ROW 1: Deploy === -->
+  <rect x="24" y="24" width="752" height="56" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="40" y="47" class="layer-label" fill="#5F5E5A">Deploy</text>
+  <text x="40" y="65" class="chip-title" fill="#2C2C2A">Vercel</text>
+  <text x="108" y="65" class="chip-sub" fill="#5F5E5A">— free tier · CI/CD via GitHub · domínio + SSL inclusos</text>
+
+  <!-- === ROW 2: Frontend === -->
+  <rect x="24" y="96" width="752" height="72" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="40" y="115" class="layer-label" fill="#534AB7">Frontend</text>
+
+  <!-- chip: Next.js -->
+  <rect x="40" y="122" width="148" height="36" rx="6" fill="#CECBF6" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="114" y="136" text-anchor="middle" class="chip-title" fill="#26215C">Next.js 14</text>
+  <text x="114" y="150" text-anchor="middle" class="chip-sub" fill="#534AB7">App Router + SSR</text>
+
+  <!-- chip: pdf.js -->
+  <rect x="200" y="122" width="120" height="36" rx="6" fill="#CECBF6" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="260" y="136" text-anchor="middle" class="chip-title" fill="#26215C">pdf.js</text>
+  <text x="260" y="150" text-anchor="middle" class="chip-sub" fill="#534AB7">Leitor inline</text>
+
+  <!-- chip: Zustand -->
+  <rect x="332" y="122" width="120" height="36" rx="6" fill="#CECBF6" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="392" y="136" text-anchor="middle" class="chip-title" fill="#26215C">Zustand</text>
+  <text x="392" y="150" text-anchor="middle" class="chip-sub" fill="#534AB7">Estado UI</text>
+
+  <!-- chip: TanStack -->
+  <rect x="464" y="122" width="148" height="36" rx="6" fill="#CECBF6" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="538" y="136" text-anchor="middle" class="chip-title" fill="#26215C">TanStack Query</text>
+  <text x="538" y="150" text-anchor="middle" class="chip-sub" fill="#534AB7">Cache client</text>
+
+  <!-- chip: Tailwind -->
+  <rect x="624" y="122" width="120" height="36" rx="6" fill="#CECBF6" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="684" y="136" text-anchor="middle" class="chip-title" fill="#26215C">Tailwind</text>
+  <text x="684" y="150" text-anchor="middle" class="chip-sub" fill="#534AB7">UI</text>
+
+  <!-- === ROW 3: API === -->
+  <rect x="24" y="184" width="752" height="72" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="40" y="203" class="layer-label" fill="#0F6E56">API + Auth</text>
+
+  <!-- chip: tRPC -->
+  <rect x="40" y="210" width="120" height="36" rx="6" fill="#9FE1CB" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="100" y="224" text-anchor="middle" class="chip-title" fill="#04342C">tRPC</text>
+  <text x="100" y="238" text-anchor="middle" class="chip-sub" fill="#085041">RPC tipado</text>
+
+  <!-- chip: Auth.js -->
+  <rect x="172" y="210" width="120" height="36" rx="6" fill="#9FE1CB" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="232" y="224" text-anchor="middle" class="chip-title" fill="#04342C">Auth.js v5</text>
+  <text x="232" y="238" text-anchor="middle" class="chip-sub" fill="#085041">Session + OAuth</text>
+
+  <!-- chip: Zod -->
+  <rect x="304" y="210" width="120" height="36" rx="6" fill="#9FE1CB" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="364" y="224" text-anchor="middle" class="chip-title" fill="#04342C">Zod</text>
+  <text x="364" y="238" text-anchor="middle" class="chip-sub" fill="#085041">Validação</text>
+
+  <!-- chip: RHF -->
+  <rect x="436" y="210" width="160" height="36" rx="6" fill="#9FE1CB" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="516" y="224" text-anchor="middle" class="chip-title" fill="#04342C">React Hook Form</text>
+  <text x="516" y="238" text-anchor="middle" class="chip-sub" fill="#085041">Formulários</text>
+
+  <!-- === ROW 4: Dados === -->
+  <rect x="24" y="272" width="368" height="72" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="40" y="291" class="layer-label" fill="#0F6E56">Banco</text>
+
+  <rect x="40" y="298" width="148" height="36" rx="6" fill="#9FE1CB" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="114" y="312" text-anchor="middle" class="chip-title" fill="#04342C">Supabase Postgres</text>
+  <text x="114" y="326" text-anchor="middle" class="chip-sub" fill="#085041">Banco principal</text>
+
+  <rect x="200" y="298" width="120" height="36" rx="6" fill="#9FE1CB" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="260" y="312" text-anchor="middle" class="chip-title" fill="#04342C">Drizzle ORM</text>
+  <text x="260" y="326" text-anchor="middle" class="chip-sub" fill="#085041">Queries + migrations</text>
+
+  <!-- === ROW 4b: Storage === -->
+  <rect x="408" y="272" width="368" height="72" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="424" y="291" class="layer-label" fill="#0F6E56">Storage + Realtime</text>
+
+  <rect x="424" y="298" width="148" height="36" rx="6" fill="#9FE1CB" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="498" y="312" text-anchor="middle" class="chip-title" fill="#04342C">Supabase Storage</text>
+  <text x="498" y="326" text-anchor="middle" class="chip-sub" fill="#085041">PDFs + áudios</text>
+
+  <rect x="584" y="298" width="148" height="36" rx="6" fill="#9FE1CB" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="658" y="312" text-anchor="middle" class="chip-title" fill="#04342C">Cloudflare CDN</text>
+  <text x="658" y="326" text-anchor="middle" class="chip-sub" fill="#085041">Cache global</text>
+
+  <!-- === ROW 5: Externos === -->
+  <rect x="24" y="360" width="752" height="28" rx="8" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+  <text x="40" y="374" class="layer-label" fill="#854F0B">Serviços externos</text>
+  <text x="200" y="378" class="chip-title" fill="#412402">Posthog</text>
+  <text x="260" y="378" class="chip-sub" fill="#633806">· analytics</text>
+  <text x="360" y="378" class="chip-title" fill="#412402">Sentry</text>
+  <text x="408" y="378" class="chip-sub" fill="#633806">· erros</text>
+  <text x="488" y="378" class="chip-title" fill="#412402">Resend</text>
+  <text x="540" y="378" class="chip-sub" fill="#633806">· email</text>
+</svg>

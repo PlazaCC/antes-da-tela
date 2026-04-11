@@ -1,0 +1,112 @@
+<svg width="800" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Fluxo de requisição — Antes da Tela</title>
+  <desc>Sequência de passos de uma requisição: usuário abre roteiro, auth check, carrega PDF, exibe comentários e posta novo comentário</desc>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: ui-sans-serif, system-ui, sans-serif; }
+      .col-label { font-size: 11px; font-weight: 600; fill: #888780; letter-spacing: 0.05em; text-transform: uppercase; }
+      .node-title { font-size: 12px; font-weight: 600; }
+      .node-sub   { font-size: 10px; }
+      .step-num   { font-size: 10px; font-weight: 700; }
+      .guide      { stroke: #D3D1C7; stroke-width: 0.5; stroke-dasharray: 4 4; }
+      .conn       { stroke: #B4B2A9; stroke-width: 1; fill: none; marker-end: url(#arr); }
+    </style>
+  </defs>
+
+  <rect width="800" height="520" fill="#ffffff" rx="12"/>
+
+  <!-- Column headers -->
+  <text x="110" y="28" text-anchor="middle" class="col-label">Usuário / browser</text>
+  <text x="380" y="28" text-anchor="middle" class="col-label">Next.js + tRPC</text>
+  <text x="650" y="28" text-anchor="middle" class="col-label">Supabase + Storage</text>
+
+  <!-- Guide lines -->
+  <line x1="110" y1="36" x2="110" y2="500" class="guide"/>
+  <line x1="380" y1="36" x2="380" y2="500" class="guide"/>
+  <line x1="650" y1="36" x2="650" y2="500" class="guide"/>
+
+  <!-- ── Step 1: SSR page ── -->
+  <circle cx="28" cy="72" r="11" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="28" y="76" text-anchor="middle" class="step-num" fill="#444441">1</text>
+  <rect x="44" y="56" width="132" height="32" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="110" y="70" text-anchor="middle" class="node-title" fill="#2C2C2A">Acessa /roteiro/[slug]</text>
+  <text x="110" y="82" text-anchor="middle" class="node-sub" fill="#5F5E5A">browser request</text>
+  <line x1="176" y1="72" x2="296" y2="72" class="conn"/>
+  <rect x="296" y="56" width="168" height="32" rx="6" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="380" y="70" text-anchor="middle" class="node-title" fill="#26215C">Page.tsx — SSR</text>
+  <text x="380" y="82" text-anchor="middle" class="node-sub" fill="#534AB7">server component</text>
+  <line x1="464" y1="72" x2="566" y2="72" class="conn"/>
+  <rect x="566" y="56" width="168" height="32" rx="6" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="650" y="70" text-anchor="middle" class="node-title" fill="#04342C">Drizzle query</text>
+  <text x="650" y="82" text-anchor="middle" class="node-sub" fill="#085041">SELECT roteiro</text>
+
+  <!-- ── Step 2: Auth check ── -->
+  <circle cx="28" cy="152" r="11" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="28" y="156" text-anchor="middle" class="step-num" fill="#444441">2</text>
+  <rect x="296" y="136" width="168" height="32" rx="6" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="380" y="150" text-anchor="middle" class="node-title" fill="#04342C">Auth.js middleware</text>
+  <text x="380" y="162" text-anchor="middle" class="node-sub" fill="#085041">verifica sessão</text>
+  <line x1="380" y1="104" x2="380" y2="136" class="conn"/>
+
+  <!-- ── Step 3: Load PDF ── -->
+  <circle cx="28" cy="232" r="11" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="28" y="236" text-anchor="middle" class="step-num" fill="#444441">3</text>
+  <rect x="44" y="216" width="132" height="32" rx="6" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="110" y="230" text-anchor="middle" class="node-title" fill="#26215C">pdf.js</text>
+  <text x="110" y="242" text-anchor="middle" class="node-sub" fill="#534AB7">renderiza leitor</text>
+  <line x1="296" y1="232" x2="176" y2="232" class="conn"/>
+  <rect x="296" y="216" width="168" height="32" rx="6" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="380" y="230" text-anchor="middle" class="node-title" fill="#26215C">Zustand store</text>
+  <text x="380" y="242" text-anchor="middle" class="node-sub" fill="#534AB7">página, zoom, painel</text>
+  <line x1="380" y1="168" x2="380" y2="216" class="conn"/>
+  <line x1="464" y1="232" x2="566" y2="232" class="conn"/>
+  <rect x="566" y="216" width="168" height="32" rx="6" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="650" y="230" text-anchor="middle" class="node-title" fill="#04342C">CDN / Storage</text>
+  <text x="650" y="242" text-anchor="middle" class="node-sub" fill="#085041">serve PDF</text>
+
+  <!-- ── Step 4: Comments ── -->
+  <circle cx="28" cy="312" r="11" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="28" y="316" text-anchor="middle" class="step-num" fill="#444441">4</text>
+  <rect x="44" y="296" width="132" height="32" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="110" y="310" text-anchor="middle" class="node-title" fill="#2C2C2A">Navega página 12</text>
+  <text x="110" y="322" text-anchor="middle" class="node-sub" fill="#5F5E5A">evento do leitor</text>
+  <line x1="176" y1="312" x2="296" y2="312" class="conn"/>
+  <rect x="296" y="296" width="168" height="32" rx="6" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="380" y="310" text-anchor="middle" class="node-title" fill="#04342C">tRPC query</text>
+  <text x="380" y="322" text-anchor="middle" class="node-sub" fill="#085041">comentarios.list</text>
+  <line x1="464" y1="312" x2="566" y2="312" class="conn"/>
+  <rect x="566" y="296" width="168" height="32" rx="6" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="650" y="310" text-anchor="middle" class="node-title" fill="#04342C">Postgres</text>
+  <text x="650" y="322" text-anchor="middle" class="node-sub" fill="#085041">WHERE pagina = 12</text>
+
+  <!-- ── Step 5: Post comment ── -->
+  <circle cx="28" cy="392" r="11" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="28" y="396" text-anchor="middle" class="step-num" fill="#444441">5</text>
+  <rect x="44" y="376" width="132" height="32" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="110" y="390" text-anchor="middle" class="node-title" fill="#2C2C2A">Posta comentário</text>
+  <text x="110" y="402" text-anchor="middle" class="node-sub" fill="#5F5E5A">React Hook Form</text>
+  <line x1="176" y1="392" x2="296" y2="392" class="conn"/>
+  <rect x="296" y="376" width="168" height="32" rx="6" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="380" y="390" text-anchor="middle" class="node-title" fill="#04342C">tRPC mutation</text>
+  <text x="380" y="402" text-anchor="middle" class="node-sub" fill="#085041">Zod valida input</text>
+  <line x1="464" y1="392" x2="566" y2="392" class="conn"/>
+  <rect x="566" y="376" width="168" height="32" rx="6" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="650" y="390" text-anchor="middle" class="node-title" fill="#04342C">INSERT + Realtime</text>
+  <text x="650" y="402" text-anchor="middle" class="node-sub" fill="#085041">broadcast leitores</text>
+
+  <!-- ── Step 6: Cache invalidation + analytics ── -->
+  <circle cx="28" cy="468" r="11" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="28" y="472" text-anchor="middle" class="step-num" fill="#444441">6</text>
+  <rect x="44" y="452" width="132" height="32" rx="6" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="110" y="466" text-anchor="middle" class="node-title" fill="#26215C">TanStack Query</text>
+  <text x="110" y="478" text-anchor="middle" class="node-sub" fill="#534AB7">invalida + refetch</text>
+  <path d="M380 408 L380 440 L110 440 L110 452" stroke="#B4B2A9" stroke-width="1" fill="none" marker-end="url(#arr)"/>
+  <rect x="296" y="452" width="168" height="32" rx="6" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+  <text x="380" y="466" text-anchor="middle" class="node-title" fill="#412402">Posthog</text>
+  <text x="380" y="478" text-anchor="middle" class="node-sub" fill="#633806">track('comentario')</text>
+  <path d="M380 408 L380 452" stroke="#EF9F27" stroke-width="1" stroke-dasharray="4 3" fill="none" marker-end="url(#arr)"/>
+</svg>

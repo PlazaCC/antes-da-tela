@@ -1,0 +1,91 @@
+<svg width="800" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Estrutura de pastas — Antes da Tela</title>
+  <desc>Organização do repositório single-repo: pastas src/app, src/server, src/lib, src/components e drizzle</desc>
+
+  <defs>
+    <style>
+      text { font-family: ui-monospace, "Cascadia Code", "Fira Mono", monospace; }
+      .dir   { font-size: 13px; font-weight: 700; }
+      .file  { font-size: 12px; font-weight: 400; }
+      .desc  { font-size: 11px; font-weight: 400; }
+      .badge { font-size: 10px; font-weight: 600; }
+    </style>
+  </defs>
+
+  <rect width="800" height="380" fill="#ffffff" rx="12"/>
+
+  <!-- Root -->
+  <text x="40" y="44" class="dir" fill="#2C2C2A">/ (raiz do projeto)</text>
+  <line x1="40" y1="52" x2="760" y2="52" stroke="#D3D1C7" stroke-width="0.5"/>
+
+  <!-- === src/app === -->
+  <rect x="40" y="64" width="220" height="120" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="56" y="84" class="dir" fill="#26215C">src/app/</text>
+  <text x="56" y="102" class="file" fill="#534AB7">page.tsx</text>
+  <text x="56" y="118" class="file" fill="#534AB7">roteiro/[slug]/</text>
+  <text x="56" y="134" class="file" fill="#534AB7">api/trpc/[trpc]/</text>
+  <text x="56" y="150" class="file" fill="#534AB7">perfil/[id]/</text>
+  <text x="56" y="166" class="file" fill="#534AB7">publicar/</text>
+  <!-- badge -->
+  <rect x="158" y="72" width="88" height="18" rx="4" fill="#CECBF6" stroke="none"/>
+  <text x="202" y="84" text-anchor="middle" class="badge" fill="#3C3489">Next.js pages</text>
+
+  <!-- === src/server === -->
+  <rect x="280" y="64" width="220" height="120" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="296" y="84" class="dir" fill="#04342C">src/server/</text>
+  <text x="296" y="102" class="file" fill="#085041">trpc.ts</text>
+  <text x="296" y="118" class="file" fill="#085041">routers/roteiros.ts</text>
+  <text x="296" y="134" class="file" fill="#085041">routers/comentarios.ts</text>
+  <text x="296" y="150" class="file" fill="#085041">routers/usuarios.ts</text>
+  <text x="296" y="166" class="file" fill="#085041">db.ts</text>
+  <!-- badge -->
+  <rect x="388" y="72" width="96" height="18" rx="4" fill="#9FE1CB" stroke="none"/>
+  <text x="436" y="84" text-anchor="middle" class="badge" fill="#085041">tRPC + Drizzle</text>
+
+  <!-- === src/lib === -->
+  <rect x="520" y="64" width="220" height="120" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="536" y="84" class="dir" fill="#04342C">src/lib/</text>
+  <text x="536" y="102" class="file" fill="#085041">auth.ts</text>
+  <text x="536" y="118" class="file" fill="#085041">supabase.ts</text>
+  <text x="536" y="134" class="file" fill="#085041">storage.ts</text>
+  <text x="536" y="150" class="file" fill="#085041">posthog.ts</text>
+  <!-- badge -->
+  <rect x="608" y="72" width="116" height="18" rx="4" fill="#9FE1CB" stroke="none"/>
+  <text x="666" y="84" text-anchor="middle" class="badge" fill="#085041">Auth.js · Supabase</text>
+
+  <!-- === src/components === -->
+  <rect x="40" y="204" width="340" height="120" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="56" y="224" class="dir" fill="#26215C">src/components/</text>
+  <text x="56" y="242" class="file" fill="#534AB7">pdf-reader/</text>
+  <text x="56" y="258" class="file" fill="#534AB7">  PdfViewer.tsx</text>
+  <text x="56" y="274" class="file" fill="#534AB7">  CommentPanel.tsx</text>
+  <text x="56" y="290" class="file" fill="#534AB7">ui/</text>
+  <text x="56" y="306" class="file" fill="#534AB7">roteiro/</text>
+  <!-- badge -->
+  <rect x="222" y="212" width="140" height="18" rx="4" fill="#CECBF6" stroke="none"/>
+  <text x="292" y="224" text-anchor="middle" class="badge" fill="#3C3489">React + Tailwind</text>
+
+  <!-- === drizzle === -->
+  <rect x="400" y="204" width="340" height="120" rx="8" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+  <text x="416" y="224" class="dir" fill="#412402">drizzle/</text>
+  <text x="416" y="242" class="file" fill="#633806">schema.ts</text>
+  <text x="416" y="258" class="file" fill="#633806">  users, scripts, comments</text>
+  <text x="416" y="274" class="file" fill="#633806">  ratings, audio_tracks</text>
+  <text x="416" y="290" class="file" fill="#633806">migrations/</text>
+  <text x="416" y="306" class="file" fill="#633806">drizzle.config.ts</text>
+  <!-- badge -->
+  <rect x="570" y="212" width="152" height="18" rx="4" fill="#FAC775" stroke="none"/>
+  <text x="646" y="224" text-anchor="middle" class="badge" fill="#412402">Drizzle ORM + kit</text>
+
+  <!-- === config files === -->
+  <rect x="40" y="340" width="720" height="28" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="56" y="357" class="file" fill="#5F5E5A">package.json</text>
+  <text x="180" y="357" class="file" fill="#B4B2A9">·</text>
+  <text x="196" y="357" class="file" fill="#5F5E5A">next.config.ts</text>
+  <text x="336" y="357" class="file" fill="#B4B2A9">·</text>
+  <text x="352" y="357" class="file" fill="#5F5E5A">tailwind.config.ts</text>
+  <text x="516" y="357" class="file" fill="#B4B2A9">·</text>
+  <text x="532" y="357" class="file" fill="#5F5E5A">.env.local</text>
+  <text x="636" y="357" class="file" fill="#B4B2A9">·</text>
+  <text x="652" y="357" class="file" fill="#5F5E5A">tsconfig.json</text>
+</svg>
