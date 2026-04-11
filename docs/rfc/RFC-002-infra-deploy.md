@@ -194,8 +194,6 @@ Railway faz sentido se o time quiser mais de 1 membro sem pagar U$20/mês (Verce
 
 ## Comparativo direto
 
-![Comparativo de opções](svgs/05-comparativo-infra.svg)
-
 | Critério                | Vercel Hobby | Fly.io Free   | Railway Hobby |
 | ----------------------- | ------------ | ------------- | ------------- |
 | **Custo inicial**       | R$ 0         | R$ 0          | ~R$ 28/mês    |
