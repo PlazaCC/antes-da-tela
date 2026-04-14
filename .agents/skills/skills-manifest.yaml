@@ -1,0 +1,101 @@
+# Manifesto de Skills MCP — Indexação para IAs
+# Este arquivo serve para indexação rápida de skills por agentes e IAs, sem depender de parsing dos SKILL.md.
+# Atualize manualmente ao adicionar/remover skills.
+
+skills:
+  - name: adapter-aws-lambda
+    description: Deploy tRPC on AWS Lambda with awsLambdaRequestHandler() for API Gateway v1/v2 and Lambda URLs.
+    path: adapter-aws-lambda/SKILL.md
+  - name: adapter-express
+    description: Mount tRPC as Express middleware with createExpressMiddleware().
+    path: adapter-express/SKILL.md
+  - name: adapter-fastify
+    description: Mount tRPC as a Fastify plugin with fastifyTRPCPlugin.
+    path: adapter-fastify/SKILL.md
+  - name: adapter-fetch
+    description: Deploy tRPC on edge runtimes with fetchRequestHandler().
+    path: adapter-fetch/SKILL.md
+  - name: adapter-standalone
+    description: Mount tRPC on Node.js HTTP server with createHTTPServer().
+    path: adapter-standalone/SKILL.md
+  - name: add-dependency
+    description: Adds a new npm package to the project using Yarn 4.
+    path: add-dependency/SKILL.md
+  - name: auth
+    description: Implement JWT/cookie authentication and authorization in tRPC.
+    path: auth/SKILL.md
+  - name: caching
+    description: Set HTTP cache headers on tRPC query responses.
+    path: caching/SKILL.md
+  - name: check-env
+    description: Check and validate environment variables.
+    path: check-env/SKILL.md
+  - name: client-setup
+    description: Create a vanilla tRPC client with createTRPCClient().
+    path: client-setup/SKILL.md
+  - name: db-migrate
+    description: Run and manage database migrations.
+    path: db-migrate/SKILL.md
+  - name: dotenv
+    description: Load environment variables from a .env file into process.env.
+    path: dotenv/SKILL.md
+  - name: dotenvx
+    description: Use dotenvx to run commands with environment variables.
+    path: dotenvx/SKILL.md
+  - name: error-handling
+    description: Throw typed errors with TRPCError and error codes.
+    path: error-handling/SKILL.md
+  - name: links
+    description: Configure the tRPC client link chain.
+    path: links/SKILL.md
+  - name: middlewares
+    description: Create and compose tRPC middleware.
+    path: middlewares/SKILL.md
+  - name: new-drizzle-table
+    description: Creates a new Drizzle ORM table schema and generates the migration.
+    path: new-drizzle-table/SKILL.md
+  - name: new-page
+    description: Scaffolds a new Next.js App Router page with proper Server Component patterns.
+    path: new-page/SKILL.md
+  - name: new-shadcn-component
+    description: Installs a shadcn/ui component and creates a typed wrapper.
+    path: new-shadcn-component/SKILL.md
+  - name: new-trpc-router
+    description: Creates a new tRPC router for a feature and wires it into appRouter.
+    path: new-trpc-router/SKILL.md
+  - name: non-json-content-types
+    description: Handle FormData, file uploads, Blob, Uint8Array, and ReadableStream inputs in tRPC mutations.
+    path: non-json-content-types/SKILL.md
+  - name: react-query-classic-migration
+    description: Migrate from @trpc/react-query (classic) to @trpc/tanstack-react-query.
+    path: react-query-classic-migration/SKILL.md
+  - name: react-query-setup
+    description: Set up @trpc/tanstack-react-query with createTRPCContext().
+    path: react-query-setup/SKILL.md
+  - name: server-setup
+    description: Initialize tRPC with initTRPC.create(), define routers, procedures, context, export AppRouter type.
+    path: server-setup/SKILL.md
+  - name: server-side-calls
+    description: Call tRPC procedures directly from server code using createCallerFactory().
+    path: server-side-calls/SKILL.md
+  - name: service-oriented-architecture
+    description: Break a tRPC backend into multiple services with custom routing links.
+    path: service-oriented-architecture/SKILL.md
+  - name: subscriptions
+    description: Set up real-time event streams with async generator subscriptions.
+    path: subscriptions/SKILL.md
+  - name: supabase
+    description: Use when doing ANY task involving Supabase.
+    path: supabase/SKILL.md
+  - name: supabase-postgres-best-practices
+    description: Postgres performance optimization and best practices from Supabase.
+    path: supabase-postgres-best-practices/SKILL.md
+  - name: superjson
+    description: Configure SuperJSON transformer on both server and client.
+    path: superjson/SKILL.md
+  - name: trpc-router
+    description: Entry point for all tRPC skills. Decision tree routing by task.
+    path: trpc-router/SKILL.md
+  - name: validators
+    description: Configure input and output validation with .input() and .output().
+    path: validators/SKILL.md
