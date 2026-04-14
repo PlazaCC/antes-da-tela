@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:supabase.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:orm.drizzle.team)",
+      "WebFetch(domain:yarnpkg.com)",
+      "WebFetch(domain:trpc.io)",
+      "WebFetch(domain:docs.sentry.io)",
+      "WebFetch(domain:posthog.com)"
+    ]
+  }
+}

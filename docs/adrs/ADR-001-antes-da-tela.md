@@ -32,7 +32,7 @@ Repositório → Único (single repo Next.js)
 Deploy      → Vercel (free tier)
 Frontend    → Next.js 14 App Router
 API         → tRPC + Zod
-Auth        → Auth.js v5
+Auth        → Supabase Auth (@supabase/ssr)
 ORM         → Drizzle
 Banco       → Supabase Postgres
 Storage     → Supabase Storage + Cloudflare CDN
@@ -56,7 +56,7 @@ Email       → Resend (free tier)
 
 **Escolha:** Repositório único, sem monorepo
 **Rejeitados:** Monorepo com Turborepo ou Nx
-**Motivo:** O backend é inteiramente Supabase — não existe serviço Node.js separado para hospedar. Os routers tRPC vivem dentro do próprio Next.js em `/src/server/`. Schema Drizzle e configuração Auth.js são arquivos locais do mesmo projeto. Não há pacotes para compartilhar entre apps distintos. Monorepo adicionaria complexidade de tooling sem benefício concreto na POC.
+**Motivo:** O backend é inteiramente Supabase — não existe serviço Node.js separado para hospedar. Os routers tRPC vivem dentro do próprio Next.js em `/src/server/`. Schema Drizzle e configuração do Supabase Auth são arquivos locais do mesmo projeto. Não há pacotes para compartilhar entre apps distintos. Monorepo adicionaria complexidade de tooling sem benefício concreto na POC.
 
 Estrutura de pastas:
 
@@ -65,7 +65,7 @@ Estrutura de pastas:
 ├── src/
 │   ├── app/          # Next.js App Router — páginas e API routes
 │   ├── server/       # tRPC routers e Drizzle queries
-│   ├── lib/          # Supabase client, Auth.js config
+│   ├── lib/          # Supabase client, Supabase Auth config
 │   └── components/   # Componentes React e UI
 ├── drizzle/          # Schema e migrations
 └── package.json
@@ -103,11 +103,11 @@ Estrutura de pastas:
 
 ---
 
-### Auth — Auth.js v5
+### Auth — Supabase Auth (@supabase/ssr)
 
-**Escolha:** Auth.js v5 (NextAuth)
-**Rejeitados:** Clerk, Lucia, Better Auth
-**Motivo:** Gratuito, sem lock-in, integração nativa com Next.js middleware. Clerk cobra por MAU acima de 10k e tem lock-in alto.
+**Escolha:** Supabase Auth (@supabase/ssr)
+**Rejeitados:** Auth.js (NextAuth), Clerk, Lucia, Better Auth
+**Motivo:** Já faz parte da infraestrutura do Supabase utilizada no projeto. Evita uma camada redundante de autenticação, reduz latência e simplifica a gestão de usuários e permissões (RLS) diretamente no Postgres. Suporta SSR nativamente através do pacote oficial `@supabase/ssr`.
 
 ---
 
@@ -198,7 +198,7 @@ Estrutura de pastas:
 
 - Supabase free tier pausa projetos inativos após 1 semana sem acesso
 - tRPC não serve bem APIs públicas consumidas por terceiros
-- Auth.js requer mais configuração inicial que Clerk
+- Supabase Auth requer configuração cuidadosa de middleware para persistência de sessão em SSR
 - pdf.js exige atenção a performance em roteiros longos (> 120 páginas)
 - Vercel free tier limita execução de funções a 10s por request
 
