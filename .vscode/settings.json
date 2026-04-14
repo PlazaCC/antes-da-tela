@@ -2,13 +2,5 @@
   // Enables custom chat prompts from .agents/prompts
   "chat.promptFilesLocations": {
     ".agents/prompts": true
-  },
-  // Enables custom chat instructions from .agents/rules, .agents/skills, and .agents
-  "chat.instructionsFilesLocations": {
-    ".agents/rules": true,
-    ".agents/skills": true,
-    ".agents": true
-  },
-  // Allows using customizations from parent repositories as well
-  "chat.useCustomizationsInParentRepositories": true
+  }
 }
