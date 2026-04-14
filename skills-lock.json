@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "skills": {
+    "adapter-aws-lambda": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "7623ff9a26f90994a5cc7725f552c6295ac2367f515859816072e33e340f853b"
+    },
+    "adapter-express": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "dfd3cf56bf78cebf6d2196d5cd0c38cc7ce33fcef6048862ca68a69135cc1f3a"
+    },
+    "adapter-fastify": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "d5c1d3ed8b0cd34e722e9f4a982d9314477beb4b13f4bdeda306ec0fad96e6e3"
+    },
+    "adapter-fetch": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "e4fd3631b00ee54810414a2b82b8b0d895503d6c44b9c51b0ce403dd05d8a116"
+    },
+    "adapter-standalone": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "4bb04e7d2b02e73bc46432e1cbde584b317c370a6f103d33d5c39ff4433a192c"
+    },
+    "auth": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "d840a0dbaeee1f161cc41c552baab5c55f4b2677faa0dbabcc4b20cb54ee25b9"
+    },
+    "caching": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "22211fdb7ea9cf4852693c65649cc8de5da281bc18890b1514d9b1baebe1295b"
+    },
+    "client-setup": {
+      "source": "@trpc/client",
+      "sourceType": "node_modules",
+      "computedHash": "88a88d6eace925785968014e8d2ddc0ae96d1d70cde28af4e2788825d916ae10"
+    },
+    "dotenv": {
+      "source": "dotenv",
+      "sourceType": "node_modules",
+      "computedHash": "7580a9737aebb75d98d174bed9b3545586db2d3a112f0fe69c8b79eecfd5ce99"
+    },
+    "dotenvx": {
+      "source": "dotenv",
+      "sourceType": "node_modules",
+      "computedHash": "851072ff03649019eeadb9780b87eacdc3e0b39b8407105354144f692ebc699b"
+    },
+    "error-handling": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "140c1ea11d7922196a5d3b21a6283f1488a18d760402d347fb0dced46a4a976a"
+    },
+    "links": {
+      "source": "@trpc/client",
+      "sourceType": "node_modules",
+      "computedHash": "49d9166ba6fcd32b68252bdb419581da39426dc7ba141921001e9460ac5d1666"
+    },
+    "middlewares": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "012024d3aa6bd2fa4747ff5e220b9bc4d0d13046811b91b6aa77d4c01a7a94e6"
+    },
+    "non-json-content-types": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "53a4eab51e5a7524c9cdc5809cf62215331b9ec1338413e68bf6f825b73df271"
+    },
+    "react-query-classic-migration": {
+      "source": "@trpc/tanstack-react-query",
+      "sourceType": "node_modules",
+      "computedHash": "29f94294eff7c8f8a3af1642fd5de4e237abdfe08152b996a776c1dfd05a08eb"
+    },
+    "react-query-setup": {
+      "source": "@trpc/tanstack-react-query",
+      "sourceType": "node_modules",
+      "computedHash": "b6069de9fbc894d8f5134db0b69ae72ec99dd569dc9cd0bd0406ddbdbbaaf340"
+    },
+    "server-setup": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "6da8ce9de5bf6e532aabb6a951c4ca5b36a9f30279a5e551c4f567cf64b7e338"
+    },
+    "server-side-calls": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "e414acd2a77c03a38b4f3580ad90e9a0d5f8e538377c722a453d91fb37e1dc8f"
+    },
+    "service-oriented-architecture": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "08fec569e0380ea01b0b02c9b77051ac9cd2585926af9c91c819592dcff955bc"
+    },
+    "subscriptions": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "416e4fe8c3c9869f489f72de77f9c9fb9bbfd6a0b9697fe18851d84d5b50e4af"
+    },
+    "supabase": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "3bc4f56943a13f4fe355742a4b3b30c56008e6d265ae71f19c592410b5f5a01f"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "abf015aafed757edaf2a329299fc106abebdc53bc7f089e92e1f762ed3d8f117"
+    },
+    "superjson": {
+      "source": "@trpc/client",
+      "sourceType": "node_modules",
+      "computedHash": "93855915aff4f8e6a34bb9eb2b7311d1700a4ed9e8a92a7755e366863cfea432"
+    },
+    "trpc-router": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "24f4a2b02946d1037e9cfdaedd309f34e06265b41b98548d82a6fa97c1ccff8b"
+    },
+    "validators": {
+      "source": "@trpc/server",
+      "sourceType": "node_modules",
+      "computedHash": "4502c88cbc8187e2440abf068d49878042919dfbbbf4a01803b87e2a084c8380"
+    }
+  }
+}
