@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { pgTable, text, timestamp, uuid, pgPolicy } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -6,4 +7,12 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   image: text("image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  pgPolicy("Users can view and update their own data", {
+    as: "permissive",
+    to: "authenticated",
+    for: "all",
+    using: sql`auth.uid() = id`,
+    withCheck: sql`auth.uid() = id`,
+  })
+]);
