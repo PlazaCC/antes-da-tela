@@ -1,0 +1,31 @@
+{
+  "figma_url": "https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=0-1",
+  "fileKey": "iUb8odefGSZiHz4KjuzX1M",
+  "pages": [
+    {
+      "name": "🎨 Foundations",
+      "nodeId": "0:1",
+      "description": "Tokens, cores, tipografia, espaçamentos e fundamentos visuais do design system."
+    },
+    {
+      "name": "🧩 Components",
+      "nodeId": "1:2",
+      "description": "Componentes reutilizáveis, estados e variantes."
+    },
+    {
+      "name": "Wireframes",
+      "nodeId": "2:1",
+      "description": "Wireframes e fluxos de navegação."
+    },
+    {
+      "name": "Final",
+      "nodeId": "3:1",
+      "description": "Telas finais e protótipos de alta fidelidade."
+    },
+    {
+      "name": "Usage Guidelines",
+      "nodeId": "4:1",
+      "description": "Guia de uso, boas práticas e exemplos de aplicação."
+    }
+  ]
+}

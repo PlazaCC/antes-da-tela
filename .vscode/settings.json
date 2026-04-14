@@ -2,5 +2,9 @@
   // Enables custom chat prompts from .agents/prompts
   "chat.promptFilesLocations": {
     ".agents/prompts": true
+  },
+  // Enables custom chat instructions from .agents/rules, .agents/skills, and .agents
+  "chat.agentFilesLocations": {
+    ".agents": true
   }
 }
