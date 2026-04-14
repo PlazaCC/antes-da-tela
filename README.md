@@ -101,4 +101,11 @@ DATABASE_URL_UNPOOLED=<prod-session-uri> yarn drizzle-kit migrate
 
 ## License
 
-MIT
+UNLICENSED
+
+---
+
+## References
+
+- [Next.js with Supabase Example](https://github.com/vercel/next.js/blob/canary/examples/with-supabase/README.md) — official Next.js example used as reference
+- [CONTRIBUTING.md](CONTRIBUTING.md) — contribution guidelines and standards
