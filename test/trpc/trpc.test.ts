@@ -7,7 +7,7 @@ test('tRPC createCaller works with a simple router', async () => {
     }),
   })
 
-  const caller = router.createCaller({ headers: new Headers({ 'x-test': '1' }) })
+  const caller = router.createCaller({ headers: new Headers({ 'x-test': '1' }), user: null })
   const res = await caller.hello()
   expect(res).toEqual({ ok: true })
 })

@@ -8,19 +8,19 @@
   "foundations": {
     "colors": {
       "palette": [
-        { "name": "bg/base", "value": "#0E0E0E" },
-        { "name": "bg/surface", "value": "#161616" },
-        { "name": "bg/elevated", "value": "#1E1E1E" },
-        { "name": "border/subtle", "value": "#252525" },
-        { "name": "border/default", "value": "#343434" },
-        { "name": "text/primary", "value": "#F0EDE6" },
-        { "name": "text/secondary", "value": "#B7B4B0" },
-        { "name": "text/muted", "value": "#6B6860" },
-        { "name": "brand/accent", "value": "#E85C2F" },
-        { "name": "brand/lime", "value": "#C8E87A" },
-        { "name": "state/error", "value": "#EF4545" },
-        { "name": "state/success", "value": "#3CBF7E" },
-        { "name": "state/warning", "value": "#F5C126" }
+        { "name": "bg/base", "value": "hsl(0 0% 5%)" },
+        { "name": "bg/surface", "value": "hsl(0 0% 9%)" },
+        { "name": "bg/elevated", "value": "hsl(0 0% 12%)" },
+        { "name": "border/subtle", "value": "hsl(0 0% 14%)" },
+        { "name": "border/default", "value": "hsl(0 0% 20%)" },
+        { "name": "text/primary", "value": "hsl(42 25% 92%)" },
+        { "name": "text/secondary", "value": "hsl(34 5% 70%)" },
+        { "name": "text/muted", "value": "hsl(43 5% 40%)" },
+        { "name": "brand/accent", "value": "hsl(15 80% 55%)" },
+        { "name": "brand/lime", "value": "hsl(78 71% 69%)" },
+        { "name": "state/error", "value": "hsl(0 84% 60%)" },
+        { "name": "state/success", "value": "hsl(150 52% 49%)" },
+        { "name": "state/warning", "value": "hsl(45 91% 56%)" }
       ]
     },
     "typography": {

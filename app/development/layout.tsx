@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { isDevToolsEnabled } from '@/lib/dev-tools'
 
 export const metadata: Metadata = {
   title: 'Development | Antes da Tela',
@@ -11,8 +12,7 @@ export const metadata: Metadata = {
 }
 
 export default function DevelopmentLayout({ children }: { children: React.ReactNode }) {
-  const isDevelopmentEnabled = process.env.NODE_ENV === 'development' || process.env.EXPOSE_DEVELOPER_ROUTER === '1'
-  if (!isDevelopmentEnabled) {
+  if (!isDevToolsEnabled()) {
     redirect('/')
   }
 

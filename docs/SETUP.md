@@ -35,6 +35,9 @@ This document provides the official step-by-step instructions to set up the Ante
 2. Fill in all required values from your Supabase, PostHog, Resend, and Sentry dashboards:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY` (server-only):
+     - If your deployment or server code needs to perform privileged actions (bypassing RLS, service-role operations), set `SUPABASE_SERVICE_ROLE_KEY` in your server environment only. Never expose this key to the browser or client bundles. When present the project will prefer this key for server-side Supabase clients.
    - `DATABASE_PASSWORD`
    - `DATABASE_URL` and `DATABASE_URL_UNPOOLED`
    - `NEXT_PUBLIC_POSTHOG_TOKEN`

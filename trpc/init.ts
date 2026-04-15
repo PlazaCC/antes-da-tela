@@ -1,9 +1,90 @@
-import { initTRPC } from '@trpc/server'
+import { createServerClient } from '@supabase/ssr'
+import { initTRPC, TRPCError } from '@trpc/server'
+import { cookies } from 'next/headers'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
 
-export const createTRPCContext = async (opts: { headers: Headers }) => {
-  return { headers: opts.headers }
+export type TRPCUser = {
+  id: string
+  email?: string | null
+  user_metadata?: Record<string, unknown> | null
+}
+
+export const createTRPCContext = async (opts: {
+  headers: Headers
+}): Promise<{ headers: Headers; user?: TRPCUser | null }> => {
+  // CookieStore shape used by Supabase client
+  type CookieEntry = { name: string; value: string; options?: Record<string, unknown> }
+  type CookieStore = {
+    getAll(): CookieEntry[]
+    setAll?(cookies: CookieEntry[]): void
+  }
+
+  // Prefer Next.js cookie store when available; otherwise derive from headers.
+  let cookieStore: CookieStore | null = null
+  try {
+    // cookies() is Next.js server API; it may throw in non-Next test environments
+    cookieStore = await cookies()
+  } catch {
+    cookieStore = null
+  }
+
+  if (!cookieStore) {
+    const cookieHeader = opts.headers?.get?.('cookie') ?? ''
+    cookieStore = {
+      getAll() {
+        if (!cookieHeader) return []
+        return cookieHeader.split('; ').map((pair) => {
+          const [name, ...rest] = pair.split('=')
+          return { name, value: rest.join('='), options: {} }
+        })
+      },
+      // setAll is a no-op when we only have header cookies
+      setAll() {},
+    }
+  }
+
+  const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!SERVICE_ROLE_KEY) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in server environment')
+  }
+
+  const supabase = createServerClient(
+    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    SERVICE_ROLE_KEY,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            if (typeof cookieStore.setAll === 'function') {
+              cookieStore.setAll(cookiesToSet)
+            }
+          } catch (err) {
+            // log and continue — avoids silently swallowing errors
+            console.error('Failed to set cookies in createTRPCContext', err)
+          }
+        },
+      },
+    },
+  )
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Normalize to the `TRPCUser` shape when possible
+  const normalizedUser: TRPCUser | null = user
+    ? {
+        id: user.id,
+        email: user.email ?? null,
+        user_metadata: (user.user_metadata ?? null) as Record<string, unknown> | null,
+      }
+    : null
+
+  return { headers: opts.headers, user: normalizedUser }
 }
 
 const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create({
@@ -21,3 +102,10 @@ const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().crea
 
 export const createTRPCRouter = t.router
 export const publicProcedure = t.procedure
+
+export const authenticatedProcedure = t.procedure.use(({ ctx, next }) => {
+  if (!ctx.user) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' })
+  }
+  return next({ ctx: { ...ctx, user: ctx.user } })
+})

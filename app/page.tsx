@@ -1,58 +1,62 @@
-import { DeployButton } from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { Hero } from "@/components/hero";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/lib/utils";
-import Link from "next/link";
-import { Suspense } from "react";
+import { Construction } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Suspense } from 'react'
+
+import { AuthButton } from '@/components/auth-button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { isDevToolsEnabled } from '@/lib/dev-tools'
 
 export default function Home() {
-  return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
-            </div>
-            {!hasEnvVars ? (
-              <EnvVarWarning />
-            ) : (
-              <Suspense>
-                <AuthButton />
-              </Suspense>
-            )}
-          </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <Hero />
-          <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
-        </div>
+  const devEnabled = isDevToolsEnabled()
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
+  return (
+    <div className='min-h-screen flex flex-col'>
+      {/* Header */}
+      <header className='w-full border-b border-subtle'>
+        <div className='max-w-5xl mx-auto px-5 h-16 flex items-center justify-between'>
+          <Link href='/'>
+            <Image src='/assets/logo.svg' alt='Antes da Tela' width={83} height={19} priority />
+          </Link>
+          <Suspense fallback={<Skeleton className='h-6 w-24' />}>
+            <AuthButton />
+          </Suspense>
+        </div>
+      </header>
+
+      {/* Under construction banner */}
+      <div className='w-full bg-elevated border-b border-subtle'>
+        <div className='max-w-5xl mx-auto px-5 py-3 flex items-center gap-3'>
+          <Construction className='size-4 text-brand-accent shrink-0' />
+          <p className='text-body-small text-secondary'>
+            Esta plataforma está em construção — algumas funcionalidades ainda não estão disponíveis.
           </p>
-          <ThemeSwitcher />
-        </footer>
+        </div>
       </div>
-    </main>
-  );
+
+      {/* Main */}
+      <main className='flex-1 flex flex-col items-center justify-center px-5 py-24'>
+        <div className='max-w-md text-center flex flex-col gap-6'>
+          <div className='flex flex-col gap-3'>
+            <h1 className='font-display text-heading-1 text-primary'>Em breve.</h1>
+            <p className='text-body-large text-secondary'>
+              A plataforma de publicação, leitura e discussão de roteiros audiovisuais está sendo construída.
+            </p>
+          </div>
+          <p className='text-body-default text-muted'>Cadastre-se para ser notificado quando abrirmos.</p>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className='flex items-center justify-center gap-6 py-6 border-t border-subtle'>
+        {devEnabled && (
+          <Link
+            href='/development'
+            className='text-body-small text-muted hover:text-secondary underline-offset-4 hover:underline transition-colors'>
+            Developer tools
+          </Link>
+        )}
+      </footer>
+    </div>
+  )
 }
