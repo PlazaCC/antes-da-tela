@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
-  title: 'Development | Next.js Supabase Starter',
+  title: 'Development | Antes da Tela',
   description: 'Developer-only validation pages for integrations and UI primitives.',
 }
 

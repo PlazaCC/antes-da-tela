@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import tailwindAnimate from 'tailwindcss-animate'
 
 export default {
   darkMode: ['class'],
@@ -27,19 +28,23 @@ export default {
         'accent-foreground': 'hsl(var(--accent-foreground))',
         destructive: 'hsl(var(--destructive))',
         'destructive-foreground': 'hsl(var(--destructive-foreground))',
-        'bg/base': 'hsl(var(--color-bg-base))',
-        'bg/surface': 'hsl(var(--color-bg-surface))',
-        'bg/elevated': 'hsl(var(--color-bg-elevated))',
-        'border/subtle': 'hsl(var(--color-border-subtle))',
-        'border/default': 'hsl(var(--color-border-default))',
-        'text/primary': 'hsl(var(--color-text-primary))',
-        'text/secondary': 'hsl(var(--color-text-secondary))',
-        'text/muted': 'hsl(var(--color-text-muted))',
-        'brand/accent': 'hsl(var(--color-brand-accent))',
-        'brand/lime': 'hsl(var(--color-brand-lime))',
-        'state/error': 'hsl(var(--color-state-error))',
-        'state/success': 'hsl(var(--color-state-success))',
-        'state/warning': 'hsl(var(--color-state-warning))',
+        // Design system semantic tokens — dark-mode first palette
+        surface: 'hsl(var(--color-bg-surface))',
+        elevated: 'hsl(var(--color-bg-elevated))',
+        'border-subtle': 'hsl(var(--color-border-subtle))',
+        'border-default': 'hsl(var(--color-border-default))',
+        'text-primary': 'hsl(var(--color-text-primary))',
+        'text-secondary': 'hsl(var(--color-text-secondary))',
+        'text-muted': 'hsl(var(--color-text-muted))',
+        brand: {
+          accent: 'hsl(var(--color-brand-accent))',
+          lime: 'hsl(var(--color-brand-lime))',
+        },
+        state: {
+          error: 'hsl(var(--color-state-error))',
+          success: 'hsl(var(--color-state-success))',
+          warning: 'hsl(var(--color-state-warning))',
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -103,5 +108,5 @@ export default {
       },
     },
   },
-  plugins: [() => import('tailwindcss-animate')],
+  plugins: [tailwindAnimate],
 } satisfies Config

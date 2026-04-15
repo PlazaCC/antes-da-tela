@@ -9,8 +9,8 @@ export interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantClasses: Record<NonNullable<MetricCardProps['color']>, string> = {
-  positive: 'border-green-500/20 bg-green-500/10 text-green-100',
-  negative: 'border-red-500/20 bg-red-500/10 text-red-100',
+  positive: 'border-state-success/20 bg-state-success/10 text-state-success',
+  negative: 'border-state-error/20 bg-state-error/10 text-state-error',
   neutral: 'border-foreground/10 bg-foreground/5 text-foreground',
 }
 

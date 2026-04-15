@@ -46,19 +46,19 @@ pre,
     --radius-pill: 999px;
     --shadow-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.04);
     --shadow-elevation-2: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --color-bg-base: #0e0e0e;
-    --color-bg-surface: #161616;
-    --color-bg-elevated: #1e1e1e;
-    --color-border-subtle: #252525;
-    --color-border-default: #343434;
-    --color-text-primary: #f0ede6;
-    --color-text-secondary: #b7b4b0;
-    --color-text-muted: #6b6860;
-    --color-brand-accent: #e85c2f;
-    --color-brand-lime: #c8e87a;
-    --color-state-error: #ef4545;
-    --color-state-success: #3cbf7e;
-    --color-state-warning: #f5c126;
+    --color-bg-base: 0 0% 5.5%;
+    --color-bg-surface: 0 0% 8.6%;
+    --color-bg-elevated: 0 0% 11.8%;
+    --color-border-subtle: 0 0% 14.5%;
+    --color-border-default: 0 0% 20.4%;
+    --color-text-primary: 36 27% 92.9%;
+    --color-text-secondary: 30 4% 70%;
+    --color-text-muted: 30 4% 40%;
+    --color-brand-accent: 15 79% 55%;
+    --color-brand-lime: 79 71% 68%;
+    --color-state-error: 0 83% 60%;
+    --color-state-success: 153 51% 49%;
+    --color-state-warning: 44 91% 55%;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -85,19 +85,19 @@ pre,
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --color-bg-base: #0e0e0e;
-    --color-bg-surface: #161616;
-    --color-bg-elevated: #1e1e1e;
-    --color-border-subtle: #252525;
-    --color-border-default: #343434;
-    --color-text-primary: #f0ede6;
-    --color-text-secondary: #b7b4b0;
-    --color-text-muted: #6b6860;
-    --color-brand-accent: #e85c2f;
-    --color-brand-lime: #c8e87a;
-    --color-state-error: #ef4545;
-    --color-state-success: #3cbf7e;
-    --color-state-warning: #f5c126;
+    --color-bg-base: 0 0% 5.5%;
+    --color-bg-surface: 0 0% 8.6%;
+    --color-bg-elevated: 0 0% 11.8%;
+    --color-border-subtle: 0 0% 14.5%;
+    --color-border-default: 0 0% 20.4%;
+    --color-text-primary: 36 27% 92.9%;
+    --color-text-secondary: 30 4% 70%;
+    --color-text-muted: 30 4% 40%;
+    --color-brand-accent: 15 79% 55%;
+    --color-brand-lime: 79 71% 68%;
+    --color-state-error: 0 83% 60%;
+    --color-state-success: 153 51% 49%;
+    --color-state-warning: 44 91% 55%;
   }
 }
 
