@@ -1,10 +1,9 @@
 name: CI
 
 on:
-  # Run on PRs that target `main`, and on direct pushes to `main`.
-  pull_request:
-    branches: ['main']
   push:
+    branches: ['**']
+  pull_request:
     branches: ['main']
 
 jobs:
@@ -14,18 +13,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Enable Corepack and prepare Yarn 4
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Enable Corepack and pin Yarn
         run: |
           corepack enable
           corepack prepare yarn@4.13.0 --activate
+          yarn --version
 
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
+      - name: Cache Yarn and node_modules
+        uses: actions/cache@v4
         with:
-          node-version: '20'
-          cache: 'yarn'
+          path: |
+            .yarn/cache
+            .yarn/unplugged
+            .yarn/build-state.yml
+            .yarn/install-state.gz
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
-      - name: Yarn install
+      - name: Install dependencies
         run: yarn install --immutable
 
       - name: Typecheck
