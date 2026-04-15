@@ -1,5 +1,6 @@
 import { db } from '@/server/db'
 import { users } from '@/server/db/schema'
+import { removeUndefined } from '@/server/utils/object'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure, TRPCUser } from '@/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { eq } from 'drizzle-orm'
@@ -47,11 +48,15 @@ export const usersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      // Remove undefined fields from input to avoid overwriting columns
+      const patch = removeUndefined(input) as Partial<{ name: string; bio: string; image: string }>
+
       const [updated] = await db
         .update(users)
-        .set(input)
+        .set(patch)
         .where(eq(users.id, (ctx.user as TRPCUser).id))
         .returning()
+
       return updated
     }),
 })

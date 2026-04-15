@@ -41,8 +41,7 @@ export function GoogleAuthButton({ label = 'Continuar com Google' }: GoogleAuthB
     try {
       setIsLoading(true)
       const supabase = createClient()
-
-      const next = searchParams.get('redirectTo') ?? '/'
+      const next = searchParams.get('next') ?? '/'
       const callbackUrl = new URL('/auth/callback', window.location.origin)
       if (next !== '/') callbackUrl.searchParams.set('next', next)
 

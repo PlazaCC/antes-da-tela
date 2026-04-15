@@ -13,11 +13,45 @@ export type TRPCUser = {
 export const createTRPCContext = async (opts: {
   headers: Headers
 }): Promise<{ headers: Headers; user?: TRPCUser | null }> => {
-  const cookieStore = await cookies()
+  // CookieStore shape used by Supabase client
+  type CookieEntry = { name: string; value: string; options?: Record<string, unknown> }
+  type CookieStore = {
+    getAll(): CookieEntry[]
+    setAll?(cookies: CookieEntry[]): void
+  }
+
+  // Prefer Next.js cookie store when available; otherwise derive from headers.
+  let cookieStore: CookieStore | null = null
+  try {
+    // cookies() is Next.js server API; it may throw in non-Next test environments
+    cookieStore = await cookies()
+  } catch {
+    cookieStore = null
+  }
+
+  if (!cookieStore) {
+    const cookieHeader = opts.headers?.get?.('cookie') ?? ''
+    cookieStore = {
+      getAll() {
+        if (!cookieHeader) return []
+        return cookieHeader.split('; ').map((pair) => {
+          const [name, ...rest] = pair.split('=')
+          return { name, value: rest.join('='), options: {} }
+        })
+      },
+      // setAll is a no-op when we only have header cookies
+      setAll() {},
+    }
+  }
+
+  const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!SERVICE_ROLE_KEY) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in server environment')
+  }
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    SERVICE_ROLE_KEY,
     {
       cookies: {
         getAll() {
@@ -25,7 +59,9 @@ export const createTRPCContext = async (opts: {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+            if (typeof cookieStore.setAll === 'function') {
+              cookieStore.setAll(cookiesToSet)
+            }
           } catch (err) {
             // log and continue — avoids silently swallowing errors
             console.error('Failed to set cookies in createTRPCContext', err)
