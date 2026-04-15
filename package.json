@@ -25,7 +25,7 @@
     "skills": "npx skills"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=24.0.0",
     "yarn": ">=4.0.0"
   },
   "dependencies": {
