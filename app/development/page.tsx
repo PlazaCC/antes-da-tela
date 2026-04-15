@@ -20,7 +20,7 @@ export default function DevelopmentPage() {
         </div>
       </section>
 
-      <div className='grid gap-4 sm:grid-cols-2'>
+      <div className='grid gap-4 sm:grid-cols-3'>
         <Card>
           <CardHeader>
             <CardTitle>Integration checks</CardTitle>
@@ -47,6 +47,21 @@ export default function DevelopmentPage() {
             </p>
             <Button asChild variant='outline'>
               <Link href='/development/components'>Open playground</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Design system</CardTitle>
+            <CardDescription>Showcase tokens, typography and component inventory.</CardDescription>
+          </CardHeader>
+          <CardContent className='flex flex-col gap-4'>
+            <p className='text-sm text-muted-foreground'>
+              Validate the Figma-derived design system in a dedicated developer preview.
+            </p>
+            <Button asChild variant='outline'>
+              <Link href='/development/design-system'>Open design system</Link>
             </Button>
           </CardContent>
         </Card>

@@ -1,47 +1,55 @@
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import { TRPCReactProvider } from "@/trpc/client";
-import { PostHogProvider } from "@/components/posthog-provider";
-import "./globals.css";
+import { PostHogProvider } from '@/components/posthog-provider'
+import { TRPCReactProvider } from '@/trpc/client'
+import type { Metadata } from 'next'
+import { ThemeProvider } from 'next-themes'
+import { DM_Mono, DM_Serif_Display, Inter } from 'next/font/google'
+import './globals.css'
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
-};
+  title: 'Next.js and Supabase Starter Kit',
+  description: 'The fastest way to build apps with Next.js and Supabase',
+}
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  display: "swap",
-  subsets: ["latin"],
-});
+const inter = Inter({
+  variable: '--font-sans',
+  display: 'swap',
+  subsets: ['latin'],
+  weight: ['400', '600'],
+})
+
+const dmSerifDisplay = DM_Serif_Display({
+  variable: '--font-display',
+  display: 'swap',
+  subsets: ['latin'],
+  weight: ['400'],
+})
+
+const dmMono = DM_Mono({
+  variable: '--font-mono',
+  display: 'swap',
+  subsets: ['latin'],
+  weight: ['400'],
+})
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+    <html lang='en' suppressHydrationWarning className='dark'>
+      <body className={`${inter.variable} ${dmSerifDisplay.variable} ${dmMono.variable} antialiased`}>
         <PostHogProvider>
           <TRPCReactProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
+            <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
               {children}
             </ThemeProvider>
           </TRPCReactProvider>
         </PostHogProvider>
       </body>
     </html>
-  );
+  )
 }

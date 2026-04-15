@@ -1,3 +1,5 @@
+'use client'
+
 import { cn } from '@/lib/utils'
 import * as React from 'react'
 
@@ -6,10 +8,10 @@ export interface NavigationItem {
   icon?: React.ReactNode
   badge?: React.ReactNode
   active?: boolean
-  href?: string
+  href: string
 }
 
-export interface NavigationProps extends React.HTMLAttributes<HTMLNavElement> {
+export interface NavigationProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onSelect'> {
   items: NavigationItem[]
   orientation?: 'horizontal' | 'vertical'
   onSelect?: (index: number) => void

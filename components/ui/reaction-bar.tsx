@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import * as React from 'react'
 
-export interface ReactionBarProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ReactionBarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   reactions: { icon: React.ReactNode; label: string; count: number; active?: boolean }[]
   onSelect?: (index: number) => void
   selected?: number

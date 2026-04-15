@@ -20,7 +20,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: data.error.message }, { status: 500 })
     }
     return NextResponse.json({ success: true })
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Erro desconhecido' }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message || 'Erro desconhecido' }, { status: 500 })
   }
 }

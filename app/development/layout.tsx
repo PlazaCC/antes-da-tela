@@ -34,6 +34,9 @@ export default function DevelopmentLayout({ children }: { children: React.ReactN
               <Link href='/development'>Overview</Link>
             </Button>
             <Button asChild variant='outline' size='sm'>
+              <Link href='/development/design-system'>Design System</Link>
+            </Button>
+            <Button asChild variant='outline' size='sm'>
               <Link href='/development/integrations'>Integrations</Link>
             </Button>
             <Button asChild variant='outline' size='sm'>

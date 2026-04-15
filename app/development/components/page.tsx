@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Comment } from '@/components/ui/comment'
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { DragZone } from '@/components/ui/drag-zone'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,105 +25,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Info } from '@/components/ui/info'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Navigation } from '@/components/ui/navigation'
+import { MetricCard } from '@/components/ui/metric-card'
+import { NavBar } from '@/components/ui/nav-bar'
 import { Progress } from '@/components/ui/progress'
+import { RadioBox } from '@/components/ui/radio-box'
 import { ReactionBar } from '@/components/ui/reaction-bar'
+import { ScriptCard } from '@/components/ui/script-card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StarRating } from '@/components/ui/star-rating'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tag } from '@/components/ui/tag'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-{
-  /* Showcase: Tag */
-}
-;<section className='grid gap-4'>
-  <Card>
-    <CardHeader>
-      <CardTitle>Tag</CardTitle>
-    </CardHeader>
-    <CardContent className='flex gap-2 flex-wrap'>
-      <Tag>Default</Tag>
-      <Tag variant='success'>Success</Tag>
-      <Tag variant='warning'>Warning</Tag>
-      <Tag variant='error'>Error</Tag>
-      <Tag variant='crítico'>Crítico</Tag>
-      <Tag variant='importante'>Importante</Tag>
-      <Tag variant='neutro'>Neutro</Tag>
-      <Tag variant='publicado'>Publicado</Tag>
-      <Tag variant='rascunho'>Rascunho</Tag>
-      <Tag variant='privado'>Privado</Tag>
-      <Tag variant='drama'>Drama</Tag>
-      <Tag variant='thriller'>Thriller</Tag>
-      <Tag variant='comédia'>Comédia</Tag>
-      <Tag variant='type10'>Type10</Tag>
-      <Tag variant='new'>New</Tag>
-    </CardContent>
-  </Card>
-</section>
-
-{
-  /* Showcase: ReactionBar */
-}
-;<section className='grid gap-4'>
-  <Card>
-    <CardHeader>
-      <CardTitle>ReactionBar</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <ReactionBar
-        reactions={[
-          { icon: '👍', label: 'Like', count: 12 },
-          { icon: '⭐', label: 'Star', count: 5 },
-          { icon: '🔥', label: 'Fire', count: 2 },
-        ]}
-      />
-    </CardContent>
-  </Card>
-</section>
-
-{
-  /* Showcase: StarRating */
-}
-;<section className='grid gap-4'>
-  <Card>
-    <CardHeader>
-      <CardTitle>StarRating</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <StarRating value={3} />
-    </CardContent>
-  </Card>
-</section>
-
-{
-  /* Showcase: Navigation */
-}
-;<section className='grid gap-4'>
-  <Card>
-    <CardHeader>
-      <CardTitle>Navigation</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Navigation
-        items={[
-          { label: 'Home', active: true },
-          { label: 'Explore' },
-          { label: 'Profile', badge: <span className='bg-primary text-xs px-2 py-0.5 rounded'>3</span> },
-        ]}
-        orientation='horizontal'
-      />
-    </CardContent>
-  </Card>
-</section>
 
 export default function DevelopmentComponentsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [checked, setChecked] = useState(false)
   const [name, setName] = useState('')
   const [dropdownStatus, setDropdownStatus] = useState('None selected')
+  const [radioValue, setRadioValue] = useState('first')
 
   return (
     <div className='grid gap-6'>
@@ -133,7 +57,7 @@ export default function DevelopmentComponentsPage() {
               <Badge variant='secondary'>Interactive</Badge>
             </div>
             <p className='max-w-3xl text-sm text-muted-foreground'>
-              Explore the app’s own shadcn-based components with live examples.
+              Explore the app&apos;s current component set and the new Figma-derived additions.
             </p>
           </div>
         </div>
@@ -203,9 +127,26 @@ export default function DevelopmentComponentsPage() {
                 <Checkbox id='demo-consent' checked={checked} onCheckedChange={(value) => setChecked(Boolean(value))} />
                 <Label htmlFor='demo-consent'>Agree to terms</Label>
               </div>
+              <div className='grid gap-3 sm:grid-cols-2'>
+                <RadioBox
+                  name='demo-radio'
+                  label='Option one'
+                  description='Preferred default flow.'
+                  checked={radioValue === 'first'}
+                  onChange={() => setRadioValue('first')}
+                />
+                <RadioBox
+                  name='demo-radio'
+                  label='Option two'
+                  description='Alternative selection for users.'
+                  checked={radioValue === 'second'}
+                  onChange={() => setRadioValue('second')}
+                />
+              </div>
               <p className='text-sm text-muted-foreground'>
                 Current state: <span className='font-medium'>{name || 'No name'}</span>,{' '}
-                <span className='font-medium'>{checked ? 'Agreed' : 'Not agreed'}</span>
+                <span className='font-medium'>{checked ? 'Agreed' : 'Not agreed'}</span>,{' '}
+                <span className='font-medium'>Selected: {radioValue}</span>
               </p>
             </CardContent>
           </Card>
@@ -215,7 +156,7 @@ export default function DevelopmentComponentsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Dialog preview</CardTitle>
-              <CardDescription>Open a client-side modal using the app’s dialog wrapper.</CardDescription>
+              <CardDescription>Open a client-side modal using the app&apos;s dialog wrapper.</CardDescription>
             </CardHeader>
             <CardContent>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -227,7 +168,7 @@ export default function DevelopmentComponentsPage() {
                     <DialogTitle>Demo dialog</DialogTitle>
                   </DialogHeader>
                   <DialogDescription>
-                    This dialog is built with the app’s own `Dialog` wrapper and the Radix primitives underneath.
+                    This dialog is built with the app&apos;s own `Dialog` wrapper and the Radix primitives underneath.
                   </DialogDescription>
                   <div className='mt-4 space-y-3 text-sm text-muted-foreground'>
                     <p>Try closing it with the button or outside click.</p>
@@ -263,11 +204,53 @@ export default function DevelopmentComponentsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Showcase: Avatar, Progress, Tooltip, Switch, Skeleton */}
-      <section className='grid gap-6'>
+      <section className='grid gap-6 lg:grid-cols-2'>
         <Card>
           <CardHeader>
-            <CardTitle>Avatar</CardTitle>
+            <CardTitle>Design system components</CardTitle>
+            <CardDescription>New Figma-aligned patterns for the project.</CardDescription>
+          </CardHeader>
+          <CardContent className='grid gap-4'>
+            <div className='grid gap-4'>
+              <NavBar
+                items={[
+                  { label: 'Home', active: true, href: '/' },
+                  { label: 'Library', href: '/library' },
+                  { label: 'Profile', href: '/profile' },
+                ]}
+              />
+              <Info
+                title='Design system guidance'
+                description='Use dark surfaces, clear contrast, and the semantic accent color for primary actions. Keep the layout spacious and the navigation minimal.'
+                badge='Guideline'
+              />
+              <ScriptCard title='The Last Draft' author='Mariana Ramos' genre='Drama' rating={4.8} pages={128} />
+              <MetricCard title='Conversion Rate' value='12.4%' variation='+3.2%' color='positive' />
+              <MetricCard title='Refunds' value='1.8%' variation='-0.4%' color='negative' />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Interaction patterns</CardTitle>
+          </CardHeader>
+          <CardContent className='grid gap-4'>
+            <DragZone />
+            <Comment
+              author='Noah Silva'
+              content='Great first pass. The pacing feels strong and the second act twist is well-managed.'
+              time='2h ago'
+              reply='I agree. The resolution paragraph can be tightened.'
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className='grid gap-4 lg:grid-cols-3'>
+        <Card>
+          <CardHeader>
+            <CardTitle>Avatar preview</CardTitle>
           </CardHeader>
           <CardContent className='flex gap-4 items-center'>
             <Avatar>
@@ -282,6 +265,7 @@ export default function DevelopmentComponentsPage() {
             </Avatar>
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Progress</CardTitle>
@@ -292,37 +276,37 @@ export default function DevelopmentComponentsPage() {
             <Progress value={100} />
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
-            <CardTitle>Switch</CardTitle>
+            <CardTitle>Feedback</CardTitle>
           </CardHeader>
-          <CardContent className='flex gap-4 items-center'>
-            <Switch />
-            <Switch size='sm' />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Skeleton</CardTitle>
-          </CardHeader>
-          <CardContent className='flex gap-4 items-center'>
-            <Skeleton className='h-8 w-32' />
-            <Skeleton className='h-8 w-8 rounded-full' />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Tooltip</CardTitle>
-          </CardHeader>
-          <CardContent className='flex gap-4 items-center'>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button>Hover me</Button>
-                </TooltipTrigger>
-                <TooltipContent>Tooltip content</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <CardContent className='grid gap-4'>
+            <div className='grid gap-3'>
+              <p className='text-sm text-muted-foreground'>
+                Interactive response patterns from the current design system.
+              </p>
+              <ReactionBar
+                reactions={[
+                  { icon: '👍', label: 'Like', count: 12 },
+                  { icon: '🔥', label: 'Fire', count: 8 },
+                  { icon: '💬', label: 'Comment', count: 3 },
+                ]}
+              />
+              <StarRating value={4} />
+            </div>
+            <div className='flex flex-wrap items-center gap-3'>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button>Hover me</Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Tooltip content</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Switch />
+              <Skeleton className='h-8 w-32' />
+            </div>
           </CardContent>
         </Card>
       </section>

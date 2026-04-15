@@ -1,11 +1,8 @@
-/* Google Fonts import */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=DM+Serif+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@400&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
 h1,
 h2,
@@ -13,12 +10,12 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'DM Serif Display', serif;
+  font-family: var(--font-display), serif;
 }
 code,
 pre,
 .font-mono {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-mono), monospace;
 }
 
 @layer base {
@@ -29,26 +26,39 @@ pre,
     --card-foreground: 0 0% 14%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 14%;
-    --primary: 17 81% 61%; /* #EB6F47 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 89%; /* #E0E0E0 */
-    --secondary-foreground: 0 0% 14%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 14%;
-    --destructive: 10 76% 41%; /* #B7401A */
-    --destructive-foreground: 0 0% 100%;
+    --primary: 8 88% 54%; /* #E85C2F */
+    --primary-foreground: 0 0% 94%; /* #F0EDE6 */
+    --secondary: 0 0% 20%; /* #343434 */
+    --secondary-foreground: 0 0% 94%;
+    --muted: 0 0% 93%; /* #EBEBEB */
+    --muted-foreground: 0 0% 42%; /* #6B6860 */
+    --accent: 8 88% 54%; /* #E85C2F */
+    --accent-foreground: 0 0% 94%;
+    --destructive: 0 76% 59%; /* #EF4545 */
+    --destructive-foreground: 0 0% 94%;
     --border: 0 0% 89%; /* #E0E0E0 */
-    --input: 0 0% 89%;
-    --ring: 0 0% 14%;
-    --brand: 17 81% 61%; /* #EB6F47 */
-    --state-success: 120 100% 5%; /* #0A1A07 */
-    --state-warning: 14 74% 41%; /* #B7401A */
+    --input: 0 0% 93%;
+    --ring: 8 88% 54%;
+    --brand: 8 88% 54%;
+    --state-success: 153 62% 40%; /* #3CBF7E */
+    --state-warning: 44 84% 55%; /* #F5C126 */
     --radius: 8px;
     --radius-pill: 999px;
     --shadow-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.04);
     --shadow-elevation-2: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --color-bg-base: #0e0e0e;
+    --color-bg-surface: #161616;
+    --color-bg-elevated: #1e1e1e;
+    --color-border-subtle: #252525;
+    --color-border-default: #343434;
+    --color-text-primary: #f0ede6;
+    --color-text-secondary: #b7b4b0;
+    --color-text-muted: #6b6860;
+    --color-brand-accent: #e85c2f;
+    --color-brand-lime: #c8e87a;
+    --color-state-error: #ef4545;
+    --color-state-success: #3cbf7e;
+    --color-state-warning: #f5c126;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -57,31 +67,41 @@ pre,
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
+    --primary: 8 88% 54%;
+    --primary-foreground: 0 0% 94%;
+    --secondary: 0 0% 22%;
+    --secondary-foreground: 0 0% 94%;
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 8 88% 54%;
+    --accent-foreground: 0 0% 94%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 94%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --ring: 8 88% 54%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --color-bg-base: #0e0e0e;
+    --color-bg-surface: #161616;
+    --color-bg-elevated: #1e1e1e;
+    --color-border-subtle: #252525;
+    --color-border-default: #343434;
+    --color-text-primary: #f0ede6;
+    --color-text-secondary: #b7b4b0;
+    --color-text-muted: #6b6860;
+    --color-brand-accent: #e85c2f;
+    --color-brand-lime: #c8e87a;
+    --color-state-error: #ef4545;
+    --color-state-success: #3cbf7e;
+    --color-state-warning: #f5c126;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   body {
     @apply bg-background text-foreground;
   }

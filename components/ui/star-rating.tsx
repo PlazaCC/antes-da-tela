@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import * as React from 'react'
 
-export interface StarRatingProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface StarRatingProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   value: number
   max?: number
   readOnly?: boolean

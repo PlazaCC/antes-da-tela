@@ -24,21 +24,21 @@ export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantClasses: Record<TagVariant, string> = {
-  default: 'bg-secondary text-secondary-foreground border border-border',
-  success: 'bg-green-100 text-green-800 border border-green-200',
-  warning: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-  error: 'bg-red-100 text-red-800 border border-red-200',
-  crítico: 'bg-red-200 text-red-900 border border-red-300',
-  importante: 'bg-orange-100 text-orange-800 border border-orange-200',
-  neutro: 'bg-gray-100 text-gray-800 border border-gray-200',
-  publicado: 'bg-blue-100 text-blue-800 border border-blue-200',
-  rascunho: 'bg-gray-200 text-gray-700 border border-gray-300',
-  privado: 'bg-zinc-100 text-zinc-800 border border-zinc-200',
-  drama: 'bg-purple-100 text-purple-800 border border-purple-200',
-  thriller: 'bg-pink-100 text-pink-800 border border-pink-200',
-  comédia: 'bg-yellow-50 text-yellow-700 border border-yellow-100',
-  type10: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-  new: 'bg-green-50 text-green-700 border border-green-100',
+  default: 'bg-surface text-foreground border border-border',
+  success: 'bg-state-success/15 text-state-success border border-state-success/30',
+  warning: 'bg-state-warning/15 text-state-warning border border-state-warning/30',
+  error: 'bg-state-error/15 text-state-error border border-state-error/30',
+  crítico: 'bg-state-error/15 text-state-error border border-state-error/30',
+  importante: 'bg-brand-accent/15 text-brand-accent border border-brand-accent/30',
+  neutro: 'bg-muted text-muted-foreground border border-border',
+  publicado: 'bg-brand-lime/15 text-brand-lime border border-brand-lime/30',
+  rascunho: 'bg-muted/70 text-secondary-foreground border border-muted',
+  privado: 'bg-surface text-secondary-foreground border border-muted',
+  drama: 'bg-accent/15 text-accent border border-accent/30',
+  thriller: 'bg-primary/15 text-primary border border-primary/30',
+  comédia: 'bg-state-warning/15 text-state-warning border border-state-warning/30',
+  type10: 'bg-secondary/20 text-secondary-foreground border border-secondary',
+  new: 'bg-state-success/15 text-state-success border border-state-success/30',
 }
 
 export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
