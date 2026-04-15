@@ -1,7 +1,8 @@
 import { eq } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
 import { db } from '@/server/db'
 import { users } from '@/server/db/schema'
-import { createTRPCRouter, publicProcedure } from '@/trpc/init'
+import { createTRPCRouter, publicProcedure, authenticatedProcedure } from '@/trpc/init'
 import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
@@ -14,12 +15,20 @@ export const usersRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      const [user] = await db
-        .insert(users)
-        .values({ id: input.id, name: input.name, email: input.email })
-        .onConflictDoNothing()
-        .returning()
-      return user
+      try {
+        const [user] = await db
+          .insert(users)
+          .values({ id: input.id, name: input.name, email: input.email })
+          .onConflictDoNothing()
+          .returning()
+        return user ?? null
+      } catch (err) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: err instanceof Error ? err.message : 'Failed to create profile',
+          cause: err,
+        })
+      }
     }),
 
   getProfile: publicProcedure
@@ -31,21 +40,19 @@ export const usersRouter = createTRPCRouter({
       return user ?? null
     }),
 
-  updateProfile: publicProcedure
+  updateProfile: authenticatedProcedure
     .input(
       z.object({
-        id: z.string().uuid(),
         name: z.string().min(2).max(100).optional(),
         bio: z.string().max(500).optional(),
         image: z.string().url().optional(),
       })
     )
-    .mutation(async ({ input }) => {
-      const { id, ...data } = input
+    .mutation(async ({ input, ctx }) => {
       const [updated] = await db
         .update(users)
-        .set(data)
-        .where(eq(users.id, id))
+        .set(input)
+        .where(eq(users.id, ctx.user.id))
         .returning()
       return updated
     }),
