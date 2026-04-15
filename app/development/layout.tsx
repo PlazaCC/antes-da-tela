@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 }
 
 export default function DevelopmentLayout({ children }: { children: React.ReactNode }) {
-  if (process.env.NODE_ENV !== 'development') {
+  const isDevelopmentEnabled = process.env.NODE_ENV === 'development' || process.env.EXPOSE_DEVELOPER_ROUTER === '1'
+  if (!isDevelopmentEnabled) {
     redirect('/')
   }
 
