@@ -10,4 +10,33 @@ Arquivo-mãe do design system: [Abrir no Figma](https://www.figma.com/design/iUb
 - **Final**: Telas finais e protótipos de alta fidelidade.
 - **Usage Guidelines**: Guia de uso, boas práticas e exemplos.
 
-> Consulte `.agents/figma.meta.json` para navegação automatizada por agentes.
+## Implementação no projeto
+
+O design system está sendo aplicado no projeto com foco em:
+
+- Tokens semânticos de cor e tipografia.
+- Tema escuro como modo padrão da aplicação.
+- Páginas de desenvolvimento de demonstração:
+  - `/development` — dashboard de validação.
+  - `/development/components` — playground de componentes ativos.
+  - `/development/design-system` — showcase de paleta, tipografia e inventário.
+
+## Componentes adicionais implementados
+
+Incluídos no projeto:
+
+- `ScriptCard`
+- `Comment`
+- `MetricCard`
+- `NavBar`
+- `Info`
+- `RadioBox`
+- `DragZone`
+
+## Próximos ajustes
+
+- Revisar a escala de tipografia global e sincronizar com o Figma.
+- Completar variações de `Tag` e `Input` conforme as especificações de estado do design system.
+- Estender a documentação com tokens, componentes e exemplos de uso.
+
+> Consulte `.agents/design-system.meta.json` para a versão atual do sistema de design extraído do Figma.
