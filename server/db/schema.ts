@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   integer,
   pgPolicy,
@@ -211,6 +211,40 @@ export const ratings = pgTable(
     }),
   ],
 )
+
+// ── Relations ─────────────────────────────────────────────────────────────────
+
+export const usersRelations = relations(users, ({ many }) => ({
+  scripts: many(scripts),
+  comments: many(comments),
+  ratings: many(ratings),
+}))
+
+export const scriptsRelations = relations(scripts, ({ one, many }) => ({
+  author: one(users, { fields: [scripts.authorId], references: [users.id] }),
+  scriptFiles: many(scriptFiles),
+  audioFiles: many(audioFiles),
+  comments: many(comments),
+  ratings: many(ratings),
+}))
+
+export const scriptFilesRelations = relations(scriptFiles, ({ one }) => ({
+  script: one(scripts, { fields: [scriptFiles.scriptId], references: [scripts.id] }),
+}))
+
+export const audioFilesRelations = relations(audioFiles, ({ one }) => ({
+  script: one(scripts, { fields: [audioFiles.scriptId], references: [scripts.id] }),
+}))
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  script: one(scripts, { fields: [comments.scriptId], references: [scripts.id] }),
+  author: one(users, { fields: [comments.authorId], references: [users.id] }),
+}))
+
+export const ratingsRelations = relations(ratings, ({ one }) => ({
+  script: one(scripts, { fields: [ratings.scriptId], references: [scripts.id] }),
+  user: one(users, { fields: [ratings.userId], references: [users.id] }),
+}))
 
 // ── Inferred types (use in tRPC routers) ─────────────────────────────────────
 

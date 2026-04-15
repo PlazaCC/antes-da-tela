@@ -51,10 +51,10 @@ pre,
     --color-bg-elevated: 0 0% 11.8%;
     --color-border-subtle: 0 0% 14.5%;
     --color-border-default: 0 0% 20.4%;
-    --color-text-primary: 36 27% 92.9%;
-    --color-text-secondary: 30 4% 70%;
-    --color-text-muted: 30 4% 40%;
-    --color-brand-accent: 15 79% 55%;
+    --color-text-primary: 42 25% 92%; /* #F0EDE6 */
+    --color-text-secondary: 34 5% 70%; /* #B7B4B0 */
+    --color-text-muted: 43 5% 40%; /* #6B6860 */
+    --color-brand-accent: 15 80% 55%; /* #E85C2F */
     --color-brand-lime: 79 71% 68%;
     --color-state-error: 0 83% 60%;
     --color-state-success: 153 51% 49%;
@@ -90,10 +90,10 @@ pre,
     --color-bg-elevated: 0 0% 11.8%;
     --color-border-subtle: 0 0% 14.5%;
     --color-border-default: 0 0% 20.4%;
-    --color-text-primary: 36 27% 92.9%;
-    --color-text-secondary: 30 4% 70%;
-    --color-text-muted: 30 4% 40%;
-    --color-brand-accent: 15 79% 55%;
+    --color-text-primary: 42 25% 92%; /* #F0EDE6 */
+    --color-text-secondary: 34 5% 70%; /* #B7B4B0 */
+    --color-text-muted: 43 5% 40%; /* #6B6860 */
+    --color-brand-accent: 15 80% 55%; /* #E85C2F */
     --color-brand-lime: 79 71% 68%;
     --color-state-error: 0 83% 60%;
     --color-state-success: 153 51% 49%;
