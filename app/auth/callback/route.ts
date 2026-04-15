@@ -18,16 +18,9 @@ export async function GET(request: NextRequest) {
 
   const cookieStore = await cookies()
 
-  const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!SERVICE_ROLE_KEY) {
-    // Fail fast on server if service role key is not configured
-    console.error('Missing SUPABASE_SERVICE_ROLE_KEY in server environment')
-    return NextResponse.redirect(`${origin}/auth/error`)
-  }
-
   const supabase = createServerClient(
-    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    SERVICE_ROLE_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {

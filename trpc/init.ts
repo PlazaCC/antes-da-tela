@@ -44,14 +44,9 @@ export const createTRPCContext = async (opts: {
     }
   }
 
-  const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!SERVICE_ROLE_KEY) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in server environment')
-  }
-
   const supabase = createServerClient(
-    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    SERVICE_ROLE_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {

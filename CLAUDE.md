@@ -74,7 +74,9 @@ yarn drizzle-kit migrate   # Apply migrations to Supabase Postgres
 - Always use `createServerClient` from `@supabase/ssr` in Server Components / API routes.
 - Always use `createBrowserClient` in Client Components.
 - Session refresh happens in `middleware.ts` — do not bypass it.
-- Never expose `SERVICE_ROLE_KEY` to the client.
+- Use `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for all server-side auth clients (callback route, tRPC context, session middleware). After `exchangeCodeForSession` the client carries the user JWT — no elevated key needed.
+- `SUPABASE_SERVICE_ROLE_KEY` is for privileged server operations only (bypassing RLS). Never use it for auth flows, session reads, or tRPC context.
+- Never expose `SUPABASE_SERVICE_ROLE_KEY` to the client or prefix it with `NEXT_PUBLIC_`.
 
 ### tRPC
 - Context: `createTRPCContext` accepts `{ headers: Headers }` from the request.

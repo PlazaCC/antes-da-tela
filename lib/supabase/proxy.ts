@@ -6,17 +6,10 @@ const PROTECTED_ROUTES = ['/publicar', '/minha-conta']
 export async function updateSession(request: NextRequest) {
   const supabaseResponse = NextResponse.next({ request })
 
-  const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!SERVICE_ROLE_KEY) {
-    // Missing service key — log and continue without proxying session
-    console.error('Missing SUPABASE_SERVICE_ROLE_KEY in updateSession')
-    return supabaseResponse
-  }
-
   try {
     const supabase = createServerClient(
-      process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      SERVICE_ROLE_KEY,
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
       {
         cookies: {
           getAll() {
