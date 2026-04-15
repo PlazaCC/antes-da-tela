@@ -1,7 +1,9 @@
 import { createTRPCRouter } from "@/trpc/init";
+import { usersRouter } from "./users";
 
 export const appRouter = createTRPCRouter({
-  // routers go here: scripts, comments, users, ...
+  users: usersRouter,
+  // routers go here: scripts, comments, ...
 });
 
 export type AppRouter = typeof appRouter;
