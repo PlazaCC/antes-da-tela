@@ -8,12 +8,14 @@
 Perfil público do roteirista e sistema de avaliação por estrelas. Fecha o ciclo de feedback da POC.
 
 **Arquivos a criar:**
+
 - `server/api/ratings.ts` — router tRPC de avaliações
 - `app/perfil/[userId]/page.tsx` — perfil público (Server Component)
 - `app/perfil/[userId]/profile-client.tsx` — Client Component
 - `app/minha-conta/page.tsx` — edição de perfil
 
 **Arquivos a atualizar:**
+
 - `server/api/root.ts` — registrar `ratingsRouter`
 - `app/roteiros/[id]/script-page-client.tsx` — integrar StarRating + média
 - `components/ui/script-card.tsx` — receber `rating` como prop real
@@ -24,39 +26,40 @@ Perfil público do roteirista e sistema de avaliação por estrelas. Fecha o cic
 
 ## Referência de design (Figma)
 
-| Tela | Node ID | Descrição |
-|------|---------|-----------|
+| Tela                     | Node ID   | Descrição                              |
+| ------------------------ | --------- | -------------------------------------- |
 | PDF Reader (script page) | `51:1007` | Área de avaliação na página do roteiro |
 
 **Componentes Figma a usar:**
 
-| Componente | Node ID | Uso |
-|------------|---------|-----|
+| Componente   | Node ID  | Uso                                                         |
+| ------------ | -------- | ----------------------------------------------------------- |
 | `StarRating` | `13:133` | Avaliação 1–5 estrelas (props: value, max, readOnly, Title) |
-| `RatingBox` | `38:123` | Container da avaliação na página do roteiro |
-| `Avatar` | `38:115` | Foto de perfil do roteirista (círculo, 80×80px) |
-| `ScriptCard` | `3:51` | Card de roteiro na listagem do perfil |
+| `RatingBox`  | `38:123` | Container da avaliação na página do roteiro                 |
+| `Avatar`     | `38:115` | Foto de perfil do roteirista (círculo, 80×80px)             |
+| `ScriptCard` | `3:51`   | Card de roteiro na listagem do perfil                       |
 
 **Tokens de design:**
 
-| Elemento | Tailwind class |
-|----------|---------------|
-| Fundo da página | `bg-base` |
-| Container | `max-w-[960px] mx-auto px-5 py-12` |
-| Header do perfil | `flex items-start gap-5` |
-| Avatar (sem foto) | `w-20 h-20 rounded-full bg-brand-accent/20 flex items-center justify-center text-2xl font-display text-brand-accent` |
-| Nome do roteirista | `font-display text-heading-2` (DM Serif Display 32px) |
-| Bio | `text-secondary text-body-default mt-1 max-w-lg` |
-| Título de seção | `font-display text-heading-3 text-primary mb-4` |
-| Grid de roteiros | `grid grid-cols-1 md:grid-cols-2 gap-4` |
-| Mensagem vazia | `text-muted text-body-small` |
-| Estrelas ativas | `text-brand-accent` (fill) |
-| Estrelas inativas | `text-border-default` |
-| Média e total | `font-mono text-label-mono-default text-secondary` (DM Mono) |
-| Formulário de conta | `max-w-sm flex flex-col gap-6` |
-| Label de campo | `font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs` |
+| Elemento            | Tailwind class                                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Fundo da página     | `bg-base`                                                                                                            |
+| Container           | `max-w-[960px] mx-auto px-5 py-12`                                                                                   |
+| Header do perfil    | `flex items-start gap-5`                                                                                             |
+| Avatar (sem foto)   | `w-20 h-20 rounded-full bg-brand-accent/20 flex items-center justify-center text-2xl font-display text-brand-accent` |
+| Nome do roteirista  | `font-display text-heading-2` (DM Serif Display 32px)                                                                |
+| Bio                 | `text-secondary text-body-default mt-1 max-w-lg`                                                                     |
+| Título de seção     | `font-display text-heading-3 text-primary mb-4`                                                                      |
+| Grid de roteiros    | `grid grid-cols-1 md:grid-cols-2 gap-4`                                                                              |
+| Mensagem vazia      | `text-muted text-body-small`                                                                                         |
+| Estrelas ativas     | `text-brand-accent` (fill)                                                                                           |
+| Estrelas inativas   | `text-border-default`                                                                                                |
+| Média e total       | `font-mono text-label-mono-default text-secondary` (DM Mono)                                                         |
+| Formulário de conta | `max-w-sm flex flex-col gap-6`                                                                                       |
+| Label de campo      | `font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs`                                     |
 
 **RatingBox (na página do roteiro):**
+
 - Contém: StarRating + texto "X avaliações" em DM Mono
 - Exibe a média numérica em DM Serif Display ao lado
 - Usuário não autenticado: readonly, link para login
@@ -80,11 +83,13 @@ import { TRPCError } from '@trpc/server'
 
 export const ratingsRouter = createTRPCRouter({
   upsert: publicProcedure
-    .input(z.object({
-      scriptId: z.string().uuid(),
-      userId: z.string().uuid(),
-      score: z.number().int().min(1).max(5),
-    }))
+    .input(
+      z.object({
+        scriptId: z.string().uuid(),
+        userId: z.string().uuid(),
+        score: z.number().int().min(1).max(5),
+      }),
+    )
     .mutation(async ({ input }) => {
       const script = await db.query.scripts.findFirst({
         where: (s, { eq }) => eq(s.id, input.scriptId),
@@ -107,32 +112,31 @@ export const ratingsRouter = createTRPCRouter({
         })
     }),
 
-  getAverage: publicProcedure
-    .input(z.object({ scriptId: z.string().uuid() }))
-    .query(async ({ input }) => {
-      const result = await db
-        .select({
-          average: avg(ratings.score),
-          total: count(ratings.id),
-        })
-        .from(ratings)
-        .where(eq(ratings.scriptId, input.scriptId))
+  getAverage: publicProcedure.input(z.object({ scriptId: z.string().uuid() })).query(async ({ input }) => {
+    const result = await db
+      .select({
+        average: avg(ratings.score),
+        total: count(ratings.id),
+      })
+      .from(ratings)
+      .where(eq(ratings.scriptId, input.scriptId))
 
-      return {
-        average: result[0]?.average ? Number(result[0].average) : 0,
-        total: result[0]?.total ?? 0,
-      }
-    }),
+    return {
+      average: result[0]?.average ? Number(result[0].average) : 0,
+      total: result[0]?.total ?? 0,
+    }
+  }),
 
   getUserRating: publicProcedure
-    .input(z.object({
-      scriptId: z.string().uuid(),
-      userId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        scriptId: z.string().uuid(),
+        userId: z.string().uuid(),
+      }),
+    )
     .query(async ({ input }) => {
       const rating = await db.query.ratings.findFirst({
-        where: (r, { eq, and }) =>
-          and(eq(r.scriptId, input.scriptId), eq(r.userId, input.userId)),
+        where: (r, { eq, and }) => and(eq(r.scriptId, input.scriptId), eq(r.userId, input.userId)),
       })
       return rating?.score ?? null
     }),
@@ -309,6 +313,7 @@ export default function MyAccountPage() {
 ```
 
 **Layout da página /minha-conta:**
+
 - Container `max-w-sm mx-auto px-5 py-12`
 - Título: `font-display text-heading-2` — "Minha conta"
 - Seção de avatar: círculo 80px + botão de troca de foto
@@ -331,6 +336,7 @@ yarn lint
 ```
 
 **Fluxo end-to-end (yarn dev):**
+
 - [ ] `/perfil/[userId]` acessível sem login, mostra avatar (inicial), nome, bio e roteiros do autor
 - [ ] Usuário autenticado avalia roteiro com 1–5 estrelas em `/roteiros/[id]`
 - [ ] Tentar avaliar o próprio roteiro retorna erro "Você não pode avaliar seu próprio roteiro"
@@ -348,6 +354,8 @@ yarn lint
 - [ ] Perfil público `/perfil/[userId]` acessível sem login
 - [ ] Avatar com inicial do nome em `bg-brand-accent/20` quando sem foto
 - [ ] Nome em `font-display text-heading-2`
+- [x] Avatar com inicial do nome em `bg-brand-accent/20` quando sem foto
+- [x] Nome em `font-display text-heading-2`
 - [ ] StarRating interativo na página do roteiro
 - [ ] Média atualiza sem reload (invalidação TanStack Query)
 - [ ] `yarn build` limpo

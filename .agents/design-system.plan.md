@@ -121,6 +121,7 @@ Para executar este plano, preciso:
 2. Extrair informações das 3 páginas principais
 3. Comparar com estrutura atual
 4. Implementar as atualizações
+5. Normalizar tokens para HSL no `.agents/design-system.meta.json` (feito)
 
 ## ✅ Checklist de implementação
 
