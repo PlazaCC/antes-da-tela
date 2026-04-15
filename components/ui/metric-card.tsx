@@ -3,8 +3,8 @@ import * as React from 'react'
 
 export interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string
-  value: string
-  variation: string
+  value: React.ReactNode
+  variation?: React.ReactNode
   color?: 'positive' | 'negative' | 'neutral'
 }
 
@@ -23,7 +23,7 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       <p className='text-sm uppercase tracking-[0.24em] text-muted-foreground'>{title}</p>
       <div className='mt-3 flex items-end gap-3'>
         <span className='text-3xl font-semibold'>{value}</span>
-        <span className='text-sm'>{variation}</span>
+        {variation ? <span className='text-sm'>{variation}</span> : null}
       </div>
     </div>
   ),

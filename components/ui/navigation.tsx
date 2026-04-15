@@ -25,7 +25,7 @@ export const Navigation = React.forwardRef<HTMLElement, NavigationProps>(
       {...props}>
       {items.map((item, i) => (
         <a
-          key={item.label}
+          key={item.href ?? item.label}
           href={item.href}
           className={cn(
             'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
