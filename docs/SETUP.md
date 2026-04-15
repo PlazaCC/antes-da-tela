@@ -38,6 +38,15 @@ This document provides the official step-by-step instructions to set up the Ante
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY` (server-only):
      - If your deployment or server code needs to perform privileged actions (bypassing RLS, service-role operations), set `SUPABASE_SERVICE_ROLE_KEY` in your server environment only. Never expose this key to the browser or client bundles. When present the project will prefer this key for server-side Supabase clients.
+     - Vercel previews: add `SUPABASE_SERVICE_ROLE_KEY` as an Environment Variable in Vercel for the **Preview** and **Production** targets (do not add it to `NEXT_PUBLIC_*`). This ensures preview deployments can complete server-side OAuth/session exchanges. Steps:
+       1. Go to your Vercel project > Settings > Environment Variables.
+       2. Add a new variable `SUPABASE_SERVICE_ROLE_KEY` with value from Supabase project settings > API > Service Role Key.
+       3. Set the Environment to both **Preview** and **Production** (and Development if you run Vercel locally).
+       4. Redeploy previews to pick up the new secret.
+     - Security checklist:
+       - Never commit `.env` or service-role keys to source control.
+       - Do not prefix the service role key with `NEXT_PUBLIC_` — client bundles must never receive this secret.
+       - Use your platform's secret management (Vercel Environment Variables, GitHub Secrets, or similar) and restrict access to the repository/team members that need it.
    - `DATABASE_PASSWORD`
    - `DATABASE_URL` and `DATABASE_URL_UNPOOLED`
    - `NEXT_PUBLIC_POSTHOG_TOKEN`
