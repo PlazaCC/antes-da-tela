@@ -30,14 +30,6 @@ inputs:
   figma_fileKey:
     type: string
     description: 'Opcional: fileKey do Figma. Se omitido, usa .agents/figma.meta.json.fileKey ou .agents/design-system.meta.json'
-  dry_run:
-    type: boolean
-    default: true
-    description: 'Se true, apenas reporta ações; não modifica arquivos nem comita'
-  auto_commit:
-    type: boolean
-    default: false
-    description: 'Se true e dry_run=false, aplica mudanças nos arquivos e cria commit Git (pede confirmação se necessário)'
 ---
 
 Descrição curta
@@ -50,17 +42,16 @@ Este prompt orienta o agente a executar o fluxo padrão da skill `poc-next-task`
    requer design), 4) atualizar checklists em `.agents/tasks/*.md` marcando itens
    concluídos; 5) opcionalmente commitar as mudanças.
 
-Regras operacionais
+Regras operacionais (resumido)
 
-- Antes de qualquer escrita, verificar `dry_run`. Se `dry_run: true`, só gerar o
-  relatório das ações pretendidas.
-- Se `auto_commit: true`, pedir confirmação explícita antes de executar o
-  comando `git commit` (a menos que o ambiente permita commits automáticos).
-- Ao operar sobre checklists, suportar dois formatos comuns:
-  - Markdown checklist: `- [ ] Item` -> `- [x] Item`
-  - YAML/JSON-like: `done: false` -> `done: true`
-- Sempre preservar histórico: ao editar arquivos, usar `apply_patch` (ou a
-  ferramenta de escrita adequada) e criar um commit com mensagem padronizada.
+- Modo operante (padrão): aplicar alterações locais com `apply_patch` (escrever arquivos), MAS NUNCA executar `git commit` nem `git push`.
+- Após aplicar alterações locais o agente apresenta:
+  - resumo das ações realizadas;
+  - diff/patch aplicado;
+  - sugestão de Conventional Commit (formato: `tipo(scope): descrição — breve`) para uso manual.
+- Se `dry_run: true`, o agente gera apenas diff/relatório sem gravar.
+- Formatos de checklist suportados: Markdown (`- [ ]` → `- [x]`) e YAML/JSON-like (`done: false` → `done: true`).
+- Princípios: mudanças mínimas e focadas; não gravar segredos.
 
 Passo-a-passo que o agente deve seguir
 
@@ -91,17 +82,12 @@ Passo-a-passo que o agente deve seguir
    - Extrair tokens relevantes (cores, tipografia) ou assets SVG e salvar como
      artefatos locais se solicitado.
 
-5. Atualizar checklists
-   - Para cada item de acceptance checklist que já estiver comprovadamente
-     satisfeito (p.ex. build/lint ok, migration gerada), atualizar o arquivo
-     `.agents/tasks/<task>.md`:
-     - Substituir `- [ ]` por `- [x]` para itens concluídos.
-     - Ou alterar `done: false` → `done: true` se for esse o formato.
-   - Se `dry_run: true`, apenas gerar diff/relatório sem gravar.
-   - Se `dry_run: false`, aplicar mudanças com `apply_patch` (ou `create_file`),
-     e, se `auto_commit: true`, criar commit com a mensagem:
+5. Atualizar checklists (resumido)
 
-     "poc({task_id}): mark acceptance items as done — {short list of items}"
+- Para cada item de acceptance comprovado: marcar como concluído (`- [x]` ou `done: true`).
+- Comportamento padrão: aplicar alterações locais com `apply_patch` e gravar arquivos, mas NÃO criar commits nem fazer push.
+- Se `dry_run: true`, gerar apenas diff/relatório sem gravar.
+- Ao final, gerar sugestão de Conventional Commit para uso manual (ex.: `feat(poc-03): mark acceptance items as done — yarn build, lint`).
 
 6. Registrar progresso no TODO do agente
    - Atualizar `manage_todo_list` para refletir progresso (opcional, mas
@@ -116,6 +102,9 @@ Passo-a-passo que o agente deve seguir
      - Próximo passo recomendado
 
 Segurança e confirmação
+
+- Nunca execute `git commit`, `git push` ou qualquer operação remota de versionamento. Sempre gere apenas o diff/patch e uma sugestão de Conventional Commit; não realize commits nem pushes.
+- Se a operação requer chaves/segredos para MCP, reporte que precisa do token e peça instruções; não grave tokens em arquivos de projeto.
 
 - Nunca execute commits ou pushes sem confirmação quando não for explicitamente
   autorizado (`auto_commit: false` por padrão).
@@ -139,28 +128,27 @@ Padrões de edição de checklist (exemplos)
   Antes: `- name: build; done: false`
   Depois: `- name: build; done: true`
 
-Exemplos de invocação
+Exemplos de invocação (curto)
 
-1. Apenas inspecionar (dry-run):
+1. Aplicar alterações locais (padrão):
 
 {
-"task_id": "poc-01",
+"task_id": "poc-03",
+"apply_changes": true
+}
+
+2. Inspecionar sem gravar:
+
+{
+"task_id": "poc-03",
 "dry_run": true
 }
 
-2. Executar validações e aplicar mudanças + commitar:
+Perguntas curtas ao usuário
 
-{
-"task_id": "poc-01",
-"dry_run": false,
-"auto_commit": true
-}
-
-Perguntas a fazer ao usuário antes de alterar o repositório
-
-- Deseja que eu aplique as mudanças (dry_run=false) ou só reporte (dry_run=true)?
-- Deseja que eu crie o commit automaticamente (auto_commit=true)?
-- Qual `figma_fileKey` usar (se diferente do meta.json)?
+- Aplicar alterações locais agora ou só inspecionar? (default: aplicar)
+- Gerar sugestão de Conventional Commit? (default: sim)
+- Usar `figma_fileKey` do meta.json ou outro?
 
 Notas de implementação para o agente
 
