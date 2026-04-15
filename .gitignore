@@ -48,3 +48,6 @@ next-env.d.ts
 # Temp
 /.temp
 /.tmp
+
+# Claude Code
+.claude/settings.local.json

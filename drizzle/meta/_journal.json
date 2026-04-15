@@ -15,6 +15,13 @@
       "when": 1776147667905,
       "tag": "0001_free_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776234741938,
+      "tag": "0002_hot_landau",
+      "breakpoints": true
     }
   ]
 }
