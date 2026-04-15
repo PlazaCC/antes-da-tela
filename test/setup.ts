@@ -6,7 +6,7 @@ import 'whatwg-fetch'
 // Basic globals/mocks for tests
 // Example: mock window.matchMedia if components rely on it
 if (typeof (window as any).matchMedia !== 'function') {
-  (window as any).matchMedia = (query: string) => ({
+  ;(window as any).matchMedia = (query: string) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -18,12 +18,28 @@ if (typeof (window as any).matchMedia !== 'function') {
   })
 }
 
+// Polyfill ResizeObserver for jsdom (Radix/Popper use it)
+if (typeof (window as any).ResizeObserver === 'undefined') {
+  class ResizeObserver {
+    observe() {
+      return null
+    }
+    unobserve() {
+      return null
+    }
+    disconnect() {
+      return null
+    }
+  }
+  ;(window as any).ResizeObserver = ResizeObserver
+}
+
 // Start MSW mock server if available (no-op fallback provided in test/mocks/server.ts)
 try {
-   
   const { server } = require('./mocks/server')
   // Vitest provides global lifecycle hooks when `globals: true` is set
-  beforeAll(() => server.listen())
+  // Warn on unhandled requests to help surface missing handlers in tests
+  beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }))
   afterEach(() => server.resetHandlers())
   afterAll(() => server.close())
 } catch {

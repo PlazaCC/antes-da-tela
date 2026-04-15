@@ -1,13 +1,7 @@
-import React from 'react'
-import { render, screen } from '../utils/render'
 import userEvent from '@testing-library/user-event'
+import { render, screen } from '../utils/render'
 
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 test('Dropdown opens and displays items when triggered', async () => {
   const user = userEvent.setup()

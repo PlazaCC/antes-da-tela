@@ -1,10 +1,10 @@
-import React from 'react'
-import { render, screen } from '../utils/render'
 import userEvent from '@testing-library/user-event'
+import { render, screen } from '../utils/render'
 
-import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 test('Dialog opens and displays title when triggered', async () => {
+  const user = userEvent.setup()
   render(
     <Dialog>
       <DialogTrigger asChild>
@@ -18,6 +18,6 @@ test('Dialog opens and displays title when triggered', async () => {
   )
 
   expect(screen.queryByText('Test Dialog')).not.toBeInTheDocument()
-  await userEvent.click(screen.getByText('Open'))
+  await user.click(screen.getByText('Open'))
   expect(await screen.findByText('Test Dialog')).toBeInTheDocument()
 })
