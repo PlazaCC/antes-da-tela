@@ -19,6 +19,59 @@ Feature central da POC. Leitor PDF com `pdfjs-dist` + sidebar de comentários fi
 
 **Regras:** `.agents/rules/nextjs.md` (dynamic imports), `.agents/rules/typescript.md`
 
+---
+
+## Referência de design (Figma)
+
+| Tela | Node ID | Descrição |
+|------|---------|-----------|
+| PDF Reader | `51:1007` | Tela completa do leitor |
+
+**Componentes Figma a usar:**
+
+| Componente | Node ID | Uso |
+|------------|---------|-----|
+| `ZoomController` | `50:1836` | Controles de zoom (+ / −) |
+| `PageController` | `50:1837` | Navegação de páginas (◀ página N/total ▶) |
+| `Comment` | `13:136` | Item de comentário na sidebar (variants: root, simple, reply) |
+| `ReactionBar` | `13:132` | Barra de reações nos comentários |
+| `Avatar` | `38:115` | Avatar do autor do comentário |
+
+**Layout (da spec do design system):**
+
+```
+Desktop 1280px:
+┌──────────────────────────────────────────┬─────────────────┐
+│  PDF Canvas (880px)                      │  Sidebar (400px) │
+│  - Renderizado em <canvas>               │  - Lista de       │
+│  - ZoomController sticky no topo         │    comentários    │
+│  - PageController sticky no topo         │  - Formulário     │
+└──────────────────────────────────────────┴─────────────────┘
+
+Mobile (375px–768px):
+- PDF acima (100% largura)
+- Sidebar abaixo (100% largura, colapsável)
+```
+
+**Tokens de design:**
+
+| Elemento | Tailwind class |
+|----------|---------------|
+| Fundo do leitor | `bg-base` |
+| Canvas do PDF | `rounded-sm border border-subtle shadow-elevation-1` |
+| Sidebar | `bg-surface border-l border-subtle` |
+| Header da sidebar "Página N" | `font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs` |
+| Textarea de comentário | `bg-elevated border-subtle rounded-sm resize-none focus:ring-1 focus:ring-brand-accent` |
+| Botão "Comentar" | `bg-brand-accent text-primary` (variant `default`, size `sm`) |
+| Comentário existente | `bg-elevated rounded-sm p-3 border border-subtle` |
+| Autor do comentário | `text-primary text-body-small font-medium` |
+| Data do comentário | `text-muted font-mono text-label-mono-small` |
+| ZoomController | `bg-elevated border border-subtle rounded-sm px-3 py-1.5` |
+| PageController | `bg-elevated border border-subtle rounded-sm flex items-center gap-2` |
+| Sticky bar do viewer | `sticky top-0 z-10 bg-base/90 backdrop-blur-sm py-2 border-b border-subtle` |
+
+---
+
 ## Passos de execução
 
 ### 1. Criar Zustand store do viewer
@@ -60,11 +113,9 @@ Criar `components/pdf-viewer/pdf-viewer.tsx` (Client Component):
 
 import { useEffect, useRef } from 'react'
 import { usePDFViewerStore } from './pdf-viewer-store'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
-// pdfjs-dist deve ser importado com dynamic para evitar SSR issues
-// O componente pai usa next/dynamic com ssr: false
+// pdfjs-dist importado dinamicamente — o componente pai usa next/dynamic com ssr: false
 
 interface PDFViewerProps {
   url: string // URL pública do PDF no Supabase Storage
@@ -72,37 +123,29 @@ interface PDFViewerProps {
 
 export function PDFViewerInner({ url }: PDFViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const renderTaskRef = useRef<any>(null)
+  const renderTaskRef = useRef<unknown>(null)
   const { currentPage, totalPages, zoom, setTotalPages, setLoading, setCurrentPage } = usePDFViewerStore()
 
   useEffect(() => {
-    let pdf: any = null
-
     async function loadPDF() {
       setLoading(true)
       const pdfjsLib = await import('pdfjs-dist')
-
-      // Worker — usar o bundlado pelo Next.js
       pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
         'pdfjs-dist/build/pdf.worker.min.mjs',
         import.meta.url,
       ).toString()
 
-      pdf = await pdfjsLib.getDocument(url).promise
+      const pdf = await pdfjsLib.getDocument(url).promise
       setTotalPages(pdf.numPages)
       setLoading(false)
-
       await renderPage(pdf, currentPage)
     }
 
     loadPDF().catch(console.error)
-
-    return () => { pdf = null }
   }, [url])
 
   useEffect(() => {
     if (!canvasRef.current) return
-    // Re-render quando página ou zoom muda
     renderPageById(currentPage)
   }, [currentPage, zoom])
 
@@ -116,77 +159,89 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     await renderPage(pdf, pageNum)
   }
 
-  async function renderPage(pdf: any, pageNum: number) {
+  async function renderPage(pdf: unknown, pageNum: number) {
     if (!canvasRef.current) return
-
-    // Cancelar render anterior se existir
     if (renderTaskRef.current) {
-      renderTaskRef.current.cancel()
+      (renderTaskRef.current as { cancel: () => void }).cancel()
     }
-
-    const page = await pdf.getPage(pageNum)
-    const viewport = page.getViewport({ scale: zoom })
+    const page = await (pdf as { getPage: (n: number) => Promise<unknown> }).getPage(pageNum)
+    const viewport = (page as { getViewport: (opts: { scale: number }) => { width: number; height: number } }).getViewport({ scale: zoom })
     const canvas = canvasRef.current
     canvas.width = viewport.width
     canvas.height = viewport.height
-
     const context = canvas.getContext('2d')!
-    const renderTask = page.render({ canvasContext: context, viewport })
+    const renderTask = (page as { render: (opts: unknown) => { promise: Promise<void>; cancel: () => void } }).render({ canvasContext: context, viewport })
     renderTaskRef.current = renderTask
-
     await renderTask.promise
   }
 
-  const goToPrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1)
-  const goToNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1)
+  const goToPrev = () => currentPage > 1 && setCurrentPage(currentPage - 1)
+  const goToNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1)
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Controles de navegação */}
-      <div className="flex items-center gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2">
-        <Button variant="outline" size="sm" onClick={goToPrevPage} disabled={currentPage <= 1}>
-          ←
-        </Button>
-        <Input
-          type="number"
-          value={currentPage}
-          min={1}
-          max={totalPages}
-          className="w-16 text-center"
-          onChange={(e) => {
-            const p = parseInt(e.target.value)
-            if (p >= 1 && p <= totalPages) setCurrentPage(p)
-          }}
-        />
-        <span className="text-sm text-muted-foreground">/ {totalPages}</span>
-        <Button variant="outline" size="sm" onClick={goToNextPage} disabled={currentPage >= totalPages}>
-          →
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => usePDFViewerStore.getState().setZoom(zoom + 0.2)}>+</Button>
-        <Button variant="outline" size="sm" onClick={() => usePDFViewerStore.getState().setZoom(Math.max(0.5, zoom - 0.2))}>−</Button>
+      {/* PageController + ZoomController (ref: 50:1837, 50:1836) */}
+      <div className="sticky top-0 z-10 bg-base/90 backdrop-blur-sm py-2 border-b border-subtle flex items-center gap-3">
+        {/* PageController */}
+        <div className="bg-elevated border border-subtle rounded-sm flex items-center gap-2 px-3 py-1.5">
+          <button
+            onClick={goToPrev}
+            disabled={currentPage <= 1}
+            className="text-secondary hover:text-primary disabled:opacity-30 text-sm"
+          >
+            ←
+          </button>
+          <span className="font-mono text-label-mono-default text-secondary">
+            {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={goToNext}
+            disabled={currentPage >= totalPages}
+            className="text-secondary hover:text-primary disabled:opacity-30 text-sm"
+          >
+            →
+          </button>
+        </div>
+        {/* ZoomController */}
+        <div className="bg-elevated border border-subtle rounded-sm flex items-center gap-1 px-2 py-1.5">
+          <button
+            onClick={() => usePDFViewerStore.getState().setZoom(Math.max(0.5, zoom - 0.2))}
+            className="text-secondary hover:text-primary w-6 h-6 flex items-center justify-center text-sm"
+          >
+            −
+          </button>
+          <span className="font-mono text-label-mono-small text-muted w-10 text-center">
+            {Math.round(zoom * 100)}%
+          </span>
+          <button
+            onClick={() => usePDFViewerStore.getState().setZoom(zoom + 0.2)}
+            className="text-secondary hover:text-primary w-6 h-6 flex items-center justify-center text-sm"
+          >
+            +
+          </button>
+        </div>
       </div>
 
       {/* Canvas de renderização */}
       <canvas
         ref={canvasRef}
-        className="max-w-full rounded border border-border shadow-elevation-1"
+        className="max-w-full rounded-sm border border-subtle shadow-elevation-1"
       />
     </div>
   )
 }
 ```
 
-**Wrapper com dynamic import** (usado em `script-page-client.tsx`):
+**Wrapper com dynamic import** (arquivo: `components/pdf-viewer/index.ts`):
 
 ```typescript
-// components/pdf-viewer/index.ts
 import dynamic from 'next/dynamic'
 
 export const PDFViewer = dynamic(
   () => import('./pdf-viewer').then((m) => m.PDFViewerInner),
   {
     ssr: false,
-    loading: () => <div className="animate-pulse h-[600px] rounded bg-muted" />,
+    loading: () => <div className="animate-pulse h-[600px] rounded-sm bg-elevated" />,
   },
 )
 ```
@@ -202,8 +257,8 @@ import { usePDFViewerStore } from './pdf-viewer-store'
 import { useTRPC } from '@/trpc/client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Comment } from '@/components/ui/comment'
 
 interface CommentsSidebarProps {
   scriptId: string
@@ -229,20 +284,35 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
   })
 
   return (
-    <aside className="flex flex-col gap-4 w-80 shrink-0">
-      <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+    <aside className="flex flex-col gap-4 w-full lg:w-[400px] shrink-0 bg-surface border-l border-subtle p-5">
+      {/* Header — ref: label DM Mono uppercase */}
+      <p className="font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs">
         Página {currentPage}
       </p>
 
-      <div className="flex flex-col gap-3">
+      {/* Lista de comentários — ref: Comment component (13:136) */}
+      <div className="flex flex-col gap-3 flex-1 overflow-y-auto">
         {comments?.map((c) => (
-          <Comment key={c.id} author={c.author?.name ?? 'Anônimo'} content={c.content} createdAt={c.createdAt} />
+          <div key={c.id} className="bg-elevated rounded-sm p-3 border border-subtle flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              {/* Avatar (ref: 38:115) — iniciais se sem imagem */}
+              <div className="w-6 h-6 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent">
+                {c.author?.name?.[0] ?? '?'}
+              </div>
+              <span className="text-primary text-body-small font-medium">{c.author?.name ?? 'Anônimo'}</span>
+              <span className="text-muted font-mono text-[10px] ml-auto">
+                {new Date(c.createdAt).toLocaleDateString('pt-BR')}
+              </span>
+            </div>
+            <p className="text-secondary text-body-small">{c.content}</p>
+          </div>
         ))}
         {comments?.length === 0 && (
-          <p className="text-sm text-muted-foreground">Nenhum comentário nesta página.</p>
+          <p className="text-muted text-body-small">Nenhum comentário nesta página.</p>
         )}
       </div>
 
+      {/* Formulário de comentário */}
       {currentUserId ? (
         <form
           onSubmit={(e) => {
@@ -250,22 +320,22 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
             if (!content.trim()) return
             createComment.mutate({ scriptId, pageNumber: currentPage, content: content.trim(), authorId: currentUserId })
           }}
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-2 border-t border-subtle pt-4"
         >
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Comentar nesta página..."
             rows={3}
-            className="w-full rounded border border-border bg-surface p-3 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full rounded-sm border border-subtle bg-elevated p-3 text-body-small text-primary resize-none focus:outline-none focus:ring-1 focus:ring-brand-accent placeholder:text-muted"
           />
           <Button type="submit" size="sm" disabled={createComment.isPending}>
             {createComment.isPending ? 'Enviando...' : 'Comentar'}
           </Button>
         </form>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          <a href="/auth/login" className="underline">Faça login</a> para comentar.
+        <p className="text-muted text-body-small border-t border-subtle pt-4">
+          <a href="/auth/login" className="text-brand-accent underline underline-offset-4">Faça login</a> para comentar.
         </p>
       )}
     </aside>
@@ -318,7 +388,7 @@ export const commentsRouter = createTRPCRouter({
   delete: publicProcedure
     .input(z.object({
       commentId: z.string().uuid(),
-      authorId: z.string().uuid(), // validação de ownership no router
+      authorId: z.string().uuid(),
     }))
     .mutation(async ({ input }) => {
       await db
@@ -349,14 +419,16 @@ export const appRouter = createTRPCRouter({
 import { PDFViewer } from '@/components/pdf-viewer'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 
-// No layout:
-<div className="flex gap-6">
-  <div className="flex-1 min-w-0">
+// Layout desktop: 880px PDF + 400px sidebar
+<div className="flex flex-col lg:flex-row gap-0 min-h-screen">
+  <div className="flex-1 min-w-0 p-5">
     {pdfUrl && <PDFViewer url={pdfUrl} />}
   </div>
   <CommentsSidebar scriptId={scriptId} currentUserId={user?.id} />
 </div>
 ```
+
+---
 
 ## Validação
 
@@ -367,11 +439,14 @@ yarn lint
 
 **Fluxo end-to-end (yarn dev):**
 - [ ] PDF abre e renderiza na rota `/roteiros/[id]`
-- [ ] Navegar entre páginas atualiza os comentários na sidebar automaticamente
+- [ ] PageController (◀/▶) navega entre páginas — comentários na sidebar atualizam automaticamente
+- [ ] ZoomController (+/−) muda o tamanho do PDF
 - [ ] Usuário autenticado adiciona comentário — aparece sem reload
 - [ ] Usuário não autenticado vê comentários mas sidebar mostra CTA de login
-- [ ] `yarn build` não tem erros de SSR (pdfjs é client-only via dynamic import)
+- [ ] `yarn build` sem erros de SSR (pdfjs é client-only via dynamic import)
 - [ ] Sem erros de CORS no console do browser ao carregar o PDF
+- [ ] Layout desktop: PDF ~880px, sidebar ~400px
+- [ ] Layout mobile: PDF empilhado acima da sidebar
 
 ## Checklist de aceite
 
@@ -379,6 +454,8 @@ yarn lint
 - [ ] Zustand store controla página atual compartilhada entre viewer e sidebar
 - [ ] `commentsRouter` com `list`, `create`, `delete`
 - [ ] Comentários filtrados por `pageNumber` da página visível
-- [ ] Soft delete (campo `deleted_at`) nos comentários
+- [ ] Soft delete (`deleted_at`) nos comentários
+- [ ] ZoomController e PageController usam tokens do design system (bg-elevated, border-subtle, font-mono)
+- [ ] Avatar do comentário com inicial do nome + bg-brand-accent/20
 - [ ] Performance aceitável em roteiros de até 120 páginas
 - [ ] `yarn build` limpo

@@ -20,6 +20,50 @@ Perfil público do roteirista e sistema de avaliação por estrelas. Fecha o cic
 
 **Componente disponível:** `StarRating` (`components/ui/star-rating.tsx`)
 
+---
+
+## Referência de design (Figma)
+
+| Tela | Node ID | Descrição |
+|------|---------|-----------|
+| PDF Reader (script page) | `51:1007` | Área de avaliação na página do roteiro |
+
+**Componentes Figma a usar:**
+
+| Componente | Node ID | Uso |
+|------------|---------|-----|
+| `StarRating` | `13:133` | Avaliação 1–5 estrelas (props: value, max, readOnly, Title) |
+| `RatingBox` | `38:123` | Container da avaliação na página do roteiro |
+| `Avatar` | `38:115` | Foto de perfil do roteirista (círculo, 80×80px) |
+| `ScriptCard` | `3:51` | Card de roteiro na listagem do perfil |
+
+**Tokens de design:**
+
+| Elemento | Tailwind class |
+|----------|---------------|
+| Fundo da página | `bg-base` |
+| Container | `max-w-[960px] mx-auto px-5 py-12` |
+| Header do perfil | `flex items-start gap-5` |
+| Avatar (sem foto) | `w-20 h-20 rounded-full bg-brand-accent/20 flex items-center justify-center text-2xl font-display text-brand-accent` |
+| Nome do roteirista | `font-display text-heading-2` (DM Serif Display 32px) |
+| Bio | `text-secondary text-body-default mt-1 max-w-lg` |
+| Título de seção | `font-display text-heading-3 text-primary mb-4` |
+| Grid de roteiros | `grid grid-cols-1 md:grid-cols-2 gap-4` |
+| Mensagem vazia | `text-muted text-body-small` |
+| Estrelas ativas | `text-brand-accent` (fill) |
+| Estrelas inativas | `text-border-default` |
+| Média e total | `font-mono text-label-mono-default text-secondary` (DM Mono) |
+| Formulário de conta | `max-w-sm flex flex-col gap-6` |
+| Label de campo | `font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs` |
+
+**RatingBox (na página do roteiro):**
+- Contém: StarRating + texto "X avaliações" em DM Mono
+- Exibe a média numérica em DM Serif Display ao lado
+- Usuário não autenticado: readonly, link para login
+- Usuário autenticado: interativo, seleciona 1–5
+
+---
+
 ## Passos de execução
 
 ### 1. Criar router tRPC de avaliações
@@ -30,12 +74,11 @@ Criar `server/api/ratings.ts`:
 import { db } from '@/server/db'
 import { ratings, scripts } from '@/server/db/schema'
 import { createTRPCRouter, publicProcedure } from '@/trpc/init'
-import { eq, and, avg, count, sql } from 'drizzle-orm'
+import { eq, and, avg, count } from 'drizzle-orm'
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 
 export const ratingsRouter = createTRPCRouter({
-  // Upsert: 1 voto por usuário por roteiro
   upsert: publicProcedure
     .input(z.object({
       scriptId: z.string().uuid(),
@@ -43,7 +86,6 @@ export const ratingsRouter = createTRPCRouter({
       score: z.number().int().min(1).max(5),
     }))
     .mutation(async ({ input }) => {
-      // Bloquear auto-avaliação
       const script = await db.query.scripts.findFirst({
         where: (s, { eq }) => eq(s.id, input.scriptId),
         columns: { authorId: true },
@@ -82,7 +124,6 @@ export const ratingsRouter = createTRPCRouter({
       }
     }),
 
-  // Voto do usuário atual num roteiro específico
   getUserRating: publicProcedure
     .input(z.object({
       scriptId: z.string().uuid(),
@@ -118,50 +159,26 @@ Atualizar `app/roteiros/[id]/script-page-client.tsx`:
 
 ```typescript
 import { StarRating } from '@/components/ui/star-rating'
-import { useTRPC } from '@/trpc/client'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-// Dentro do componente:
-const trpc = useTRPC()
-const queryClient = useQueryClient()
-
-const { data: ratingData } = useQuery(
-  trpc.ratings.getAverage.queryOptions({ scriptId })
-)
-
-const { data: userRating } = useQuery(
-  userId
-    ? trpc.ratings.getUserRating.queryOptions({ scriptId, userId })
-    : { queryKey: ['ratings', 'user', null], queryFn: () => null, enabled: false }
-)
-
-const upsertRating = useMutation({
-  ...trpc.ratings.upsert.mutationOptions(),
-  onSuccess: () => {
-    queryClient.invalidateQueries(trpc.ratings.getAverage.queryOptions({ scriptId }))
-    queryClient.invalidateQueries(trpc.ratings.getUserRating.queryOptions({ scriptId, userId: userId! }))
-  },
-})
-
-// No JSX:
-<div className="flex items-center gap-3">
+// RatingBox (ref: 38:123) — inserir na área de metadados do roteiro
+<div className="flex items-center gap-3 p-3 bg-elevated rounded-sm border border-subtle">
   <StarRating
     value={userRating ?? 0}
     onChange={(score) => {
-      if (!userId) return // redirecionar para login
+      if (!userId) { router.push('/auth/login'); return }
       upsertRating.mutate({ scriptId, userId, score })
     }}
     readonly={!userId}
   />
   {ratingData && ratingData.total > 0 && (
-    <span className="text-sm text-muted-foreground">
-      {ratingData.average.toFixed(1)} · {ratingData.total} avaliações
+    <span className="font-mono text-label-mono-default text-secondary">
+      {ratingData.average.toFixed(1)} · {ratingData.total} {ratingData.total === 1 ? 'avaliação' : 'avaliações'}
     </span>
   )}
 </div>
 ```
 
-> Verificar a API do componente `StarRating` em `components/ui/star-rating.tsx` e ajustar props conforme necessário.
+> Verificar a API do componente `StarRating` em `components/ui/star-rating.tsx` e ajustar props conforme necessário. A prop `Title` no Figma corresponde ao label textual da categoria (ex: "Narrativa", "Diálogos").
 
 ### 4. Criar página de perfil público
 
@@ -171,15 +188,17 @@ Criar `app/perfil/[userId]/page.tsx` (Server Component):
 import { trpc, HydrateClient } from '@/trpc/server'
 import { ProfileClient } from './profile-client'
 
-export default async function ProfilePage({ params }: { params: { userId: string } }) {
+export default async function ProfilePage({ params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = await params
+
   await Promise.all([
-    trpc.users.getProfile.prefetch({ id: params.userId }),
-    trpc.scripts.listByAuthor.prefetch({ authorId: params.userId }),
+    trpc.users.getProfile.prefetch({ id: userId }),
+    trpc.scripts.listByAuthor.prefetch({ authorId: userId }),
   ])
 
   return (
     <HydrateClient>
-      <ProfileClient userId={params.userId} />
+      <ProfileClient userId={userId} />
     </HydrateClient>
   )
 }
@@ -194,36 +213,41 @@ import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
 import { ScriptCard } from '@/components/ui/script-card'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export function ProfileClient({ userId }: { userId: string }) {
   const trpc = useTRPC()
-
   const { data: user } = useQuery(trpc.users.getProfile.queryOptions({ id: userId }))
   const { data: scriptList } = useQuery(trpc.scripts.listByAuthor.queryOptions({ authorId: userId }))
 
-  if (!user) return <p className="text-muted-foreground">Perfil não encontrado.</p>
+  if (!user) return <p className="text-muted text-body-small">Perfil não encontrado.</p>
 
   return (
-    <main className="max-w-4xl mx-auto px-5 py-12 flex flex-col gap-10">
-      {/* Header do perfil */}
+    <main className="max-w-[960px] mx-auto px-5 py-12 flex flex-col gap-10">
+
+      {/* Header do perfil — ref: Avatar (38:115) */}
       <section className="flex items-start gap-5">
         {user.image ? (
-          <Image src={user.image} alt={user.name} width={80} height={80} className="rounded-full" />
+          <img
+            src={user.image}
+            alt={user.name}
+            className="w-20 h-20 rounded-full object-cover border border-subtle"
+          />
         ) : (
-          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-2xl font-semibold">
+          <div className="w-20 h-20 rounded-full bg-brand-accent/20 flex items-center justify-center text-2xl font-display text-brand-accent shrink-0">
             {user.name[0]}
           </div>
         )}
-        <div>
-          <h1 className="text-heading-2 font-semibold">{user.name}</h1>
-          {user.bio && <p className="text-body-default text-muted-foreground mt-1">{user.bio}</p>}
+        <div className="flex flex-col gap-1 pt-1">
+          <h1 className="font-display text-heading-2 text-primary">{user.name}</h1>
+          {user.bio && (
+            <p className="text-secondary text-body-default max-w-lg">{user.bio}</p>
+          )}
         </div>
       </section>
 
       {/* Roteiros do autor */}
       <section>
-        <h2 className="text-heading-3 font-semibold mb-4">Roteiros publicados</h2>
+        <h2 className="font-display text-heading-3 text-primary mb-4">Roteiros publicados</h2>
         {scriptList && scriptList.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {scriptList.map((script) => (
@@ -239,7 +263,7 @@ export function ProfileClient({ userId }: { userId: string }) {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm">Nenhum roteiro publicado ainda.</p>
+          <p className="text-muted text-body-small">Nenhum roteiro publicado ainda.</p>
         )}
       </section>
     </main>
@@ -249,41 +273,55 @@ export function ProfileClient({ userId }: { userId: string }) {
 
 ### 5. Criar página de edição de perfil
 
-Criar `app/minha-conta/page.tsx` (Client Component, rota protegida pelo middleware):
+Criar `app/minha-conta/page.tsx` (Client Component, rota protegida):
 
 ```typescript
 'use client'
 
 import { useTRPC } from '@/trpc/client'
-import { createBrowserClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useEffect } from 'react'
 
 const profileSchema = z.object({
-  name: z.string().min(2).max(100),
+  name: z.string().min(2, 'Nome deve ter ao menos 2 caracteres').max(100),
   bio: z.string().max(500).optional(),
 })
 
+type FormValues = z.infer<typeof profileSchema>
+
 export default function MyAccountPage() {
   const trpc = useTRPC()
-  const supabase = createBrowserClient()
-  // Obter userId da sessão atual via supabase.auth.getUser()
-  // Formulário com prefill dos dados atuais
-  // Upload de avatar: supabase.storage.from('avatars').upload(path, file)
-  // Após upload: trpc.users.updateProfile.mutate({ id, image: publicUrl })
-  // Submit do formulário: trpc.users.updateProfile.mutate({ id, name, bio })
+  const supabase = createClient()
+
+  // 1. Obter userId da sessão
+  // 2. Carregar perfil atual via trpc.users.getProfile
+  // 3. Prefill do formulário com os dados atuais
+  // 4. Submit: trpc.users.updateProfile.mutate({ id, name, bio })
+  // 5. Upload de avatar: supabase.storage.from('avatars').upload(path, file)
+  //    → após upload: trpc.users.updateProfile.mutate({ id, image: publicUrl })
 }
 ```
 
-### 6. Conectar rating médio no ScriptCard (home)
+**Layout da página /minha-conta:**
+- Container `max-w-sm mx-auto px-5 py-12`
+- Título: `font-display text-heading-2` — "Minha conta"
+- Seção de avatar: círculo 80px + botão de troca de foto
+- Formulário: `flex flex-col gap-6`
+- Labels em DM Mono uppercase (`font-mono text-label-mono-caps text-secondary uppercase`)
 
-Depois que `ratingsRouter.getAverage` existir, atualizar `HomeClient` e `ProfileClient` para buscar e passar a média real ao `ScriptCard`.
+### 6. Conectar rating médio no ScriptCard
 
-> Estratégia eficiente: buscar média de todos os roteiros da lista em batch via um endpoint `ratings.getAverages(scriptIds[])` — opcional para POC, pode usar 0 inicialmente.
+Atualizar `HomeClient` e `ProfileClient` para buscar e passar a média real ao `ScriptCard` depois que `ratingsRouter` existir.
+
+> Para a POC, pode passar `rating={0}` inicialmente. Na iteração seguinte, buscar média via `ratings.getAverage` para cada script.
+
+---
 
 ## Validação
 
@@ -293,20 +331,23 @@ yarn lint
 ```
 
 **Fluxo end-to-end (yarn dev):**
-- [ ] `/perfil/[userId]` acessível sem login, mostra roteiros do autor
-- [ ] Usuário autenticado dá nota 1–5 em `/roteiros/[id]`
-- [ ] Tentar avaliar o próprio roteiro retorna erro "não pode avaliar seu próprio roteiro"
+- [ ] `/perfil/[userId]` acessível sem login, mostra avatar (inicial), nome, bio e roteiros do autor
+- [ ] Usuário autenticado avalia roteiro com 1–5 estrelas em `/roteiros/[id]`
+- [ ] Tentar avaliar o próprio roteiro retorna erro "Você não pode avaliar seu próprio roteiro"
 - [ ] Submeter nova nota atualiza a média exibida sem reload
 - [ ] `/minha-conta` acessível apenas para usuários autenticados
 - [ ] Editar nome/bio salva corretamente na tabela `users`
 - [ ] Upload de avatar aparece no bucket `avatars` e atualiza a imagem no perfil
+- [ ] Visual: Avatar com inicial em brand-accent, nome em DM Serif Display, média em DM Mono
 
 ## Checklist de aceite
 
 - [ ] `ratingsRouter` com `upsert`, `getAverage`, `getUserRating`
 - [ ] Auto-avaliação bloqueada com `TRPCError FORBIDDEN`
 - [ ] Upsert funciona (segunda avaliação substitui a primeira)
-- [ ] Perfil público `/perfil/[userId]` sem login
+- [ ] Perfil público `/perfil/[userId]` acessível sem login
+- [ ] Avatar com inicial do nome em `bg-brand-accent/20` quando sem foto
+- [ ] Nome em `font-display text-heading-2`
 - [ ] StarRating interativo na página do roteiro
 - [ ] Média atualiza sem reload (invalidação TanStack Query)
 - [ ] `yarn build` limpo

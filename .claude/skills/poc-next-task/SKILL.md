@@ -109,17 +109,64 @@ Before closing, confirm every item in the next task's acceptance checklist:
 - [ ] `yarn build` passes with zero errors
 - [ ] `yarn lint` passes with zero warnings
 - [ ] All specified files exist and match the expected structure
-- [ ] Branch is ready to merge (or already merged, per task instructions)
+- [ ] Branch is ready to merge (per task instructions)
 
-Report which task was completed, which criteria passed, and what the next task in the queue is.
+---
+
+## Step 7 — Report and commit suggestion
+
+**Never commit.** Do not run `git add`, `git commit`, or `git push` under any circumstance.
+
+Instead, output a structured closing report:
+
+### Report format
+
+```
+## Task [XX] — <Task Name> complete
+
+### What was done
+- <concise bullet per file or feature implemented>
+- ...
+
+### Acceptance criteria
+- [x] yarn build passes with zero errors
+- [x] yarn lint passes with zero warnings
+- [x] <other criteria from the checklist>
+
+### Suggested commit
+\`\`\`
+<type>(<scope>): <short description>
+
+<optional body — what and why, not how>
+\`\`\`
+
+### Next task
+[XX+1] <Task Name> — <one-line description of what it unlocks>
+```
+
+**Conventional commit guidance:**
+
+| Situation | type |
+|-----------|------|
+| New feature / page / route | `feat` |
+| Bug fix or correction | `fix` |
+| DB schema / migration | `feat(db)` |
+| Auth flow | `feat(auth)` |
+| tRPC router | `feat(api)` |
+| UI component | `feat(ui)` |
+| Config / tooling | `chore` |
+| Refactor without behaviour change | `refactor` |
+
+Scope = the task area (e.g. `upload`, `leitor`, `home`, `perfil`, `auth`, `db`).
 
 ---
 
 ## Constraints
 
+- **Never commit, push, or stage files** — always leave that to the developer.
 - Never use `npm install` — always `yarn add`.
 - Tailwind v3 only — do not use v4 syntax.
 - Use `cn()` from `@/lib/utils` for all className composition.
 - `createServerClient` in Server Components, `createBrowserClient` in Client Components.
 - Schema source of truth: `server/db/schema.ts` — never edit generated migration files directly.
-- All output (code, comments, commits, docs) in English.
+- All output (code, comments, docs) in English.
