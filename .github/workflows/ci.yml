@@ -1,10 +1,11 @@
 name: CI
 
 on:
-  push:
-    branches: ['**']
+  # Run on PRs that target `main`, and on direct pushes to `main`.
   pull_request:
-    branches: ['**']
+    branches: ['main']
+  push:
+    branches: ['main']
 
 jobs:
   build-and-test:
@@ -18,6 +19,11 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+
+      - name: Enable Corepack and prepare Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.13.0 --activate
 
       - name: Yarn install
         run: yarn install --immutable
