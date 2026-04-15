@@ -62,12 +62,12 @@ Estrutura de pastas:
 
 ```
 /
-├── src/
-│   ├── app/          # Next.js App Router — páginas e API routes
-│   ├── server/       # tRPC routers e Drizzle queries
-│   ├── lib/          # Supabase client, Supabase Auth config
-│   └── components/   # Componentes React e UI
-├── drizzle/          # Schema e migrations
+├── app/          # Next.js App Router — páginas e API routes
+├── server/       # tRPC routers e Drizzle queries
+├── lib/          # Supabase client, Supabase Auth config
+├── components/   # Componentes React e UI
+├── trpc/         # tRPC init, client e server helpers
+├── drizzle/      # Migrations geradas
 └── package.json
 ```
 
@@ -221,3 +221,22 @@ Esta ADR deve ser revisada se:
 - o volume de usuários ultrapassar os limites do free tier do Supabase
 - surgir necessidade de API pública para consumo externo por terceiros
 - a POC validar crescimento que justifique separar serviços em provedores especializados
+
+---
+
+## Implementação atual (resumo) — 2026-04-14
+
+- **O que está implementado:**
+	- Cliente Supabase browser em `lib/supabase/client.ts`.
+	- Configuração Drizzle (`drizzle.config.ts`) apontando para `server/db/schema.ts`.
+	- Esquema inicial com tabela `users` em `server/db/schema.ts`.
+	- Handler tRPC montado em `app/api/trpc/[trpc]/route.ts` e `trpc/init.ts` configurado; `server/api/root.ts` contém placeholders para routers de domínio.
+	- UI e design system com componentes como `ScriptCard` e `DragZone` (UI), além de páginas de verificação para integrações (PostHog, Resend, Sentry) em `app/development`.
+
+- **O que falta / próximos passos técnicos:**
+	- Modelagem Drizzle e migrations para `scripts`/`roteiros`, `comments`, `ratings`, `audio_files`.
+	- Implementação do fluxo de upload (Supabase Storage) e endpoints/rotas seguras ou upload direto do cliente.
+	- Componente leitor de PDF (dynamic import de `pdfjs-dist`) e ancoragem de comentários por página.
+	- Routers tRPC de domínio (`scripts`, `comments`, `uploads`) e testes de integração com Supabase.
+
+> Observação: a RFC-002 (infra) permanece aberta até decisão final de deploy — recomenda-se fechar esta RFC assim que a opção de infra for escolhida.

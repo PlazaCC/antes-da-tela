@@ -1,0 +1,359 @@
+{
+  "project": {
+    "name": "Antes da Tela",
+    "type": "POC",
+    "description": "Plataforma de publicação, leitura e discussão de roteiros audiovisuais",
+    "repo": "https://github.com/PlazaCC/antes-da-tela",
+    "branch_active": "feat/design-system",
+    "deploy": "Vercel (free tier)",
+    "docs": {
+      "poc": "docs/POC.md",
+      "adr": "docs/adrs/ADR-001-antes-da-tela.md",
+      "setup": "docs/SETUP.md",
+      "agents_context": "docs/AGENTS-CONTEXT.md",
+      "poc_status": "docs/POC-STATUS.md"
+    },
+    "hypotheses": [
+      "Existe demanda por leitura centralizada de roteiros",
+      "Roteiristas querem feedback estruturado por página",
+      "Curadoria aumenta descoberta"
+    ]
+  },
+
+  "stack": {
+    "framework": "Next.js App Router + TypeScript",
+    "auth": "@supabase/ssr (createServerClient / createBrowserClient)",
+    "api": "tRPC v11 + Zod",
+    "orm": "Drizzle ORM + postgres driver (prepare: false)",
+    "database": "Supabase Postgres — pooler transaction port 6543",
+    "storage": "Supabase Storage + Cloudflare CDN",
+    "pdf": "pdfjs-dist (next/dynamic, ssr: false)",
+    "state": "Zustand",
+    "cache": "TanStack Query + superjson",
+    "ui": "shadcn/ui + Radix UI + Tailwind v3",
+    "email": "Resend",
+    "analytics": "PostHog",
+    "errors": "Sentry",
+    "pkg_manager": "Yarn 4 (Berry)"
+  },
+
+  "critical_paths": {
+    "schema": "server/db/schema.ts",
+    "router_root": "server/api/root.ts",
+    "trpc_init": "trpc/init.ts",
+    "trpc_client": "trpc/client.tsx",
+    "trpc_server": "trpc/server.tsx",
+    "supabase_client": "lib/supabase/client.ts",
+    "supabase_server": "lib/supabase/server.ts",
+    "middleware": "middleware.ts",
+    "trpc_handler": "app/api/trpc/[trpc]/route.ts",
+    "globals_css": "app/globals.css",
+    "tailwind_config": "tailwind.config.ts",
+    "components_ui": "components/ui/",
+    "task_files": ".agents/tasks/"
+  },
+
+  "conventions": {
+    "classname": "cn() from @/lib/utils",
+    "upload": "always client-side to Supabase Storage (Vercel 10s timeout)",
+    "ssr_prefetch": "trpc + HydrateClient from @/trpc/server",
+    "client_query": "useTRPC() from @/trpc/client",
+    "validation": "Zod schema shared between tRPC input and zodResolver",
+    "server_component": "createServerClient from @supabase/ssr",
+    "client_component": "createBrowserClient from @supabase/ssr",
+    "tailwind_version": "v3 — no v4 syntax",
+    "package_install": "yarn add — never npm install",
+    "tokens_format": "CSS vars use HSL channels (no hex), Tailwind wraps with hsl(var(...))",
+    "db_migrations": "DATABASE_URL_UNPOOLED (port 5432) for migrate only"
+  },
+
+  "validation_commands": {
+    "build": "yarn build",
+    "lint": "yarn lint",
+    "db_generate": "yarn drizzle-kit generate",
+    "db_migrate": "yarn drizzle-kit migrate",
+    "dev": "yarn dev"
+  },
+
+  "tasks": [
+    {
+      "id": "poc-01",
+      "scope": "Design System",
+      "title": "[Design System] - Tokens visuais, componentes e playground",
+      "clickup": "https://app.clickup.com/t/86agwj9wg",
+      "status": "in_progress",
+      "priority": "urgent",
+      "depends_on": [],
+      "branch": "feat/design-system",
+      "task_file": ".agents/tasks/poc-01-design-system.md",
+      "objective": "Merge da branch de design system, garantindo tokens HSL corretos e playground funcional",
+      "files_affected": [
+        "tailwind.config.ts",
+        "app/globals.css",
+        "app/layout.tsx",
+        "components/ui/*",
+        "app/development/design-system/page.tsx",
+        "app/development/components/page.tsx"
+      ],
+      "acceptance": [
+        { "id": "ds-1", "item": "yarn build e yarn lint passam sem erros após merge", "done": false },
+        { "id": "ds-2", "item": "CSS vars usam HSL channels (não hex) em :root e .dark", "done": true },
+        { "id": "ds-3", "item": "Tailwind tokens usam nested objects (state.success, brand.accent), não slash-keys", "done": true },
+        { "id": "ds-4", "item": "Plugin tailwindcss-animate via static import (não dynamic import)", "done": true },
+        { "id": "ds-5", "item": "MetricCard usa state-success/state-error (não green-500/red-500)", "done": true },
+        { "id": "ds-6", "item": "app/layout.tsx título 'Antes da Tela' (não starter kit padrão)", "done": true },
+        { "id": "ds-7", "item": "Token colors renderizam corretamente em /development/design-system", "done": false },
+        { "id": "ds-8", "item": "Branch feat/design-system merged em main", "done": false }
+      ]
+    },
+
+    {
+      "id": "poc-02",
+      "scope": "DB",
+      "title": "[DB] - Modelagem Drizzle e migrations",
+      "clickup": "https://app.clickup.com/t/86agq8yhn",
+      "status": "in_progress",
+      "priority": "urgent",
+      "depends_on": [],
+      "blocker": true,
+      "task_file": ".agents/tasks/poc-02-db-schema.md",
+      "objective": "Schema completo Drizzle + migrations aplicadas + Storage buckets com CORS",
+      "files_affected": [
+        "server/db/schema.ts"
+      ],
+      "tables_to_create": ["scripts", "script_files", "audio_files", "comments", "ratings"],
+      "table_existing": ["users"],
+      "storage_buckets": [
+        { "name": "scripts", "public": true, "max_mb": 50, "mime": "application/pdf" },
+        { "name": "audio", "public": true, "max_mb": 100, "mime": "audio/*" },
+        { "name": "avatars", "public": true, "max_mb": 5, "mime": "image/*" }
+      ],
+      "acceptance": [
+        { "id": "db-1", "item": "yarn drizzle-kit generate sem erros", "done": false },
+        { "id": "db-2", "item": "yarn drizzle-kit migrate aplicado no Supabase", "done": false },
+        { "id": "db-3", "item": "6 tabelas visíveis no painel Supabase com colunas e FKs corretas", "done": false },
+        { "id": "db-4", "item": "Coluna bio adicionada em users", "done": false },
+        { "id": "db-5", "item": "unique index ratings(script_id, user_id) existe", "done": false },
+        { "id": "db-6", "item": "Buckets scripts, audio, avatars criados com políticas", "done": false },
+        { "id": "db-7", "item": "CORS configurado no bucket scripts para localhost e *.vercel.app", "done": false },
+        { "id": "db-8", "item": "yarn build passa com tipos Drizzle inferidos", "done": false },
+        { "id": "db-9", "item": "Exports de tipos (User, Script, Comment, Rating) em schema.ts", "done": false }
+      ]
+    },
+
+    {
+      "id": "poc-03",
+      "scope": "Auth",
+      "title": "[Auth] - Autenticação completa e fluxos de sessão",
+      "clickup": "https://app.clickup.com/t/86agq8yny",
+      "status": "in_review",
+      "priority": "urgent",
+      "depends_on": ["poc-02"],
+      "task_file": ".agents/tasks/poc-03-auth.md",
+      "objective": "Fluxo completo: cadastro, login, recuperação de senha, sessão SSR, middleware de proteção",
+      "files_affected": [
+        "middleware.ts",
+        "app/auth/sign-up/page.tsx",
+        "app/auth/login/page.tsx",
+        "app/auth/forgot-password/page.tsx",
+        "app/auth/update-password/page.tsx",
+        "server/api/users.ts",
+        "server/api/root.ts"
+      ],
+      "protected_routes": ["/publicar", "/minha-conta"],
+      "acceptance": [
+        { "id": "auth-1", "item": "middleware.ts refreshSession em todas as rotas", "done": false },
+        { "id": "auth-2", "item": "/publicar e /minha-conta redirecionam para login quando não autenticado", "done": false },
+        { "id": "auth-3", "item": "Cadastro cria registro na tabela users via tRPC", "done": false },
+        { "id": "auth-4", "item": "Sessão persiste após refresh (cookie SSR correto)", "done": false },
+        { "id": "auth-5", "item": "Email de confirmação e recuperação chegam via Resend", "done": false },
+        { "id": "auth-6", "item": "Formulários exibem erro inline por campo (Zod validation)", "done": false },
+        { "id": "auth-7", "item": "yarn build passa sem erros de tipo", "done": false }
+      ]
+    },
+
+    {
+      "id": "poc-04",
+      "scope": "Upload",
+      "title": "[Upload] - Formulário de publicação e upload de PDF",
+      "clickup": "https://app.clickup.com/t/86agq8z1h",
+      "status": "pending",
+      "priority": "high",
+      "depends_on": ["poc-02", "poc-03"],
+      "task_file": ".agents/tasks/poc-04-upload.md",
+      "objective": "Formulário de publicação + upload direto client→Storage + tRPC scripts router",
+      "files_to_create": [
+        "server/api/scripts.ts",
+        "app/publicar/page.tsx",
+        "app/roteiros/[id]/page.tsx",
+        "app/roteiros/[id]/script-page-client.tsx"
+      ],
+      "files_to_update": ["server/api/root.ts"],
+      "trpc_router": "scriptsRouter",
+      "trpc_endpoints": ["create", "getById", "listRecent", "listFeatured", "listByAuthor", "search"],
+      "upload_constraint": "client-side only — Vercel server timeout 10s",
+      "max_file_size_mb": 50,
+      "acceptance": [
+        { "id": "up-1", "item": "scriptsRouter com 6 endpoints registrado em root.ts", "done": false },
+        { "id": "up-2", "item": "Upload client-side direto para bucket scripts", "done": false },
+        { "id": "up-3", "item": "Validação: tipo PDF + tamanho max 50MB client-side", "done": false },
+        { "id": "up-4", "item": "Roteiro criado acessível em /roteiros/[id] após publicação", "done": false },
+        { "id": "up-5", "item": "Progresso de upload exibido durante envio", "done": false },
+        { "id": "up-6", "item": "yarn build passa sem erros", "done": false }
+      ]
+    },
+
+    {
+      "id": "poc-05",
+      "scope": "Leitor",
+      "title": "[Leitor] - PDF viewer com comentários ancorados por página",
+      "clickup": "https://app.clickup.com/t/86agq8yv2",
+      "status": "pending",
+      "priority": "urgent",
+      "depends_on": ["poc-02", "poc-04"],
+      "task_file": ".agents/tasks/poc-05-leitor.md",
+      "objective": "PDFViewer (pdfjs-dist, dynamic import) + Zustand store + sidebar comentários por página",
+      "files_to_create": [
+        "components/pdf-viewer/pdf-viewer.tsx",
+        "components/pdf-viewer/pdf-viewer-store.ts",
+        "components/pdf-viewer/comments-sidebar.tsx",
+        "components/pdf-viewer/index.ts",
+        "server/api/comments.ts"
+      ],
+      "files_to_update": [
+        "app/roteiros/[id]/script-page-client.tsx",
+        "server/api/root.ts"
+      ],
+      "trpc_router": "commentsRouter",
+      "trpc_endpoints": ["list", "create", "delete"],
+      "pdf_constraint": "next/dynamic with ssr: false — pdfjs is client-only",
+      "comment_model": "soft delete via deleted_at field",
+      "acceptance": [
+        { "id": "lei-1", "item": "PDFViewer carregado com next/dynamic ssr:false", "done": false },
+        { "id": "lei-2", "item": "Zustand store controla currentPage compartilhado com sidebar", "done": false },
+        { "id": "lei-3", "item": "Navegar página atualiza comentários da sidebar automaticamente", "done": false },
+        { "id": "lei-4", "item": "Usuário autenticado cria comentário sem reload", "done": false },
+        { "id": "lei-5", "item": "Usuário não autenticado vê comentários + CTA login", "done": false },
+        { "id": "lei-6", "item": "Sem erros de CORS ao carregar PDF do bucket scripts", "done": false },
+        { "id": "lei-7", "item": "Performance aceitável em roteiros de até 120 páginas", "done": false },
+        { "id": "lei-8", "item": "yarn build limpo (sem erros SSR do pdfjs)", "done": false }
+      ]
+    },
+
+    {
+      "id": "poc-06",
+      "scope": "Home",
+      "title": "[Home] - Listagem de roteiros e descoberta",
+      "clickup": "https://app.clickup.com/t/86agq8z5g",
+      "status": "pending",
+      "priority": "high",
+      "depends_on": ["poc-02", "poc-04"],
+      "task_file": ".agents/tasks/poc-06-home.md",
+      "objective": "Home SSR com listagem recente + destaque + filtro gênero + busca debounce 300ms",
+      "files_to_create": [
+        "app/home-client.tsx",
+        "lib/hooks/use-debounce.ts"
+      ],
+      "files_to_update": ["app/page.tsx"],
+      "ssr_pattern": "trpc.scripts.listRecent.prefetch() + HydrateClient in Server Component",
+      "acceptance": [
+        { "id": "home-1", "item": "Roteiros visíveis no view-source HTML (SSR confirmado)", "done": false },
+        { "id": "home-2", "item": "Filtro por gênero refiltra grid sem reload", "done": false },
+        { "id": "home-3", "item": "Busca com debounce 300ms (sem request por tecla)", "done": false },
+        { "id": "home-4", "item": "Seção 'em destaque' para scripts com is_featured=true", "done": false },
+        { "id": "home-5", "item": "ScriptCard responsivo: 1 coluna mobile (375px), 3 colunas desktop (1280px)", "done": false },
+        { "id": "home-6", "item": "yarn build limpo", "done": false }
+      ]
+    },
+
+    {
+      "id": "poc-07",
+      "scope": "Perfil",
+      "title": "[Perfil] - Página pública do roteirista e avaliações",
+      "clickup": "https://app.clickup.com/t/86agq8zbq",
+      "status": "pending",
+      "priority": "normal",
+      "depends_on": ["poc-02", "poc-03", "poc-04"],
+      "task_file": ".agents/tasks/poc-07-perfil.md",
+      "objective": "Perfil público /perfil/[userId] + tRPC ratingsRouter + StarRating interativo",
+      "files_to_create": [
+        "server/api/ratings.ts",
+        "app/perfil/[userId]/page.tsx",
+        "app/perfil/[userId]/profile-client.tsx",
+        "app/minha-conta/page.tsx"
+      ],
+      "files_to_update": [
+        "server/api/root.ts",
+        "app/roteiros/[id]/script-page-client.tsx"
+      ],
+      "trpc_router": "ratingsRouter",
+      "trpc_endpoints": ["upsert", "getAverage", "getUserRating"],
+      "component_existing": "components/ui/star-rating.tsx",
+      "rules": {
+        "self_rating": "FORBIDDEN — TRPCError if authorId === userId",
+        "upsert": "onConflictDoUpdate on (script_id, user_id)"
+      },
+      "acceptance": [
+        { "id": "perf-1", "item": "ratingsRouter com upsert, getAverage, getUserRating em root.ts", "done": false },
+        { "id": "perf-2", "item": "Auto-avaliação retorna TRPCError FORBIDDEN", "done": false },
+        { "id": "perf-3", "item": "Upsert funciona (segunda nota substitui a primeira)", "done": false },
+        { "id": "perf-4", "item": "/perfil/[userId] acessível sem login", "done": false },
+        { "id": "perf-5", "item": "StarRating atualiza média sem reload (TanStack Query invalidation)", "done": false },
+        { "id": "perf-6", "item": "/minha-conta permite editar nome, bio e avatar", "done": false },
+        { "id": "perf-7", "item": "yarn build limpo", "done": false }
+      ]
+    }
+  ],
+
+  "execution_order": [
+    { "step": 1, "task_id": "poc-01", "parallel_with": null, "note": "merge feat/design-system" },
+    { "step": 2, "task_id": "poc-02", "parallel_with": null, "note": "BLOQUEADOR — fazer primeiro" },
+    { "step": 3, "task_id": "poc-03", "parallel_with": "poc-04", "note": "paralelo com Upload" },
+    { "step": 3, "task_id": "poc-04", "parallel_with": "poc-03", "note": "paralelo com Auth" },
+    { "step": 4, "task_id": "poc-05", "parallel_with": "poc-06", "note": "paralelo com Home" },
+    { "step": 4, "task_id": "poc-06", "parallel_with": "poc-05", "note": "paralelo com Leitor" },
+    { "step": 5, "task_id": "poc-07", "parallel_with": null, "note": "depende de todos os anteriores" }
+  ],
+
+  "clickup": {
+    "board": "dev",
+    "list": "Antes da Tela",
+    "mcp_tools": {
+      "update_status": "plaza_update_task_status",
+      "comment": "plaza_comment_task"
+    },
+    "status_map": {
+      "pending":     "pendentes",
+      "in_progress": "em progresso",
+      "in_review":   "em revisão",
+      "blocked":     "bloqueado",
+      "staging":     "em staging",
+      "done":        "completo"
+    },
+    "agent_rules": [
+      "Ao INICIAR uma task: chamar plaza_update_task_status com status 'em progresso'",
+      "Ao CONCLUIR uma task: chamar plaza_update_task_status com status 'completo'",
+      "Ao fazer RELEASE (merge em main ou deploy): comentar na task com plaza_comment_task descrevendo o que foi entregue, branch e comando de validação",
+      "Se a task BLOQUEAR por dependência externa: status 'bloqueado' + comentar o motivo"
+    ],
+    "comment_template_release": "🚀 Release: {descricao}. Branch: {branch}. Validação: {comando}. Checks concluídos: {done}/{total}.",
+    "comment_template_progress": "▶️ Em execução: {descricao}. Próximo passo: {proximo_passo}.",
+    "tasks": {
+      "poc-01": "86agwj9wg",
+      "poc-02": "86agq8yhn",
+      "poc-03": "86agq8yny",
+      "poc-04": "86agq8z1h",
+      "poc-05": "86agq8yv2",
+      "poc-06": "86agq8z5g",
+      "poc-07": "86agq8zbq"
+    }
+  },
+
+  "meta": {
+    "generated_at": "2026-04-14",
+    "agent_rules": ".agents/rules/",
+    "design_system_tokens": ".agents/design-system.meta.json",
+    "figma": ".agents/figma.meta.json",
+    "how_to_use": "Feed this file as context before executing any task. Use task_id to locate the detailed task file in .agents/tasks/. Update done:true in acceptance checklist as items are completed. Use clickup.tasks map to get ClickUp task ID and call MCP tools on status changes."
+  }
+}
