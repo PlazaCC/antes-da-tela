@@ -20,44 +20,50 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
-        getAll() { return cookieStore.getAll() },
+        getAll() {
+          return cookieStore.getAll()
+        },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
         },
       },
-    }
+    },
   )
 
-  const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+  try {
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
-  if (exchangeError || !data.user) {
+    if (exchangeError || !data?.user) {
+      return NextResponse.redirect(`${origin}/auth/error`)
+    }
+
+    const { user } = data
+
+    // Use the Supabase client (PostgREST) instead of Drizzle.
+    // After exchangeCodeForSession the client carries the session, so auth.uid() = user.id
+    // and the RLS policy "Users can view and update their own data" allows this insert.
+    try {
+      await supabase.from('users').upsert(
+        {
+          id: user.id,
+          name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'User',
+          email: user.email!,
+          image: user.user_metadata?.avatar_url ?? null,
+        },
+        { onConflict: 'id', ignoreDuplicates: true },
+      )
+    } catch (err) {
+      // log and treat as non-fatal for UX
+      console.error('Failed to upsert user after OAuth exchange', err)
+    }
+
+    const destination = next.startsWith('/') ? next : '/'
+    return NextResponse.redirect(`${origin}${destination}`)
+  } catch (err) {
+    console.error('Error during auth callback handling', err)
     return NextResponse.redirect(`${origin}/auth/error`)
   }
-
-  const { user } = data
-
-  // Use the Supabase client (PostgREST) instead of Drizzle.
-  // After exchangeCodeForSession the client carries the session, so auth.uid() = user.id
-  // and the RLS policy "Users can view and update their own data" allows this insert.
-  await supabase.from('users').upsert(
-    {
-      id: user.id,
-      name:
-        user.user_metadata?.full_name ??
-        user.user_metadata?.name ??
-        user.email?.split('@')[0] ??
-        'User',
-      email: user.email!,
-      image: user.user_metadata?.avatar_url ?? null,
-    },
-    { onConflict: 'id', ignoreDuplicates: true }
-  )
-
-  const destination = next.startsWith('/') ? next : '/'
-  return NextResponse.redirect(`${origin}${destination}`)
 }

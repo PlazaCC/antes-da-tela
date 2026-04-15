@@ -1,24 +1,24 @@
-import { eq } from 'drizzle-orm'
-import { TRPCError } from '@trpc/server'
 import { db } from '@/server/db'
 import { users } from '@/server/db/schema'
-import { createTRPCRouter, publicProcedure, authenticatedProcedure } from '@/trpc/init'
+import { authenticatedProcedure, createTRPCRouter, publicProcedure, TRPCUser } from '@/trpc/init'
+import { TRPCError } from '@trpc/server'
+import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
-  createProfile: publicProcedure
+  createProfile: authenticatedProcedure
     .input(
       z.object({
-        id: z.string().uuid(),
         name: z.string().min(2).max(100),
         email: z.string().email(),
-      })
+      }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
+        const id = (ctx.user as TRPCUser).id
         const [user] = await db
           .insert(users)
-          .values({ id: input.id, name: input.name, email: input.email })
+          .values({ id, name: input.name, email: input.email })
           .onConflictDoNothing()
           .returning()
         return user ?? null
@@ -31,14 +31,12 @@ export const usersRouter = createTRPCRouter({
       }
     }),
 
-  getProfile: publicProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ input }) => {
-      const user = await db.query.users.findFirst({
-        where: (u, { eq }) => eq(u.id, input.id),
-      })
-      return user ?? null
-    }),
+  getProfile: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input }) => {
+    const user = await db.query.users.findFirst({
+      where: (u, { eq }) => eq(u.id, input.id),
+    })
+    return user ?? null
+  }),
 
   updateProfile: authenticatedProcedure
     .input(
@@ -46,13 +44,13 @@ export const usersRouter = createTRPCRouter({
         name: z.string().min(2).max(100).optional(),
         bio: z.string().max(500).optional(),
         image: z.string().url().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const [updated] = await db
         .update(users)
         .set(input)
-        .where(eq(users.id, ctx.user.id))
+        .where(eq(users.id, (ctx.user as TRPCUser).id))
         .returning()
       return updated
     }),
