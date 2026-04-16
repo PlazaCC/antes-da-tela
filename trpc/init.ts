@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { initTRPC, TRPCError } from '@trpc/server'
+import * as Sentry from '@sentry/nextjs'
 import { cookies } from 'next/headers'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
@@ -85,6 +86,17 @@ export const createTRPCContext = async (opts: {
 const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
+    try {
+      // Capture internal/unexpected errors in Sentry to avoid noise from expected TRPC errors
+      const shouldCapture = error.code === 'INTERNAL_SERVER_ERROR' || !!error.originalError
+      if (shouldCapture) {
+        Sentry.captureException(error)
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Sentry capture failed in trpc errorFormatter', e)
+    }
+
     return {
       ...shape,
       data: {

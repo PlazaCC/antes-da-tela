@@ -3,6 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import NextError from "next/error";
 import { useEffect } from "react";
+import { notifyError } from "@/lib/feedback";
 
 export default function GlobalError({
   error,
@@ -10,7 +11,16 @@ export default function GlobalError({
   error: Error & { digest?: string };
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    try {
+      const eventId = Sentry.captureException(error)
+      notifyError(
+        'Ocorreu um erro inesperado. Tente novamente. Se persistir, contate o suporte.',
+        eventId as string,
+      )
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('GlobalError capture failed', e)
+    }
   }, [error]);
 
   return (
