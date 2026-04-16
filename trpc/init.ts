@@ -1,6 +1,8 @@
-import { createServerClient } from '@supabase/ssr'
-import { initTRPC, TRPCError } from '@trpc/server'
+import { AppError, formatErrorForClient } from '@/lib/errors'
+import { createClient as createSupabaseClient } from '@/lib/supabase/server'
 import * as Sentry from '@sentry/nextjs'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { initTRPC, TRPCError } from '@trpc/server'
 import { cookies } from 'next/headers'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
@@ -13,7 +15,7 @@ export type TRPCUser = {
 
 export const createTRPCContext = async (opts: {
   headers: Headers
-}): Promise<{ headers: Headers; user?: TRPCUser | null }> => {
+}): Promise<{ headers: Headers; user: TRPCUser | null; supabase: SupabaseClient }> => {
   // CookieStore shape used by Supabase client
   type CookieEntry = { name: string; value: string; options?: Record<string, unknown> }
   type CookieStore = {
@@ -45,55 +47,23 @@ export const createTRPCContext = async (opts: {
     }
   }
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            if (typeof cookieStore.setAll === 'function') {
-              cookieStore.setAll(cookiesToSet)
-            }
-          } catch (err) {
-            // log and continue — avoids silently swallowing errors
-            console.error('Failed to set cookies in createTRPCContext', err)
-          }
-        },
-      },
-    },
-  )
+  // Create the authenticated Supabase client but do NOT call getUser() here.
+  // Public procedures don't need auth and shouldn't pay for a network round-trip.
+  // getUser() is called lazily by authenticatedProcedure below.
+  const supabase = await createSupabaseClient(cookieStore)
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // Normalize to the `TRPCUser` shape when possible
-  const normalizedUser: TRPCUser | null = user
-    ? {
-        id: user.id,
-        email: user.email ?? null,
-        user_metadata: (user.user_metadata ?? null) as Record<string, unknown> | null,
-      }
-    : null
-
-  return { headers: opts.headers, user: normalizedUser }
+  return { headers: opts.headers, user: null, supabase }
 }
 
 const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
     try {
-      // Capture internal/unexpected errors in Sentry to avoid noise from expected TRPC errors
-      const shouldCapture = error.code === 'INTERNAL_SERVER_ERROR' || !!error.originalError
+      const shouldCapture = error.code === 'INTERNAL_SERVER_ERROR' || !!error.cause
       if (shouldCapture) {
         Sentry.captureException(error)
       }
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('Sentry capture failed in trpc errorFormatter', e)
     }
 
@@ -102,17 +72,69 @@ const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().crea
       data: {
         ...shape.data,
         zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+        clientError: formatErrorForClient(error.cause ?? error),
       },
     }
   },
 })
 
 export const createTRPCRouter = t.router
-export const publicProcedure = t.procedure
 
-export const authenticatedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.user) {
+function mapStatusToTRPCCode(status?: number) {
+  switch (status) {
+    case 400:
+      return 'BAD_REQUEST'
+    case 401:
+      return 'UNAUTHORIZED'
+    case 403:
+      return 'FORBIDDEN'
+    case 404:
+      return 'NOT_FOUND'
+    case 409:
+      return 'CONFLICT'
+    default:
+      return 'INTERNAL_SERVER_ERROR'
+  }
+}
+
+type TRPCCode = 'BAD_REQUEST' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'INTERNAL_SERVER_ERROR'
+
+const appErrorMiddleware = t.middleware(async ({ next }) => {
+  try {
+    return await next()
+  } catch (err: unknown) {
+    if (err instanceof AppError) {
+      const code = mapStatusToTRPCCode(err.statusCode)
+      Sentry.captureException(err)
+      throw new TRPCError({ code: code as TRPCCode, message: err.publicMessage ?? err.message, cause: err as AppError })
+    }
+    throw err as Error
+  }
+})
+
+export const publicProcedure = t.procedure.use(appErrorMiddleware)
+
+/**
+ * Authenticated procedure — calls getUser() to verify the session with the
+ * Supabase Auth server and throws UNAUTHORIZED if no valid session exists.
+ *
+ * getUser() is intentionally deferred here (not in createTRPCContext) so that
+ * public procedures do not pay for the extra network round-trip.
+ */
+export const authenticatedProcedure = t.procedure.use(appErrorMiddleware).use(async ({ ctx, next }) => {
+  const {
+    data: { user },
+  } = await ctx.supabase.auth.getUser()
+
+  if (!user) {
     throw new TRPCError({ code: 'UNAUTHORIZED' })
   }
-  return next({ ctx: { ...ctx, user: ctx.user } })
+
+  const normalizedUser: TRPCUser = {
+    id: user.id,
+    email: user.email ?? null,
+    user_metadata: (user.user_metadata ?? null) as Record<string, unknown> | null,
+  }
+
+  return next({ ctx: { ...ctx, user: normalizedUser } })
 })
