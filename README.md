@@ -13,6 +13,7 @@ Antes da Tela is a platform for publishing, reading, and discussing audiovisual 
 - **Database:** Supabase Postgres (transaction pooler)
 - **Storage:** Supabase Storage + Cloudflare CDN
 - **State/UI:** Zustand, shadcn/ui, Radix UI, Tailwind CSS v3
+  - Add new shadcn components using the official CLI: `yarn dlx shadcn@latest add <component>` and do not manually edit files in `components/ui/`.
 - **PDF Reader:** pdf.js
 - **Analytics:** PostHog (client: posthog-js / server: posthog-node)
 - **Error Tracking:** Sentry (`@sentry/nextjs`)
@@ -86,6 +87,21 @@ yarn dev
 - **Sentry:** Trigger an error (e.g., throw an error in a route) and verify it appears in Sentry.
 - **PostHog:** Navigate the app and confirm pageview events in the PostHog dashboard.
 - **Resend:** Use the password recovery or any email feature and confirm delivery in the Resend dashboard.
+
+### Monitoring & UX (Sentry + Toaster)
+
+- This project uses `@sentry/nextjs` for server and edge error monitoring. Configure `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, and `SENTRY_SEND_DEFAULT_PII` in your environment (see `.env.example`).
+- Server errors are reported to Sentry and route handlers return a consistent JSON payload via `lib/errors.ts` and `lib/api/withErrorHandler.ts`.
+- For user-facing transient feedback we use `sonner` via a centralized `AppToaster` component and `lib/feedback.ts` helpers (`notifyError`, `notifySuccess`, `notifyPromise`, etc.). Render `<AppToaster />` in the root layout (already wired in `app/layout.tsx`).
+
+Example: show an error with the Sentry event id so support can correlate logs:
+
+```tsx
+import { notifyError } from '@/lib/feedback'
+
+// when you have an event id from captureException
+notifyError('Ocorreu um erro inesperado', eventId)
+```
 
 ---
 
