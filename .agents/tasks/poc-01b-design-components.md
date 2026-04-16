@@ -20,12 +20,12 @@ Implementar os componentes faltantes ou incompletos identificados no audit: `Scr
 
 ## Acceptance
 
-- [ ] `ScriptCard` implementado e responsivo (mobile -> 1 coluna; desktop -> 3 colunas)
-- [ ] `NavBar` desktop + mobile collapse funcionando e estilizado com tokens
-- [ ] `ReactionBar` acessível (keyboard + screen reader)
-- [ ] `Tag` tem variantes semânticas e usa tokens de cor
-- [ ] `StarRating` atualiza estado sem reload e aceita meia-estrelas
-- [ ] Exemplos adicionados ao playground `app/development/components/page.tsx`
+- [x] `ScriptCard` implementado e responsivo (mobile -> 1 coluna; desktop -> 3 colunas)
+- [x] `NavBar` desktop + mobile collapse funcionando e estilizado com tokens
+- [x] `ReactionBar` acessível (keyboard + screen reader)
+- [x] `Tag` tem variantes semânticas e usa tokens de cor
+- [x] `StarRating` atualiza estado sem reload e aceita meia-estrelas
+- [x] Exemplos adicionados ao playground `app/development/components/page.tsx`
 - [x] Assets gráficos (SVG/PNG/PDF) estão presentes em `.agents/figma/` e registrados em `.agents/design-system.meta.json`.
 
 ## Files a tocar
