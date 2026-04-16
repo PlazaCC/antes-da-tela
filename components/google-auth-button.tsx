@@ -1,8 +1,9 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { notifyError } from '@/lib/feedback'
 import { createClient } from '@/lib/supabase/client'
-import { showToast } from '@/lib/toast'
+import { cn } from '@/lib/utils'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
@@ -31,9 +32,10 @@ function GoogleIcon() {
 
 interface GoogleAuthButtonProps {
   label?: string
+  className?: string
 }
 
-export function GoogleAuthButton({ label = 'Continuar com Google' }: GoogleAuthButtonProps) {
+export function GoogleAuthButton({ label = 'Continuar com Google', className }: GoogleAuthButtonProps) {
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -53,9 +55,8 @@ export function GoogleAuthButton({ label = 'Continuar com Google' }: GoogleAuthB
     } catch (err) {
       console.error('Google OAuth error', err)
       try {
-        showToast('Erro ao tentar autenticar com Google. Tente novamente.')
+        notifyError('Erro ao tentar autenticar com Google. Tente novamente.')
       } catch {
-        // fallback to alert if toast failed
         try {
           window.alert('Erro ao tentar autenticar com Google. Tente novamente.')
         } catch {}
@@ -70,7 +71,7 @@ export function GoogleAuthButton({ label = 'Continuar com Google' }: GoogleAuthB
       onClick={handleGoogleAuth}
       disabled={isLoading}
       variant='outline'
-      className='w-full gap-3 border-subtle bg-elevated text-primary hover:bg-surface'>
+      className={cn('w-full gap-3 border-subtle bg-elevated text-primary hover:bg-surface', className)}>
       <GoogleIcon />
       {isLoading ? 'Redirecionando...' : label}
     </Button>

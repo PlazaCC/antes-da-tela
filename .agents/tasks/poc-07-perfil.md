@@ -10,19 +10,31 @@ Perfil público do roteirista e sistema de avaliação por estrelas. Fecha o cic
 **Arquivos a criar:**
 
 - `server/api/ratings.ts` — router tRPC de avaliações
-- `app/perfil/[userId]/page.tsx` — perfil público (Server Component)
-- `app/perfil/[userId]/profile-client.tsx` — Client Component
-- `app/minha-conta/page.tsx` — edição de perfil
+- `app/profile/[userId]/page.tsx` — perfil público (Server Component)
+- `app/profile/[userId]/profile-client.tsx` — Client Component
+- `app/(authenticated)/account/page.tsx` — profile editing (protected via route group)
 
 **Arquivos a atualizar:**
 
 - `server/api/root.ts` — registrar `ratingsRouter`
-- `app/roteiros/[id]/script-page-client.tsx` — integrar StarRating + média
+- `app/scripts/[id]/script-page-client.tsx` — integrar StarRating + média
 - `components/ui/script-card.tsx` — receber `rating` como prop real
 
 **Componente disponível:** `StarRating` (`components/ui/star-rating.tsx`)
 
----
+## Next.js — Boas práticas (Perfil / Avaliações)
+
+- A página pública `app/profile/[userId]/page.tsx` deve ser um Server Component que prefetch (`trpc.server`) `users.getProfile` e `scripts.listByAuthor`, e hidratar com `HydrateClient`.
+- A rota de edição `/account` deve viver em `app/(authenticated)/account` e ser protegida por um layout que valida sessão no servidor; evite checks client-only antes de renderizar o formulário.
+- Componentes interativos (ex: `StarRating`, upload de avatar) devem ser Client Components (`'use client'`) e usar otimistic updates com TanStack Query mais invalidação (`queryClient.invalidateQueries`).
+- Proteja o endpoint de avaliações contra auto-avaliação no servidor (TRPC/DB) e retorne erros TRPC claros para o cliente tratar.
+
+## Supabase — Boas práticas (Perfil / Avaliações)
+
+- Use `createServerClient()` to prefetch `users.getProfile` and `scripts.listByAuthor` on the server and hydrate to the client; do not construct a browser client in Server Components.
+- Avatar uploads: for user-uploaded avatars use the `avatars` bucket and upload from the browser to a public bucket or obtain a signed URL from a server `route.ts` if you want private avatars. After upload, update the `users.image` column server-side via a secured tRPC mutation.
+- Protect rating mutations server-side: enforce that `userId !== script.authorId` either in the tRPC resolver or via a DB policy. Return TRPC errors with proper codes (`FORBIDDEN`) for the client to handle.
+- Use optimistic updates for the `StarRating` component and invalidate rating-related queries on success (`queryClient.invalidateQueries(['ratings', scriptId])`).
 
 ## Referência de design (Figma)
 
@@ -159,7 +171,7 @@ export const appRouter = createTRPCRouter({
 
 ### 3. Integrar StarRating na página do roteiro
 
-Atualizar `app/roteiros/[id]/script-page-client.tsx`:
+Atualizar `app/scripts/[id]/script-page-client.tsx`:
 
 ```typescript
 import { StarRating } from '@/components/ui/star-rating'
@@ -186,7 +198,7 @@ import { StarRating } from '@/components/ui/star-rating'
 
 ### 4. Criar página de perfil público
 
-Criar `app/perfil/[userId]/page.tsx` (Server Component):
+Criar `app/profile/[userId]/page.tsx` (Server Component):
 
 ```typescript
 import { trpc, HydrateClient } from '@/trpc/server'
@@ -208,7 +220,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userId
 }
 ```
 
-Criar `app/perfil/[userId]/profile-client.tsx` (Client Component):
+Criar `app/profile/[userId]/profile-client.tsx` (Client Component):
 
 ```typescript
 'use client'
@@ -255,7 +267,7 @@ export function ProfileClient({ userId }: { userId: string }) {
         {scriptList && scriptList.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {scriptList.map((script) => (
-              <Link key={script.id} href={`/roteiros/${script.id}`}>
+              <Link key={script.id} href={`/scripts/${script.id}`}>
                 <ScriptCard
                   title={script.title}
                   author={user.name}
@@ -277,7 +289,7 @@ export function ProfileClient({ userId }: { userId: string }) {
 
 ### 5. Criar página de edição de perfil
 
-Criar `app/minha-conta/page.tsx` (Client Component, rota protegida):
+Criar `app/account/page.tsx` (Client Component, rota protegida):
 
 ```typescript
 'use client'
@@ -312,7 +324,7 @@ export default function MyAccountPage() {
 }
 ```
 
-**Layout da página /minha-conta:**
+**Layout da página /account:**
 
 - Container `max-w-sm mx-auto px-5 py-12`
 - Título: `font-display text-heading-2` — "Minha conta"
@@ -337,11 +349,11 @@ yarn lint
 
 **Fluxo end-to-end (yarn dev):**
 
-- [ ] `/perfil/[userId]` acessível sem login, mostra avatar (inicial), nome, bio e roteiros do autor
-- [ ] Usuário autenticado avalia roteiro com 1–5 estrelas em `/roteiros/[id]`
+- [ ] `/profile/[userId]` acessível sem login, mostra avatar (inicial), nome, bio e roteiros do autor
+- [ ] Usuário autenticado avalia roteiro com 1–5 estrelas em `/scripts/[id]`
 - [ ] Tentar avaliar o próprio roteiro retorna erro "Você não pode avaliar seu próprio roteiro"
 - [ ] Submeter nova nota atualiza a média exibida sem reload
-- [ ] `/minha-conta` acessível apenas para usuários autenticados
+- [ ] `/account` acessível apenas para usuários autenticados
 - [ ] Editar nome/bio salva corretamente na tabela `users`
 - [ ] Upload de avatar aparece no bucket `avatars` e atualiza a imagem no perfil
 - [ ] Visual: Avatar com inicial em brand-accent, nome em DM Serif Display, média em DM Mono
@@ -351,7 +363,7 @@ yarn lint
 - [ ] `ratingsRouter` com `upsert`, `getAverage`, `getUserRating`
 - [ ] Auto-avaliação bloqueada com `TRPCError FORBIDDEN`
 - [ ] Upsert funciona (segunda avaliação substitui a primeira)
-- [ ] Perfil público `/perfil/[userId]` acessível sem login
+- [ ] Perfil público `/profile/[userId]` acessível sem login
 - [ ] Avatar com inicial do nome em `bg-brand-accent/20` quando sem foto
 - [ ] Nome em `font-display text-heading-2`
 - [x] Avatar com inicial do nome em `bg-brand-accent/20` quando sem foto

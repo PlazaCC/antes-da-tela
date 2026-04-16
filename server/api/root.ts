@@ -1,9 +1,10 @@
-import { createTRPCRouter } from "@/trpc/init";
-import { usersRouter } from "./users";
+import { createTRPCRouter } from '@/trpc/init'
+import { usersRouter } from './users'
+import { scriptsRouter } from './scripts'
 
 export const appRouter = createTRPCRouter({
   users: usersRouter,
-  // routers go here: scripts, comments, ...
-});
+  scripts: scriptsRouter,
+})
 
-export type AppRouter = typeof appRouter;
+export type AppRouter = typeof appRouter

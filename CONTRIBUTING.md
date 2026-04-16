@@ -37,6 +37,9 @@ See [docs/SETUP.md](docs/SETUP.md) for environment setup instructions.
 - **Drizzle ORM**: Schemas in `server/db/schema.ts`, queries in `server/db/`.
 - **Supabase Auth**: Use `@supabase/ssr` on the server and `createBrowserClient` on the client.
 - **UI**: Prioritize shadcn/ui components and follow the project's design standards.
+- **UI**: Prioritize `shadcn/ui` components and follow the project's design standards.
+  - Always install shadcn components using the official CLI: `yarn dlx shadcn@latest add <component>`.
+  - Never manually copy or edit files under `components/ui/` — use the CLI to upgrade or regenerate primitives.
 - **Tailwind CSS v3**: Do not use v4 syntax.
 - **Zustand**: For simple global state management.
 - **PDF.js**: For script rendering and manipulation.
@@ -83,6 +86,42 @@ See `.agents/rules/` for detailed stack/layer-specific rules.
 - Suggestions for improvements are welcome!
 
 ---
+
+## Schema changes and migrations (Drizzle + Supabase)
+
+Use the canonical workflow below when changing database schema. This keeps migration history consistent, reviewable, and safe to apply to remote Supabase projects.
+
+1. Edit the Drizzle schema in `server/db/schema.ts`.
+2. Generate a migration with:
+
+```bash
+yarn drizzle:generate "describe-your-change"
+```
+
+3. Review the generated SQL in `drizzle/` and fix any small issues. Do NOT hand-edit previously committed migration files unless you're certain.
+
+4. Run database advisors and dump the remote schema before applying:
+
+```bash
+npx --yes supabase db advisors --linked
+yarn db:dump
+```
+
+5. Apply migrations to the remote project:
+
+```bash
+yarn db:push
+# or apply a single SQL file
+npx --yes supabase db query --file ./drizzle/migrations/0001_your_migration.sql --linked
+```
+
+6. Commit the Drizzle schema change and generated migration, open a PR including the SQL, and request review.
+
+Notes:
+
+- Prefer `drizzle-kit` for migration generation and `supabase db push` for applying changes.
+- Do not rely on ad-hoc `.sql` files in `supabase/migrations/` as the single source of truth; keep `drizzle/` in sync.
+- In emergency cases where SQL is necessary, ensure you create a corresponding Drizzle migration afterwards to capture the change.
 
 ## License
 

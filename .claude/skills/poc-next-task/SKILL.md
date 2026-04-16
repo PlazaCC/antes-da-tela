@@ -48,9 +48,9 @@ Task → branch mapping:
 | [02] DB Schema     | `feat/db-schema` |
 | [03] Auth          | `feat/auth` |
 | [04] Upload        | `feat/upload` |
-| [05] Leitor PDF    | `feat/leitor` |
+| [05] Leitor PDF    | `feat/reader` |
 | [06] Home          | `feat/home` |
-| [07] Perfil        | `feat/perfil` |
+| [07] Perfil        | `feat/profile` |
 
 ---
 
@@ -157,7 +157,7 @@ Instead, output a structured closing report:
 | Config / tooling | `chore` |
 | Refactor without behaviour change | `refactor` |
 
-Scope = the task area (e.g. `upload`, `leitor`, `home`, `perfil`, `auth`, `db`).
+Scope = the task area (e.g. `upload`, `reader`, `home`, `profile`, `auth`, `db`).
 
 ---
 

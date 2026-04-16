@@ -61,6 +61,9 @@ Passo-a-passo que o agente deve seguir
      (ex.: `.agents/tasks/poc-01-design-system.md`).
    - Ler `.agents/figma.meta.json` e `.agents/design-system.meta.json` para
      valores padrão de `fileKey` e tokens.
+   - Verificar primeiro os assets locais em `.agents/figma/` (subpastas `components/`, `frames/`, `screens/`).
+     - Se houver SVG/PNG/PDF locais referentes aos nodes da task, prefira usá-los como fonte primária
+       para análise e comparações (evita chamadas MCP desnecessárias). Registrar paths e dimensões quando aplicável.
 
 2. Determinar a task alvo
    - Se `task_id` fornecido, usar esse ID.

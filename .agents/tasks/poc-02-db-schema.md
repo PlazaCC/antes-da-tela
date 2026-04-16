@@ -13,8 +13,25 @@
 Hoje existe apenas a tabela `users`. Precisam ser criadas: `scripts`, `script_files`, `audio_files`, `comments`, `ratings`.
 
 **Env vars necessárias:**
+
 - `DATABASE_URL` — transaction pooler (porta 6543) — runtime
 - `DATABASE_URL_UNPOOLED` — session pooler (porta 5432) — apenas migrations
+
+## Next.js — Boas práticas (DB e server-side)
+
+- Mantenha todo acesso ao banco e migrations no código server-only (`server/db/*`, `server/api/*`, `trpc` routers). Nunca importe o cliente Drizzle em componentes client-side.
+- Use tRPC + prefetch em Server Components (`trpc.server`) e hidrate no cliente com `HydrateClient`; evite chamadas diretas ao DB em client components.
+- `prepare: false` em `postgres()` é obrigatório para o pooler; use `DATABASE_URL` no runtime e `DATABASE_URL_UNPOOLED` apenas para gerar/aplicar migrations em CI/local.
+- Migrations: gere local/CI com `yarn drizzle-kit generate` usando `DATABASE_URL_UNPOOLED` e revise o SQL antes de aplicar com `yarn drizzle-kit migrate`.
+- Coloque tipos e helpers do DB em `server/db/` e exporte apenas o que é necessário para os routers; isso evita leak de tipos/bundles para o cliente.
+
+## Supabase — Boas práticas (DB / Storage / RLS)
+
+- Authoring & RLS: prefer Row-Level Security with clear `auth.uid()` policies (already used in the schema). Keep business rules in Postgres policies where possible to avoid client bypasses.
+- Service role key: use it only on the server for privileged operations (migrations, signed URLs, admin jobs). Never expose it to the browser or commit it to the repo.
+- Storage buckets: choose `public` for assets meant for direct browser consumption (PDF viewer), and `private` + signed URLs for sensitive files. Configure CORS on public buckets used by pdf.js.
+- When creating buckets, set explicit MIME type restrictions and file-size limits; use Supabase CDN/public URLs for faster delivery and set `Cache-Control` where possible.
+- Migrations: run `yarn drizzle-kit generate` and `yarn drizzle-kit migrate` with `DATABASE_URL_UNPOOLED` in CI; review generated SQL for accidental destructive operations before applying.
 
 ## Schema completo a implementar
 
@@ -22,17 +39,7 @@ Substituir o conteúdo de `server/db/schema.ts` pelo schema abaixo:
 
 ```typescript
 import { sql } from 'drizzle-orm'
-import {
-  integer,
-  pgPolicy,
-  pgTable,
-  smallint,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  boolean,
-} from 'drizzle-orm/pg-core'
+import { integer, pgPolicy, pgTable, smallint, text, timestamp, uniqueIndex, uuid, boolean } from 'drizzle-orm/pg-core'
 
 // ── Users ────────────────────────────────────────────────────────────────────
 
@@ -276,18 +283,21 @@ yarn drizzle-kit migrate
 No painel Supabase → Storage → New Bucket:
 
 **Bucket `scripts`** (PDFs):
+
 - Name: `scripts`
 - Public: **sim** (leitura pública de PDFs)
 - File size limit: 52428800 (50MB)
 - Allowed MIME types: `application/pdf`
 
 **Bucket `audio`** (áudios):
+
 - Name: `audio`
 - Public: **sim**
 - File size limit: 104857600 (100MB)
 - Allowed MIME types: `audio/mpeg,audio/mp4,audio/wav`
 
 **Bucket `avatars`** (fotos de perfil):
+
 - Name: `avatars`
 - Public: **sim**
 - File size limit: 5242880 (5MB)
@@ -316,6 +326,7 @@ yarn build                  # zero type errors com novos tipos inferidos
 ```
 
 **Verificação manual no painel Supabase:**
+
 - [ ] Tabelas `users`, `scripts`, `script_files`, `audio_files`, `comments`, `ratings` existem
 - [ ] Coluna `bio` adicionada em `users`
 - [ ] Constraint `ratings_script_user_unique` existe em `ratings`

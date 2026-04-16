@@ -5,52 +5,74 @@
 
 ## Contexto
 
-Supabase Auth com `@supabase/ssr`. Sessão gerenciada por cookies via `proxy.ts` (Next.js 16 usa `proxy.ts`, não `middleware.ts`). As telas de auth já existem parcialmente — auditar e completar.
+Supabase Auth com `@supabase/ssr`. Sessão gerenciada por cookies via `middleware.ts` (padrão Next.js App Router). As telas de auth já existem parcialmente — auditar e completar.
 
 **Arquivos a auditar/completar:**
-- `app/auth/sign-up/page.tsx` + `components/sign-up-form.tsx`
-- `app/auth/login/page.tsx` + `components/login-form.tsx`
+
+- `app/auth/login/page.tsx` (sign-up removido — fluxo unificado via Google OAuth)
 - `app/auth/forgot-password/page.tsx`
 - `app/auth/update-password/page.tsx`
-- `proxy.ts` + `lib/supabase/proxy.ts` (≠ middleware.ts — este projeto usa Next.js 16)
+- `middleware.ts` ← **já criado** (session refresh + x-pathname header)
+- `app/(authenticated)/layout.tsx` ← **já criado** (auth guard do route group)
 - `lib/supabase/server.ts`
 - `lib/supabase/client.ts`
 
 **Arquivos a criar:**
-- `server/api/users.ts` — router tRPC para criar perfil após cadastro
+
+- `server/api/users.ts` — tRPC router to create user profile after OAuth signup
 
 **Regras:** `.agents/rules/supabase.md`, `.agents/rules/typescript.md`
 
+## Next.js — Boas práticas (Auth)
+
+- Mantenha a lógica de refresh e troca de tokens no servidor: `middleware.ts` deve ser mínima e rápida (chamada a `supabase.auth.getUser()`), sem operações pesadas.
+- Use `createServerClient` em Server Components e route handlers; use `createBrowserClient` apenas em Client Components.
+- Trate o callback OAuth em um `route.ts` (route handler) para manter as chaves/segredos no servidor e evitar expor `SUPABASE_SERVICE_ROLE_KEY` ao cliente.
+- Proteja rotas com route groups (`app/(authenticated)`) e realize redirecionamentos do lado do servidor (Server Component) para evitar borrões de UI durante a hidratação.
+- Cookies de sessão devem ser `HttpOnly`, `SameSite=Lax` e `secure` em produção; não armazene chaves administrativas no client bundle.
+
 ---
+
+## Supabase — Boas práticas (Auth)
+
+- Use the split client pattern: `createServerClient` in Server Components/route handlers and `createBrowserClient` in Client Components. See `lib/supabase/server.ts` and `lib/supabase/client.ts`.
+- Always call `supabase.auth.getUser()` for security-sensitive checks (do not rely on `getSession()` for auth verification).
+- Handle OAuth in a server-side `app/auth/callback/route.ts` that calls `exchangeCodeForSession(code)` and redirects to the sanitized `next` origin — avoid hardcoded origins.
+- Keep the `SUPABASE_SERVICE_ROLE_KEY` only on the server (CI/Env); never expose it to the browser or commit it. For privileged ops (signed URLs, server-side uploads), implement a minimal `route.ts` that performs the action server-side.
+- After auth actions in Server Actions or route handlers, call `revalidatePath('/', 'layout')` (or the affected paths) to avoid stale SSR caches.
+- Always destructure `{ data, error }` from Supabase calls and show inline errors to the user; log server-side errors for debugging but avoid leaking details to clients.
+- For long-lived sessions, ensure cookies are `HttpOnly`, `Secure`, and `SameSite=Lax` in production via the server client cookie options.
 
 ## Referência de design (Figma)
 
-| Tela | Node ID | Descrição |
-|------|---------|-----------|
-| Auth/Login | `51:499` | Tela de login final |
+| Tela          | Node ID  | Descrição              |
+| ------------- | -------- | ---------------------- |
+| Auth/Login    | `51:499` | Tela de login final    |
 | Auth/Cadastro | `51:528` | Tela de cadastro final |
 
 **Tokens de design a usar:**
 
-| Elemento | Tailwind class |
-|----------|---------------|
-| Fundo da página | `bg-base` |
-| Card central | `bg-surface` + `border border-subtle` + `rounded-sm` |
-| Input label | `text-secondary font-mono text-label-mono-caps uppercase tracking-wider` |
-| Input field | `bg-elevated border-subtle` (estados: `focus:border-default`, `error:border-state-error`) |
-| Botão primário | `bg-brand-accent text-primary hover:opacity-90` |
-| Link secundário | `text-brand-accent underline-offset-4` |
-| Mensagem de erro | `text-state-error text-body-small` |
-| Título da tela | `font-display text-heading-2` (DM Serif Display 32px) |
-| Subtítulo | `text-secondary text-body-default` |
+| Elemento         | Tailwind class                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| Fundo da página  | `bg-base`                                                                                 |
+| Card central     | `bg-surface` + `border border-subtle` + `rounded-sm`                                      |
+| Input label      | `text-secondary font-mono text-label-mono-caps uppercase tracking-wider`                  |
+| Input field      | `bg-elevated border-subtle` (estados: `focus:border-default`, `error:border-state-error`) |
+| Botão primário   | `bg-brand-accent text-primary hover:opacity-90`                                           |
+| Link secundário  | `text-brand-accent underline-offset-4`                                                    |
+| Mensagem de erro | `text-state-error text-body-small`                                                        |
+| Título da tela   | `font-display text-heading-2` (DM Serif Display 32px)                                     |
+| Subtítulo        | `text-secondary text-body-default`                                                        |
 
 **Layout:**
+
 - Tela centralizada verticalmente: `min-h-screen flex items-center justify-center`
 - Card com padding interno: `p-8` (32px)
 - Gap entre campos: `gap-6` (24px)
 - Largura máxima do card: `max-w-sm` (384px)
 
 **Componentes do design system a usar:**
+
 - `Input` (com label, placeholder, estado de erro por campo)
 - `Button` variant `default` para submit, `ghost` para links secundários
 - `Card`, `CardHeader`, `CardContent` para container
@@ -59,66 +81,28 @@ Supabase Auth com `@supabase/ssr`. Sessão gerenciada por cookies via `proxy.ts`
 
 ## Passos de execução
 
-### 1. Atualizar proxy.ts e lib/supabase/proxy.ts
+### 1. middleware.ts + app/(authenticated)/layout.tsx
 
-**Atenção: Este projeto usa Next.js 16 com `proxy.ts` em vez de `middleware.ts`.**
+**Both files are already implemented.** See the source for their contracts:
 
-`proxy.ts` (raiz do projeto):
-```typescript
-import { updateSession } from '@/lib/supabase/proxy'
-import { type NextRequest } from 'next/server'
+`proxy.ts` / `lib/supabase/proxy.ts` — session refresh only, no route protection:
 
-export async function proxy(request: NextRequest) {
-  return await updateSession(request)
-}
+- Calls `supabase.auth.getUser()` on every request to rotate the access token.
+- Forwards `x-pathname` request header so the layout can read the current path.
+- Matcher excludes `_next/static`, `_next/image`, favicon, and static assets.
 
-export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
-}
+`app/(authenticated)/layout.tsx` — route-group auth guard:
+
+- Calls `getClaims()` (local JWT read, no network) — safe because middleware already refreshed.
+- Redirects to `/auth/login?next=<pathname>` when session is absent.
+- Wraps all routes under `app/(authenticated)/` (currently `/publish`; `/account` is next).
+
+**Route protection pattern:**
+
 ```
-
-`lib/supabase/proxy.ts` — proteger apenas `/publicar` e `/minha-conta`:
-```typescript
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
-
-const PROTECTED_ROUTES = ['/publicar', '/minha-conta']
-
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() { return request.cookies.getAll() },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    },
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const isProtected = PROTECTED_ROUTES.some(route =>
-    request.nextUrl.pathname.startsWith(route)
-  )
-
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
-    url.searchParams.set('redirectTo', request.nextUrl.pathname)
-    return NextResponse.redirect(url)
-  }
-
-  return supabaseResponse
-}
+middleware.ts          → refresh session on every request (getUser)
+(authenticated)/layout → check session for protected routes  (getClaims + redirect)
+auth/callback/route.ts → exchange OAuth code, upsert user, redirect to ?next=
 ```
 
 ### 2. Criar router tRPC de usuários
@@ -134,11 +118,13 @@ import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
   createProfile: publicProcedure
-    .input(z.object({
-      id: z.string().uuid(),
-      name: z.string().min(2).max(100),
-      email: z.string().email(),
-    }))
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        name: z.string().min(2).max(100),
+        email: z.string().email(),
+      }),
+    )
     .mutation(async ({ input }) => {
       const [user] = await db
         .insert(users)
@@ -148,29 +134,25 @@ export const usersRouter = createTRPCRouter({
       return user
     }),
 
-  getProfile: publicProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ input }) => {
-      const user = await db.query.users.findFirst({
-        where: (u, { eq }) => eq(u.id, input.id),
-      })
-      return user ?? null
-    }),
+  getProfile: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input }) => {
+    const user = await db.query.users.findFirst({
+      where: (u, { eq }) => eq(u.id, input.id),
+    })
+    return user ?? null
+  }),
 
   updateProfile: publicProcedure
-    .input(z.object({
-      id: z.string().uuid(),
-      name: z.string().min(2).max(100).optional(),
-      bio: z.string().max(500).optional(),
-      image: z.string().url().optional(),
-    }))
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        name: z.string().min(2).max(100).optional(),
+        bio: z.string().max(500).optional(),
+        image: z.string().url().optional(),
+      }),
+    )
     .mutation(async ({ input }) => {
       const { id, ...data } = input
-      const [updated] = await db
-        .update(users)
-        .set(data)
-        .where(eq(users.id, id))
-        .returning()
+      const [updated] = await db.update(users).set(data).where(eq(users.id, id)).returning()
       return updated
     }),
 })
@@ -192,6 +174,7 @@ export type AppRouter = typeof appRouter
 ### 4. Auditar tela de cadastro (components/sign-up-form.tsx)
 
 A tela DEVE:
+
 - Usar React Hook Form com `zodResolver`
 - Schema Zod: `name` (min 2), `email` (email válido), `password` (min 8)
 - Após `supabase.auth.signUp()` bem-sucedido → chamar `trpc.users.createProfile.mutate()`
@@ -225,7 +208,10 @@ async function onSubmit(data: FormValues) {
     password: data.password,
     options: { data: { name: data.name } },
   })
-  if (error) { setError('root', { message: error.message }); return }
+  if (error) {
+    setError('root', { message: error.message })
+    return
+  }
   if (authData.user) {
     await createProfile.mutateAsync({ id: authData.user.id, name: data.name, email: data.email })
   }
@@ -236,6 +222,7 @@ async function onSubmit(data: FormValues) {
 ### 5. Auditar tela de login (components/login-form.tsx)
 
 A tela DEVE:
+
 - `supabase.auth.signInWithPassword({ email, password })`
 - Usar `useSearchParams()` para ler `redirectTo` (envolver em `<Suspense>` na page)
 - Redirecionar para `searchParams.get('redirectTo') ?? '/'` após sucesso
@@ -263,10 +250,12 @@ export default function Page() {
 ### 6. Auditar recuperação de senha
 
 `app/auth/forgot-password/page.tsx`:
+
 - `supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + '/auth/update-password' })`
 - Mostrar confirmação de envio (não revelar se email existe)
 
 `app/auth/update-password/page.tsx`:
+
 - `supabase.auth.updateUser({ password: newPassword })`
 - Requer sessão ativa (link mágico do email)
 - Redirecionar para `/` após sucesso
@@ -281,21 +270,23 @@ yarn lint
 ```
 
 **Fluxo end-to-end (yarn dev):**
+
 - [ ] Cadastro cria usuário no Supabase Auth E registro na tabela `users`
 - [ ] Email de confirmação chega (verificar Resend ou Supabase SMTP)
 - [ ] Login retorna sessão que persiste após F5
-- [ ] `/publicar` redireciona para `/auth/login?redirectTo=/publicar` quando não autenticado
-- [ ] Após login, retorna para `/publicar` automaticamente
+- [x] `/publish` redireciona para `/auth/login?next=/publish` quando não autenticado
+- [ ] Após login, retorna para `/publish` automaticamente
 - [ ] Email de recuperação chega e permite redefinir senha
 - [ ] Formulários mostram erros inline por campo (não apenas global)
 - [ ] Visual alinhado com Figma: fundo escuro, card bg-surface, inputs com labels em DM Mono
 
 ## Checklist de aceite
 
-- [ ] `proxy.ts` + `lib/supabase/proxy.ts` protegem `/publicar` e `/minha-conta`
-- [ ] Cadastro cria registro na tabela `users` via tRPC
-- [ ] Sessão persiste após refresh (cookie SSR correto)
-- [ ] Todos os fluxos de auth (sign-up, login, forgot, update-password) funcionam end-to-end
-- [ ] Emails enviados via Resend (verificar no dashboard)
-- [ ] `yarn build` passa sem erros de tipo nos novos arquivos
-- [ ] Design alinhado: tokens de cor, tipografia e layout corretos
+- [x] `proxy.ts` + `lib/supabase/proxy.ts` refresh session on every request (`getUser`)
+- [x] `app/(authenticated)/layout.tsx` guards `/publish` and future `/account`
+- [x] `/publish` redirects unauthenticated users to `/auth/login?next=/publish`
+- [x] After OAuth login, callback redirects back to `?next=` URL
+- [ ] User profile upserted in `users` table via `auth/callback/route.ts` (done via Supabase PostgREST; verify in Supabase dashboard)
+- [ ] Session persists after page refresh (cookie SSR correct)
+- [ ] `yarn build` passes with zero type errors
+- [ ] Design aligned: color tokens, typography, and layout correct

@@ -7,7 +7,17 @@
 
 Branch `feat/design-system` já implementou os componentes e tokens. Esta task garante que o merge está correto, os tokens renderizam, e o playground valida o design system visualmente antes das demais features usarem os componentes.
 
+## Next.js — Boas práticas (Design System)
+
+- Importe CSS global somente em `app/layout.tsx` via `app/globals.css`; evite importar CSS global dentro de componentes.
+- Respeite fronteiras Server/Client: mantenha componentes puramente apresentacionais como Server Components; use `'use client'` apenas para componentes que usam hooks, estado ou APIs do navegador.
+- Use `next/font` em `app/layout.tsx` para otimizar carregamento de fontes e evitar layout shifts.
+- Não construa classes Tailwind dinamicamente em tempo de execução; prefira classes estáticas ou `safelist` no `tailwind.config.ts` para evitar problemas com purge.
+- Para bibliotecas pesadas (ícones, gráficos), prefira `next/dynamic({ ssr: false })` para não inflar o bundle do servidor.
+- Use `next/image` quando apropriado e configure domínios remotos em `next.config.js`.
+
 **Arquivos-chave:**
+
 - `tailwind.config.ts` — tokens de cor, tipografia, espaçamento, breakpoints
 - `app/globals.css` — CSS custom properties (HSL channels, não hex)
 - `app/layout.tsx` — fontes Google (Inter, DM Serif Display, DM Mono), ThemeProvider dark
@@ -94,6 +104,7 @@ yarn lint     # deve passar sem warnings
 ```
 
 **Verificação visual (yarn dev):**
+
 - [ ] `http://localhost:3000/development/design-system` — paleta de cores renderiza com as cores corretas do dark mode
 - [ ] `http://localhost:3000/development/components` — todos os componentes listados e interativos
 - [ ] Tag variant `success` → verde, `warning` → amarelo, `error` → vermelho (cores do design system, não raw Tailwind)
@@ -108,3 +119,36 @@ yarn lint     # deve passar sem warnings
 - [ ] Nenhum componente usa cores raw Tailwind (`green-500`, `red-500`) onde deveria usar tokens
 - [ ] `app/layout.tsx` com título "Antes da Tela" (não o starter kit padrão)
 - [ ] Branch `feat/design-system` merged em `main`
+
+## Framelink MCP — export e passos de verificação
+
+- Executar `get_metadata(fileKey="iUb8odefGSZiHz4KjuzX1M", nodeId="0:1")` para obter mapa de nodes.
+- Para cada componente/screen crítico rodar `get_design_context(fileKey="iUb8odefGSZiHz4KjuzX1M", nodeId=":nodeId")` e salvar o JSON em `.agents/figma/contexts/`.
+- Gerar screenshots por componente com `get_screenshot(fileKey="iUb8odefGSZiHz4KjuzX1M", nodeId=":nodeId")` e salvar em `.agents/figma/screens/`.
+- Baixar apenas assets referenciados (SVGs/ícones) e colocá-los em `public/assets/figma/`.
+
+### Validação de export
+
+- [ ] `metadata` exportado e salvo em `.agents/figma/metadata.json`
+- [ ] Contextos de componentes (min. Button, Tag, Input, ScriptCard, Comment, NavBar, ReactionBar) salvos em `.agents/figma/contexts/`
+- [ ] Screenshots por screen principais salvos em `.agents/figma/screens/`
+
+## Component audit — passos e prioridade
+
+- Consultar `.agents/design-system.meta.json` → `exportContext.componentAudit` para ver status atual.
+- Prioridade de implementação:
+  - Alta: Button (variants), ScriptCard, NavBar, Input (helper/error), Publish Flow DragZone
+  - Média: Tag (semantic variants), ReactionBar, StarRating (interactivity), Comment variants
+  - Baixa: MetricCard, Info variants
+
+## Subtasks sugeridas (arquivos em `.agents/tasks/`)
+
+- `poc-01a-design-tokens.md` — Auditoria de tokens e normalização CSS vars (HSL channels) — acceptance: CSS vars e Tailwind map atualizados.
+- `poc-01b-design-components.md` — Implementação dos componentes faltantes e variantes prioritárias — acceptance: componentes na pasta `components/ui/` com exemplos no playground.
+- `poc-01c-design-visual-audit.md` — QA visual 1:1 com screenshots e ajustes responsivos — acceptance: checklist visual completo.
+
+## Próximos passos imediatos
+
+1. Rodar export Framelink MCP para os nodeIds listados em `.agents/figma.meta.json` (se possível automatizar via script small helper).
+2. Popular `.agents/figma/contexts/` com os JSONs de cada componente.
+3. Executar a `poc-01a` (tokens audit) antes de implementar variantes visuais.

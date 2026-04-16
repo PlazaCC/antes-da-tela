@@ -16,24 +16,25 @@
 ```
 
 **Dependências:**
+
 - `[02]` bloqueia tudo
 - `[03]` e `[04]` podem rodar em paralelo após `[02]`
 - `[05]`, `[06]`, `[07]` dependem de `[02]` + `[04]`
 
 ## Stack de referência rápida
 
-| Camada | Tecnologia |
-|---|---|
-| Framework | Next.js App Router · TypeScript |
-| Auth | Supabase Auth · `@supabase/ssr` |
-| API | tRPC v11 + Zod |
-| ORM | Drizzle ORM + `postgres` driver |
-| DB/Storage | Supabase Postgres + Storage |
-| Cache | TanStack Query + superjson |
-| Estado UI | Zustand |
-| PDF | `pdfjs-dist` (dynamic import, client-only) |
-| UI | shadcn/ui + Radix UI + Tailwind v3 |
-| Package | Yarn 4 (Berry) |
+| Camada     | Tecnologia                                 |
+| ---------- | ------------------------------------------ |
+| Framework  | Next.js App Router · TypeScript            |
+| Auth       | Supabase Auth · `@supabase/ssr`            |
+| API        | tRPC v11 + Zod                             |
+| ORM        | Drizzle ORM + `postgres` driver            |
+| DB/Storage | Supabase Postgres + Storage                |
+| Cache      | TanStack Query + superjson                 |
+| Estado UI  | Zustand                                    |
+| PDF        | `pdfjs-dist` (dynamic import, client-only) |
+| UI         | shadcn/ui + Radix UI + Tailwind v3         |
+| Package    | Yarn 4 (Berry)                             |
 
 ## Caminhos críticos
 
@@ -61,6 +62,23 @@ components/ui/               ← todos os componentes UI
 - **Nunca `npm install`** — usar `yarn add`
 - **Tailwind v3** — não usar sintaxe v4
 
+## Next.js — Boas práticas (resumo rápido)
+
+- Prefira Server Components para páginas e pré-carregue dados com `trpc.server` + `HydrateClient` para SEO e performance.
+- Separe claramente Client vs Server: use `createBrowserClient` apenas em Client Components e `createServerClient` no servidor/route handlers.
+- Importações pesadas (pdfjs, bibliotecas de edição) devem ser carregadas dinamicamente com `next/dynamic({ ssr: false })`.
+- Evite expor segredos no bundle (ex.: `SUPABASE_SERVICE_ROLE_KEY`). Use `route.ts` server-side para operações privilegiadas.
+- Use `next/font` para otimizar fontes e `next/image` para otimizar imagens quando aplicável.
+- Use ISR / cache-control quando fizer sentido para páginas de listagem (Home) para balancear frescor e performance.
+
+## Supabase — Boas práticas (resumo rápido)
+
+- Use `createServerClient` in Server Components / route handlers and `createBrowserClient` in Client Components; never instantiate a browser client on the server.
+- Keep `SERVICE_ROLE` keys strictly server-side; expose privileged operations via minimal `route.ts` endpoints that perform the action server-side.
+- For files served to the browser (PDFs, avatars), prefer public buckets or generate signed URLs server-side for private content; configure CORS and `Content-Type` correctly.
+- Implement RLS policies with `auth.uid()` to protect row-level access; keep business rules in Postgres policies where appropriate.
+- Run migrations with `DATABASE_URL_UNPOOLED` and verify SQL before applying in production.
+
 ## Comandos de validação pós-task
 
 ```bash
@@ -72,12 +90,12 @@ yarn drizzle-kit migrate    # aplicar no Supabase (usa DATABASE_URL_UNPOOLED)
 
 ## Arquivos de cada task
 
-| Task | Arquivo |
-|---|---|
+| Task          | Arquivo                                 |
+| ------------- | --------------------------------------- |
 | Design System | `.agents/tasks/poc-01-design-system.md` |
-| DB Schema | `.agents/tasks/poc-02-db-schema.md` |
-| Auth | `.agents/tasks/poc-03-auth.md` |
-| Upload | `.agents/tasks/poc-04-upload.md` |
-| Leitor PDF | `.agents/tasks/poc-05-leitor.md` |
-| Home | `.agents/tasks/poc-06-home.md` |
-| Perfil | `.agents/tasks/poc-07-perfil.md` |
+| DB Schema     | `.agents/tasks/poc-02-db-schema.md`     |
+| Auth          | `.agents/tasks/poc-03-auth.md`          |
+| Upload        | `.agents/tasks/poc-04-upload.md`        |
+| Leitor PDF    | `.agents/tasks/poc-05-leitor.md`        |
+| Home          | `.agents/tasks/poc-06-home.md`          |
+| Perfil        | `.agents/tasks/poc-07-perfil.md`        |

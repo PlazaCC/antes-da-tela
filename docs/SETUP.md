@@ -35,7 +35,7 @@ This document provides the official step-by-step instructions to set up the Ante
 2. Fill in all required values from your Supabase, PostHog, Resend, and Sentry dashboards:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — used by auth flows, session middleware, and tRPC context
-   - `SUPABASE_SERVICE_ROLE_KEY` *(server-only, optional)* — only needed for privileged operations that bypass RLS (admin scripts, background jobs). **Not required** for normal auth, session refresh, or API calls.
+   - `SUPABASE_SERVICE_ROLE_KEY` _(server-only, optional)_ — only needed for privileged operations that bypass RLS (admin scripts, background jobs). **Not required** for normal auth, session refresh, or API calls.
      - Never expose this value to the browser or commit it to source control.
      - Do not prefix with `NEXT_PUBLIC_`.
      - If set in Vercel: add it under Settings > Environment Variables for **Preview** and **Production** targets only.
@@ -100,6 +100,7 @@ Test all integrations to ensure correct setup:
 - Run migrations: `yarn drizzle-kit migrate`
 - Add dependency: `yarn add <package>`
 - Remove dependency: `yarn remove <package>`
+- Add shadcn component: `yarn dlx shadcn@latest add <component>` — do not copy or edit files under `components/ui/` manually; create wrappers in `components/<component>/` when you need app-specific behavior.
 
 ---
 
