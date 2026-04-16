@@ -3,37 +3,34 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 
 import { GoogleAuthButton } from '@/components/google-auth-button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function LoginPage() {
   return (
-    <div className='flex min-h-svh w-full items-center justify-center p-6 md:p-10'>
-      <div className='flex w-full max-w-sm flex-col gap-6'>
-        <div className='flex justify-center'>
-          <Link href='/'>
-            <Image src='/assets/logo.svg' alt='Antes da Tela' width={83} height={19} priority />
+    <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm flex flex-col gap-8">
+        <div className="flex justify-center">
+          <Link href="/">
+            <Image src="/assets/logo.svg" alt="Antes da Tela" width={83} height={19} priority />
           </Link>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className='font-display text-heading-2'>Entrar</CardTitle>
-            <CardDescription className='text-secondary text-body-default'>
+        <div className="flex flex-col gap-6 rounded-sm border border-border-subtle bg-surface p-8">
+          <div className="flex flex-col gap-1.5">
+            <h1 className="font-display text-heading-3 text-text-primary">Entrar</h1>
+            <p className="text-body-small text-text-secondary">
               Use sua conta Google para continuar
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<Skeleton className='h-10 w-full' />}>
-              <GoogleAuthButton label='Entrar com Google' />
-            </Suspense>
-          </CardContent>
-        </Card>
+            </p>
+          </div>
 
-        <p className='text-center text-body-small text-muted'>
-          Não tem uma conta?{' '}
-          <Link href='/auth/sign-up' className='text-brand-accent underline-offset-4 hover:underline'>
-            Cadastrar-se
+          <Suspense fallback={<Skeleton className="h-10 w-full bg-elevated" />}>
+            <GoogleAuthButton label="Entrar com Google" />
+          </Suspense>
+        </div>
+
+        <p className="text-center text-label-mono-default text-text-muted">
+          <Link href="/" className="hover:text-text-secondary transition-colors underline-offset-4 hover:underline">
+            ← Voltar ao início
           </Link>
         </p>
       </div>

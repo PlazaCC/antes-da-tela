@@ -86,6 +86,7 @@ yarn drizzle-kit migrate   # Apply migrations to Supabase Postgres
 
 ### Drizzle ORM
 - Always pass `prepare: false` to `postgres()` client — required for Supabase transaction pooler.
+- Always strip `pgmode` from `DATABASE_URL` before passing to `postgres()` — PgBouncer rejects it as an unsupported startup parameter. See `sanitizePoolerUrl` in `server/db/index.ts`.
 - `DATABASE_URL` → transaction pooler (port 6543) — use at runtime.
 - `DATABASE_URL_UNPOOLED` → session pooler (port 5432) — use **only** for migrations.
 - Schema lives in `server/db/schema.ts`; migrations output to `drizzle/`.

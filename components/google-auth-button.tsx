@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 import { showToast } from '@/lib/toast'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
@@ -31,9 +32,10 @@ function GoogleIcon() {
 
 interface GoogleAuthButtonProps {
   label?: string
+  className?: string
 }
 
-export function GoogleAuthButton({ label = 'Continuar com Google' }: GoogleAuthButtonProps) {
+export function GoogleAuthButton({ label = 'Continuar com Google', className }: GoogleAuthButtonProps) {
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -70,7 +72,7 @@ export function GoogleAuthButton({ label = 'Continuar com Google' }: GoogleAuthB
       onClick={handleGoogleAuth}
       disabled={isLoading}
       variant='outline'
-      className='w-full gap-3 border-subtle bg-elevated text-primary hover:bg-surface'>
+      className={cn('w-full gap-3 border-subtle bg-elevated text-primary hover:bg-surface', className)}>
       <GoogleIcon />
       {isLoading ? 'Redirecionando...' : label}
     </Button>

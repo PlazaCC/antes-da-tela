@@ -31,9 +31,16 @@ export function TRPCReactProvider({ children }: { children: React.ReactNode }) {
     })
   );
 
+  // QueryClientProvider must be the outer wrapper; TRPCProvider reads the
+  // QueryClient from context and must be nested inside it.  Reversing this
+  // order causes React to detect conflicting QueryClient contexts and triggers
+  // the "multiple renderers concurrently rendering the same context provider"
+  // warning, which breaks hydration.
   return (
-    <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </TRPCProvider>
+    <QueryClientProvider client={queryClient}>
+      <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
+        {children}
+      </TRPCProvider>
+    </QueryClientProvider>
   );
 }

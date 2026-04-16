@@ -20,7 +20,7 @@ export default function ScriptPageClient({ scriptId }: { scriptId: string }) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-bg-base flex items-center justify-center">
-        <p className="text-text-secondary font-mono text-label-mono-default">Loading script…</p>
+        <p className="text-text-secondary font-mono text-label-mono-default">Carregando roteiro…</p>
       </div>
     )
   }
@@ -28,7 +28,7 @@ export default function ScriptPageClient({ scriptId }: { scriptId: string }) {
   if (isError || !script) {
     return (
       <div className="min-h-screen bg-bg-base flex items-center justify-center">
-        <p className="text-state-error font-mono text-label-mono-default">Script not found.</p>
+        <p className="text-state-error font-mono text-label-mono-default">Roteiro não encontrado.</p>
       </div>
     )
   }
@@ -57,7 +57,7 @@ export default function ScriptPageClient({ scriptId }: { scriptId: string }) {
 
           {script.author && (
             <p className="font-mono text-label-mono-default text-text-muted">
-              by <span className="text-text-secondary">{script.author.name}</span>
+              por <span className="text-text-secondary">{script.author.name}</span>
             </p>
           )}
         </div>
@@ -66,7 +66,7 @@ export default function ScriptPageClient({ scriptId }: { scriptId: string }) {
         {script.synopsis && (
           <div className="mb-10">
             <h2 className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs mb-3">
-              Synopsis
+              Sinopse
             </h2>
             <p className="text-body-default text-text-primary leading-relaxed whitespace-pre-wrap">
               {script.synopsis}
@@ -78,18 +78,18 @@ export default function ScriptPageClient({ scriptId }: { scriptId: string }) {
         {script.scriptFiles?.[0] && (
           <div className="rounded-sm border border-border-subtle bg-surface p-6">
             <h2 className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs mb-4">
-              Script File
+              Arquivo do Roteiro
             </h2>
             <div className="flex flex-col gap-2">
               {script.scriptFiles[0].pageCount && (
                 <p className="text-sm text-text-secondary">
-                  <span className="text-text-muted">Pages: </span>
+                  <span className="text-text-muted">Páginas: </span>
                   {script.scriptFiles[0].pageCount}
                 </p>
               )}
               {script.scriptFiles[0].fileSize && (
                 <p className="text-sm text-text-secondary">
-                  <span className="text-text-muted">Size: </span>
+                  <span className="text-text-muted">Tamanho: </span>
                   {(script.scriptFiles[0].fileSize / 1024 / 1024).toFixed(1)} MB
                 </p>
               )}

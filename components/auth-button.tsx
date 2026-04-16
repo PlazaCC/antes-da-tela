@@ -1,7 +1,6 @@
-import Link from 'next/link'
-import { Button } from './ui/button'
 import { createClient } from '@/lib/supabase/server'
 import { LogoutButton } from './logout-button'
+import { GoogleAuthButton } from './google-auth-button'
 
 export async function AuthButton() {
   const supabase = await createClient()
@@ -10,27 +9,25 @@ export async function AuthButton() {
 
   if (user) {
     const name =
-      user.user_metadata?.full_name ??
-      user.user_metadata?.name ??
+      (user.user_metadata?.full_name as string | undefined) ??
+      (user.user_metadata?.name as string | undefined) ??
       user.email?.split('@')[0] ??
       'Usuário'
 
     return (
-      <div className="flex items-center gap-4">
-        <span className="text-body-small text-secondary">{name}</span>
+      <div className="flex items-center gap-3">
+        <span className="text-label-mono-default text-text-secondary hidden sm:block truncate max-w-[160px]">
+          {name}
+        </span>
         <LogoutButton />
       </div>
     )
   }
 
   return (
-    <div className="flex gap-2">
-      <Button asChild size="sm" variant="outline">
-        <Link href="/auth/login">Entrar</Link>
-      </Button>
-      <Button asChild size="sm">
-        <Link href="/auth/sign-up">Cadastrar</Link>
-      </Button>
-    </div>
+    <GoogleAuthButton
+      label="Entrar com Google"
+      className="w-auto h-9 px-4 text-sm rounded-sm"
+    />
   )
 }

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { DragZone } from '@/components/ui/drag-zone'
 import { cn } from '@/lib/utils'
 
-const STEP_LABELS = ['Basic Info', 'Files', 'Category', 'Review'] as const
+const STEP_LABELS = ['Informações', 'Arquivo', 'Categorias', 'Revisão'] as const
 
 const GENRES = [
   'drama',
@@ -36,15 +36,15 @@ const AGE_RATINGS = [
 type Genre = (typeof GENRES)[number]
 type AgeRating = (typeof AGE_RATINGS)[number]['value']
 
-const MAX_PDF = 50 * 1024 * 1024 // 50MB
+const MAX_PDF_BYTES = 50 * 1024 * 1024 // 50 MB
 
 function validatePDF(file: File): string | null {
-  if (file.type !== 'application/pdf') return 'Only PDF files are accepted'
-  if (file.size > MAX_PDF) return 'File must be 50MB or smaller'
+  if (file.type !== 'application/pdf') return 'Apenas arquivos PDF são aceitos'
+  if (file.size > MAX_PDF_BYTES) return 'O arquivo deve ter no máximo 50 MB'
   return null
 }
 
-interface FormData {
+interface PublishFormState {
   title: string
   logline: string
   synopsis: string
@@ -55,7 +55,7 @@ interface FormData {
   pdfError: string
 }
 
-const initialFormData: FormData = {
+const INITIAL_FORM_STATE: PublishFormState = {
   title: '',
   logline: '',
   synopsis: '',
@@ -66,13 +66,14 @@ const initialFormData: FormData = {
   pdfError: '',
 }
 
-export default function PublicarPage() {
+export default function PublishPage() {
   const router = useRouter()
+  // Stable browser Supabase client — layout has already verified the session.
   const supabase = useMemo(() => createClient(), [])
   const trpc = useTRPC()
 
   const [step, setStep] = useState(1)
-  const [form, setForm] = useState<FormData>(initialFormData)
+  const [form, setForm] = useState<PublishFormState>(INITIAL_FORM_STATE)
   const [userId, setUserId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -80,6 +81,8 @@ export default function PublicarPage() {
   const isDraggingOver = useRef(false)
   const [dragActive, setDragActive] = useState(false)
 
+  // Read the user ID client-side so we can build the storage path.
+  // The layout already guards the route server-side, so this is always defined.
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUserId(data.user?.id ?? null)
@@ -89,7 +92,7 @@ export default function PublicarPage() {
   const createMutation = useMutation(
     trpc.scripts.create.mutationOptions({
       onSuccess: (script) => {
-        router.push(`/roteiros/${script.id}`)
+        router.push(`/scripts/${script.id}`)
       },
     }),
   )
@@ -122,19 +125,22 @@ export default function PublicarPage() {
     setDragActive(false)
   }
 
+  // Upload is always client-side — Vercel server functions time out at 10s,
+  // which is not enough for PDF files up to 50 MB.
   const uploadPDF = async (): Promise<string> => {
     if (!form.pdfFile) throw new Error('No PDF selected')
-    const path = `${userId}/${Date.now()}_${form.pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+    const storagePath = `${userId}/${Date.now()}_${form.pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
     setUploading(true)
-    const { error } = await supabase.storage.from('scripts').upload(path, form.pdfFile)
+    const { error } = await supabase.storage.from('scripts').upload(storagePath, form.pdfFile)
     setUploading(false)
     if (error) throw new Error(error.message)
-    return path
+    return storagePath
   }
 
   const handlePublish = async () => {
     if (!userId) return
     setUploadError('')
+    // Preserve storagePath so a retry after a mutation failure skips re-upload.
     let storagePath = form.pdfStoragePath
     try {
       if (!storagePath) {
@@ -152,8 +158,8 @@ export default function PublicarPage() {
       })
     } catch (err) {
       if (!storagePath) {
-        // Upload failed — mutation errors are surfaced by createMutation.error
-        setUploadError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
+        // Upload failed — mutation errors are surfaced via createMutation.error
+        setUploadError(err instanceof Error ? err.message : 'Falha no envio. Tente novamente.')
       }
     }
   }
@@ -197,16 +203,16 @@ export default function PublicarPage() {
           {/* ── Step 1: Basic Info ─────────────────────────────────── */}
           {step === 1 && (
             <div className="flex flex-col gap-6">
-              <h1 className="font-display text-heading-3 text-text-primary">Basic Information</h1>
+              <h1 className="font-display text-heading-3 text-text-primary">Informações Básicas</h1>
 
               <div className="flex flex-col gap-2">
                 <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
-                  Title *
+                  Título *
                 </label>
                 <Input
                   value={form.title}
                   onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="Script title"
+                  placeholder="Título do roteiro"
                   maxLength={200}
                 />
               </div>
@@ -218,7 +224,7 @@ export default function PublicarPage() {
                 <Input
                   value={form.logline}
                   onChange={(e) => setForm((prev) => ({ ...prev, logline: e.target.value }))}
-                  placeholder="One-sentence description (max 300 chars)"
+                  placeholder="Descrição em uma frase (máx. 300 caracteres)"
                   maxLength={300}
                 />
                 <span className="text-xs text-text-muted text-right">{form.logline.length}/300</span>
@@ -226,12 +232,12 @@ export default function PublicarPage() {
 
               <div className="flex flex-col gap-2">
                 <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
-                  Synopsis
+                  Sinopse
                 </label>
                 <textarea
                   value={form.synopsis}
                   onChange={(e) => setForm((prev) => ({ ...prev, synopsis: e.target.value }))}
-                  placeholder="Brief synopsis (max 2000 chars)"
+                  placeholder="Sinopse breve (máx. 2000 caracteres)"
                   maxLength={2000}
                   rows={5}
                   className="w-full rounded-md border border-border-subtle bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -245,7 +251,7 @@ export default function PublicarPage() {
                   disabled={!canProceedStep1}
                   className="bg-brand-accent text-primary hover:bg-brand-accent/90"
                 >
-                  Continue
+                  Continuar
                 </Button>
               </div>
             </div>
@@ -254,11 +260,11 @@ export default function PublicarPage() {
           {/* ── Step 2: Files ──────────────────────────────────────── */}
           {step === 2 && (
             <div className="flex flex-col gap-6">
-              <h1 className="font-display text-heading-3 text-text-primary">Upload Files</h1>
+              <h1 className="font-display text-heading-3 text-text-primary">Upload do Roteiro</h1>
 
               <div className="flex flex-col gap-2">
                 <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
-                  Script PDF *
+                  PDF do Roteiro *
                 </label>
                 <div
                   onDrop={handleDrop}
@@ -267,12 +273,12 @@ export default function PublicarPage() {
                   onClick={() => pdfInputRef.current?.click()}
                 >
                   <DragZone
-                    title={
+                    title={form.pdfFile ? form.pdfFile.name : 'Arraste o PDF aqui'}
+                    subtitle={
                       form.pdfFile
-                        ? form.pdfFile.name
-                        : 'Drag & drop PDF here'
+                        ? `${(form.pdfFile.size / 1024 / 1024).toFixed(1)} MB`
+                        : 'ou clique para selecionar — máx. 50 MB'
                     }
-                    subtitle={form.pdfFile ? `${(form.pdfFile.size / 1024 / 1024).toFixed(1)} MB` : 'or click to select — max 50 MB'}
                     className={cn(
                       'cursor-pointer',
                       dragActive && 'border-brand-accent bg-brand-accent/5',
@@ -298,14 +304,14 @@ export default function PublicarPage() {
 
               <div className="flex justify-between">
                 <Button variant="ghost" onClick={() => setStep(1)}>
-                  Back
+                  Voltar
                 </Button>
                 <Button
                   onClick={() => setStep(3)}
                   disabled={!canProceedStep2}
                   className="bg-brand-accent text-primary hover:bg-brand-accent/90"
                 >
-                  Continue
+                  Continuar
                 </Button>
               </div>
             </div>
@@ -314,11 +320,11 @@ export default function PublicarPage() {
           {/* ── Step 3: Categorization ─────────────────────────────── */}
           {step === 3 && (
             <div className="flex flex-col gap-6">
-              <h1 className="font-display text-heading-3 text-text-primary">Categorization</h1>
+              <h1 className="font-display text-heading-3 text-text-primary">Categorias</h1>
 
               <div className="flex flex-col gap-3">
                 <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
-                  Genre
+                  Gênero
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {GENRES.map((g) => (
@@ -343,7 +349,7 @@ export default function PublicarPage() {
 
               <div className="flex flex-col gap-3">
                 <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
-                  Age Rating
+                  Faixa Etária
                 </label>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {AGE_RATINGS.map(({ value, label }) => (
@@ -372,13 +378,13 @@ export default function PublicarPage() {
 
               <div className="flex justify-between">
                 <Button variant="ghost" onClick={() => setStep(2)}>
-                  Back
+                  Voltar
                 </Button>
                 <Button
                   onClick={() => setStep(4)}
                   className="bg-brand-accent text-primary hover:bg-brand-accent/90"
                 >
-                  Continue
+                  Continuar
                 </Button>
               </div>
             </div>
@@ -387,37 +393,41 @@ export default function PublicarPage() {
           {/* ── Step 4: Review ─────────────────────────────────────── */}
           {step === 4 && (
             <div className="flex flex-col gap-6">
-              <h1 className="font-display text-heading-3 text-text-primary">Review & Publish</h1>
+              <h1 className="font-display text-heading-3 text-text-primary">Revisão e Publicação</h1>
 
               <div className="flex flex-col gap-4 rounded-sm border border-border-subtle bg-elevated p-6">
-                <ReviewRow label="Title" value={form.title} />
+                <ReviewRow label="Título" value={form.title} />
                 {form.logline && <ReviewRow label="Logline" value={form.logline} />}
-                {form.synopsis && <ReviewRow label="Synopsis" value={form.synopsis} />}
+                {form.synopsis && <ReviewRow label="Sinopse" value={form.synopsis} />}
                 {form.pdfFile && <ReviewRow label="PDF" value={form.pdfFile.name} />}
-                {form.genre && <ReviewRow label="Genre" value={form.genre} />}
-                {form.ageRating && <ReviewRow label="Age Rating" value={form.ageRating} />}
+                {form.genre && <ReviewRow label="Gênero" value={form.genre} />}
+                {form.ageRating && <ReviewRow label="Faixa Etária" value={form.ageRating} />}
               </div>
 
               {(createMutation.error || uploadError) && (
                 <p className="text-sm text-state-error">
-                  {uploadError || 'Error publishing script. Please try again.'}
+                  {uploadError || 'Erro ao publicar o roteiro. Tente novamente.'}
                 </p>
               )}
 
               {uploading && (
-                <p className="text-sm text-text-secondary">Uploading PDF...</p>
+                <p className="text-sm text-text-secondary">Enviando PDF...</p>
               )}
 
               <div className="flex justify-between">
-                <Button variant="ghost" onClick={() => setStep(3)} disabled={uploading || createMutation.isPending}>
-                  Back
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep(3)}
+                  disabled={uploading || createMutation.isPending}
+                >
+                  Voltar
                 </Button>
                 <Button
                   onClick={handlePublish}
                   disabled={uploading || createMutation.isPending || !userId}
                   className="bg-brand-accent text-primary hover:bg-brand-accent/90 px-8"
                 >
-                  {createMutation.isPending || uploading ? 'Publishing…' : 'Publish Script'}
+                  {createMutation.isPending || uploading ? 'Publicando…' : 'Publicar Roteiro'}
                 </Button>
               </div>
             </div>
