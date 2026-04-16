@@ -9,23 +9,28 @@ export interface ReactionBarProps extends Omit<React.HTMLAttributes<HTMLDivEleme
 
 export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
   ({ className, reactions, onSelect, selected, ...props }, ref) => (
-    <div ref={ref} className={cn('flex gap-2', className)} {...props}>
-      {reactions.map((reaction, i) => (
-        <button
-          key={reaction.label}
-          type='button'
-          className={cn(
-            'flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium border transition-colors',
-            reaction.active || selected === i
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-background text-foreground border-border hover:bg-accent',
-          )}
-          onClick={() => onSelect?.(i)}
-          aria-pressed={reaction.active || selected === i}>
-          {reaction.icon}
-          <span>{reaction.count}</span>
-        </button>
-      ))}
+    <div ref={ref} className={cn('flex flex-wrap gap-2', className)} role='group' aria-label='Reactions' {...props}>
+      {reactions.map((reaction, i) => {
+        const isActive = reaction.active || selected === i
+        return (
+          <button
+            key={reaction.label}
+            type='button'
+            className={cn(
+              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors min-h-[44px] sm:min-h-0',
+              isActive
+                ? 'bg-brand-accent text-text-primary border-brand-accent'
+                : 'bg-elevated text-text-secondary border-border-subtle hover:border-brand-accent hover:text-text-primary',
+            )}
+            onClick={() => onSelect?.(i)}
+            aria-pressed={isActive}
+            aria-label={`${reaction.label}: ${reaction.count} reaction${reaction.count !== 1 ? 's' : ''}${isActive ? ', active' : ''}`}
+          >
+            <span aria-hidden='true'>{reaction.icon}</span>
+            <span>{reaction.count}</span>
+          </button>
+        )
+      })}
     </div>
   ),
 )

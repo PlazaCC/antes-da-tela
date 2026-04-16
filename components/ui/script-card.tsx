@@ -1,6 +1,7 @@
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import * as React from 'react'
+import { Tag } from '@/components/ui/tag'
+import { StarRating } from '@/components/ui/star-rating'
 
 export interface ScriptCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string
@@ -8,31 +9,56 @@ export interface ScriptCardProps extends React.HTMLAttributes<HTMLDivElement> {
   genre: string
   rating: number
   pages: number
+  status?: 'publicado' | 'rascunho' | 'privado'
+  href?: string
 }
 
 export const ScriptCard = React.forwardRef<HTMLDivElement, ScriptCardProps>(
-  ({ className, title, author, genre, rating, pages, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        'group rounded-3xl border border-border bg-surface p-6 transition hover:border-accent hover:bg-elevated',
-        className,
-      )}
-      {...props}>
-      <div className='flex flex-col gap-4'>
-        <div className='flex flex-wrap items-center justify-between gap-3'>
-          <div>
-            <p className='text-sm uppercase tracking-[0.24em] text-muted-foreground'>{genre}</p>
-            <h3 className='mt-2 text-xl font-semibold text-foreground'>{title}</h3>
+  ({ className, title, author, genre, rating, pages, status, href, ...props }, ref) => {
+    const content = (
+      <div
+        ref={ref}
+        className={cn(
+          'group flex flex-col gap-4 rounded-sm border border-border-subtle bg-surface p-5 transition-colors',
+          'hover:border-brand-accent hover:bg-elevated',
+          href && 'cursor-pointer',
+          className,
+        )}
+        {...props}
+      >
+        <div className='flex items-start justify-between gap-3'>
+          <div className='flex flex-col gap-1 min-w-0'>
+            <p className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider truncate'>
+              {genre}
+            </p>
+            <h3 className='text-heading-3 font-semibold text-text-primary leading-tight line-clamp-2'>
+              {title}
+            </h3>
           </div>
-          <Badge variant='secondary'>{rating.toFixed(1)} ★</Badge>
+          {status && <Tag variant={status} className='shrink-0 mt-0.5' />}
         </div>
-        <div className='flex items-center justify-between gap-4 text-sm text-secondary-foreground'>
-          <span>By {author}</span>
-          <span>{pages} pages</span>
+
+        <div className='flex items-center justify-between gap-3 mt-auto'>
+          <span className='text-body-small text-text-secondary truncate'>by {author}</span>
+          <span className='font-mono text-label-mono-small text-text-muted shrink-0'>{pages}p</span>
+        </div>
+
+        <div className='flex items-center gap-2'>
+          <StarRating value={rating} readOnly allowHalf />
+          <span className='font-mono text-label-mono-small text-text-muted'>{rating.toFixed(1)}</span>
         </div>
       </div>
-    </div>
-  ),
+    )
+
+    if (href) {
+      return (
+        <a href={href} className='block no-underline'>
+          {content}
+        </a>
+      )
+    }
+
+    return content
+  },
 )
 ScriptCard.displayName = 'ScriptCard'
