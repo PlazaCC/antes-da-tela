@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTRPC } from '@/trpc/client'
@@ -68,13 +68,14 @@ const initialFormData: FormData = {
 
 export default function PublicarPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const trpc = useTRPC()
 
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<FormData>(initialFormData)
   const [userId, setUserId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const pdfInputRef = useRef<HTMLInputElement>(null)
   const isDraggingOver = useRef(false)
   const [dragActive, setDragActive] = useState(false)
@@ -133,9 +134,13 @@ export default function PublicarPage() {
 
   const handlePublish = async () => {
     if (!userId) return
+    setUploadError('')
+    let storagePath = form.pdfStoragePath
     try {
-      const storagePath = form.pdfStoragePath || (await uploadPDF())
-      setForm((prev) => ({ ...prev, pdfStoragePath: storagePath }))
+      if (!storagePath) {
+        storagePath = await uploadPDF()
+        setForm((prev) => ({ ...prev, pdfStoragePath: storagePath }))
+      }
       await createMutation.mutateAsync({
         title: form.title,
         logline: form.logline || undefined,
@@ -144,10 +149,12 @@ export default function PublicarPage() {
         ageRating: form.ageRating || undefined,
         storagePath,
         fileSize: form.pdfFile?.size,
-        authorId: userId,
       })
-    } catch {
-      // error handled by mutation state
+    } catch (err) {
+      if (!storagePath) {
+        // Upload failed — mutation errors are surfaced by createMutation.error
+        setUploadError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
+      }
     }
   }
 
@@ -391,9 +398,9 @@ export default function PublicarPage() {
                 {form.ageRating && <ReviewRow label="Age Rating" value={form.ageRating} />}
               </div>
 
-              {createMutation.error && (
+              {(createMutation.error || uploadError) && (
                 <p className="text-sm text-state-error">
-                  Error publishing script. Please try again.
+                  {uploadError || 'Error publishing script. Please try again.'}
                 </p>
               )}
 

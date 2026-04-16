@@ -1,6 +1,6 @@
 import { db } from '@/server/db'
 import { scriptFiles, scripts } from '@/server/db/schema'
-import { createTRPCRouter, publicProcedure } from '@/trpc/init'
+import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { ilike, or } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -28,28 +28,31 @@ export const scriptCreateSchema = z.object({
   fileSize: z.number().int().positive().optional(),
   pageCount: z.number().int().positive().optional(),
   bannerPath: z.string().optional(),
-  authorId: z.string().uuid(),
+  // authorId is read from the session — never accepted from client input
 })
 
 export const scriptsRouter = createTRPCRouter({
-  create: publicProcedure
+  create: authenticatedProcedure
     .input(scriptCreateSchema)
-    .mutation(async ({ input }) => {
-      const { storagePath, fileSize, pageCount, authorId, ...scriptData } = input
+    .mutation(async ({ input, ctx }) => {
+      const { storagePath, fileSize, pageCount, ...scriptData } = input
+      const authorId = ctx.user.id
 
-      const [script] = await db
-        .insert(scripts)
-        .values({ ...scriptData, authorId, publishedAt: new Date() })
-        .returning()
+      return await db.transaction(async (tx) => {
+        const [script] = await tx
+          .insert(scripts)
+          .values({ ...scriptData, authorId, publishedAt: new Date() })
+          .returning()
 
-      await db.insert(scriptFiles).values({
-        scriptId: script.id,
-        storagePath,
-        fileSize,
-        pageCount,
+        await tx.insert(scriptFiles).values({
+          scriptId: script.id,
+          storagePath,
+          fileSize,
+          pageCount,
+        })
+
+        return script
       })
-
-      return script
     }),
 
   getById: publicProcedure
@@ -69,7 +72,6 @@ export const scriptsRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().int().min(1).max(50).default(12),
-        cursor: z.string().uuid().optional(),
       }),
     )
     .query(async ({ input }) => {
@@ -115,7 +117,7 @@ export const scriptsRouter = createTRPCRouter({
         where: (s, { eq, and }) =>
           and(
             eq(s.status, 'published'),
-            or(ilike(s.title, `%${input.query}%`)),
+            or(ilike(s.title, `%${input.query}%`), ilike(s.logline, `%${input.query}%`)),
             input.genre ? eq(s.genre, input.genre) : undefined,
           ),
         limit: 20,

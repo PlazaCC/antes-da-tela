@@ -1,6 +1,9 @@
 import { relations, sql } from 'drizzle-orm'
 import {
+  boolean,
+  check,
   integer,
+  pgEnum,
   pgPolicy,
   pgTable,
   smallint,
@@ -8,7 +11,6 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
-  boolean,
 } from 'drizzle-orm/pg-core'
 
 // ── Users ────────────────────────────────────────────────────────────────────
@@ -40,6 +42,10 @@ export const users = pgTable(
   ],
 )
 
+// ── Enums ─────────────────────────────────────────────────────────────────────
+
+export const scriptStatusEnum = pgEnum('script_status', ['draft', 'published'])
+
 // ── Scripts ───────────────────────────────────────────────────────────────────
 
 export const scripts = pgTable(
@@ -52,7 +58,7 @@ export const scripts = pgTable(
     genre: text('genre'),
     ageRating: text('age_rating'),
     isFeatured: boolean('is_featured').default(false).notNull(),
-    status: text('status').default('published').notNull(), // 'draft' | 'published'
+    status: scriptStatusEnum('status').default('published').notNull(),
     authorId: uuid('author_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
@@ -196,6 +202,7 @@ export const ratings = pgTable(
   },
   (table) => [
     uniqueIndex('ratings_script_user_unique').on(table.scriptId, table.userId),
+    check('ratings_score_range', sql`${table.score} >= 1 AND ${table.score} <= 5`),
     pgPolicy('Ratings are publicly readable', {
       as: 'permissive',
       to: 'public',
