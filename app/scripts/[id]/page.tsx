@@ -1,14 +1,34 @@
 import { appRouter } from '@/server/api/root'
 import { createTRPCContext } from '@/trpc/init'
-import { Suspense } from 'react'
+import type { Metadata } from 'next'
+import { headers } from 'next/headers'
+import { cache, Suspense } from 'react'
 import ScriptPageClient from './script-page-client'
 
-export default async function ScriptPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+type Props = { params: Promise<{ id: string }> }
 
-  const ctx = await createTRPCContext({ headers: new Headers() })
+/**
+ * React.cache deduplicates the DB round-trip between generateMetadata and the
+ * page component — both run in the same request context.
+ */
+const getScript = cache(async (id: string) => {
+  const ctx = await createTRPCContext({ headers: await headers() })
   const caller = appRouter.createCaller(ctx)
-  const script = await caller.scripts.getById({ id })
+  return caller.scripts.getById({ id })
+})
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+  const script = await getScript(id)
+  return {
+    title: script?.title ?? 'Roteiro',
+    description: script?.logline ?? 'Leia e discuta roteiros audiovisuais.',
+  }
+}
+
+export default async function ScriptPage({ params }: Props) {
+  const { id } = await params
+  const script = await getScript(id)
 
   return (
     <Suspense

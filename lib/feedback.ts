@@ -45,47 +45,15 @@ export function dismissToast(id?: string) {
   }
 }
 
-export async function notifyPromise<T = unknown>(
+export function notifyPromise<T = unknown>(
   promise: Promise<T>,
   messages: { loading: string; success: string | ((data: T) => string); error: string | ((err: unknown) => string) },
 ) {
-  try {
-    const maybeToast = toast as unknown as {
-      promise?: (
-        p: Promise<T>,
-        opts: {
-          loading: string
-          success: string | ((data: T) => string)
-          error: string | ((err: unknown) => string)
-        },
-      ) => Promise<T>
-    }
-
-    if (typeof maybeToast.promise === 'function') {
-      return maybeToast.promise(promise, {
-        loading: messages.loading,
-        success: messages.success,
-        error: messages.error,
-      })
-    }
-
-    // Fallback: show loading, await, then show success/error
-    const id = toast(messages.loading)
-    try {
-      const res = await promise
-      dismissToast(String(id))
-      const text = typeof messages.success === 'function' ? messages.success(res) : messages.success
-      notifySuccess(text)
-      return res
-    } catch (err) {
-      dismissToast(String(id))
-      const text = typeof messages.error === 'function' ? messages.error(err) : messages.error
-      notifyError(text)
-      throw err
-    }
-  } catch (err) {
-    console.error('notifyPromise failed', err)
-    return promise
-  }
+  // toast.promise is a stable, documented sonner API.
+  return toast.promise(promise, {
+    loading: messages.loading,
+    success: messages.success,
+    error: messages.error,
+  })
 }
 // Prefer named exports; do not export default to keep imports explicit.

@@ -80,7 +80,10 @@ const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().crea
 
 export const createTRPCRouter = t.router
 
-function mapStatusToTRPCCode(status?: number) {
+// Return type is explicit so callers can pass it directly to TRPCError without a cast.
+type TRPCCode = 'BAD_REQUEST' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'INTERNAL_SERVER_ERROR'
+
+function mapStatusToTRPCCode(status?: number): TRPCCode {
   switch (status) {
     case 400:
       return 'BAD_REQUEST'
@@ -97,8 +100,6 @@ function mapStatusToTRPCCode(status?: number) {
   }
 }
 
-type TRPCCode = 'BAD_REQUEST' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'INTERNAL_SERVER_ERROR'
-
 const appErrorMiddleware = t.middleware(async ({ next }) => {
   try {
     return await next()
@@ -106,7 +107,7 @@ const appErrorMiddleware = t.middleware(async ({ next }) => {
     if (err instanceof AppError) {
       const code = mapStatusToTRPCCode(err.statusCode)
       Sentry.captureException(err)
-      throw new TRPCError({ code: code as TRPCCode, message: err.publicMessage ?? err.message, cause: err as AppError })
+      throw new TRPCError({ code, message: err.publicMessage ?? err.message, cause: err as AppError })
     }
     throw err as Error
   }

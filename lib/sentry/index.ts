@@ -22,4 +22,6 @@ export function captureMessage(message: string, level: SeverityLevel = 'info') {
   }
 }
 
-export default Sentry
+// Do not export Sentry directly — callers must go through the typed wrappers
+// above so error handling stays consistent (fallback logs, context enrichment).
+// If raw Sentry access is truly needed, import from '@sentry/nextjs' directly.

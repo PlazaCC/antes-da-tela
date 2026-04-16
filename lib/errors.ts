@@ -27,7 +27,9 @@ export function formatErrorForClient(err: unknown): ClientErrorPayload {
     return { status: 'error', code: err.code, message: err.publicMessage }
   }
 
-  // Generic fallback message for unknown errors
+  // Generic fallback — intentionally in Portuguese because this string is
+  // shown verbatim to end users in the UI. All other code/docs/tests use English;
+  // only user-visible copy is written in Portuguese.
   return { status: 'error', code: 'INTERNAL_ERROR', message: 'Ocorreu um erro interno. Tente novamente mais tarde.' }
 }
 

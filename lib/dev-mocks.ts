@@ -1,21 +1,8 @@
 import { fakerPT_BR } from '@faker-js/faker'
+import { AGE_RATINGS, GENRES } from '@/lib/constants/scripts'
 import type { Dispatch, SetStateAction } from 'react'
 import { useEffect } from 'react'
 import { isDevToolsEnabled } from './dev-tools'
-
-const GENRES = [
-  'drama',
-  'thriller',
-  'comédia',
-  'ficção científica',
-  'terror',
-  'romance',
-  'documentário',
-  'animação',
-  'outro',
-] as const
-
-const AGE_RATINGS = ['livre', '10', '12', '14', '16', '18'] as const
 
 // Return a small, realistic mock for the publish form. Deterministic seed for repeatability.
 export type PublishFormState = {

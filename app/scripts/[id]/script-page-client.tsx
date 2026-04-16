@@ -1,17 +1,12 @@
 'use client'
 
+import type { AppRouter } from '@/server/api/root'
 import type { TagVariant } from '@/components/ui/tag'
 import { Tag } from '@/components/ui/tag'
-type Script = {
-  id: string
-  title: string
-  logline?: string | null
-  synopsis?: string | null
-  genre?: string | null
-  ageRating?: string | null
-  author?: { id: string; name?: string | null } | null
-  scriptFiles?: Array<{ pageCount?: number | null; fileSize?: number | null }> | null
-}
+import type { inferRouterOutputs } from '@trpc/server'
+
+type RouterOutput = inferRouterOutputs<AppRouter>
+type ScriptDetail = RouterOutput['scripts']['getById']
 
 const GENRE_VARIANT_MAP: Record<string, TagVariant> = {
   drama: 'drama',
@@ -19,7 +14,7 @@ const GENRE_VARIANT_MAP: Record<string, TagVariant> = {
   comédia: 'comédia',
 }
 
-export default function ScriptPageClient({ script }: { script: Script | null }) {
+export default function ScriptPageClient({ script }: { script: ScriptDetail }) {
   if (!script) {
     return (
       <div className='min-h-screen bg-bg-base flex items-center justify-center'>
@@ -37,7 +32,7 @@ export default function ScriptPageClient({ script }: { script: Script | null }) 
         <div className='flex flex-col gap-4 mb-10'>
           <div className='flex items-center gap-2 flex-wrap'>
             {script.genre && <Tag variant={genreVariant}>{script.genre}</Tag>}
-            {script.ageRating && <Tag variant='default'>{script.ageRating}</Tag>}
+            {script.age_rating && <Tag variant='default'>{script.age_rating}</Tag>}
           </div>
 
           <h1 className='font-display text-heading-1 text-text-primary'>{script.title}</h1>
@@ -57,27 +52,29 @@ export default function ScriptPageClient({ script }: { script: Script | null }) 
             <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs mb-3'>
               Sinopse
             </h2>
-            <p className='text-body-default text-text-primary leading-relaxed whitespace-pre-wrap'>{script.synopsis}</p>
+            <p className='text-body-default text-text-primary leading-relaxed whitespace-pre-wrap'>
+              {script.synopsis}
+            </p>
           </div>
         )}
 
         {/* File info */}
-        {script.scriptFiles?.[0] && (
+        {script.script_files?.[0] && (
           <div className='rounded-sm border border-border-subtle bg-surface p-6'>
             <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs mb-4'>
               Arquivo do Roteiro
             </h2>
             <div className='flex flex-col gap-2'>
-              {script.scriptFiles[0].pageCount && (
+              {script.script_files[0].page_count && (
                 <p className='text-sm text-text-secondary'>
                   <span className='text-text-muted'>Páginas: </span>
-                  {script.scriptFiles[0].pageCount}
+                  {script.script_files[0].page_count}
                 </p>
               )}
-              {script.scriptFiles[0].fileSize && (
+              {script.script_files[0].file_size && (
                 <p className='text-sm text-text-secondary'>
                   <span className='text-text-muted'>Tamanho: </span>
-                  {(script.scriptFiles[0].fileSize / 1024 / 1024).toFixed(1)} MB
+                  {(script.script_files[0].file_size / 1024 / 1024).toFixed(1)} MB
                 </p>
               )}
             </div>

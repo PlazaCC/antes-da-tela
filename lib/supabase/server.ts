@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 /**
@@ -17,12 +17,12 @@ import { cookies } from 'next/headers'
  *
  * Uses only the anon/publishable key — no service role key required.
  */
-type CookieEntry = { name: string; value: string; options?: Record<string, unknown> }
+type CookieEntry = { name: string; value: string; options?: CookieOptions }
 
 type CookieStore = {
   getAll(): CookieEntry[]
   setAll?(cookies: CookieEntry[]): void
-  set?: (name: string, value: string, options?: Record<string, unknown>) => void
+  set?: (name: string, value: string, options?: CookieOptions) => void
 }
 
 export async function createClient(cookieStoreParam?: CookieStore) {

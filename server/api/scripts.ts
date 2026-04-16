@@ -1,20 +1,7 @@
+import { AGE_RATINGS, GENRES } from '@/lib/constants/scripts'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-
-const GENRES = [
-  'drama',
-  'thriller',
-  'comédia',
-  'ficção científica',
-  'terror',
-  'romance',
-  'documentário',
-  'animação',
-  'outro',
-] as const
-
-const AGE_RATINGS = ['livre', '10', '12', '14', '16', '18'] as const
 
 export const scriptCreateSchema = z.object({
   title: z.string().min(1).max(200),
@@ -35,24 +22,18 @@ export const scriptsRouter = createTRPCRouter({
     const authorId = ctx.user!.id
 
     // Ensure the author's profile exists in `users` to satisfy FK constraints.
-    try {
-      const authorEmail = ctx.user!.email ?? null
-      const authorName =
-        ctx.user!.user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
-      const { error: upsertError } = await ctx.supabase
-        .from('users')
-        .upsert({ id: authorId, name: String(authorName).slice(0, 100), email: authorEmail }, { onConflict: 'id' })
+    const authorEmail = ctx.user!.email ?? null
+    const authorName =
+      ctx.user!.user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
+    const { error: upsertError } = await ctx.supabase
+      .from('users')
+      .upsert({ id: authorId, name: String(authorName).slice(0, 100), email: authorEmail }, { onConflict: 'id' })
 
-      if (upsertError) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: `Failed to ensure author profile: ${upsertError.message}`,
-        })
-      }
-    } catch (err) {
-      // log for debugging
-      console.error('ensure author profile error', err)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to ensure author profile' })
+    if (upsertError) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: `Failed to ensure author profile: ${upsertError.message}`,
+      })
     }
 
     // Insert script row
@@ -85,7 +66,10 @@ export const scriptsRouter = createTRPCRouter({
     })
 
     if (fileError) {
-      // Roll back the orphan script so it doesn't appear in listings
+      // Best-effort rollback: delete the orphan script so it doesn't appear in
+      // listings. This is NOT transactional — if the delete also fails the orphan
+      // remains, but it will have status='published' with no associated file.
+      // TODO: replace with a Postgres transaction / RPC once the POC graduates.
       await ctx.supabase.from('scripts').delete().eq('id', script.id)
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',

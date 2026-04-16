@@ -1,5 +1,5 @@
 import { PostHogProvider } from '@/components/posthog-provider'
-import AppToaster from '@/components/ui/toaster'
+import AppToaster from '@/components/app-toaster/app-toaster'
 import { TRPCReactProvider } from '@/trpc/client'
 import type { Metadata } from 'next'
 import { ThemeProvider } from 'next-themes'
