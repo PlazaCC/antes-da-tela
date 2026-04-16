@@ -51,3 +51,6 @@ next-env.d.ts
 
 # Claude Code
 .claude/settings.local.json
+
+# MCP Files
+.playwright-mcp
