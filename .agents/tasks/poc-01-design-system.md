@@ -119,3 +119,36 @@ yarn lint     # deve passar sem warnings
 - [ ] Nenhum componente usa cores raw Tailwind (`green-500`, `red-500`) onde deveria usar tokens
 - [ ] `app/layout.tsx` com título "Antes da Tela" (não o starter kit padrão)
 - [ ] Branch `feat/design-system` merged em `main`
+
+## Framelink MCP — export e passos de verificação
+
+- Executar `get_metadata(fileKey="iUb8odefGSZiHz4KjuzX1M", nodeId="0:1")` para obter mapa de nodes.
+- Para cada componente/screen crítico rodar `get_design_context(fileKey="iUb8odefGSZiHz4KjuzX1M", nodeId=":nodeId")` e salvar o JSON em `.agents/figma/contexts/`.
+- Gerar screenshots por componente com `get_screenshot(fileKey="iUb8odefGSZiHz4KjuzX1M", nodeId=":nodeId")` e salvar em `.agents/figma/screens/`.
+- Baixar apenas assets referenciados (SVGs/ícones) e colocá-los em `public/assets/figma/`.
+
+### Validação de export
+
+- [ ] `metadata` exportado e salvo em `.agents/figma/metadata.json`
+- [ ] Contextos de componentes (min. Button, Tag, Input, ScriptCard, Comment, NavBar, ReactionBar) salvos em `.agents/figma/contexts/`
+- [ ] Screenshots por screen principais salvos em `.agents/figma/screens/`
+
+## Component audit — passos e prioridade
+
+- Consultar `.agents/design-system.meta.json` → `exportContext.componentAudit` para ver status atual.
+- Prioridade de implementação:
+  - Alta: Button (variants), ScriptCard, NavBar, Input (helper/error), Publish Flow DragZone
+  - Média: Tag (semantic variants), ReactionBar, StarRating (interactivity), Comment variants
+  - Baixa: MetricCard, Info variants
+
+## Subtasks sugeridas (arquivos em `.agents/tasks/`)
+
+- `poc-01a-design-tokens.md` — Auditoria de tokens e normalização CSS vars (HSL channels) — acceptance: CSS vars e Tailwind map atualizados.
+- `poc-01b-design-components.md` — Implementação dos componentes faltantes e variantes prioritárias — acceptance: componentes na pasta `components/ui/` com exemplos no playground.
+- `poc-01c-design-visual-audit.md` — QA visual 1:1 com screenshots e ajustes responsivos — acceptance: checklist visual completo.
+
+## Próximos passos imediatos
+
+1. Rodar export Framelink MCP para os nodeIds listados em `.agents/figma.meta.json` (se possível automatizar via script small helper).
+2. Popular `.agents/figma/contexts/` com os JSONs de cada componente.
+3. Executar a `poc-01a` (tokens audit) antes de implementar variantes visuais.

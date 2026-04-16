@@ -37,6 +37,9 @@ See [docs/SETUP.md](docs/SETUP.md) for environment setup instructions.
 - **Drizzle ORM**: Schemas in `server/db/schema.ts`, queries in `server/db/`.
 - **Supabase Auth**: Use `@supabase/ssr` on the server and `createBrowserClient` on the client.
 - **UI**: Prioritize shadcn/ui components and follow the project's design standards.
+- **UI**: Prioritize `shadcn/ui` components and follow the project's design standards.
+  - Always install shadcn components using the official CLI: `yarn dlx shadcn@latest add <component>`.
+  - Never manually copy or edit files under `components/ui/` — use the CLI to upgrade or regenerate primitives.
 - **Tailwind CSS v3**: Do not use v4 syntax.
 - **Zustand**: For simple global state management.
 - **PDF.js**: For script rendering and manipulation.

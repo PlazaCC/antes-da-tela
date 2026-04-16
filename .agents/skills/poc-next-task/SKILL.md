@@ -19,6 +19,7 @@ Never skip ahead — each task's acceptance criteria must pass before the next b
 ## Step 1 — Read the execution order
 
 Read `.agents/tasks/poc-overview.md` to understand:
+
 - The mandatory execution order (`[01]` → `[07]`)
 - The dependency rules (what blocks what)
 - The validation commands for each task
@@ -36,21 +37,22 @@ git stash list
 ```
 
 Then cross-reference with the execution order:
+
 - Which branches exist? (`feat/design-system`, `feat/db-schema`, etc.)
 - Which branches are already merged into `main`?
 - Which task is currently in progress (open branch, uncommitted work)?
 
 Task → branch mapping:
 
-| Task | Branch |
-|------|--------|
+| Task               | Branch               |
+| ------------------ | -------------------- |
 | [01] Design System | `feat/design-system` |
-| [02] DB Schema     | `feat/db-schema` |
-| [03] Auth          | `feat/auth` |
-| [04] Upload        | `feat/upload` |
-| [05] Leitor PDF    | `feat/leitor` |
-| [06] Home          | `feat/home` |
-| [07] Perfil        | `feat/perfil` |
+| [02] DB Schema     | `feat/db-schema`     |
+| [03] Auth          | `feat/auth`          |
+| [04] Upload        | `feat/upload`        |
+| [05] Leitor PDF    | `feat/leitor`        |
+| [06] Home          | `feat/home`          |
+| [07] Perfil        | `feat/perfil`        |
 
 ---
 
@@ -58,21 +60,24 @@ Task → branch mapping:
 
 Read the task file for the **last completed or in-progress task** from `.agents/tasks/`:
 
-| Task | File |
-|------|------|
+| Task               | File                                    |
+| ------------------ | --------------------------------------- |
 | [01] Design System | `.agents/tasks/poc-01-design-system.md` |
-| [02] DB Schema     | `.agents/tasks/poc-02-db-schema.md` |
-| [03] Auth          | `.agents/tasks/poc-03-auth.md` |
-| [04] Upload        | `.agents/tasks/poc-04-upload.md` |
-| [05] Leitor PDF    | `.agents/tasks/poc-05-leitor.md` |
-| [06] Home          | `.agents/tasks/poc-06-home.md` |
-| [07] Perfil        | `.agents/tasks/poc-07-perfil.md` |
+| [02] DB Schema     | `.agents/tasks/poc-02-db-schema.md`     |
+| [03] Auth          | `.agents/tasks/poc-03-auth.md`          |
+| [04] Upload        | `.agents/tasks/poc-04-upload.md`        |
+| [05] Leitor PDF    | `.agents/tasks/poc-05-leitor.md`        |
+| [06] Home          | `.agents/tasks/poc-06-home.md`          |
+| [07] Perfil        | `.agents/tasks/poc-07-perfil.md`        |
 
 Check every item in that task's **Checklist de aceite / Acceptance Criteria**:
+
 - Run `yarn build` — must produce zero TypeScript errors.
 - Run `yarn lint` — must produce zero ESLint warnings.
 - Verify git state: branch merged into `main`, no uncommitted changes.
 - Run `yarn drizzle-kit generate` if the task touched `server/db/schema.ts`.
+
+- Check for local visual assets in `.agents/figma/` (folders `components/`, `frames/`, `screens/`). If matching SVG/PNG/PDF assets exist for the task's components/screens, prefer those local files for visual diffs and verification before calling the Figma MCP API (saves quota and is reproducible).
 
 **If any criterion is NOT met:** fix the gap first. Do not proceed to the next task until this step is clean.
 
@@ -95,6 +100,7 @@ Identify the next task according to this order and read its full spec file from 
 ## Step 5 — Execute the next task
 
 Follow every step in the task file exactly as written:
+
 1. Create or check out the feature branch specified in the task.
 2. Implement all required files, components, routes, schemas, and configurations.
 3. Run the validation commands listed in the task (`yarn build`, `yarn lint`, `yarn drizzle-kit generate` when applicable).

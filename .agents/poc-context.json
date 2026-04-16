@@ -100,7 +100,11 @@
       "acceptance": [
         { "id": "ds-1", "item": "yarn build e yarn lint passam sem erros após merge", "done": false },
         { "id": "ds-2", "item": "CSS vars usam HSL channels (não hex) em :root e .dark", "done": true },
-        { "id": "ds-3", "item": "Tailwind tokens usam nested objects (state.success, brand.accent), não slash-keys", "done": true },
+        {
+          "id": "ds-3",
+          "item": "Tailwind tokens usam nested objects (state.success, brand.accent), não slash-keys",
+          "done": true
+        },
         { "id": "ds-4", "item": "Plugin tailwindcss-animate via static import (não dynamic import)", "done": true },
         { "id": "ds-5", "item": "MetricCard usa state-success/state-error (não green-500/red-500)", "done": true },
         { "id": "ds-6", "item": "app/layout.tsx título 'Antes da Tela' (não starter kit padrão)", "done": true },
@@ -120,9 +124,7 @@
       "blocker": true,
       "task_file": ".agents/tasks/poc-02-db-schema.md",
       "objective": "Schema completo Drizzle + migrations aplicadas + Storage buckets com CORS",
-      "files_affected": [
-        "server/db/schema.ts"
-      ],
+      "files_affected": ["server/db/schema.ts"],
       "tables_to_create": ["scripts", "script_files", "audio_files", "comments", "ratings"],
       "table_existing": ["users"],
       "storage_buckets": [
@@ -223,10 +225,7 @@
         "components/pdf-viewer/index.ts",
         "server/api/comments.ts"
       ],
-      "files_to_update": [
-        "app/scripts/[id]/script-page-client.tsx",
-        "server/api/root.ts"
-      ],
+      "files_to_update": ["app/scripts/[id]/script-page-client.tsx", "server/api/root.ts"],
       "trpc_router": "commentsRouter",
       "trpc_endpoints": ["list", "create", "delete"],
       "pdf_constraint": "next/dynamic with ssr: false — pdfjs is client-only",
@@ -253,10 +252,7 @@
       "depends_on": ["poc-02", "poc-04"],
       "task_file": ".agents/tasks/poc-06-home.md",
       "objective": "Home SSR com listagem recente + destaque + filtro gênero + busca debounce 300ms",
-      "files_to_create": [
-        "app/home-client.tsx",
-        "lib/hooks/use-debounce.ts"
-      ],
+      "files_to_create": ["app/home-client.tsx", "lib/hooks/use-debounce.ts"],
       "files_to_update": ["app/page.tsx"],
       "ssr_pattern": "trpc.scripts.listRecent.prefetch() + HydrateClient in Server Component",
       "acceptance": [
@@ -264,7 +260,11 @@
         { "id": "home-2", "item": "Filtro por gênero refiltra grid sem reload", "done": false },
         { "id": "home-3", "item": "Busca com debounce 300ms (sem request por tecla)", "done": false },
         { "id": "home-4", "item": "Seção 'em destaque' para scripts com is_featured=true", "done": false },
-        { "id": "home-5", "item": "ScriptCard responsivo: 1 coluna mobile (375px), 3 colunas desktop (1280px)", "done": false },
+        {
+          "id": "home-5",
+          "item": "ScriptCard responsivo: 1 coluna mobile (375px), 3 colunas desktop (1280px)",
+          "done": false
+        },
         { "id": "home-6", "item": "yarn build limpo", "done": false }
       ]
     },
@@ -285,10 +285,7 @@
         "app/profile/[userId]/profile-client.tsx",
         "app/(authenticated)/account/page.tsx"
       ],
-      "files_to_update": [
-        "server/api/root.ts",
-        "app/scripts/[id]/script-page-client.tsx"
-      ],
+      "files_to_update": ["server/api/root.ts", "app/scripts/[id]/script-page-client.tsx"],
       "trpc_router": "ratingsRouter",
       "trpc_endpoints": ["upsert", "getAverage", "getUserRating"],
       "component_existing": "components/ui/star-rating.tsx",
@@ -301,7 +298,11 @@
         { "id": "perf-2", "item": "Auto-avaliação retorna TRPCError FORBIDDEN", "done": false },
         { "id": "perf-3", "item": "Upsert funciona (segunda nota substitui a primeira)", "done": false },
         { "id": "perf-4", "item": "/profile/[userId] accessible without login", "done": false },
-        { "id": "perf-5", "item": "StarRating updates average without reload (TanStack Query invalidation)", "done": false },
+        {
+          "id": "perf-5",
+          "item": "StarRating updates average without reload (TanStack Query invalidation)",
+          "done": false
+        },
         { "id": "perf-6", "item": "/account allows editing name, bio, and avatar", "done": false },
         { "id": "perf-7", "item": "yarn build limpo", "done": false }
       ]
@@ -326,12 +327,12 @@
       "comment": "plaza_comment_task"
     },
     "status_map": {
-      "pending":     "pendentes",
+      "pending": "pendentes",
       "in_progress": "em progresso",
-      "in_review":   "em revisão",
-      "blocked":     "bloqueado",
-      "staging":     "em staging",
-      "done":        "completo"
+      "in_review": "em revisão",
+      "blocked": "bloqueado",
+      "staging": "em staging",
+      "done": "completo"
     },
     "agent_rules": [
       "Ao INICIAR uma task: chamar plaza_update_task_status com status 'em progresso'",

@@ -1,0 +1,8 @@
+{
+  "id": "13:137",
+  "name": "NavBar",
+  "type": "COMPONENT",
+  "components": [],
+  "screenshot": ".agents/figma/screens/nav-bar.png",
+  "notes": "Top navigation with logo, links, and account menu. Capture responsive states (mobile/desktop)."
+}

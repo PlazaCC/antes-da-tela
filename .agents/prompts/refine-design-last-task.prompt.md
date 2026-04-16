@@ -35,6 +35,9 @@ Este prompt guia um agente a executar refinamentos de design específicos para a
 1. Carregar contexto local: `.agents/poc-context.json`, `.agents/tasks/*`,
    `.agents/figma.meta.json`, `.agents/design-system.meta.json` e
    `.agents/design-system.plan.md`.
+   - Antes de consultar o MCP, verificar se há assets locais em `.agents/figma/`.
+     - Use `.agents/figma/components/*.svg`, `.agents/figma/frames/*.pdf|png` e `.agents/figma/screens/*` quando presentes.
+     - Registrar paths dos assets consumidos e preferir assets locais para comparações e diffs (reduz payload e facilita reproducibilidade).
 2. Determinar task alvo: usar `task_id` se fornecido; caso contrário, escolher a
    última task com status `in_progress` ou `pending` conforme `execution_order`.
 3. Extrair referências de design da task alvo (componentes, nodes, tokens).

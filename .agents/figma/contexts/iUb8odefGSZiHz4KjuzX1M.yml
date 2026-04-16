@@ -1,0 +1,540 @@
+metadata:
+  name: Antes da Tela — Design System
+  components:
+    13:132:
+      id: 13:132
+      key: 5924e33d25f9f5c01ffa77e3ec1ee4f956b1740e
+      name: ReactionBar
+    13:102:
+      id: 13:102
+      key: cbb9ba63cbef013058e773a53a4ef9a261842c9b
+      name: Property 1=Normal
+      componentSetId: 13:114
+    13:103:
+      id: 13:103
+      key: c3ea97146e5c8c8572892efa44f61ebe03bc5820
+      name: Property 1=Selected
+      componentSetId: 13:114
+    13:133:
+      id: 13:133
+      key: aac91fad4f37ef37ef6ed68f4793926febdf90ae
+      name: StarRating
+      propertyDefinitions:
+        Title:
+          type: text
+          defaultValue: Narrativa
+    13:137:
+      id: 13:137
+      key: 9793c93a4f61a4e179128f7bdca24900f085731a
+      name: NavBar
+    28:56:
+      id: 28:56
+      key: d6764ee09d5120a4275b0eee426415b8625cb5f1
+      name: Logo
+    3:74:
+      id: 3:74
+      key: 677025dfa6bb15b786b1fcac02a73806750897fa
+      name: Type=Primary, Size=SM
+      componentSetId: 13:84
+    3:49:
+      id: 3:49
+      key: 62a94a573de0c9de1d8ad4a5a64df5a4a43565e9
+      name: Hover=Default
+      componentSetId: 3:51
+    3:50:
+      id: 3:50
+      key: 347499eac381a86b87448aaba75bb715c9810d5a
+      name: Hover=Hover
+      componentSetId: 3:51
+    3:65:
+      id: 3:65
+      key: 0138468c9fdfe1652618bdd99f47010b9ce48e23
+      name: State=Default
+      componentSetId: 3:66
+    3:64:
+      id: 3:64
+      key: 13a8c525bd941f8ac341cbed94090efac26394a9
+      name: State=Focused
+      componentSetId: 3:66
+    3:63:
+      id: 3:63
+      key: be7d2f86fe508ed756a1b02ca65fc4b67047545e
+      name: State=Error
+      componentSetId: 3:66
+    3:62:
+      id: 3:62
+      key: 34e68437382adf9b6c2659f39d55c2bba0b2bb68
+      name: State=Disabled
+      componentSetId: 3:66
+    3:73:
+      id: 3:73
+      key: cc883fcf171653df25ad8a4c29a45860737e3ffb
+      name: Type=Primary, Size=MD
+      componentSetId: 13:84
+    3:72:
+      id: 3:72
+      key: fd6696f3531a9abbad348be3ba2b3daa5fcfb3f7
+      name: Type=Primary, Size=LG
+      componentSetId: 13:84
+    3:71:
+      id: 3:71
+      key: 7d4cee308fd09f8074bf9611ec7f1cdb0e3b6e10
+      name: Type=Secondary, Size=SM
+      componentSetId: 13:84
+    3:70:
+      id: 3:70
+      key: ef27ee92952057008c0a8275b564b09af77a13c5
+      name: Type=Secondary, Size=MD
+      componentSetId: 13:84
+    3:69:
+      id: 3:69
+      key: c77daccf379b476aedf73919eb5c2601702ffdef
+      name: Type=Secondary, Size=LG
+      componentSetId: 13:84
+    3:75:
+      id: 3:75
+      key: bc04fc4ff76f808840c9e6feef5cfaab53cec8a0
+      name: Type=Ghost, Size=SM
+      componentSetId: 13:84
+    3:76:
+      id: 3:76
+      key: 0736336a7e05dfbaaa4886094e8ffa078c3d3156
+      name: Type=Ghost, Size=MD
+      componentSetId: 13:84
+    3:77:
+      id: 3:77
+      key: 087c915479a4a54be677bef9e2bff4a5094fa7bc
+      name: Type=Ghost, Size=LG
+      componentSetId: 13:84
+    3:78:
+      id: 3:78
+      key: 557f441a19b177de3a8b8a8271df59e8399a324d
+      name: Type=Destructive, Size=SM
+      componentSetId: 13:84
+    3:79:
+      id: 3:79
+      key: b81a55f113e7253b4e4598119b2224bbe249f084
+      name: Type=Destructive, Size=MD
+      componentSetId: 13:84
+    13:80:
+      id: 13:80
+      key: 3505d355348845ed7642711595ecef52ff40eee4
+      name: Type=Destructive, Size=LG
+      componentSetId: 13:84
+    13:81:
+      id: 13:81
+      key: 6f78b50b09364b809fbb9f552d73cebcb1dac99b
+      name: Type=Disabled, Size=SM
+      componentSetId: 13:84
+    13:82:
+      id: 13:82
+      key: cb45ce73b8d3dfb19573e20d05eef1346c05b21d
+      name: Type=Disabled, Size=MD
+      componentSetId: 13:84
+    13:83:
+      id: 13:83
+      key: f5f5ca757e572e54faa2a02fd1cd8abd28827a52
+      name: Type=Disabled, Size=LG
+      componentSetId: 13:84
+    13:94:
+      id: 13:94
+      key: 12c3b9eead1a3b52b43d4ef37b2db136fb7200f3
+      name: Type=Crítico
+      componentSetId: 13:95
+    100:817:
+      id: 100:817
+      key: dbc77183cde7b07999b2c264a579bd09436ff50c
+      name: New
+      componentSetId: 13:95
+    13:93:
+      id: 13:93
+      key: 8d8537d82c14bc45b4bf98163807e72af802f068
+      name: Type=Importante
+      componentSetId: 13:95
+    13:92:
+      id: 13:92
+      key: e2f76fe48220b90ce8e899e52bb673c01b028a12
+      name: Type=Neutro
+      componentSetId: 13:95
+    13:91:
+      id: 13:91
+      key: 18183224ff85bdfbb6a450b94853f26fb87d858c
+      name: Type=Publicado
+      componentSetId: 13:95
+    13:90:
+      id: 13:90
+      key: c9cd9c0bcfba64e72021a664b2bb6b07832a89e1
+      name: Type=Rascunho
+      componentSetId: 13:95
+    13:89:
+      id: 13:89
+      key: 3c374c69c7b2785ab667d6d59b9ea8c77cc51c99
+      name: Type=Privado
+      componentSetId: 13:95
+    13:88:
+      id: 13:88
+      key: 206a05b56b11156639e3b30f01fff23a5f09edb9
+      name: Type=Drama
+      componentSetId: 13:95
+    13:87:
+      id: 13:87
+      key: f91b963cfc766225ac41a4c7f7474456872df901
+      name: Type=Thriller
+      componentSetId: 13:95
+    13:86:
+      id: 13:86
+      key: 54dd11113e80b2cf7f6f94cfca96cd2542483b4f
+      name: Type=Comédia
+      componentSetId: 13:95
+    38:53:
+      id: 38:53
+      key: 0810ef58d99fcb9aafce5759d9ef182202f4d484
+      name: Type=Type10
+      componentSetId: 13:95
+    13:135:
+      id: 13:135
+      key: d8e80e5b9b63865773e6ea028be387a142a4ebb4
+      name: Property 1=Root
+      componentSetId: 13:136
+    48:956:
+      id: 48:956
+      key: dfe56650895c44aa746a98b566a94e19315768ce
+      name: Property 1=Simple
+      componentSetId: 13:136
+    38:115:
+      id: 38:115
+      key: 788750ed7e17471a99ac56cc6757b98a9d89205c
+      name: Avatar
+    13:134:
+      id: 13:134
+      key: 6f891d27a4d24ab6df7df926ba75d5886205612a
+      name: Property 1=Reply
+      componentSetId: 13:136
+    13:142:
+      id: 13:142
+      key: d85928b0208cb8f93024bf7d8ec78954f0f25177
+      name: Metric Color=Positive
+      componentSetId: 13:145
+    13:143:
+      id: 13:143
+      key: 5cf06a159addf0e8e2b61e0308c33eb140b6eb2a
+      name: Metric Color=Negative
+      componentSetId: 13:145
+    13:144:
+      id: 13:144
+      key: 0baa2991032b9d21e9617439d33a4066c72a07d9
+      name: Metric Color=Neutral
+      componentSetId: 13:145
+    29:105:
+      id: 29:105
+      key: eabc6e77c11f1cee89e7a49f1f645984ba17b598
+      name: Dropdown
+    38:97:
+      id: 38:97
+      key: 0e95b73aa0488ef0ef6bc1bd30d8dc3dbeda07db
+      name: Property 1=Default
+      componentSetId: 48:905
+    48:904:
+      id: 48:904
+      key: f58819a46bcc7d84866acffda2531a0b52d273ad
+      name: Property 1=Simple
+      componentSetId: 48:905
+    100:621:
+      id: 100:621
+      key: c2d1ce6b459ed8ca43e91915dd810f504ce4d2de
+      name: Property 1=Input selected
+      componentSetId: 100:622
+    100:620:
+      id: 100:620
+      key: 4e32142a496e88c4bd2e1a2be947d1eb34f54387
+      name: Property 1=Input Base
+      componentSetId: 100:622
+    100:702:
+      id: 100:702
+      key: 7b1c86307c4ce3aed4563b1335a7620162b0cf3a
+      name: Property 1=Input profile
+      componentSetId: 100:622
+    100:619:
+      id: 100:619
+      key: 8fba55eed1876134219a227e4fdbdba98e591dd8
+      name: Property 1=Input tagline
+      componentSetId: 100:622
+    100:666:
+      id: 100:666
+      key: 8a7f28590b9de5cc8208eb7517e5cca9cf8418c0
+      name: Property 1=Input description
+      componentSetId: 100:622
+    102:562:
+      id: 102:562
+      key: 72c296098114b1d8a326bb76b697c20a494bea88
+      name: On=Radio On
+      componentSetId: 102:564
+    102:563:
+      id: 102:563
+      key: e47c869dab853ccedb1a180e4fa6e0fc83a70ed7
+      name: On=Radio Off
+      componentSetId: 102:564
+    100:1302:
+      id: 100:1302
+      key: 73e01e65fd0be28889e8a3e53ea916fddacff7ac
+      name: Property 1=file
+      componentSetId: 100:1303
+    100:1352:
+      id: 100:1352
+      key: c856116c46891a1601811bc7e053d6761fd97523
+      name: Property 1=Arquivo upado
+      componentSetId: 100:1303
+    100:1301:
+      id: 100:1301
+      key: 11b07ddfc0f9d47580b6e28876a3fe932c636e8a
+      name: Property 1=audio
+      componentSetId: 100:1303
+    115:593:
+      id: 115:593
+      key: dbf52ff96428b1c77a4ab2870c02aa57061b162e
+      name: Property 1=Variant4
+      componentSetId: 100:1303
+    115:1295:
+      id: 115:1295
+      key: b9482bf4ec1049bccd697104f973173808da5547
+      name: Property 1=Progress 1
+      componentSetId: 115:1296
+    115:1294:
+      id: 115:1294
+      key: 4d29e951bafed883e76a540fb6cb4845eef797a0
+      name: Property 1=Progress 2
+      componentSetId: 115:1296
+    115:1293:
+      id: 115:1293
+      key: b3cfc98c1fb1fa3ba87cb5159793cd2ef2e7089f
+      name: Property 1=Progress 3
+      componentSetId: 115:1296
+    115:1292:
+      id: 115:1292
+      key: d5dd68dac1e76d26e11cd49ca52d6a5b04d89ed2
+      name: Property 1=Progress 4
+      componentSetId: 115:1296
+    44:252:
+      id: 44:252
+      key: 1b42e1f88982879590e13ffebaac6fa638bf60cc
+      name: Logo
+    38:123:
+      id: 38:123
+      key: 9195ea810b6cee2c55189a0012b268a05dc913b1
+      name: RatingBox
+    38:117:
+      id: 38:117
+      key: ceacdee718a3ff0d07946f158d7ca44650c040f7
+      name: Property 1=Default
+      componentSetId: 38:119
+    38:118:
+      id: 38:118
+      key: ce629dc260a6517760c1eeebf2f4c3ee3997663c
+      name: Property 1=Following
+      componentSetId: 38:119
+    38:145:
+      id: 38:145
+      key: f038203d885b06ab3a18e30e037e13c8d987b75d
+      name: Property 1=Default
+      componentSetId: 48:644
+    38:147:
+      id: 38:147
+      key: f077e95be362d80868ffec7e94b2f5b69ff97a29
+      name: Property 1=Expanded
+      componentSetId: 48:644
+    46:427:
+      id: 46:427
+      key: b531217684803d7eeece89687754d05057c42b7a
+      name: Property 1=Default
+      componentSetId: 50:1747
+    48:836:
+      id: 48:836
+      key: d8d1b7d64c577db99ee856fdcdf1788665caac21
+      name: Property 1=Default
+      componentSetId: 50:1915
+    48:797:
+      id: 48:797
+      key: 48a44b7546239a67b385939012778126eb15d829
+      name: Simple Info
+    48:851:
+      id: 48:851
+      key: ff801dd625406c8a5d51abad5f24f3939e7ee875
+      name: CloseButton
+    48:920:
+      id: 48:920
+      key: cf91025015d70a7cbb2a7412862ab7dd8022b6bb
+      name: RatingInfo
+    48:1122:
+      id: 48:1122
+      key: 160946b2ad03dd3e20aa93d8ae903895826eac93
+      name: Filter Section Header
+    48:1107:
+      id: 48:1107
+      key: 70a3bad0abd32c2e966c08788c3db46a3add4a2d
+      name: Checkbox
+    48:1094:
+      id: 48:1094
+      key: bf2ff6c1d6aa25e685861c2b36fe0756d30ba99f
+      name: Checkbox Input
+      propertyDefinitions:
+        Checked:
+          type: boolean
+          defaultValue: true
+    50:1746:
+      id: 50:1746
+      key: bae73c583f6863e4f2b89992bb26e5fddecc9817
+      name: Property 1=Full Frame
+      componentSetId: 50:1747
+    50:1837:
+      id: 50:1837
+      key: 41e6c637ac0df6099c2f96102824162d7f4271fb
+      name: Page Controller
+    50:1836:
+      id: 50:1836
+      key: b3a66325c757e5f5c56b58d5b8488da5f3e6aed3
+      name: Zoom Controller
+    50:1914:
+      id: 50:1914
+      key: 7fc38acd681d941eab115fbbf00d16a51009415f
+      name: Property 1=Default
+      componentSetId: 50:1915
+  componentSets:
+    13:114:
+      id: 13:114
+      key: 31b3b3469747b0eb384a0ce6914b3fb53d954e07
+      name: Reaction
+      description: ''
+    13:84:
+      id: 13:84
+      key: 946b15b521f6e9a93703030814418d5621c1e926
+      name: Button
+      description: ''
+    3:51:
+      id: 3:51
+      key: 588f68a88be14849e127ad69b0645a5b6d9d9aa5
+      name: ScriptCard
+      description: ''
+    3:66:
+      id: 3:66
+      key: ff095bff198aaaa869a637fb0aa2ebfa29707474
+      name: Input
+      description: ''
+    13:95:
+      id: 13:95
+      key: 2aeb051a10db7ab6ec2ce95a47faafeef0fd5a49
+      name: Tag
+      description: ''
+    13:136:
+      id: 13:136
+      key: 447327f0d9ba07da1ec77707c7224eb459f551f9
+      name: Comment
+      description: ''
+    13:145:
+      id: 13:145
+      key: 9d6574a480d5403c7ffcb9b88eb15c501bf0f576
+      name: MetricCard
+      description: ''
+      propertyDefinitions:
+        Title:
+          type: text
+          defaultValue: title
+        Content:
+          type: text
+          defaultValue: '284'
+    48:905:
+      id: 48:905
+      key: 6192d29d8a62f8cb5085fbd02b5c56a6027713ec
+      name: Info
+      description: ''
+    100:622:
+      id: 100:622
+      key: eafcf35594d7dfdac73cb58d876b84b67e836609
+      name: Input
+      description: ''
+    102:564:
+      id: 102:564
+      key: dd2154df18ccc8d36d0ffb1beac98fe40176f493
+      name: Radio box
+      description: ''
+    100:1303:
+      id: 100:1303
+      key: c4ef84aa95c3f76fc0113f882d0a6ba08745bded
+      name: Drag
+      description: ''
+    115:1296:
+      id: 115:1296
+      key: cd85a9d1dd2a3ffd6d47ccc6751b1ead3165f1b3
+      name: Progress
+      description: ''
+    38:119:
+      id: 38:119
+      key: 61a616fece536971e18f2891de03180abaff4e33
+      name: FollowButton
+      description: ''
+    48:644:
+      id: 48:644
+      key: 456beb7ac31dba03b378a3bcee4b2a8b3c9da820
+      name: ScriptCard
+      description: ''
+    50:1747:
+      id: 50:1747
+      key: af4f981ddef219f9239c924551525c839f0f6602
+      name: Header
+      description: ''
+    50:1915:
+      id: 50:1915
+      key: ddf3cc23594fbc4ebfded0a2cb55ea2ba7efc6a1
+      name: Player
+      description: ''
+nodes:
+  - id: 0:1
+    name: 🎨 Foundations
+    type: CANVAS
+    children:
+      - id: 173:19
+        name: Foundations
+        type: FRAME
+        layout: layout_GZSJJF
+        fills: fill_X6Z2WK
+        children:
+          - id: 4:2
+            name: COLOR PALETTE
+            type: TEXT
+            layout: layout_NKFD02
+            text: COLOR PALETTE
+            textStyle: style_GRZM6P
+            fills: fill_O3QP5H
+          - id: 4:3
+            name: Rectangle
+            type: RECTANGLE
+            layout: layout_TEU6YI
+            fills: fill_2JFOXC
+          - id: 4:4
+            name: Color Palette
+            type: TEXT
+            layout: layout_0AXBCJ
+            text: Color Palette
+            textStyle: style_OWLAYH
+            fills: fill_VHFQ3C
+          - id: 4:5
+            name: Backgrounds
+            type: TEXT
+            layout: layout_JVO1TA
+            text: Backgrounds
+            textStyle: style_E3QQTL
+            fills: fill_UFSSS6
+          - id: 4:6
+            name: bg/base
+            type: FRAME
+            layout: layout_D36WZS
+            fills: fill_XN6LGB
+            borderRadius: 4px
+            children:
+              - id: 4:7
+                name: Rectangle
+                type: RECTANGLE
+                layout: layout_WT82Z8
+                fills: fill_X6Z2WK
+                strokes: fill_BWSDHU
+                strokeWeight: 1px
+... (truncated for brevity)

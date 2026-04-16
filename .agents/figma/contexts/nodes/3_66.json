@@ -1,0 +1,8 @@
+{
+  "id": "3:66",
+  "name": "Input",
+  "type": "COMPONENT_SET",
+  "components": ["100:622", "3:67", "3:68"],
+  "screenshot": ".agents/figma/screens/input.png",
+  "notes": "Text input primitives with variants: default, focused, error, with icon, and textarea."
+}
