@@ -1,5 +1,5 @@
 ---
-name: refine-design-last-task
+name: poc-last-task-refine-design
 agent: agent
 description: >-
   Prompt de apoio para refinar o design da última task POC realizada. Baseado na
