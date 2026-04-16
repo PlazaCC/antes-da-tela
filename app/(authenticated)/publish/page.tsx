@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { DragZone } from '@/components/ui/drag-zone'
+import { Input } from '@/components/ui/input'
+import { useAutoFillPublishForm } from '@/lib/dev-mocks'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
 import { useMutation } from '@tanstack/react-query'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { DragZone } from '@/components/ui/drag-zone'
-import { cn } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 const STEP_LABELS = ['Informações', 'Arquivo', 'Categorias', 'Revisão'] as const
 
@@ -164,18 +165,21 @@ export default function PublishPage() {
     }
   }
 
+  // Auto-fill in development for faster form testing.
+  useAutoFillPublishForm(setForm as unknown as Dispatch<SetStateAction<Record<string, unknown>>>)
+
   const canProceedStep1 = form.title.trim().length > 0
   const canProceedStep2 = form.pdfFile !== null && !form.pdfError
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <div className="max-w-2xl mx-auto px-5 py-12">
+    <div className='min-h-screen bg-bg-base'>
+      <div className='max-w-2xl mx-auto px-5 py-12'>
         {/* Progress indicator — pill tabs matching Figma Progress component */}
-        <div className="flex items-center mb-8">
+        <div className='flex items-center mb-8'>
           {STEP_LABELS.map((label, i) => {
             const s = i + 1
             return (
-              <div key={s} className="flex items-center">
+              <div key={s} className='flex items-center'>
                 <div
                   className={cn(
                     'flex items-center gap-2 rounded-sm px-4 py-2 transition-colors',
@@ -184,73 +188,71 @@ export default function PublishPage() {
                       : s === step
                         ? 'bg-brand-accent text-text-primary'
                         : 'bg-surface border border-border-subtle text-text-secondary',
-                  )}
-                >
-                  <span className="font-mono text-label-mono-caps text-xs font-medium tracking-wider">
-                    {s}
-                  </span>
-                  <span className="hidden sm:inline font-mono text-label-mono-caps text-xs font-medium tracking-wider uppercase">
+                  )}>
+                  <span className='font-mono text-label-mono-caps text-xs font-medium tracking-wider'>{s}</span>
+                  <span className='hidden sm:inline font-mono text-label-mono-caps text-xs font-medium tracking-wider uppercase'>
                     {label}
                   </span>
                 </div>
-                {s < 4 && <div className="w-4 h-px bg-border-subtle" />}
+                {s < 4 && <div className='w-4 h-px bg-border-subtle' />}
               </div>
             )
           })}
         </div>
 
-        <div className="bg-surface border border-border-subtle rounded-sm p-8">
+        <div className='bg-surface border border-border-subtle rounded-sm p-8'>
           {/* ── Step 1: Basic Info ─────────────────────────────────── */}
           {step === 1 && (
-            <div className="flex flex-col gap-6">
-              <h1 className="font-display text-heading-3 text-text-primary">Informações Básicas</h1>
+            <div className='flex flex-col gap-6'>
+              <h1 className='font-display text-heading-3 text-text-primary'>Informações Básicas</h1>
 
-              <div className="flex flex-col gap-2">
-                <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
+              {/* dev auto-fill handled by useAutoFillPublishForm */}
+
+              <div className='flex flex-col gap-2'>
+                <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
                   Título *
                 </label>
                 <Input
                   value={form.title}
                   onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="Título do roteiro"
+                  placeholder='Título do roteiro'
                   maxLength={200}
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
+              <div className='flex flex-col gap-2'>
+                <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
                   Logline
                 </label>
                 <Input
                   value={form.logline}
                   onChange={(e) => setForm((prev) => ({ ...prev, logline: e.target.value }))}
-                  placeholder="Descrição em uma frase (máx. 300 caracteres)"
+                  placeholder='Descrição em uma frase (máx. 300 caracteres)'
                   maxLength={300}
                 />
-                <span className="text-xs text-text-muted text-right">{form.logline.length}/300</span>
+                <span className='text-xs text-text-muted text-right'>{form.logline.length}/300</span>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
+              <div className='flex flex-col gap-2'>
+                <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
                   Sinopse
                 </label>
                 <textarea
                   value={form.synopsis}
                   onChange={(e) => setForm((prev) => ({ ...prev, synopsis: e.target.value }))}
-                  placeholder="Sinopse breve (máx. 2000 caracteres)"
+                  placeholder='Sinopse breve (máx. 2000 caracteres)'
                   maxLength={2000}
                   rows={5}
-                  className="w-full rounded-md border border-border-subtle bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className='w-full rounded-md border border-border-subtle bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
                 />
-                <span className="text-xs text-text-muted text-right">{form.synopsis.length}/2000</span>
+                <span className='text-xs text-text-muted text-right'>{form.synopsis.length}/2000</span>
               </div>
 
-              <div className="flex justify-end">
+              <div className='flex justify-end'>
                 <Button
                   onClick={() => setStep(2)}
                   disabled={!canProceedStep1}
-                  className="bg-brand-accent text-primary hover:bg-brand-accent/90"
-                >
+                  className='bg-brand-accent text-primary hover:bg-brand-accent/90'>
                   Continuar
                 </Button>
               </div>
@@ -259,19 +261,18 @@ export default function PublishPage() {
 
           {/* ── Step 2: Files ──────────────────────────────────────── */}
           {step === 2 && (
-            <div className="flex flex-col gap-6">
-              <h1 className="font-display text-heading-3 text-text-primary">Upload do Roteiro</h1>
+            <div className='flex flex-col gap-6'>
+              <h1 className='font-display text-heading-3 text-text-primary'>Upload do Roteiro</h1>
 
-              <div className="flex flex-col gap-2">
-                <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
+              <div className='flex flex-col gap-2'>
+                <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
                   PDF do Roteiro *
                 </label>
                 <div
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
-                  onClick={() => pdfInputRef.current?.click()}
-                >
+                  onClick={() => pdfInputRef.current?.click()}>
                   <DragZone
                     title={form.pdfFile ? form.pdfFile.name : 'Arraste o PDF aqui'}
                     subtitle={
@@ -289,28 +290,25 @@ export default function PublishPage() {
                 </div>
                 <input
                   ref={pdfInputRef}
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
+                  type='file'
+                  accept='application/pdf'
+                  className='hidden'
                   onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) handlePDFSelect(file)
                   }}
                 />
-                {form.pdfError && (
-                  <p className="text-xs text-state-error">{form.pdfError}</p>
-                )}
+                {form.pdfError && <p className='text-xs text-state-error'>{form.pdfError}</p>}
               </div>
 
-              <div className="flex justify-between">
-                <Button variant="ghost" onClick={() => setStep(1)}>
+              <div className='flex justify-between'>
+                <Button variant='ghost' onClick={() => setStep(1)}>
                   Voltar
                 </Button>
                 <Button
                   onClick={() => setStep(3)}
                   disabled={!canProceedStep2}
-                  className="bg-brand-accent text-primary hover:bg-brand-accent/90"
-                >
+                  className='bg-brand-accent text-primary hover:bg-brand-accent/90'>
                   Continuar
                 </Button>
               </div>
@@ -319,39 +317,36 @@ export default function PublishPage() {
 
           {/* ── Step 3: Categorization ─────────────────────────────── */}
           {step === 3 && (
-            <div className="flex flex-col gap-6">
-              <h1 className="font-display text-heading-3 text-text-primary">Categorias</h1>
+            <div className='flex flex-col gap-6'>
+              <h1 className='font-display text-heading-3 text-text-primary'>Categorias</h1>
 
-              <div className="flex flex-col gap-3">
-                <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
+              <div className='flex flex-col gap-3'>
+                <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
                   Gênero
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className='flex flex-wrap gap-2'>
                   {GENRES.map((g) => (
                     <button
                       key={g}
-                      type="button"
-                      onClick={() =>
-                        setForm((prev) => ({ ...prev, genre: prev.genre === g ? '' : g }))
-                      }
+                      type='button'
+                      onClick={() => setForm((prev) => ({ ...prev, genre: prev.genre === g ? '' : g }))}
                       className={cn(
                         'inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border transition-colors',
                         form.genre === g
                           ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
                           : 'bg-surface border-border-subtle text-text-secondary hover:border-brand-accent/50',
-                      )}
-                    >
+                      )}>
                       {g}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3">
-                <label className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
+              <div className='flex flex-col gap-3'>
+                <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
                   Faixa Etária
                 </label>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
                   {AGE_RATINGS.map(({ value, label }) => (
                     <label
                       key={value}
@@ -360,30 +355,26 @@ export default function PublishPage() {
                         form.ageRating === value
                           ? 'border-brand-accent bg-brand-accent/10'
                           : 'border-border-subtle bg-elevated hover:border-brand-accent/50',
-                      )}
-                    >
-                      <span className="text-sm font-medium text-text-primary">{label}</span>
+                      )}>
+                      <span className='text-sm font-medium text-text-primary'>{label}</span>
                       <input
-                        type="radio"
-                        name="ageRating"
+                        type='radio'
+                        name='ageRating'
                         value={value}
                         checked={form.ageRating === value}
                         onChange={() => setForm((prev) => ({ ...prev, ageRating: value }))}
-                        className="h-4 w-4 appearance-none rounded-full border border-border-subtle bg-background checked:border-brand-accent checked:bg-brand-accent focus:outline-none"
+                        className='h-4 w-4 appearance-none rounded-full border border-border-subtle bg-background checked:border-brand-accent checked:bg-brand-accent focus:outline-none'
                       />
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="flex justify-between">
-                <Button variant="ghost" onClick={() => setStep(2)}>
+              <div className='flex justify-between'>
+                <Button variant='ghost' onClick={() => setStep(2)}>
                   Voltar
                 </Button>
-                <Button
-                  onClick={() => setStep(4)}
-                  className="bg-brand-accent text-primary hover:bg-brand-accent/90"
-                >
+                <Button onClick={() => setStep(4)} className='bg-brand-accent text-primary hover:bg-brand-accent/90'>
                   Continuar
                 </Button>
               </div>
@@ -392,41 +383,34 @@ export default function PublishPage() {
 
           {/* ── Step 4: Review ─────────────────────────────────────── */}
           {step === 4 && (
-            <div className="flex flex-col gap-6">
-              <h1 className="font-display text-heading-3 text-text-primary">Revisão e Publicação</h1>
+            <div className='flex flex-col gap-6'>
+              <h1 className='font-display text-heading-3 text-text-primary'>Revisão e Publicação</h1>
 
-              <div className="flex flex-col gap-4 rounded-sm border border-border-subtle bg-elevated p-6">
-                <ReviewRow label="Título" value={form.title} />
-                {form.logline && <ReviewRow label="Logline" value={form.logline} />}
-                {form.synopsis && <ReviewRow label="Sinopse" value={form.synopsis} />}
-                {form.pdfFile && <ReviewRow label="PDF" value={form.pdfFile.name} />}
-                {form.genre && <ReviewRow label="Gênero" value={form.genre} />}
-                {form.ageRating && <ReviewRow label="Faixa Etária" value={form.ageRating} />}
+              <div className='flex flex-col gap-4 rounded-sm border border-border-subtle bg-elevated p-6'>
+                <ReviewRow label='Título' value={form.title} />
+                {form.logline && <ReviewRow label='Logline' value={form.logline} />}
+                {form.synopsis && <ReviewRow label='Sinopse' value={form.synopsis} />}
+                {form.pdfFile && <ReviewRow label='PDF' value={form.pdfFile.name} />}
+                {form.genre && <ReviewRow label='Gênero' value={form.genre} />}
+                {form.ageRating && <ReviewRow label='Faixa Etária' value={form.ageRating} />}
               </div>
 
               {(createMutation.error || uploadError) && (
-                <p className="text-sm text-state-error">
+                <p className='text-sm text-state-error'>
                   {uploadError || 'Erro ao publicar o roteiro. Tente novamente.'}
                 </p>
               )}
 
-              {uploading && (
-                <p className="text-sm text-text-secondary">Enviando PDF...</p>
-              )}
+              {uploading && <p className='text-sm text-text-secondary'>Enviando PDF...</p>}
 
-              <div className="flex justify-between">
-                <Button
-                  variant="ghost"
-                  onClick={() => setStep(3)}
-                  disabled={uploading || createMutation.isPending}
-                >
+              <div className='flex justify-between'>
+                <Button variant='ghost' onClick={() => setStep(3)} disabled={uploading || createMutation.isPending}>
                   Voltar
                 </Button>
                 <Button
                   onClick={handlePublish}
                   disabled={uploading || createMutation.isPending || !userId}
-                  className="bg-brand-accent text-primary hover:bg-brand-accent/90 px-8"
-                >
+                  className='bg-brand-accent text-primary hover:bg-brand-accent/90 px-8'>
                   {createMutation.isPending || uploading ? 'Publicando…' : 'Publicar Roteiro'}
                 </Button>
               </div>
@@ -440,11 +424,11 @@ export default function PublishPage() {
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs">
+    <div className='flex flex-col gap-1'>
+      <span className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
         {label}
       </span>
-      <span className="text-sm text-text-primary">{value}</span>
+      <span className='text-sm text-text-primary'>{value}</span>
     </div>
   )
 }
