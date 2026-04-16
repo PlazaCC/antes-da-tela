@@ -7,7 +7,17 @@
 
 Branch `feat/design-system` já implementou os componentes e tokens. Esta task garante que o merge está correto, os tokens renderizam, e o playground valida o design system visualmente antes das demais features usarem os componentes.
 
+## Next.js — Boas práticas (Design System)
+
+- Importe CSS global somente em `app/layout.tsx` via `app/globals.css`; evite importar CSS global dentro de componentes.
+- Respeite fronteiras Server/Client: mantenha componentes puramente apresentacionais como Server Components; use `'use client'` apenas para componentes que usam hooks, estado ou APIs do navegador.
+- Use `next/font` em `app/layout.tsx` para otimizar carregamento de fontes e evitar layout shifts.
+- Não construa classes Tailwind dinamicamente em tempo de execução; prefira classes estáticas ou `safelist` no `tailwind.config.ts` para evitar problemas com purge.
+- Para bibliotecas pesadas (ícones, gráficos), prefira `next/dynamic({ ssr: false })` para não inflar o bundle do servidor.
+- Use `next/image` quando apropriado e configure domínios remotos em `next.config.js`.
+
 **Arquivos-chave:**
+
 - `tailwind.config.ts` — tokens de cor, tipografia, espaçamento, breakpoints
 - `app/globals.css` — CSS custom properties (HSL channels, não hex)
 - `app/layout.tsx` — fontes Google (Inter, DM Serif Display, DM Mono), ThemeProvider dark
@@ -94,6 +104,7 @@ yarn lint     # deve passar sem warnings
 ```
 
 **Verificação visual (yarn dev):**
+
 - [ ] `http://localhost:3000/development/design-system` — paleta de cores renderiza com as cores corretas do dark mode
 - [ ] `http://localhost:3000/development/components` — todos os componentes listados e interativos
 - [ ] Tag variant `success` → verde, `warning` → amarelo, `error` → vermelho (cores do design system, não raw Tailwind)

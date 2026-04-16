@@ -22,7 +22,19 @@ Perfil público do roteirista e sistema de avaliação por estrelas. Fecha o cic
 
 **Componente disponível:** `StarRating` (`components/ui/star-rating.tsx`)
 
----
+## Next.js — Boas práticas (Perfil / Avaliações)
+
+- A página pública `app/profile/[userId]/page.tsx` deve ser um Server Component que prefetch (`trpc.server`) `users.getProfile` e `scripts.listByAuthor`, e hidratar com `HydrateClient`.
+- A rota de edição `/account` deve viver em `app/(authenticated)/account` e ser protegida por um layout que valida sessão no servidor; evite checks client-only antes de renderizar o formulário.
+- Componentes interativos (ex: `StarRating`, upload de avatar) devem ser Client Components (`'use client'`) e usar otimistic updates com TanStack Query mais invalidação (`queryClient.invalidateQueries`).
+- Proteja o endpoint de avaliações contra auto-avaliação no servidor (TRPC/DB) e retorne erros TRPC claros para o cliente tratar.
+
+## Supabase — Boas práticas (Perfil / Avaliações)
+
+- Use `createServerClient()` to prefetch `users.getProfile` and `scripts.listByAuthor` on the server and hydrate to the client; do not construct a browser client in Server Components.
+- Avatar uploads: for user-uploaded avatars use the `avatars` bucket and upload from the browser to a public bucket or obtain a signed URL from a server `route.ts` if you want private avatars. After upload, update the `users.image` column server-side via a secured tRPC mutation.
+- Protect rating mutations server-side: enforce that `userId !== script.authorId` either in the tRPC resolver or via a DB policy. Return TRPC errors with proper codes (`FORBIDDEN`) for the client to handle.
+- Use optimistic updates for the `StarRating` component and invalidate rating-related queries on success (`queryClient.invalidateQueries(['ratings', scriptId])`).
 
 ## Referência de design (Figma)
 

@@ -33,9 +33,17 @@ export async function createClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options),
             );
-          } catch {
-            // Intentionally ignored: Server Components cannot set cookies.
-            // The middleware proxy handles token rotation before render.
+          } catch (err) {
+            // Intentionally ignore failures in production because Server Components
+            // cannot set cookies, however surface a warning in non-production to
+            // aid debugging.
+            if (process.env.NODE_ENV !== "production") {
+              // eslint-disable-next-line no-console
+              console.warn(
+                "createClient: failed to set cookies in Server Component:",
+                err,
+              );
+            }
           }
         },
       },

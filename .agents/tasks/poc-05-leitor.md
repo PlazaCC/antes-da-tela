@@ -8,34 +8,51 @@
 Feature central da POC. Leitor PDF com `pdfjs-dist` + sidebar de comentários filtrada pela página atual.
 
 **Arquivos a criar:**
+
 - `components/pdf-viewer/pdf-viewer.tsx` — componente principal (Client Component, dynamic import)
 - `components/pdf-viewer/pdf-viewer-store.ts` — Zustand store
 - `components/pdf-viewer/comments-sidebar.tsx` — sidebar de comentários
 - `server/api/comments.ts` — router tRPC
 
 **Arquivos a atualizar:**
+
 - `app/scripts/[id]/script-page-client.tsx` — integrar PDFViewer
 - `server/api/root.ts` — registrar `commentsRouter`
 
 **Regras:** `.agents/rules/nextjs.md` (dynamic imports), `.agents/rules/typescript.md`
 
----
+## Next.js — Boas práticas (Leitor / PDF)
+
+- O viewer deve ser um Client Component importado dinamicamente com `next/dynamic({ ssr: false })` para evitar bundling do `pdfjs-dist` no servidor.
+- Configure o worker do `pdfjs-dist` via `new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()` para evitar problemas de build/worker path.
+- Evite usar `pdfjs-dist` em Server Components; todo acesso ao canvas e APIs do navegador deve ocorrer em efeitos (`useEffect`) em Client Components.
+- Use uma store leve (Zustand) para compartilhar `currentPage`, `zoom` e estado de carregamento entre viewer e sidebar; mantenha a store no diretório do componente (`components/pdf-viewer`).
+- Forneça `loading`/`fallback` via `dynamic` loading component e `Suspense` para boa UX durante renderização do PDF.
+- Forneça `loading`/`fallback` via `dynamic` loading component e `Suspense` para boa UX durante renderização do PDF.
+
+## Supabase — Boas práticas (PDF Viewer)
+
+- Configure o bucket `scripts` com CORS permitindo `GET`/`HEAD` de `http://localhost:3000` e do domínio de produção para que `pdfjs-dist` possa carregar os PDFs diretamente.
+- Prefira servir PDFs de um bucket `public` para o viewer; se precisar de privacidade, gere signed URLs server-side via um `route.ts` que usa o `SERVICE_ROLE` (mantido apenas no servidor).
+- Garanta `Content-Type: application/pdf` no upload e defina `Cache-Control` apropriado para beneficiar o CDN/edge caching (s-maxage/stale-while-revalidate).
+- Use `supabase.storage.from('scripts').getPublicUrl(path)` para URLs públicas ou um server endpoint que retorna a signed URL para arquivos privados.
+- Busque apenas metadados (pageCount, storagePath) no Server Component e hidrate o cliente; evite transferir o arquivo PDF pelo servidor.
 
 ## Referência de design (Figma)
 
-| Tela | Node ID | Descrição |
-|------|---------|-----------|
+| Tela       | Node ID   | Descrição               |
+| ---------- | --------- | ----------------------- |
 | PDF Reader | `51:1007` | Tela completa do leitor |
 
 **Componentes Figma a usar:**
 
-| Componente | Node ID | Uso |
-|------------|---------|-----|
-| `ZoomController` | `50:1836` | Controles de zoom (+ / −) |
-| `PageController` | `50:1837` | Navegação de páginas (◀ página N/total ▶) |
-| `Comment` | `13:136` | Item de comentário na sidebar (variants: root, simple, reply) |
-| `ReactionBar` | `13:132` | Barra de reações nos comentários |
-| `Avatar` | `38:115` | Avatar do autor do comentário |
+| Componente       | Node ID   | Uso                                                           |
+| ---------------- | --------- | ------------------------------------------------------------- |
+| `ZoomController` | `50:1836` | Controles de zoom (+ / −)                                     |
+| `PageController` | `50:1837` | Navegação de páginas (◀ página N/total ▶)                     |
+| `Comment`        | `13:136`  | Item de comentário na sidebar (variants: root, simple, reply) |
+| `ReactionBar`    | `13:132`  | Barra de reações nos comentários                              |
+| `Avatar`         | `38:115`  | Avatar do autor do comentário                                 |
 
 **Layout (da spec do design system):**
 
@@ -55,20 +72,20 @@ Mobile (375px–768px):
 
 **Tokens de design:**
 
-| Elemento | Tailwind class |
-|----------|---------------|
-| Fundo do leitor | `bg-base` |
-| Canvas do PDF | `rounded-sm border border-subtle shadow-elevation-1` |
-| Sidebar | `bg-surface border-l border-subtle` |
-| Header da sidebar "Página N" | `font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs` |
-| Textarea de comentário | `bg-elevated border-subtle rounded-sm resize-none focus:ring-1 focus:ring-brand-accent` |
-| Botão "Comentar" | `bg-brand-accent text-primary` (variant `default`, size `sm`) |
-| Comentário existente | `bg-elevated rounded-sm p-3 border border-subtle` |
-| Autor do comentário | `text-primary text-body-small font-medium` |
-| Data do comentário | `text-muted font-mono text-label-mono-small` |
-| ZoomController | `bg-elevated border border-subtle rounded-sm px-3 py-1.5` |
-| PageController | `bg-elevated border border-subtle rounded-sm flex items-center gap-2` |
-| Sticky bar do viewer | `sticky top-0 z-10 bg-base/90 backdrop-blur-sm py-2 border-b border-subtle` |
+| Elemento                     | Tailwind class                                                                          |
+| ---------------------------- | --------------------------------------------------------------------------------------- |
+| Fundo do leitor              | `bg-base`                                                                               |
+| Canvas do PDF                | `rounded-sm border border-subtle shadow-elevation-1`                                    |
+| Sidebar                      | `bg-surface border-l border-subtle`                                                     |
+| Header da sidebar "Página N" | `font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs`        |
+| Textarea de comentário       | `bg-elevated border-subtle rounded-sm resize-none focus:ring-1 focus:ring-brand-accent` |
+| Botão "Comentar"             | `bg-brand-accent text-primary` (variant `default`, size `sm`)                           |
+| Comentário existente         | `bg-elevated rounded-sm p-3 border border-subtle`                                       |
+| Autor do comentário          | `text-primary text-body-small font-medium`                                              |
+| Data do comentário           | `text-muted font-mono text-label-mono-small`                                            |
+| ZoomController               | `bg-elevated border border-subtle rounded-sm px-3 py-1.5`                               |
+| PageController               | `bg-elevated border border-subtle rounded-sm flex items-center gap-2`                   |
+| Sticky bar do viewer         | `sticky top-0 z-10 bg-base/90 backdrop-blur-sm py-2 border-b border-subtle`             |
 
 ---
 
@@ -356,40 +373,42 @@ import { z } from 'zod'
 
 export const commentsRouter = createTRPCRouter({
   list: publicProcedure
-    .input(z.object({
-      scriptId: z.string().uuid(),
-      pageNumber: z.number().int().min(1),
-    }))
+    .input(
+      z.object({
+        scriptId: z.string().uuid(),
+        pageNumber: z.number().int().min(1),
+      }),
+    )
     .query(async ({ input }) => {
       return db.query.comments.findMany({
         where: (c, { eq, and, isNull }) =>
-          and(
-            eq(c.scriptId, input.scriptId),
-            eq(c.pageNumber, input.pageNumber),
-            isNull(c.deletedAt),
-          ),
+          and(eq(c.scriptId, input.scriptId), eq(c.pageNumber, input.pageNumber), isNull(c.deletedAt)),
         orderBy: (c, { asc }) => [asc(c.createdAt)],
         with: { author: { columns: { id: true, name: true, image: true } } },
       })
     }),
 
   create: publicProcedure
-    .input(z.object({
-      scriptId: z.string().uuid(),
-      pageNumber: z.number().int().min(1),
-      content: z.string().min(1).max(1000),
-      authorId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        scriptId: z.string().uuid(),
+        pageNumber: z.number().int().min(1),
+        content: z.string().min(1).max(1000),
+        authorId: z.string().uuid(),
+      }),
+    )
     .mutation(async ({ input }) => {
       const [comment] = await db.insert(comments).values(input).returning()
       return comment
     }),
 
   delete: publicProcedure
-    .input(z.object({
-      commentId: z.string().uuid(),
-      authorId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        commentId: z.string().uuid(),
+        authorId: z.string().uuid(),
+      }),
+    )
     .mutation(async ({ input }) => {
       await db
         .update(comments)
@@ -438,6 +457,7 @@ yarn lint
 ```
 
 **Fluxo end-to-end (yarn dev):**
+
 - [ ] PDF abre e renderiza na rota `/scripts/[id]`
 - [ ] PageController (◀/▶) navega entre páginas — comentários na sidebar atualizam automaticamente
 - [ ] ZoomController (+/−) muda o tamanho do PDF

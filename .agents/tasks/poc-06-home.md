@@ -8,6 +8,7 @@
 Página inicial da POC. Hub de descoberta com SSR obrigatório para SEO e TanStack Query para interatividade client-side.
 
 **Arquivos a criar:**
+
 - `app/page.tsx` — Server Component com prefetch tRPC
 - `app/home-client.tsx` — Client Component com filtros e busca
 
@@ -15,54 +16,69 @@ Página inicial da POC. Hub de descoberta com SSR obrigatório para SEO e TanSta
 
 **Regras:** `.agents/rules/nextjs.md` (SSR prefetch pattern), `.agents/rules/typescript.md`
 
----
+## Next.js — Boas práticas (Home / SSR)
+
+- A `app/page.tsx` deve ser um Server Component que faz prefetch das queries principais (`trpc.scripts.listRecent`, `trpc.scripts.listFeatured`) usando `trpc.server` e `HydrateClient` para tornar o HTML inicial indexável por SEO.
+- Defina metadata estático ou dinâmico via `generateMetadata` quando necessário para cada rota/ página.
+- Use revalidação (ISR) ou cache-control adequado para reduzir latência em páginas de listagem; prefira prefetch server-side para conteúdo SEO-critical.
+- A parte interativa (busca com debounce, filtros) deve ser um Client Component que consome dados já hidratados ou faz queries dependentes via `useTRPC()`.
+- Evite chamadas fetch duplicadas: quando possível prefetch no servidor e hidrate ao cliente com `HydrateClient` para evitar waterfall de requisições.
+
+## Supabase — Boas práticas (Home / SSR)
+
+- Use `createServerClient()` in `app/page.tsx` Server Components when you need to fetch Supabase data (or prefetch via `trpc.server`) so queries execute server-side and the HTML contains the data for SEO.
+- Do not instantiate browser clients in Server Components — that causes runtime errors and leaks anon keys; server-side code must use the server client pattern that reads cookies where necessary.
+- For list pages, consider caching strategy: prefetch server-side and use ISR or cache-control headers; when using Supabase Realtime or Edge, choose appropriate staleness for the feed.
+- Avoid exposing administrative queries to the client; any privileged data must be returned via server-side routes or tRPC procedures that enforce authorization.
 
 ## Referência de design (Figma)
 
-| Tela | Node ID | Descrição |
-|------|---------|-----------|
-| Home | `51:562` | Tela principal com feed de roteiros |
-| Search Sheet | `51:820` | Busca com resultados em overlay/sheet |
-| Filter Page | `51:930` | Página de filtros por gênero/classificação |
+| Tela         | Node ID  | Descrição                                  |
+| ------------ | -------- | ------------------------------------------ |
+| Home         | `51:562` | Tela principal com feed de roteiros        |
+| Search Sheet | `51:820` | Busca com resultados em overlay/sheet      |
+| Filter Page  | `51:930` | Página de filtros por gênero/classificação |
 
 **Componentes Figma a usar:**
 
-| Componente | Node ID | Uso |
-|------------|---------|-----|
-| `NavBar` | `13:137` | Barra de navegação superior fixa |
-| `Logo` | `28:56` | Logotipo no NavBar |
-| `ScriptCard` | `3:51` | Card de roteiro na grid |
-| `Input` | `3:66` | Campo de busca |
-| `Tag` | `13:95` | Filtro de gênero (variant: drama, thriller, etc.) |
-| `Button` | `13:84` | CTA "Publicar" + botão "Todos" nos filtros |
-| `FilterSectionHeader` | `48:1122` | Header de seção de filtros |
-| `Checkbox` | `48:1107` | Filtros na Filter Page |
+| Componente            | Node ID   | Uso                                               |
+| --------------------- | --------- | ------------------------------------------------- |
+| `NavBar`              | `13:137`  | Barra de navegação superior fixa                  |
+| `Logo`                | `28:56`   | Logotipo no NavBar                                |
+| `ScriptCard`          | `3:51`    | Card de roteiro na grid                           |
+| `Input`               | `3:66`    | Campo de busca                                    |
+| `Tag`                 | `13:95`   | Filtro de gênero (variant: drama, thriller, etc.) |
+| `Button`              | `13:84`   | CTA "Publicar" + botão "Todos" nos filtros        |
+| `FilterSectionHeader` | `48:1122` | Header de seção de filtros                        |
+| `Checkbox`            | `48:1107` | Filtros na Filter Page                            |
 
 **Tokens de design:**
 
-| Elemento | Tailwind class |
-|----------|---------------|
-| Fundo da página | `bg-base` |
-| NavBar | `bg-base border-b border-subtle sticky top-0 z-50` |
-| Container principal | `max-w-[1140px] mx-auto px-5` |
-| Seção hero | `py-16` |
-| Título hero | `font-display text-display` (DM Serif Display 56px) |
-| Subtítulo | `text-secondary text-body-large max-w-xl` |
-| CTA "Publicar" | `bg-brand-accent text-primary hover:opacity-90` |
-| Título de seção (Em destaque / Recentes) | `font-display text-heading-2` (DM Serif Display 32px) |
-| Input de busca | `bg-elevated border-subtle max-w-xs` |
-| Tag de gênero inativo | `bg-elevated border-subtle text-secondary` |
-| Tag de gênero ativo | `bg-brand-accent/10 border-brand-accent text-brand-accent` |
-| Grid de roteiros | `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4` |
-| Mensagem vazia | `text-muted text-body-small` |
+| Elemento                                 | Tailwind class                                             |
+| ---------------------------------------- | ---------------------------------------------------------- |
+| Fundo da página                          | `bg-base`                                                  |
+| NavBar                                   | `bg-base border-b border-subtle sticky top-0 z-50`         |
+| Container principal                      | `max-w-[1140px] mx-auto px-5`                              |
+| Seção hero                               | `py-16`                                                    |
+| Título hero                              | `font-display text-display` (DM Serif Display 56px)        |
+| Subtítulo                                | `text-secondary text-body-large max-w-xl`                  |
+| CTA "Publicar"                           | `bg-brand-accent text-primary hover:opacity-90`            |
+| Título de seção (Em destaque / Recentes) | `font-display text-heading-2` (DM Serif Display 32px)      |
+| Input de busca                           | `bg-elevated border-subtle max-w-xs`                       |
+| Tag de gênero inativo                    | `bg-elevated border-subtle text-secondary`                 |
+| Tag de gênero ativo                      | `bg-brand-accent/10 border-brand-accent text-brand-accent` |
+| Grid de roteiros                         | `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`     |
+| Mensagem vazia                           | `text-muted text-body-small`                               |
 
 **NavBar:**
+
 - Esquerda: Logo
 - Centro: Link "Home", Link "Roteiros"
 - Direita: Botão "Publicar" (`bg-brand-accent`, variant `default`) + Avatar/login
 - Sticky no topo, altura 64px, `bg-base border-b border-subtle`
 
 **Hero section:**
+
 - Título em DM Serif Display (`font-display text-display`)
 - Pode incluir uma palavra em itálico com `font-display italic`
 - Subtítulo em Inter body/large (`text-body-large text-secondary`)
@@ -293,6 +309,7 @@ yarn lint
 ```
 
 **Verificação (yarn dev):**
+
 - [ ] `view-source:http://localhost:3000` contém os títulos dos roteiros (SSR confirmado)
 - [ ] NavBar sticky no topo com logo, link home, botão "Publicar" em brand-accent
 - [ ] Hero com DM Serif Display e subtítulo Inter

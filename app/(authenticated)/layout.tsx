@@ -1,6 +1,7 @@
+import { createClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import React from 'react'
 
 /**
  * Authenticated route-group layout.
@@ -16,11 +17,15 @@ import { createClient } from '@/lib/supabase/server'
  *   - The proxy also forwards the request pathname via `x-pathname` so we
  *     can build an accurate `?next=` redirect URL without usePathname().
  */
-export default async function AuthenticatedLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <React.Suspense fallback={null}>
+      <AuthCheck>{children}</AuthCheck>
+    </React.Suspense>
+  )
+}
+
+async function AuthCheck({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data } = await supabase.auth.getClaims()
 
