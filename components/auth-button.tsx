@@ -4,6 +4,10 @@ import { GoogleAuthButton } from './google-auth-button'
 
 export async function AuthButton() {
   const supabase = await createClient()
+  // getClaims() is intentional here — this is a display-only component, not a
+  // security boundary. The token is always fresh because proxy.ts calls
+  // getUser() on every request before this renders. Route protection (the
+  // actual security check) lives in app/(authenticated)/layout.tsx via getUser().
   const { data } = await supabase.auth.getClaims()
   const user = data?.claims
 

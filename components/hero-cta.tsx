@@ -5,6 +5,8 @@ import { Button } from './ui/button'
 
 export async function HeroCTA() {
   const supabase = await createClient()
+  // getClaims() is intentional — display-only check. Token is fresh because
+  // proxy.ts calls getUser() before render. Security boundary is in layout.tsx.
   const { data } = await supabase.auth.getClaims()
 
   if (data?.claims) {

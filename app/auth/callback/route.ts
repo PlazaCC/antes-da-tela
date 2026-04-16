@@ -1,5 +1,7 @@
+import withErrorHandler from '@/lib/api/withErrorHandler'
+import { captureException } from '@/lib/sentry'
 import { createRouteHandlerClient } from '@/lib/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 /**
  * OAuth callback route — receives the authorization code from Supabase's
@@ -15,7 +17,7 @@ import { NextRequest, NextResponse } from 'next/server'
  * Uses `createRouteHandlerClient` (not `createClient`) so that `setAll`
  * errors are NOT swallowed — persisting the session cookie is critical here.
  */
-export async function GET(request: NextRequest) {
+async function handler(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
@@ -50,10 +52,7 @@ export async function GET(request: NextRequest) {
         {
           id: user.id,
           name: String(
-            user.user_metadata?.full_name ??
-              user.user_metadata?.name ??
-              user.email?.split('@')[0] ??
-              'User',
+            user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'User',
           ).slice(0, 100),
           email: user.email!,
           image: user.user_metadata?.avatar_url ?? null,
@@ -63,10 +62,20 @@ export async function GET(request: NextRequest) {
       .then(
         (res) => {
           if (res.error) {
+            try {
+              captureException(res.error, { userId: user.id })
+            } catch {
+              /* ignore */
+            }
             console.error('Failed to upsert user after OAuth exchange', res.error.message)
           }
         },
         (err) => {
+          try {
+            captureException(err, { userId: user.id })
+          } catch {
+            /* ignore */
+          }
           console.error('Failed to upsert user after OAuth exchange', err)
         },
       )
@@ -74,7 +83,17 @@ export async function GET(request: NextRequest) {
     const destination = next.startsWith('/') ? next : '/'
     return NextResponse.redirect(`${origin}${destination}`)
   } catch (err) {
-    console.error('Error during auth callback handling', err)
-    return NextResponse.redirect(`${origin}/auth/error`)
+    // Report to Sentry and redirect to error page
+    try {
+      const id = captureException(err)
+      // include the Sentry event id so support can correlate logs
+      return NextResponse.redirect(`${origin}/auth/error?eventId=${encodeURIComponent(String(id))}`)
+    } catch {
+      console.error('Error during auth callback handling', err)
+      return NextResponse.redirect(`${origin}/auth/error`)
+    }
   }
 }
+
+export const GET = withErrorHandler(handler)
+export { handler }

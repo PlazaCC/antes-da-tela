@@ -1,35 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
+import withErrorHandler from '@/lib/api/withErrorHandler'
+import { AppError } from '@/lib/errors'
 import { Resend } from 'resend'
 
-export async function POST(req: NextRequest) {
+async function handler(req: Request) {
   const API_KEY = process.env.RESEND_API_KEY
   const TEST_TO = process.env.TEST_RESEND_TO
 
   if (!API_KEY) {
-    return NextResponse.json({ error: 'RESEND_API_KEY não está configurada' }, { status: 500 })
+    throw new AppError('RESEND_API_KEY não está configurada', { code: 'MISSING_CONFIG', statusCode: 500 })
   }
   if (!TEST_TO) {
-    return NextResponse.json({ error: 'TEST_RESEND_TO não está configurado' }, { status: 500 })
+    throw new AppError('TEST_RESEND_TO não está configurado', { code: 'MISSING_CONFIG', statusCode: 500 })
   }
 
   const resend = new Resend(API_KEY)
 
-  const { to } = await req.json()
+  const { to } = await (req as Request).json()
   // Só permite envio para o e-mail de teste configurado
   if (to !== TEST_TO) {
-    return NextResponse.json({ error: 'Só é permitido enviar para o e-mail de teste configurado.' }, { status: 400 })
+    throw new AppError('Só é permitido enviar para o e-mail de teste configurado.', {
+      code: 'INVALID_ARG',
+      statusCode: 400,
+    })
   }
 
-  try {
-    await resend.emails.send({
-      from: 'noreply@resend.dev',
-      to,
-      subject: 'Teste Resend Plaza',
-      html: `<h2>Teste de envio via Resend</h2><p>Se você recebeu este e-mail, o Resend está funcionando! 🎉</p>`,
-    })
-    return NextResponse.json({ success: true })
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error)
-    return NextResponse.json({ error: message || 'Erro desconhecido' }, { status: 500 })
-  }
+  await resend.emails.send({
+    from: 'noreply@resend.dev',
+    to,
+    subject: 'Teste Resend Plaza',
+    html: `<h2>Teste de envio via Resend</h2><p>Se você recebeu este e-mail, o Resend está funcionando! 🎉</p>`,
+  })
+
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { 'content-type': 'application/json' },
+  })
 }
+
+export const POST = withErrorHandler(handler)

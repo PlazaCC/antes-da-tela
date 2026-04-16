@@ -11,11 +11,12 @@ import React from 'react'
  * stays `/account`, etc.
  *
  * Strategy:
- *   - getClaims() reads the JWT from the cookie set by middleware.  It is a
- *     local operation (no network call) and is safe because proxy.ts
- *     already called getUser() to refresh the token on every request.
- *   - The proxy also forwards the request pathname via `x-pathname` so we
- *     can build an accurate `?next=` redirect URL without usePathname().
+ *   - getUser() contacts the Supabase Auth server to verify the token is still
+ *     valid. This is intentionally chosen over getClaims() (which only decodes
+ *     the JWT locally) because proxy.ts silently falls through on errors, so a
+ *     locally-decodable but server-expired token would pass a getClaims() check.
+ *   - The proxy forwards the request pathname via `x-pathname` so we can build
+ *     an accurate `?next=` redirect URL without usePathname().
  */
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,9 +28,9 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 
 async function AuthCheck({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
-  const { data } = await supabase.auth.getClaims()
+  const { data } = await supabase.auth.getUser()
 
-  if (!data?.claims) {
+  if (!data?.user) {
     const h = await headers()
     const pathname = h.get('x-pathname') ?? '/'
     redirect(`/auth/login?next=${encodeURIComponent(pathname)}`)

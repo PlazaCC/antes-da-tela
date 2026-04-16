@@ -7,17 +7,17 @@ export function captureException(err: unknown, context?: Record<string, unknown>
     return eventId
   } catch (e) {
     // Fallback: log to console if Sentry fails
-    // eslint-disable-next-line no-console
     console.error('Sentry.captureException failed', e)
     return ''
   }
 }
 
-export function captureMessage(message: string, level: Sentry.Severity = 'info') {
+type SeverityLevel = 'fatal' | 'error' | 'warning' | 'log' | 'info' | 'debug'
+
+export function captureMessage(message: string, level: SeverityLevel = 'info') {
   try {
     Sentry.captureMessage(message, level)
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error('Sentry.captureMessage failed', e)
   }
 }

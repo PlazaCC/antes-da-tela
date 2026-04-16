@@ -1,8 +1,8 @@
-import { createServerClient } from '@supabase/ssr'
+import { createRouteHandlerClient } from '@/lib/supabase/server'
 import { NextResponse, type NextRequest } from 'next/server'
 
 /**
- * Session proxy — called from `middleware.ts` on every matched request.
+ * Session proxy — called from `proxy.ts` on every matched request.
  *
  * Responsibilities:
  *   1. Refresh the Supabase access token (rotate via Set-Cookie) so Server
@@ -28,37 +28,27 @@ export async function updateSession(request: NextRequest) {
     request: { headers: requestHeaders },
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          // Write rotated tokens back onto the cloned request so Server
-          // Components in this same request cycle see the fresh cookies.
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          )
-          // Rebuild the response with the updated request (including
-          // x-pathname) so the header is preserved after token rotation.
-          supabaseResponse = NextResponse.next({
-            request: { headers: requestHeaders },
-          })
-          // Write the same rotated tokens onto the response so the browser
-          // stores them.
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
+  const supabase = await createRouteHandlerClient({
+    getAll() {
+      return request.cookies.getAll()
+    },
+    setAll(cookiesToSet) {
+      // Write rotated tokens back onto the cloned request so Server
+      // Components in this same request cycle see the fresh cookies.
+      cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+      // Rebuild the response with the updated request (including
+      // x-pathname) so the header is preserved after token rotation.
+      supabaseResponse = NextResponse.next({
+        request: { headers: requestHeaders },
+      })
+      // Write the same rotated tokens onto the response so the browser
+      // stores them.
+      cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
+    },
+  })
 
   // IMPORTANT: use getUser() — not getClaims() — to trigger a token refresh
-  // when the access token is about to expire.  getClaims() only reads the JWT
+  // when the access token is about to expire. getClaims() only reads the JWT
   // locally and never reaches the Supabase Auth server.
   await supabase.auth.getUser()
 

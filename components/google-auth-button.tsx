@@ -1,9 +1,9 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { notifyError } from '@/lib/feedback'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import { showToast } from '@/lib/toast'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
@@ -55,9 +55,8 @@ export function GoogleAuthButton({ label = 'Continuar com Google', className }: 
     } catch (err) {
       console.error('Google OAuth error', err)
       try {
-        showToast('Erro ao tentar autenticar com Google. Tente novamente.')
+        notifyError('Erro ao tentar autenticar com Google. Tente novamente.')
       } catch {
-        // fallback to alert if toast failed
         try {
           window.alert('Erro ao tentar autenticar com Google. Tente novamente.')
         } catch {}

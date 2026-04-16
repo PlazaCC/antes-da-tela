@@ -38,8 +38,4 @@ export function handleServerError(err: unknown): ClientErrorPayload & { issueId?
   return { ...payload, issueId }
 }
 
-export default {
-  AppError,
-  formatErrorForClient,
-  handleServerError,
-}
+// Named exports are preferred; no default export to keep imports explicit.
