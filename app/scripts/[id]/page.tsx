@@ -7,19 +7,32 @@ import ScriptPageClient from './script-page-client'
 
 type Props = { params: Promise<{ id: string }> }
 
-/**
- * React.cache deduplicates the DB round-trip between generateMetadata and the
- * page component — both run in the same request context.
- */
-const getScript = cache(async (id: string) => {
+const getPageData = cache(async (id: string) => {
   const ctx = await createTRPCContext({ headers: await headers() })
   const caller = appRouter.createCaller(ctx)
-  return caller.scripts.getById({ id })
+  const [script, { data: authData }] = await Promise.all([
+    caller.scripts.getById({ id }),
+    ctx.supabase.auth.getUser(),
+  ])
+
+  let pdfUrl: string | null = null
+  if (script?.script_files?.[0]?.storage_path) {
+    const { data } = ctx.supabase.storage
+      .from('scripts')
+      .getPublicUrl(script.script_files[0].storage_path)
+    pdfUrl = data.publicUrl
+  }
+
+  return {
+    script,
+    pdfUrl,
+    currentUserId: authData.user?.id ?? null,
+  }
 })
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const script = await getScript(id)
+  const { script } = await getPageData(id)
   return {
     title: script?.title ?? 'Roteiro',
     description: script?.logline ?? 'Leia e discuta roteiros audiovisuais.',
@@ -28,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ScriptPage({ params }: Props) {
   const { id } = await params
-  const script = await getScript(id)
+  const { script, pdfUrl, currentUserId } = await getPageData(id)
 
   return (
     <Suspense
@@ -36,8 +49,9 @@ export default async function ScriptPage({ params }: Props) {
         <div className='min-h-screen bg-bg-base flex items-center justify-center'>
           <p className='text-text-secondary font-mono text-label-mono-default'>Loading…</p>
         </div>
-      }>
-      <ScriptPageClient script={script} />
+      }
+    >
+      <ScriptPageClient script={script} pdfUrl={pdfUrl} currentUserId={currentUserId} />
     </Suspense>
   )
 }

@@ -470,12 +470,12 @@ yarn lint
 
 ## Checklist de aceite
 
-- [ ] `PDFViewer` carregado com `next/dynamic, ssr: false`
-- [ ] Zustand store controla página atual compartilhada entre viewer e sidebar
-- [ ] `commentsRouter` com `list`, `create`, `delete`
-- [ ] Comentários filtrados por `pageNumber` da página visível
-- [ ] Soft delete (`deleted_at`) nos comentários
-- [ ] ZoomController e PageController usam tokens do design system (bg-elevated, border-subtle, font-mono)
-- [ ] Avatar do comentário com inicial do nome + bg-brand-accent/20
-- [ ] Performance aceitável em roteiros de até 120 páginas
-- [ ] `yarn build` limpo
+- [x] `PDFViewer` carregado com `next/dynamic, ssr: false`
+- [x] Zustand store controla página atual compartilhada entre viewer e sidebar
+- [x] `commentsRouter` com `list`, `create`, `delete`
+- [x] Comentários filtrados por `pageNumber` da página visível
+- [x] Soft delete (`deleted_at`) nos comentários
+- [x] ZoomController e PageController usam tokens do design system (bg-elevated, border-subtle, font-mono)
+- [x] Avatar do comentário com inicial do nome + bg-brand-accent/20
+- [x] Performance aceitável em roteiros de até 120 páginas (PDF cacheado em ref, sem re-fetch em troca de página)
+- [x] `yarn build` limpo
