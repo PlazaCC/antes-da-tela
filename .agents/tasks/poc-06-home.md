@@ -98,7 +98,7 @@ export function NavBar() {
         {/* Actions */}
         <div className="flex items-center gap-3">
           <Button asChild>
-            <Link href="/publicar">Publicar</Link>
+            <Link href="/publish">Publicar</Link>
           </Button>
           {/* Auth: mostrar avatar se logado, link de login se não */}
         </div>
@@ -216,7 +216,7 @@ export function HomeClient() {
           <h2 className="font-display text-heading-2 text-primary">Em destaque</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {featured.map((script) => (
-              <Link key={script.id} href={`/roteiros/${script.id}`}>
+              <Link key={script.id} href={`/scripts/${script.id}`}>
                 <ScriptCard
                   title={script.title}
                   author={script.author?.name ?? ''}
@@ -238,7 +238,7 @@ export function HomeClient() {
         {recent?.items && recent.items.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {recent.items.map((script) => (
-              <Link key={script.id} href={`/roteiros/${script.id}`}>
+              <Link key={script.id} href={`/scripts/${script.id}`}>
                 <ScriptCard
                   title={script.title}
                   author={script.author?.name ?? ''}

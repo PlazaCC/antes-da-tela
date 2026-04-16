@@ -10,10 +10,10 @@ Fluxo de publicação de roteiro: wizard multi-etapas com metadados + upload dir
 **Upload DEVE ser client-side** — endpoints server-side na Vercel têm timeout de 10s, insuficiente para PDFs.
 
 **Arquivos a criar:**
-- `server/api/scripts.ts` — router tRPC
-- `app/publicar/page.tsx` — wizard de publicação (rota protegida, 4 etapas)
-- `app/roteiros/[id]/page.tsx` — página pública do roteiro (Server Component)
-- `app/roteiros/[id]/script-page-client.tsx` — Client Component com metadados
+- `server/api/scripts.ts` — tRPC router ← **done**
+- `app/(authenticated)/publish/page.tsx` — publish wizard (protected via route group, 4 steps) ← **done**
+- `app/scripts/[id]/page.tsx` — public script page (Server Component) ← **done**
+- `app/scripts/[id]/script-page-client.tsx` — Client Component with metadata ← **done**
 
 **Arquivos a atualizar:**
 - `server/api/root.ts` — registrar `scriptsRouter`
@@ -206,7 +206,7 @@ export const appRouter = createTRPCRouter({
 export type AppRouter = typeof appRouter
 ```
 
-### 3. Criar wizard de publicação (app/publicar/page.tsx)
+### 3. Criar wizard de publicação (app/publish/page.tsx)
 
 O wizard tem **4 etapas**. Implementar como Client Component com estado de etapa local.
 
@@ -241,7 +241,7 @@ O wizard tem **4 etapas**. Implementar como Client Component com estado de etapa
 - Resumo de todos os campos preenchidos
 - Preview do nome do arquivo PDF
 - Botão "Publicar" com destaque `bg-brand-accent`
-- Ao confirmar: `trpc.scripts.create.mutate({ ...formData, storagePath, authorId })` → `router.push('/roteiros/${id}')`
+- Ao confirmar: `trpc.scripts.create.mutate({ ...formData, storagePath, authorId })` → `router.push('/scripts/${id}')`
 
 **Indicador de progresso (Progress component, ref: 115:1296):**
 ```typescript
@@ -258,7 +258,7 @@ O wizard tem **4 etapas**. Implementar como Client Component com estado de etapa
 </div>
 ```
 
-### 4. Criar página do roteiro (app/roteiros/[id]/page.tsx)
+### 4. Criar página do roteiro (app/scripts/[id]/page.tsx)
 
 Server Component com prefetch tRPC:
 
@@ -278,7 +278,7 @@ export default async function ScriptPage({ params }: { params: Promise<{ id: str
 }
 ```
 
-`app/roteiros/[id]/script-page-client.tsx` (Client Component):
+`app/scripts/[id]/script-page-client.tsx` (Client Component):
 - `useTRPC().scripts.getById.useQuery({ id: scriptId })`
 - Layout: metadados à esquerda/topo + `PDFViewer` (da task [05]) + seção de comentários
 - Exibir título (`font-display text-heading-2`), logline (`text-secondary`), autor, `Tag` de gênero, StarRating
@@ -294,14 +294,14 @@ yarn lint
 ```
 
 **Fluxo end-to-end (yarn dev, usuário autenticado):**
-- [ ] `/publicar` redireciona para login quando não autenticado
+- [ ] `/publish` redireciona para login quando não autenticado
 - [ ] Progress indicator avança etapa por etapa
 - [ ] Etapa 2: DragZone rejeita arquivo não-PDF com mensagem de erro
 - [ ] Etapa 2: DragZone rejeita PDF > 50MB com mensagem de erro
 - [ ] Upload bem-sucedido: PDF aparece no bucket `scripts` no painel Supabase
 - [ ] Roteiro criado aparece na tabela `scripts` com `author_id` correto
-- [ ] Redireciona para `/roteiros/[id]` após publicação
-- [ ] `/roteiros/[id]` carrega metadados do roteiro
+- [ ] Redireciona para `/scripts/[id]` após publicação
+- [ ] `/scripts/[id]` carrega metadados do roteiro
 - [ ] Visual: wizard com card bg-surface, progress bar brand-accent, tokens corretos
 
 ## Checklist de aceite
@@ -312,5 +312,5 @@ yarn lint
 - [ ] Validação client-side: tipo PDF + tamanho 50MB
 - [ ] DragZone usado para upload (não input file simples)
 - [ ] Gênero selecionável com Tag/Checkbox na etapa de categorização
-- [ ] Roteiro criado acessível em `/roteiros/[id]`
+- [ ] Roteiro criado acessível em `/scripts/[id]`
 - [ ] `yarn build` passa sem erros de tipo

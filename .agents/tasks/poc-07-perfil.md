@@ -10,14 +10,14 @@ Perfil público do roteirista e sistema de avaliação por estrelas. Fecha o cic
 **Arquivos a criar:**
 
 - `server/api/ratings.ts` — router tRPC de avaliações
-- `app/perfil/[userId]/page.tsx` — perfil público (Server Component)
-- `app/perfil/[userId]/profile-client.tsx` — Client Component
-- `app/minha-conta/page.tsx` — edição de perfil
+- `app/profile/[userId]/page.tsx` — perfil público (Server Component)
+- `app/profile/[userId]/profile-client.tsx` — Client Component
+- `app/(authenticated)/account/page.tsx` — profile editing (protected via route group)
 
 **Arquivos a atualizar:**
 
 - `server/api/root.ts` — registrar `ratingsRouter`
-- `app/roteiros/[id]/script-page-client.tsx` — integrar StarRating + média
+- `app/scripts/[id]/script-page-client.tsx` — integrar StarRating + média
 - `components/ui/script-card.tsx` — receber `rating` como prop real
 
 **Componente disponível:** `StarRating` (`components/ui/star-rating.tsx`)
@@ -159,7 +159,7 @@ export const appRouter = createTRPCRouter({
 
 ### 3. Integrar StarRating na página do roteiro
 
-Atualizar `app/roteiros/[id]/script-page-client.tsx`:
+Atualizar `app/scripts/[id]/script-page-client.tsx`:
 
 ```typescript
 import { StarRating } from '@/components/ui/star-rating'
@@ -186,7 +186,7 @@ import { StarRating } from '@/components/ui/star-rating'
 
 ### 4. Criar página de perfil público
 
-Criar `app/perfil/[userId]/page.tsx` (Server Component):
+Criar `app/profile/[userId]/page.tsx` (Server Component):
 
 ```typescript
 import { trpc, HydrateClient } from '@/trpc/server'
@@ -208,7 +208,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userId
 }
 ```
 
-Criar `app/perfil/[userId]/profile-client.tsx` (Client Component):
+Criar `app/profile/[userId]/profile-client.tsx` (Client Component):
 
 ```typescript
 'use client'
@@ -255,7 +255,7 @@ export function ProfileClient({ userId }: { userId: string }) {
         {scriptList && scriptList.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {scriptList.map((script) => (
-              <Link key={script.id} href={`/roteiros/${script.id}`}>
+              <Link key={script.id} href={`/scripts/${script.id}`}>
                 <ScriptCard
                   title={script.title}
                   author={user.name}
@@ -277,7 +277,7 @@ export function ProfileClient({ userId }: { userId: string }) {
 
 ### 5. Criar página de edição de perfil
 
-Criar `app/minha-conta/page.tsx` (Client Component, rota protegida):
+Criar `app/account/page.tsx` (Client Component, rota protegida):
 
 ```typescript
 'use client'
@@ -312,7 +312,7 @@ export default function MyAccountPage() {
 }
 ```
 
-**Layout da página /minha-conta:**
+**Layout da página /account:**
 
 - Container `max-w-sm mx-auto px-5 py-12`
 - Título: `font-display text-heading-2` — "Minha conta"
@@ -337,11 +337,11 @@ yarn lint
 
 **Fluxo end-to-end (yarn dev):**
 
-- [ ] `/perfil/[userId]` acessível sem login, mostra avatar (inicial), nome, bio e roteiros do autor
-- [ ] Usuário autenticado avalia roteiro com 1–5 estrelas em `/roteiros/[id]`
+- [ ] `/profile/[userId]` acessível sem login, mostra avatar (inicial), nome, bio e roteiros do autor
+- [ ] Usuário autenticado avalia roteiro com 1–5 estrelas em `/scripts/[id]`
 - [ ] Tentar avaliar o próprio roteiro retorna erro "Você não pode avaliar seu próprio roteiro"
 - [ ] Submeter nova nota atualiza a média exibida sem reload
-- [ ] `/minha-conta` acessível apenas para usuários autenticados
+- [ ] `/account` acessível apenas para usuários autenticados
 - [ ] Editar nome/bio salva corretamente na tabela `users`
 - [ ] Upload de avatar aparece no bucket `avatars` e atualiza a imagem no perfil
 - [ ] Visual: Avatar com inicial em brand-accent, nome em DM Serif Display, média em DM Mono
@@ -351,7 +351,7 @@ yarn lint
 - [ ] `ratingsRouter` com `upsert`, `getAverage`, `getUserRating`
 - [ ] Auto-avaliação bloqueada com `TRPCError FORBIDDEN`
 - [ ] Upsert funciona (segunda avaliação substitui a primeira)
-- [ ] Perfil público `/perfil/[userId]` acessível sem login
+- [ ] Perfil público `/profile/[userId]` acessível sem login
 - [ ] Avatar com inicial do nome em `bg-brand-accent/20` quando sem foto
 - [ ] Nome em `font-display text-heading-2`
 - [x] Avatar com inicial do nome em `bg-brand-accent/20` quando sem foto

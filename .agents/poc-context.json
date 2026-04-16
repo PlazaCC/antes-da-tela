@@ -45,7 +45,9 @@
     "trpc_server": "trpc/server.tsx",
     "supabase_client": "lib/supabase/client.ts",
     "supabase_server": "lib/supabase/server.ts",
-    "middleware": "middleware.ts",
+    "proxy": "proxy.ts",
+    "proxy_session": "lib/supabase/proxy.ts",
+    "authenticated_layout": "app/(authenticated)/layout.tsx",
     "trpc_handler": "app/api/trpc/[trpc]/route.ts",
     "globals_css": "app/globals.css",
     "tailwind_config": "tailwind.config.ts",
@@ -152,18 +154,19 @@
       "task_file": ".agents/tasks/poc-03-auth.md",
       "objective": "Fluxo completo: cadastro, login, recuperação de senha, sessão SSR, middleware de proteção",
       "files_affected": [
-        "middleware.ts",
-        "app/auth/sign-up/page.tsx",
+        "proxy.ts",
+        "lib/supabase/proxy.ts",
+        "app/(authenticated)/layout.tsx",
         "app/auth/login/page.tsx",
-        "app/auth/forgot-password/page.tsx",
-        "app/auth/update-password/page.tsx",
+        "app/auth/callback/route.ts",
         "server/api/users.ts",
         "server/api/root.ts"
       ],
-      "protected_routes": ["/publicar", "/minha-conta"],
+      "protected_routes": ["/publish", "/account"],
+      "route_group": "app/(authenticated)/",
       "acceptance": [
-        { "id": "auth-1", "item": "middleware.ts refreshSession em todas as rotas", "done": false },
-        { "id": "auth-2", "item": "/publicar e /minha-conta redirecionam para login quando não autenticado", "done": false },
+        { "id": "auth-1", "item": "proxy.ts + lib/supabase/proxy.ts refreshSession em todas as rotas", "done": true },
+        { "id": "auth-2", "item": "/publish e /account redirecionam para login quando não autenticado", "done": true },
         { "id": "auth-3", "item": "Cadastro cria registro na tabela users via tRPC", "done": false },
         { "id": "auth-4", "item": "Sessão persiste após refresh (cookie SSR correto)", "done": false },
         { "id": "auth-5", "item": "Email de confirmação e recuperação chegam via Resend", "done": false },
@@ -184,9 +187,9 @@
       "objective": "Formulário de publicação + upload direto client→Storage + tRPC scripts router",
       "files_to_create": [
         "server/api/scripts.ts",
-        "app/publicar/page.tsx",
-        "app/roteiros/[id]/page.tsx",
-        "app/roteiros/[id]/script-page-client.tsx"
+        "app/(authenticated)/publish/page.tsx",
+        "app/scripts/[id]/page.tsx",
+        "app/scripts/[id]/script-page-client.tsx"
       ],
       "files_to_update": ["server/api/root.ts"],
       "trpc_router": "scriptsRouter",
@@ -197,7 +200,7 @@
         { "id": "up-1", "item": "scriptsRouter com 6 endpoints registrado em root.ts", "done": false },
         { "id": "up-2", "item": "Upload client-side direto para bucket scripts", "done": false },
         { "id": "up-3", "item": "Validação: tipo PDF + tamanho max 50MB client-side", "done": false },
-        { "id": "up-4", "item": "Roteiro criado acessível em /roteiros/[id] após publicação", "done": false },
+        { "id": "up-4", "item": "Script criado acessível em /scripts/[id] após publicação", "done": false },
         { "id": "up-5", "item": "Progresso de upload exibido durante envio", "done": false },
         { "id": "up-6", "item": "yarn build passa sem erros", "done": false }
       ]
@@ -221,7 +224,7 @@
         "server/api/comments.ts"
       ],
       "files_to_update": [
-        "app/roteiros/[id]/script-page-client.tsx",
+        "app/scripts/[id]/script-page-client.tsx",
         "server/api/root.ts"
       ],
       "trpc_router": "commentsRouter",
@@ -275,16 +278,16 @@
       "priority": "normal",
       "depends_on": ["poc-02", "poc-03", "poc-04"],
       "task_file": ".agents/tasks/poc-07-perfil.md",
-      "objective": "Perfil público /perfil/[userId] + tRPC ratingsRouter + StarRating interativo",
+      "objective": "Public profile /profile/[userId] + tRPC ratingsRouter + interactive StarRating",
       "files_to_create": [
         "server/api/ratings.ts",
-        "app/perfil/[userId]/page.tsx",
-        "app/perfil/[userId]/profile-client.tsx",
-        "app/minha-conta/page.tsx"
+        "app/profile/[userId]/page.tsx",
+        "app/profile/[userId]/profile-client.tsx",
+        "app/(authenticated)/account/page.tsx"
       ],
       "files_to_update": [
         "server/api/root.ts",
-        "app/roteiros/[id]/script-page-client.tsx"
+        "app/scripts/[id]/script-page-client.tsx"
       ],
       "trpc_router": "ratingsRouter",
       "trpc_endpoints": ["upsert", "getAverage", "getUserRating"],
@@ -297,9 +300,9 @@
         { "id": "perf-1", "item": "ratingsRouter com upsert, getAverage, getUserRating em root.ts", "done": false },
         { "id": "perf-2", "item": "Auto-avaliação retorna TRPCError FORBIDDEN", "done": false },
         { "id": "perf-3", "item": "Upsert funciona (segunda nota substitui a primeira)", "done": false },
-        { "id": "perf-4", "item": "/perfil/[userId] acessível sem login", "done": false },
-        { "id": "perf-5", "item": "StarRating atualiza média sem reload (TanStack Query invalidation)", "done": false },
-        { "id": "perf-6", "item": "/minha-conta permite editar nome, bio e avatar", "done": false },
+        { "id": "perf-4", "item": "/profile/[userId] accessible without login", "done": false },
+        { "id": "perf-5", "item": "StarRating updates average without reload (TanStack Query invalidation)", "done": false },
+        { "id": "perf-6", "item": "/account allows editing name, bio, and avatar", "done": false },
         { "id": "perf-7", "item": "yarn build limpo", "done": false }
       ]
     }

@@ -14,7 +14,7 @@ Feature central da POC. Leitor PDF com `pdfjs-dist` + sidebar de comentários fi
 - `server/api/comments.ts` — router tRPC
 
 **Arquivos a atualizar:**
-- `app/roteiros/[id]/script-page-client.tsx` — integrar PDFViewer
+- `app/scripts/[id]/script-page-client.tsx` — integrar PDFViewer
 - `server/api/root.ts` — registrar `commentsRouter`
 
 **Regras:** `.agents/rules/nextjs.md` (dynamic imports), `.agents/rules/typescript.md`
@@ -415,7 +415,7 @@ export const appRouter = createTRPCRouter({
 ### 6. Integrar em script-page-client.tsx
 
 ```typescript
-// app/roteiros/[id]/script-page-client.tsx
+// app/scripts/[id]/script-page-client.tsx
 import { PDFViewer } from '@/components/pdf-viewer'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 
@@ -438,7 +438,7 @@ yarn lint
 ```
 
 **Fluxo end-to-end (yarn dev):**
-- [ ] PDF abre e renderiza na rota `/roteiros/[id]`
+- [ ] PDF abre e renderiza na rota `/scripts/[id]`
 - [ ] PageController (◀/▶) navega entre páginas — comentários na sidebar atualizam automaticamente
 - [ ] ZoomController (+/−) muda o tamanho do PDF
 - [ ] Usuário autenticado adiciona comentário — aparece sem reload

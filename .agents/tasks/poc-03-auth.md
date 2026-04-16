@@ -5,19 +5,19 @@
 
 ## Contexto
 
-Supabase Auth com `@supabase/ssr`. Sessão gerenciada por cookies via `proxy.ts` (Next.js 16 usa `proxy.ts`, não `middleware.ts`). As telas de auth já existem parcialmente — auditar e completar.
+Supabase Auth com `@supabase/ssr`. Sessão gerenciada por cookies via `middleware.ts` (padrão Next.js App Router). As telas de auth já existem parcialmente — auditar e completar.
 
 **Arquivos a auditar/completar:**
-- `app/auth/sign-up/page.tsx` + `components/sign-up-form.tsx`
-- `app/auth/login/page.tsx` + `components/login-form.tsx`
+- `app/auth/login/page.tsx` (sign-up removido — fluxo unificado via Google OAuth)
 - `app/auth/forgot-password/page.tsx`
 - `app/auth/update-password/page.tsx`
-- `proxy.ts` + `lib/supabase/proxy.ts` (≠ middleware.ts — este projeto usa Next.js 16)
+- `middleware.ts` ← **já criado** (session refresh + x-pathname header)
+- `app/(authenticated)/layout.tsx` ← **já criado** (auth guard do route group)
 - `lib/supabase/server.ts`
 - `lib/supabase/client.ts`
 
 **Arquivos a criar:**
-- `server/api/users.ts` — router tRPC para criar perfil após cadastro
+- `server/api/users.ts` — tRPC router to create user profile after OAuth signup
 
 **Regras:** `.agents/rules/supabase.md`, `.agents/rules/typescript.md`
 
@@ -59,66 +59,25 @@ Supabase Auth com `@supabase/ssr`. Sessão gerenciada por cookies via `proxy.ts`
 
 ## Passos de execução
 
-### 1. Atualizar proxy.ts e lib/supabase/proxy.ts
+### 1. middleware.ts + app/(authenticated)/layout.tsx
 
-**Atenção: Este projeto usa Next.js 16 com `proxy.ts` em vez de `middleware.ts`.**
+**Both files are already implemented.** See the source for their contracts:
 
-`proxy.ts` (raiz do projeto):
-```typescript
-import { updateSession } from '@/lib/supabase/proxy'
-import { type NextRequest } from 'next/server'
+`proxy.ts` / `lib/supabase/proxy.ts` — session refresh only, no route protection:
+- Calls `supabase.auth.getUser()` on every request to rotate the access token.
+- Forwards `x-pathname` request header so the layout can read the current path.
+- Matcher excludes `_next/static`, `_next/image`, favicon, and static assets.
 
-export async function proxy(request: NextRequest) {
-  return await updateSession(request)
-}
+`app/(authenticated)/layout.tsx` — route-group auth guard:
+- Calls `getClaims()` (local JWT read, no network) — safe because middleware already refreshed.
+- Redirects to `/auth/login?next=<pathname>` when session is absent.
+- Wraps all routes under `app/(authenticated)/` (currently `/publish`; `/account` is next).
 
-export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
-}
+**Route protection pattern:**
 ```
-
-`lib/supabase/proxy.ts` — proteger apenas `/publicar` e `/minha-conta`:
-```typescript
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
-
-const PROTECTED_ROUTES = ['/publicar', '/minha-conta']
-
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() { return request.cookies.getAll() },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    },
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const isProtected = PROTECTED_ROUTES.some(route =>
-    request.nextUrl.pathname.startsWith(route)
-  )
-
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
-    url.searchParams.set('redirectTo', request.nextUrl.pathname)
-    return NextResponse.redirect(url)
-  }
-
-  return supabaseResponse
-}
+middleware.ts          → refresh session on every request (getUser)
+(authenticated)/layout → check session for protected routes  (getClaims + redirect)
+auth/callback/route.ts → exchange OAuth code, upsert user, redirect to ?next=
 ```
 
 ### 2. Criar router tRPC de usuários
@@ -284,18 +243,19 @@ yarn lint
 - [ ] Cadastro cria usuário no Supabase Auth E registro na tabela `users`
 - [ ] Email de confirmação chega (verificar Resend ou Supabase SMTP)
 - [ ] Login retorna sessão que persiste após F5
-- [ ] `/publicar` redireciona para `/auth/login?redirectTo=/publicar` quando não autenticado
-- [ ] Após login, retorna para `/publicar` automaticamente
+- [x] `/publish` redireciona para `/auth/login?next=/publish` quando não autenticado
+- [ ] Após login, retorna para `/publish` automaticamente
 - [ ] Email de recuperação chega e permite redefinir senha
 - [ ] Formulários mostram erros inline por campo (não apenas global)
 - [ ] Visual alinhado com Figma: fundo escuro, card bg-surface, inputs com labels em DM Mono
 
 ## Checklist de aceite
 
-- [ ] `proxy.ts` + `lib/supabase/proxy.ts` protegem `/publicar` e `/minha-conta`
-- [ ] Cadastro cria registro na tabela `users` via tRPC
-- [ ] Sessão persiste após refresh (cookie SSR correto)
-- [ ] Todos os fluxos de auth (sign-up, login, forgot, update-password) funcionam end-to-end
-- [ ] Emails enviados via Resend (verificar no dashboard)
-- [ ] `yarn build` passa sem erros de tipo nos novos arquivos
-- [ ] Design alinhado: tokens de cor, tipografia e layout corretos
+- [x] `proxy.ts` + `lib/supabase/proxy.ts` refresh session on every request (`getUser`)
+- [x] `app/(authenticated)/layout.tsx` guards `/publish` and future `/account`
+- [x] `/publish` redirects unauthenticated users to `/auth/login?next=/publish`
+- [x] After OAuth login, callback redirects back to `?next=` URL
+- [ ] User profile upserted in `users` table via `auth/callback/route.ts` (done via Supabase PostgREST; verify in Supabase dashboard)
+- [ ] Session persists after page refresh (cookie SSR correct)
+- [ ] `yarn build` passes with zero type errors
+- [ ] Design aligned: color tokens, typography, and layout correct
