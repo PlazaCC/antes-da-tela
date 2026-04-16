@@ -1,2 +1,2 @@
-ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view and update their own data" ON "users" AS PERMISSIVE FOR ALL TO "authenticated" USING (auth.uid() = id) WITH CHECK (auth.uid() = id);

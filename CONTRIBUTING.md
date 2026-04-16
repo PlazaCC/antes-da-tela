@@ -87,6 +87,42 @@ See `.agents/rules/` for detailed stack/layer-specific rules.
 
 ---
 
+## Schema changes and migrations (Drizzle + Supabase)
+
+Use the canonical workflow below when changing database schema. This keeps migration history consistent, reviewable, and safe to apply to remote Supabase projects.
+
+1. Edit the Drizzle schema in `server/db/schema.ts`.
+2. Generate a migration with:
+
+```bash
+yarn drizzle:generate "describe-your-change"
+```
+
+3. Review the generated SQL in `drizzle/` and fix any small issues. Do NOT hand-edit previously committed migration files unless you're certain.
+
+4. Run database advisors and dump the remote schema before applying:
+
+```bash
+npx --yes supabase db advisors --linked
+yarn db:dump
+```
+
+5. Apply migrations to the remote project:
+
+```bash
+yarn db:push
+# or apply a single SQL file
+npx --yes supabase db query --file ./drizzle/migrations/0001_your_migration.sql --linked
+```
+
+6. Commit the Drizzle schema change and generated migration, open a PR including the SQL, and request review.
+
+Notes:
+
+- Prefer `drizzle-kit` for migration generation and `supabase db push` for applying changes.
+- Do not rely on ad-hoc `.sql` files in `supabase/migrations/` as the single source of truth; keep `drizzle/` in sync.
+- In emergency cases where SQL is necessary, ensure you create a corresponding Drizzle migration afterwards to capture the change.
+
 ## License
 
 UNLICENSED

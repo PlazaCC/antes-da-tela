@@ -32,13 +32,13 @@ export const scriptCreateSchema = z.object({
 export const scriptsRouter = createTRPCRouter({
   create: authenticatedProcedure.input(scriptCreateSchema).mutation(async ({ input, ctx }) => {
     const { storagePath, fileSize, pageCount, ageRating, bannerPath, ...scriptData } = input
-    const authorId = (ctx.user as any).id
+    const authorId = ctx.user!.id
 
     // Ensure the author's profile exists in `users` to satisfy FK constraints.
     try {
-      const authorEmail = (ctx.user as any).email ?? null
+      const authorEmail = ctx.user!.email ?? null
       const authorName =
-        (ctx.user as any).user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
+        ctx.user!.user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
       const { error: upsertError } = await ctx.supabase
         .from('users')
         .upsert({ id: authorId, name: String(authorName).slice(0, 100), email: authorEmail }, { onConflict: 'id' })
@@ -49,7 +49,9 @@ export const scriptsRouter = createTRPCRouter({
           message: `Failed to ensure author profile: ${upsertError.message}`,
         })
       }
-    } catch (e) {
+    } catch (err) {
+      // log for debugging
+      console.error('ensure author profile error', err)
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to ensure author profile' })
     }
 

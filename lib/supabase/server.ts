@@ -26,7 +26,7 @@ type CookieStore = {
 }
 
 export async function createClient(cookieStoreParam?: CookieStore) {
-  const cookieStore = cookieStoreParam ?? (await cookies())
+  const cookieStore = cookieStoreParam ?? ((await cookies()) as unknown as CookieStore)
 
   return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
     cookies: {
@@ -59,7 +59,7 @@ export async function createClient(cookieStoreParam?: CookieStore) {
  * after `exchangeCodeForSession`).
  */
 export async function createRouteHandlerClient(cookieStoreParam?: CookieStore) {
-  const cookieStore = cookieStoreParam ?? (await cookies())
+  const cookieStore = cookieStoreParam ?? ((await cookies()) as unknown as CookieStore)
 
   return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
     cookies: {
