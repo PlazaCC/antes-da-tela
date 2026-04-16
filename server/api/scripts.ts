@@ -30,66 +30,79 @@ export const scriptCreateSchema = z.object({
 })
 
 export const scriptsRouter = createTRPCRouter({
-  create: authenticatedProcedure
-    .input(scriptCreateSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { storagePath, fileSize, pageCount, ageRating, bannerPath, ...scriptData } = input
-      const authorId = ctx.user.id
+  create: authenticatedProcedure.input(scriptCreateSchema).mutation(async ({ input, ctx }) => {
+    const { storagePath, fileSize, pageCount, ageRating, bannerPath, ...scriptData } = input
+    const authorId = (ctx.user as any).id
 
-      // Insert script row
-      const { data: script, error: scriptError } = await ctx.supabase
-        .from('scripts')
-        .insert({
-          ...scriptData,
-          age_rating: ageRating ?? null,
-          banner_path: bannerPath ?? null,
-          author_id: authorId,
-          status: 'published',
-          published_at: new Date().toISOString(),
-        })
-        .select()
-        .single()
+    // Ensure the author's profile exists in `users` to satisfy FK constraints.
+    try {
+      const authorEmail = (ctx.user as any).email ?? null
+      const authorName =
+        (ctx.user as any).user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
+      const { error: upsertError } = await ctx.supabase
+        .from('users')
+        .upsert({ id: authorId, name: String(authorName).slice(0, 100), email: authorEmail }, { onConflict: 'id' })
 
-      if (scriptError || !script) {
+      if (upsertError) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: scriptError?.message ?? 'Failed to create script',
+          message: `Failed to ensure author profile: ${upsertError.message}`,
         })
       }
+    } catch (e) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to ensure author profile' })
+    }
 
-      // Insert associated script file
-      const { error: fileError } = await ctx.supabase
-        .from('script_files')
-        .insert({
-          script_id: script.id,
-          storage_path: storagePath,
-          file_size: fileSize ?? null,
-          page_count: pageCount ?? null,
-        })
+    // Insert script row
+    const { data: script, error: scriptError } = await ctx.supabase
+      .from('scripts')
+      .insert({
+        ...scriptData,
+        age_rating: ageRating ?? null,
+        banner_path: bannerPath ?? null,
+        author_id: authorId,
+        status: 'published',
+        published_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
 
-      if (fileError) {
-        // Roll back the orphan script so it doesn't appear in listings
-        await ctx.supabase.from('scripts').delete().eq('id', script.id)
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: fileError.message,
-        })
-      }
+    if (scriptError || !script) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: scriptError?.message ?? 'Failed to create script',
+      })
+    }
 
-      return script
-    }),
+    // Insert associated script file
+    const { error: fileError } = await ctx.supabase.from('script_files').insert({
+      script_id: script.id,
+      storage_path: storagePath,
+      file_size: fileSize ?? null,
+      page_count: pageCount ?? null,
+    })
 
-  getById: publicProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ input, ctx }) => {
-      const { data: script } = await ctx.supabase
-        .from('scripts')
-        .select('*, script_files(*), author:users!author_id(id, name, image)')
-        .eq('id', input.id)
-        .maybeSingle()
+    if (fileError) {
+      // Roll back the orphan script so it doesn't appear in listings
+      await ctx.supabase.from('scripts').delete().eq('id', script.id)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: fileError.message,
+      })
+    }
 
-      return script ?? null
-    }),
+    return script
+  }),
+
+  getById: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input, ctx }) => {
+    const { data: script } = await ctx.supabase
+      .from('scripts')
+      .select('*, script_files(*), author:users!author_id(id, name, image)')
+      .eq('id', input.id)
+      .maybeSingle()
+
+    return script ?? null
+  }),
 
   listRecent: publicProcedure
     .input(
@@ -122,24 +135,26 @@ export const scriptsRouter = createTRPCRouter({
     return data ?? []
   }),
 
-  listByAuthor: publicProcedure
-    .input(z.object({ authorId: z.string().uuid() }))
-    .query(async ({ input, ctx }) => {
-      const { data } = await ctx.supabase
-        .from('scripts')
-        .select('*, author:users!author_id(id, name)')
-        .eq('author_id', input.authorId)
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
+  listByAuthor: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input, ctx }) => {
+    const { data } = await ctx.supabase
+      .from('scripts')
+      .select('*, author:users!author_id(id, name)')
+      .eq('author_id', input.authorId)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
 
-      return data ?? []
-    }),
+    return data ?? []
+  }),
 
   search: publicProcedure
     .input(
       z.object({
         // Reject PostgREST-special characters to prevent filter injection via .or()
-        query: z.string().min(1).max(100).regex(/^[^%,().]+$/, 'Invalid search characters'),
+        query: z
+          .string()
+          .min(1)
+          .max(100)
+          .regex(/^[^%,().]+$/, 'Invalid search characters'),
         genre: z.enum(GENRES).optional(),
       }),
     )

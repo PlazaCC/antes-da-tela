@@ -1,10 +1,11 @@
-import { updateSession } from '@/lib/supabase/proxy'
+import { captureException } from '@/lib/sentry'
+import { updateSession } from '@/lib/supabase/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 
 /**
  * Next.js Proxy (Edge) — runs before every matched request.
  *
- * Delegates to `updateSession` in `lib/supabase/proxy.ts` which:
+ * Delegates to `updateSession` in `lib/middleware.ts` which:
  *   1. Refreshes the Supabase access token (rotates via Set-Cookie) so Server
  *      Components always read a non-expired session.
  *   2. Forwards the request pathname as `x-pathname` so the authenticated
@@ -22,7 +23,12 @@ export async function proxy(request: NextRequest) {
   try {
     return await updateSession(request)
   } catch (err) {
-    // Do not block the request on session proxy errors; log and continue.
+    // Do not block the request on session proxy errors; report and continue.
+    try {
+      captureException(err, { url: request.url })
+    } catch (e) {
+      console.error('proxy handler error (sentry failed)', e)
+    }
     console.error('proxy handler error', err)
     return NextResponse.next()
   }
