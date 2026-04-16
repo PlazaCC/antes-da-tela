@@ -1,7 +1,5 @@
-import { db } from '@/server/db'
-import { scriptFiles, scripts } from '@/server/db/schema'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
-import { ilike, or } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 const GENRES = [
@@ -35,36 +33,61 @@ export const scriptsRouter = createTRPCRouter({
   create: authenticatedProcedure
     .input(scriptCreateSchema)
     .mutation(async ({ input, ctx }) => {
-      const { storagePath, fileSize, pageCount, ...scriptData } = input
+      const { storagePath, fileSize, pageCount, ageRating, bannerPath, ...scriptData } = input
       const authorId = ctx.user.id
 
-      return await db.transaction(async (tx) => {
-        const [script] = await tx
-          .insert(scripts)
-          .values({ ...scriptData, authorId, publishedAt: new Date() })
-          .returning()
+      // Insert script row
+      const { data: script, error: scriptError } = await ctx.supabase
+        .from('scripts')
+        .insert({
+          ...scriptData,
+          age_rating: ageRating ?? null,
+          banner_path: bannerPath ?? null,
+          author_id: authorId,
+          status: 'published',
+          published_at: new Date().toISOString(),
+        })
+        .select()
+        .single()
 
-        await tx.insert(scriptFiles).values({
-          scriptId: script.id,
-          storagePath,
-          fileSize,
-          pageCount,
+      if (scriptError || !script) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: scriptError?.message ?? 'Failed to create script',
+        })
+      }
+
+      // Insert associated script file
+      const { error: fileError } = await ctx.supabase
+        .from('script_files')
+        .insert({
+          script_id: script.id,
+          storage_path: storagePath,
+          file_size: fileSize ?? null,
+          page_count: pageCount ?? null,
         })
 
-        return script
-      })
+      if (fileError) {
+        // Roll back the orphan script so it doesn't appear in listings
+        await ctx.supabase.from('scripts').delete().eq('id', script.id)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: fileError.message,
+        })
+      }
+
+      return script
     }),
 
   getById: publicProcedure
     .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ input }) => {
-      const script = await db.query.scripts.findFirst({
-        where: (s, { eq }) => eq(s.id, input.id),
-        with: {
-          scriptFiles: true,
-          author: { columns: { id: true, name: true, image: true } },
-        },
-      })
+    .query(async ({ input, ctx }) => {
+      const { data: script } = await ctx.supabase
+        .from('scripts')
+        .select('*, script_files(*), author:users!author_id(id, name, image)')
+        .eq('id', input.id)
+        .maybeSingle()
+
       return script ?? null
     }),
 
@@ -74,54 +97,65 @@ export const scriptsRouter = createTRPCRouter({
         limit: z.number().int().min(1).max(50).default(12),
       }),
     )
-    .query(async ({ input }) => {
-      const rows = await db.query.scripts.findMany({
-        where: (s, { eq }) => eq(s.status, 'published'),
-        orderBy: (s, { desc }) => [desc(s.publishedAt)],
-        limit: input.limit + 1,
-        with: { author: { columns: { id: true, name: true } } },
-      })
-      const hasMore = rows.length > input.limit
-      return { items: rows.slice(0, input.limit), hasMore }
+    .query(async ({ input, ctx }) => {
+      const { data: rows } = await ctx.supabase
+        .from('scripts')
+        .select('*, author:users!author_id(id, name)')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(input.limit + 1)
+
+      const items = rows ?? []
+      const hasMore = items.length > input.limit
+      return { items: items.slice(0, input.limit), hasMore }
     }),
 
-  listFeatured: publicProcedure.query(async () => {
-    return db.query.scripts.findMany({
-      where: (s, { eq, and }) => and(eq(s.status, 'published'), eq(s.isFeatured, true)),
-      orderBy: (s, { desc }) => [desc(s.publishedAt)],
-      limit: 6,
-      with: { author: { columns: { id: true, name: true } } },
-    })
+  listFeatured: publicProcedure.query(async ({ ctx }) => {
+    const { data } = await ctx.supabase
+      .from('scripts')
+      .select('*, author:users!author_id(id, name)')
+      .eq('status', 'published')
+      .eq('is_featured', true)
+      .order('published_at', { ascending: false })
+      .limit(6)
+
+    return data ?? []
   }),
 
   listByAuthor: publicProcedure
     .input(z.object({ authorId: z.string().uuid() }))
-    .query(async ({ input }) => {
-      return db.query.scripts.findMany({
-        where: (s, { eq, and }) =>
-          and(eq(s.authorId, input.authorId), eq(s.status, 'published')),
-        orderBy: (s, { desc }) => [desc(s.publishedAt)],
-        with: { author: { columns: { id: true, name: true } } },
-      })
+    .query(async ({ input, ctx }) => {
+      const { data } = await ctx.supabase
+        .from('scripts')
+        .select('*, author:users!author_id(id, name)')
+        .eq('author_id', input.authorId)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+
+      return data ?? []
     }),
 
   search: publicProcedure
     .input(
       z.object({
-        query: z.string().min(1).max(100),
+        // Reject PostgREST-special characters to prevent filter injection via .or()
+        query: z.string().min(1).max(100).regex(/^[^%,().]+$/, 'Invalid search characters'),
         genre: z.enum(GENRES).optional(),
       }),
     )
-    .query(async ({ input }) => {
-      return db.query.scripts.findMany({
-        where: (s, { eq, and }) =>
-          and(
-            eq(s.status, 'published'),
-            or(ilike(s.title, `%${input.query}%`), ilike(s.logline, `%${input.query}%`)),
-            input.genre ? eq(s.genre, input.genre) : undefined,
-          ),
-        limit: 20,
-        with: { author: { columns: { id: true, name: true } } },
-      })
+    .query(async ({ input, ctx }) => {
+      let queryBuilder = ctx.supabase
+        .from('scripts')
+        .select('*, author:users!author_id(id, name)')
+        .eq('status', 'published')
+        .or(`title.ilike.%${input.query}%,logline.ilike.%${input.query}%`)
+        .limit(20)
+
+      if (input.genre) {
+        queryBuilder = queryBuilder.eq('genre', input.genre)
+      }
+
+      const { data } = await queryBuilder
+      return data ?? []
     }),
 })
