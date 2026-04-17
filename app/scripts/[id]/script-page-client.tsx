@@ -74,26 +74,23 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
             </p>
           )}
 
-          {/* RatingBox — ref: Figma 38:123 */}
-          <div className='flex items-center gap-3 p-3 bg-elevated rounded-sm border border-subtle w-fit'>
+          {/* RatingBox — ref: Figma 38:123 — height 29px, padding 6px, gap 6px */}
+          <div className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'>
             <StarRating
-              value={userRating ?? 0}
-              allowHalf={false}
+              value={userRating ?? ratingData?.average ?? 0}
+              allowHalf={!currentUserId}
               readOnly={!currentUserId}
               onChange={(score) => {
                 if (!currentUserId) {
                   router.push('/auth/login')
                   return
                 }
-                const page = ratingData
                 upsertRating.mutate(
                   { scriptId: script.id, score: Math.round(score) },
                   {
                     onSuccess: () => {
                       void queryClient.invalidateQueries(averageOpts)
-                      if (page !== undefined) {
-                        void queryClient.invalidateQueries(userRatingOpts)
-                      }
+                      void queryClient.invalidateQueries(userRatingOpts)
                     },
                     onError: (err) => {
                       toast.error(err.message)
@@ -103,9 +100,16 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
               }}
             />
             {ratingData && ratingData.total > 0 && (
-              <span className='font-mono text-label-mono-default text-text-secondary'>
-                {ratingData.average.toFixed(1)} · {ratingData.total}{' '}
-                {ratingData.total === 1 ? 'rating' : 'ratings'}
+              <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
+                {ratingData.average.toFixed(1)}{' '}
+                <span className='text-text-muted'>({ratingData.total})</span>
+              </span>
+            )}
+            {!currentUserId && (
+              <span className='font-mono text-label-mono-small text-text-muted'>
+                <a href='/auth/login' className='text-brand-accent hover:underline'>
+                  Avaliar
+                </a>
               </span>
             )}
           </div>

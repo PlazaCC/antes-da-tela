@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import type { CommentWithAuthor } from '@/server/api/comments'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import Link from 'next/link'
 import { useState } from 'react'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
@@ -42,13 +43,27 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
             className='bg-elevated rounded-sm p-3 border border-border-subtle flex flex-col gap-2'
           >
             <div className='flex items-center gap-2'>
-              {/* Avatar (ref: Figma 38:115) — initials fallback */}
-              <div className='w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent shrink-0'>
-                {c.author?.name?.[0]?.toUpperCase() ?? '?'}
-              </div>
-              <span className='text-text-primary text-body-small font-medium truncate'>
-                {c.author?.name ?? 'Anonymous'}
-              </span>
+              {/* Avatar (ref: Figma 38:115) — initials fallback, clickable to profile */}
+              {c.author?.id ? (
+                <Link href={`/profile/${c.author.id}`} className='shrink-0 hover:opacity-80 transition-opacity'>
+                  <div className='w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent'>
+                    {c.author.name?.[0]?.toUpperCase() ?? '?'}
+                  </div>
+                </Link>
+              ) : (
+                <div className='w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent shrink-0'>
+                  ?
+                </div>
+              )}
+              {c.author?.id ? (
+                <Link href={`/profile/${c.author.id}`} className='text-text-primary text-body-small font-medium truncate hover:text-brand-accent transition-colors'>
+                  {c.author.name ?? 'Anonymous'}
+                </Link>
+              ) : (
+                <span className='text-text-primary text-body-small font-medium truncate'>
+                  {c.author?.name ?? 'Anonymous'}
+                </span>
+              )}
               <span className='font-mono text-label-mono-small text-text-muted ml-auto shrink-0'>
                 {new Date(c.created_at).toLocaleDateString('pt-BR')}
               </span>
