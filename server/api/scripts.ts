@@ -3,6 +3,24 @@ import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trp
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+type ScriptDetail = {
+  id: string
+  title: string
+  logline: string | null
+  synopsis: string | null
+  genre: string | null
+  age_rating: string | null
+  is_featured: boolean
+  published_at: string | null
+  script_files: Array<{
+    id: string
+    storage_path: string
+    page_count: number | null
+    file_size: number | null
+  }>
+  author: { id: string; name: string | null; image: string | null } | null
+}
+
 export const scriptCreateSchema = z.object({
   title: z.string().min(1).max(200),
   logline: z.string().max(300).optional(),
@@ -83,11 +101,15 @@ export const scriptsRouter = createTRPCRouter({
   getById: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input, ctx }) => {
     const { data: script } = await ctx.supabase
       .from('scripts')
-      .select('*, script_files(*), author:users!author_id(id, name, image)')
+      .select(
+        'id, title, logline, synopsis, genre, age_rating, is_featured, published_at,' +
+        ' script_files(id, storage_path, page_count, file_size),' +
+        ' author:users!author_id(id, name, image)',
+      )
       .eq('id', input.id)
       .maybeSingle()
 
-    return script ?? null
+    return (script ?? null) as ScriptDetail | null
   }),
 
   listRecent: publicProcedure

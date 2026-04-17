@@ -72,20 +72,21 @@ Mobile (375px–768px):
 
 **Tokens de design:**
 
-| Elemento                     | Tailwind class                                                                          |
-| ---------------------------- | --------------------------------------------------------------------------------------- |
-| Fundo do leitor              | `bg-base`                                                                               |
-| Canvas do PDF                | `rounded-sm border border-subtle shadow-elevation-1`                                    |
-| Sidebar                      | `bg-surface border-l border-subtle`                                                     |
-| Header da sidebar "Página N" | `font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs`        |
-| Textarea de comentário       | `bg-elevated border-subtle rounded-sm resize-none focus:ring-1 focus:ring-brand-accent` |
-| Botão "Comentar"             | `bg-brand-accent text-primary` (variant `default`, size `sm`)                           |
-| Comentário existente         | `bg-elevated rounded-sm p-3 border border-subtle`                                       |
-| Autor do comentário          | `text-primary text-body-small font-medium`                                              |
-| Data do comentário           | `text-muted font-mono text-label-mono-small`                                            |
-| ZoomController               | `bg-elevated border border-subtle rounded-sm px-3 py-1.5`                               |
-| PageController               | `bg-elevated border border-subtle rounded-sm flex items-center gap-2`                   |
-| Sticky bar do viewer         | `sticky top-0 z-10 bg-base/90 backdrop-blur-sm py-2 border-b border-subtle`             |
+| Elemento                     | Tailwind class                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| Fundo do leitor              | `bg-bg-base`                                                                                      |
+| Canvas do PDF                | `rounded-sm border border-border-subtle shadow-elevation-1`                                       |
+| Sidebar                      | `bg-surface border-l border-border-subtle`                                                        |
+| Header da sidebar "Página N" | `font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider`                     |
+| Textarea de comentário       | `bg-elevated border border-border-subtle rounded-sm resize-none focus:ring-1 focus:ring-brand-accent` |
+| Botão "Comentar"             | Button variant `default`, size `sm`                                                               |
+| Comentário existente         | `bg-elevated rounded-sm p-3 border border-border-subtle`                                          |
+| Autor do comentário          | `text-text-primary text-body-small font-medium`                                                   |
+| Data do comentário           | `text-text-muted font-mono text-label-mono-small`                                                 |
+| Avatar do comentário         | `w-8 h-8 rounded-full bg-brand-accent/20 text-brand-accent text-xs font-medium`                  |
+| ZoomController               | `bg-elevated border border-border-subtle rounded-sm px-2 py-1.5`                                 |
+| PageController               | `bg-elevated border border-border-subtle rounded-sm flex items-center gap-2 px-3 py-1.5`         |
+| Sticky bar do viewer         | `sticky top-0 z-10 bg-bg-base/90 backdrop-blur-sm py-2 border-b border-border-subtle`            |
 
 ---
 
@@ -470,12 +471,12 @@ yarn lint
 
 ## Checklist de aceite
 
-- [ ] `PDFViewer` carregado com `next/dynamic, ssr: false`
-- [ ] Zustand store controla página atual compartilhada entre viewer e sidebar
-- [ ] `commentsRouter` com `list`, `create`, `delete`
-- [ ] Comentários filtrados por `pageNumber` da página visível
-- [ ] Soft delete (`deleted_at`) nos comentários
-- [ ] ZoomController e PageController usam tokens do design system (bg-elevated, border-subtle, font-mono)
-- [ ] Avatar do comentário com inicial do nome + bg-brand-accent/20
-- [ ] Performance aceitável em roteiros de até 120 páginas
-- [ ] `yarn build` limpo
+- [x] `PDFViewer` carregado com `next/dynamic, ssr: false`
+- [x] Zustand store controla página atual compartilhada entre viewer e sidebar
+- [x] `commentsRouter` com `list`, `create`, `delete`
+- [x] Comentários filtrados por `pageNumber` da página visível
+- [x] Soft delete (`deleted_at`) nos comentários
+- [x] ZoomController e PageController usam tokens do design system (bg-elevated, border-subtle, font-mono)
+- [x] Avatar do comentário com inicial do nome + bg-brand-accent/20
+- [x] Performance aceitável em roteiros de até 120 páginas (PDF cacheado em ref, sem re-fetch em troca de página)
+- [x] `yarn build` limpo

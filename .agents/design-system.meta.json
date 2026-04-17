@@ -88,6 +88,22 @@
   },
   "assets": [
     {
+      "name": "ZoomController",
+      "type": "asset",
+      "format": "svg",
+      "path": ".agents/figma/components/Zoom Controller.svg",
+      "figmaNodeId": "50:1836",
+      "description": "Zoom in/out controls for the PDF viewer (+/− buttons + percentage label)."
+    },
+    {
+      "name": "PageController",
+      "type": "asset",
+      "format": "svg",
+      "path": ".agents/figma/components/Page Controller.svg",
+      "figmaNodeId": "50:1837",
+      "description": "Page navigation controls for the PDF viewer (◀ N/total ▶)."
+    },
+    {
       "name": "Logo",
       "type": "image",
       "format": "svg",
@@ -418,6 +434,15 @@
       "description": "Várias variações de input com diferentes propósitos.",
       "props": ["type", "placeholder", "value", "error", "helper"],
       "variants": ["input-selected", "input-base", "input-profile", "input-tagline", "input-description"]
+    },
+    {
+      "name": "Avatar",
+      "type": "component",
+      "figmaNodeId": "38:115",
+      "description": "User avatar with circular crop, initials fallback, and optional status badge. Used in comments sidebar and profile pages.",
+      "props": ["src", "name", "size", "status"],
+      "sizes": ["sm", "md", "lg"],
+      "states": ["default", "online", "offline"]
     }
   ],
   "guidelines": {
@@ -544,6 +569,28 @@
         "notes": "Metrics used in admin/dashboard; implement positive/negative/neutral variants with color token mapping.",
         "priority": "low",
         "figmaNodeId": "13:145"
+      },
+      {
+        "name": "ZoomController",
+        "status": "implemented",
+        "notes": "Inline implementation in pdf-viewer.tsx; uses bg-elevated, border-border-subtle, font-mono tokens. No standalone component file — inline in PDFViewerInner.",
+        "priority": "low",
+        "figmaNodeId": "50:1836"
+      },
+      {
+        "name": "PageController",
+        "status": "implemented",
+        "notes": "Inline implementation in pdf-viewer.tsx; shares sticky controls bar with ZoomController. aria-label on each button.",
+        "priority": "low",
+        "figmaNodeId": "50:1837"
+      },
+      {
+        "name": "Avatar",
+        "status": "partial",
+        "notes": "Inline initials-fallback div used in comments-sidebar.tsx (w-8 h-8, bg-brand-accent/20). No standalone Avatar component yet. Needs extracting before poc-07 (profile page).",
+        "priority": "medium",
+        "figmaNodeId": "38:115",
+        "suggestedProps": ["src", "name", "size"]
       }
     ],
     "screens": [

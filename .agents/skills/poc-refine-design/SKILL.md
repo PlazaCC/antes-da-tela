@@ -5,17 +5,7 @@ description: Use when a POC task has been implemented and needs design alignment
 
 # poc-refine-design
 
-Align the last completed (or specified) POC task with the Figma design source. Compares `.agents/design-system.meta.json` against live Figma data, resolves token/component divergences, and updates task checklists.
-
-## Inputs
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `task_id` | string | auto-detect | Target task ID (e.g. `poc-07`). If omitted, picks the last `in_progress` or `pending` task by `execution_order`. |
-| `figma_fileKey` | string | from `figma.meta.json` | Figma file key. Defaults to `.agents/figma.meta.json.fileKey`. |
-| `apply_changes` | boolean | `false` | Write patches to disk. |
-| `dry_run` | boolean | `true` | Report only — no file writes. |
-| `commit_suggestion` | boolean | `true` | Generate a Conventional Commit message. |
+Align the last completed (or in-progress) POC task with the Figma design source. Compares `.agents/design-system.meta.json` against live Figma data, resolves token/component divergences, applies all corrections, and updates task checklists.
 
 ## Workflow
 
@@ -33,12 +23,11 @@ Read in order:
 - `.agents/figma/frames/*.pdf|png`
 - `.agents/figma/screens/*`
 
-Prefer local assets to reduce MCP payload. Record paths consumed.
+Prefer local assets to reduce MCP payload.
 
 ### 2. Determine Target Task
 
-- If `task_id` provided → use it.
-- Otherwise → pick the last task with `status` in `["in_progress", "pending"]` ordered by `execution_order` (highest number wins, e.g. `poc-07` > `poc-06`).
+Pick the last task with `status` in `["in_progress", "pending"]` ordered by `execution_order` (highest number wins, e.g. `poc-07` > `poc-06`).
 
 ### 3. Extract Design References
 
@@ -53,7 +42,7 @@ From the task file, collect:
 mcp_framelink_fig_get_figma_data(fileKey, nodeIds)
 ```
 
-Use `figma.meta.json.components` to map component names → nodeIds. Request only nodes relevant to the task (pages `Foundations` + task-specific frames). Minimise payload.
+Use `figma.meta.json.components` to map component names → nodeIds. Request only nodes relevant to the task (pages `Foundations` + task-specific frames).
 
 If the MCP call fails with a permissions error → **stop and ask the user for the Figma token**. Do not write partial data.
 
@@ -66,58 +55,34 @@ If the MCP call fails with a permissions error → **stop and ask the user for t
 | **Components** | For each task component: verify `figmaNodeId` and `type` (`component` vs `asset`) in meta. |
 | **Token format** | If `poc-context.json.tokens_format` is `hsl`, convert all hex → HSL channels before comparing. |
 
-### 6. Resolve Redundancies
+### 6. Apply Corrections
 
 - Consolidate tokens that share the same value under different names.
 - Correct `type` field: distinguish `component` (interactive, reusable) from `asset` (image/SVG).
-- Update `.agents/design-system.meta.json` with corrections.
+- Write all corrections to `.agents/design-system.meta.json`.
 - If strategy changes, update `.agents/design-system.plan.md`.
 
-Do **not** touch source code files outside `.agents/` unless `apply_changes=true`.
+Make minimal changes — do not rewrite sections unrelated to the task.
 
-### 7. Apply or Dry-Run
+### 7. Update Task Checklist
 
-- `dry_run=true` → produce diff + report, no writes.
-- `apply_changes=true` AND `dry_run=false` → apply patches via `apply_patch`. Update todo to reflect progress.
-- **Never run `git commit` or `git push`.**
+Mark acceptance items in `.agents/tasks/<task-file>.md` as completed for items verifiably checked in this run.
 
-### 8. Update Task Checklist
-
-Mark acceptance items in `.agents/tasks/<task-file>.md` as completed **only** for items that were verifiably checked in this run.
-
-### 9. Deliver Report
+### 8. Deliver Report
 
 ```
-Task processed:      <task-id>
+Task processed:    <task-id>
 Figma nodes queried: [list]
-Changes proposed/applied:
+Changes applied:
   - file: <path>
     change: <brief description>
-Checklist updated:   [items marked done]
-Next steps / risks:  <1-2 sentences>
-Commit suggestion:   feat(design): <message>  (if commit_suggestion=true)
+Checklist updated: [items marked done]
+Next steps / risks: <1-2 sentences>
+Commit suggestion: feat(design): <message>
 ```
 
 ## Operational Rules
 
 - Ask for MCP token on permission failure — never write incomplete data.
-- Make minimal changes: do not rewrite sections unrelated to the task.
 - Never auto-commit or push.
 - Convert hex → HSL only when `poc-context.json.tokens_format` requires it.
-
-## Quick Invocations
-
-**Safe inspection (default):**
-```json
-{ "dry_run": true }
-```
-
-**Apply changes with commit suggestion:**
-```json
-{
-  "task_id": "poc-07",
-  "apply_changes": true,
-  "dry_run": false,
-  "commit_suggestion": true
-}
-```
