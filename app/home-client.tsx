@@ -50,12 +50,21 @@ export function HomeClient() {
 
   const displayedScripts = isSearchActive ? (searchData ?? []) : (recentData?.items ?? [])
 
+  // Fetch ratings for displayed scripts in batch to show them on the home page
+  const scriptIds = displayedScripts.map((s) => s.id)
+  const { data: ratingsMap } = useQuery({
+    ...trpc.ratings.getManyAverage.queryOptions({ scriptIds }),
+    enabled: scriptIds.length > 0,
+  })
+
   return (
     <main className='max-w-[1140px] mx-auto px-5 pt-8 pb-16 flex flex-col gap-12'>
       <ScriptPreviewModal
         scriptId={previewId}
         open={!!previewId}
-        onOpenChange={(open) => { if (!open) setPreviewId(null) }}
+        onOpenChange={(open) => {
+          if (!open) setPreviewId(null)
+        }}
       />
 
       {/* Hero headline */}
@@ -78,8 +87,7 @@ export function HomeClient() {
             !genre
               ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
               : 'bg-elevated border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
-          )}
-        >
+          )}>
           Todos
         </button>
         {GENRES.map((g) => (
@@ -92,8 +100,7 @@ export function HomeClient() {
               genre === g
                 ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
                 : 'bg-elevated border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
-            )}
-          >
+            )}>
             {g}
           </button>
         ))}
@@ -110,7 +117,7 @@ export function HomeClient() {
                 title={script.title}
                 author={script.author?.name ?? ''}
                 genre={script.genre ?? ''}
-                rating={null}
+                rating={ratingsMap && ratingsMap[script.id]?.total > 0 ? ratingsMap[script.id].average : null}
                 pages={script.script_files?.[0]?.page_count ?? null}
                 onPreview={() => setPreviewId(script.id)}
               />
@@ -132,7 +139,7 @@ export function HomeClient() {
                 title={script.title}
                 author={script.author?.name ?? ''}
                 genre={script.genre ?? ''}
-                rating={null}
+                rating={ratingsMap && ratingsMap[script.id]?.total > 0 ? ratingsMap[script.id].average : null}
                 pages={script.script_files?.[0]?.page_count ?? null}
                 onPreview={() => setPreviewId(script.id)}
               />
@@ -146,8 +153,7 @@ export function HomeClient() {
             {isSearchActive && (
               <button
                 onClick={() => setGenre(undefined)}
-                className='text-brand-accent text-body-small hover:underline underline-offset-4 w-fit'
-              >
+                className='text-brand-accent text-body-small hover:underline underline-offset-4 w-fit'>
                 Limpar filtros
               </button>
             )}

@@ -3,6 +3,8 @@
 import { ScriptCard } from '@/components/ui/script-card'
 import type { ScriptListItem } from '@/server/api/scripts'
 import type { User } from '@/server/db/schema'
+import { useTRPC } from '@/trpc/client'
+import { useQuery } from '@tanstack/react-query'
 import Image from 'next/image'
 
 interface Props {
@@ -11,6 +13,12 @@ interface Props {
 }
 
 export function ProfileClient({ user, scripts }: Props) {
+  const trpc = useTRPC()
+  const scriptIds = scripts.map((script) => script.id)
+  const { data: ratingsMap } = useQuery({
+    ...trpc.ratings.getManyAverage.queryOptions({ scriptIds }),
+    enabled: scriptIds.length > 0,
+  })
   if (!user) {
     return (
       <main className='max-w-[960px] mx-auto px-5 py-12'>
@@ -55,7 +63,7 @@ export function ProfileClient({ user, scripts }: Props) {
                 title={script.title}
                 author={user.name}
                 genre={script.genre ?? ''}
-                rating={null}
+                rating={ratingsMap && ratingsMap[script.id]?.total > 0 ? ratingsMap[script.id].average : null}
                 pages={script.script_files?.[0]?.page_count ?? null}
               />
             ))}

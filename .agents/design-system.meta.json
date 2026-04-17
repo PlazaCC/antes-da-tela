@@ -554,9 +554,18 @@
       {
         "name": "ScriptCard",
         "status": "implemented",
-        "notes": "Implemented at components/ui/script-card.tsx. Supports href (renders as <a>) or div, hover border brand-accent, metadata layout (genre/title/author/pages/rating). No cover image yet — Figma shows editorial cover images which require script.cover_url data.",
+        "notes": "Implemented at components/ui/script-card.tsx. Supports href (renders as <a>) or div with onPreview callback (opens ScriptPreviewModal), hover border brand-accent, metadata layout (genre/title/author/pages/rating). onPreview prop adds role=button, tabIndex=0, and keyboard handler. No cover image yet — Figma shows editorial cover images which require script.cover_url data.",
         "priority": "medium",
         "figmaNodeId": "3:51"
+      },
+      {
+        "name": "ScriptPreviewModal",
+        "status": "implemented",
+        "notes": "Implemented at components/script-preview-modal/script-preview-modal.tsx. 2-column layout (left sidebar: cover placeholder/metadata/CTA, right: content). Figma nodeId 51:718 (Modal/Roteiro). Aligns with: heading/1 title, brand-accent LOGLINE/SINOPSE labels, blockquote logline with left border, author+rating on same row, genre/age_rating Tag pills row, metadata sidebar (Gênero/Páginas/Publicado). Deferred: cover thumbnail, audio player, metrics row (Leituras/Comentários/Lidos), Seguir button — require additional data/features not available in POC.",
+        "priority": "medium",
+        "figmaNodeId": "51:718",
+        "suggestedProps": ["scriptId", "open", "onOpenChange"],
+        "regression_audit": { "status": "auto-applied", "compared_tasks": ["poc-10", "poc-09", "poc-08"], "risk": "low" }
       },
       {
         "name": "ReactionBar",
@@ -629,7 +638,16 @@
         "name": "Home",
         "route": "/",
         "figmaNodeId": "51:562",
-        "requiredComponents": ["NavBar", "ScriptCard", "Tag", "StarRating", "MetricCard"]
+        "requiredComponents": ["NavBar", "ScriptCard", "Tag", "StarRating", "MetricCard"],
+        "status": "implemented"
+      },
+      {
+        "name": "Modal/Roteiro",
+        "route": "/ (overlay)",
+        "figmaNodeId": "51:718",
+        "requiredComponents": ["Dialog", "StarRating", "Tag", "Skeleton"],
+        "status": "implemented",
+        "deferred": ["cover thumbnail", "audio player", "metrics row", "Seguir button"]
       },
       {
         "name": "PDF Reader",
