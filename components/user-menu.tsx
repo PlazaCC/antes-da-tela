@@ -1,5 +1,6 @@
 'use client'
 
+import { Avatar } from '@/components/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -21,7 +21,6 @@ interface UserMenuProps {
 
 export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
   const router = useRouter()
-  const initial = userName?.[0]?.toUpperCase() ?? '?'
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -37,20 +36,9 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className='w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent shrink-0 hover:bg-brand-accent/30 transition-colors overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent'
+          className='rounded-full hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base'
           aria-label='User menu'>
-          {userImage ? (
-            <Image
-              src={userImage}
-              alt={userName ?? 'Avatar'}
-              width={32}
-              height={32}
-              unoptimized
-              className='w-8 h-8 object-cover'
-            />
-          ) : (
-            initial
-          )}
+          <Avatar src={userImage} name={userName ?? '?'} size='sm' />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-44'>

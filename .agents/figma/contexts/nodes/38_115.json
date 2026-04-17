@@ -1,8 +1,0 @@
-{
-  "id": "38:115",
-  "name": "Avatar",
-  "type": "COMPONENT",
-  "components": [],
-  "screenshot": ".agents/figma/screens/avatar.png",
-  "notes": "Avatar primitives: circle, initials fallback, status badge. Capture multiple sizes."
-}

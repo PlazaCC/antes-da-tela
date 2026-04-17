@@ -53,7 +53,6 @@ export const usersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Build patch with only the fields that were provided
       const patch: Record<string, string> = {}
       if (input.name !== undefined) patch.name = input.name
       if (input.bio !== undefined) patch.bio = input.bio
@@ -74,5 +73,47 @@ export const usersRouter = createTRPCRouter({
       }
 
       return (updated ?? null) as User | null
+    }),
+
+  isFollowing: publicProcedure
+    .input(z.object({ authorId: z.string().uuid() }))
+    .query(async ({ input, ctx }) => {
+      const { data } = await ctx.supabase.auth.getClaims()
+      if (!data?.claims) return { following: false }
+      const userId = data.claims.sub as string
+      const { data: row } = await ctx.supabase
+        .from('user_follows')
+        .select('follower_id')
+        .eq('follower_id', userId)
+        .eq('followee_id', input.authorId)
+        .maybeSingle()
+      return { following: !!row }
+    }),
+
+  follow: authenticatedProcedure
+    .input(z.object({ authorId: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.user as TRPCUser).id
+      if (userId === input.authorId) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Cannot follow yourself' })
+      }
+      const { error } = await ctx.supabase
+        .from('user_follows')
+        .upsert({ follower_id: userId, followee_id: input.authorId }, { onConflict: 'follower_id,followee_id' })
+      if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+      return { following: true }
+    }),
+
+  unfollow: authenticatedProcedure
+    .input(z.object({ authorId: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.user as TRPCUser).id
+      const { error } = await ctx.supabase
+        .from('user_follows')
+        .delete()
+        .eq('follower_id', userId)
+        .eq('followee_id', input.authorId)
+      if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+      return { following: false }
     }),
 })

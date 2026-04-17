@@ -1,6 +1,6 @@
 'use client'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
 import type { CommentWithAuthor } from '@/server/api/comments'
 import { useTRPC } from '@/trpc/client'
@@ -44,18 +44,10 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
               {/* Avatar (ref: Figma 38:115) — initials fallback, clickable to profile */}
               {c.author?.id ? (
                 <Link href={`/profile/${c.author.id}`} className='shrink-0 hover:opacity-80 transition-opacity'>
-                  <Avatar>
-                    {c.author.image ? (
-                      <AvatarImage src={c.author.image} alt={c.author.name ?? 'Avatar'} />
-                    ) : (
-                      <AvatarFallback>{c.author.name?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-                    )}
-                  </Avatar>
+                  <Avatar src={c.author.image} name={c.author.name ?? '?'} size='md' />
                 </Link>
               ) : (
-                <div className='w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent shrink-0'>
-                  ?
-                </div>
+                <Avatar name='?' size='md' />
               )}
               {c.author?.id ? (
                 <Link

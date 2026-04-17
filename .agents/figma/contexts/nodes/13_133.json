@@ -1,8 +1,0 @@
-{
-  "id": "13:133",
-  "name": "StarRating",
-  "type": "COMPONENT",
-  "components": [],
-  "screenshot": ".agents/figma/screens/star-rating.png",
-  "notes": "Star rating control used in reviews and listings. Capture empty/partial/full states."
-}

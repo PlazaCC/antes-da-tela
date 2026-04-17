@@ -35,9 +35,9 @@ Este prompt guia um agente a executar refinamentos de design específicos para a
 1. Carregar contexto local: `.agents/poc-context.json`, `.agents/tasks/*`,
    `.agents/figma.meta.json`, `.agents/design-system.meta.json` e
    `.agents/design-system.plan.md`.
-   - Antes de consultar o MCP, verificar se há assets locais em `.agents/figma/`.
-     - Use `.agents/figma/components/*.svg`, `.agents/figma/frames/*.pdf|png` e `.agents/figma/screens/*` quando presentes.
-     - Registrar paths dos assets consumidos e preferir assets locais para comparações e diffs (reduz payload e facilita reproducibilidade).
+   - Antes de consultar o MCP, use `.agents/figma.meta.json` e `.agents/design-system.meta.json` apenas como apoio/fallback para `fileKey` e mapeamento de componentes/tokens.
+   - Ignore qualquer menção a assets locais em `.agents/figma/` — não há mais SVG/PNG/PDF locais.
+
 2. Determinar task alvo: usar `task_id` se fornecido; caso contrário, escolher a
    última task com status `in_progress` ou `pending` conforme `execution_order`.
 3. Extrair referências de design da task alvo (componentes, nodes, tokens).
@@ -52,26 +52,27 @@ Escopo e restrição (AJUSTE SOLICITADO)
   dependências próximas. Não execute mudanças globais sem validação manual.
 
 4. Consultar o Figma via FramLink MCP (`mcp_framelink_fig_get_figma_data`) usando
-   `figma_fileKey` e os `nodeId`s relevantes. Baixar apenas nodes necessários.
+   sempre os links oficiais do Figma e os `nodeId`s relevantes. Baixar apenas nodes necessários.
+   Use arquivos locais de metadados apenas se MCP não estiver disponível.
 5. Comparar: `design-system.meta.json` vs dados extraídos do Figma. Detectar:
    - tokens faltantes ou divergentes (cores, tipografia, spacing)
    - componentes duplicados/obsoletos
    - assets SVG ou imagens ausentes
 6. Limpeza e atualização:
    - remover redundâncias no `.agents/design-system.meta.json` ou marcar
-     componentes como `asset` vs `component` conforme o Figma
+     componentes como `asset` vs `component` conforme o Figma (obtido via MCP)
    - normalizar tokens em formato esperado pelo projeto (HSL channels quando
      aplicável) e atualizar `design-system.plan.md` quando houver alteração de
      estratégia
-   - gerar diffs/patches mínimos para atualizar arquivos locais extraídos
+
+- gerar diffs/patches mínimos para atualizar arquivos locais extraídos (apenas se MCP não estiver disponível)
 
 Diretrizes operacionais (escopo restrito)
 
 - Priorize apenas os `nodeId`s e componentes referenciados diretamente na task
   alvo e em tasks dependentes imediatas. Evite tocar tokens ou componentes que
   não impactem a entrega da task.
-- Prefira assets locais em `.agents/figma/` para comparação e export (reduz
-  payload e garante reprodutibilidade).
+  - Ignore qualquer menção a assets locais em `.agents/figma/` — utilize sempre o MCP como fonte.
 - NÃO modificar `components/ui/*` de forma ampla. Alterações em UI só são
   permitidas se forem mínimas, localizadas e claramente não causarem
   regressão (ex.: extrair wrapper, adicionar prop pass-through). Para mudanças
@@ -90,10 +91,8 @@ Critérios de verificação (quando marcar acceptance como done)
 
 - Só marque um acceptance item como `done` se a evidência for localmente
   verificável (ex.: token existe em `.agents/design-system.meta.json`, asset
-  SVG salvo em `.agents/figma/components/`, ou componente adicionado em
-  `components/ui/` como mudança mínima). Se a verificação exigir build ou QA
-  visual, adicione uma entrada na checklist indicando verificação manual
-  pendente.
+  SVG salvo em `.agents/figma/components/` (não mais utilizado), ou componente adicionado em
+  `components/ui/` como mudança mínima). Se a verificação exigir build ou QA visual, adicione uma entrada na checklist indicando verificação manual pendente.
 
 8. Entregar relatório resumido com:
    - task processada
@@ -119,12 +118,8 @@ Passo-a-passo detalhado que o agente deve seguir
      na ordem de `execution_order`. Priorizar a última numericamente (ex: poc-07).
 3. Ler o arquivo da task alvo em `.agents/tasks/` e identificar referências de
    design (nomes de componentes, nodeIds, tokens). Ex.: `StarRating`, `RatingBox`, `Avatar`, `ScriptCard`.
-4. Ler `.agents/figma.meta.json` para `fileKey` (a menos que `figma_fileKey`
-   seja fornecido). Mapear componentes para `nodeId`s usando o campo
-   `components` do `figma.meta.json`.
-5. Chamar `mcp_framelink_fig_get_figma_data` com `fileKey` e `nodeId`s necessários
-   (páginas `Foundations` e frames referenciados). Solicitar apenas nodes usados
-   pela task para minimizar payload.
+4. Ler `.agents/figma.meta.json` para `fileKey` (a menos que `figma_fileKey` seja fornecido), apenas como apoio/fallback. Mapear componentes para `nodeId`s usando o campo `components` do `figma.meta.json` apenas se MCP não estiver disponível.
+5. Chamar `mcp_framelink_fig_get_figma_data` sempre que possível, usando os links oficiais do Figma e os `nodeId`s necessários (páginas e frames referenciados). Solicitar apenas nodes usados pela task para minimizar payload.
 6. Extrair e comparar:
    - cores: comparar paleta atual em `.agents/design-system.meta.json` com
      cores extraídas; detectar nomes duplicados, valores divergentes e tokens

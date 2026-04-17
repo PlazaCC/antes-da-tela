@@ -1,8 +1,0 @@
-{
-  "id": "13:95",
-  "name": "Tag",
-  "type": "COMPONENT_SET",
-  "components": [],
-  "screenshot": ".agents/figma/screens/tag.png",
-  "notes": "Small inline tag/chip used for categories and labels."
-}

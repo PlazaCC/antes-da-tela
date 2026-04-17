@@ -7,125 +7,73 @@ description: >-
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# POC — Next Task Executor
+# POC — Next Task Executor (Atualizado)
 
-## Objective
+## Objetivo
 
-Determine the current POC state, verify the previous task is complete, and execute the next task.
-Never skip ahead — each task's acceptance criteria must pass before the next begins.
-
----
-
-## Step 1 — Read the execution order
-
-Read `.agents/tasks/poc-overview.md` to understand:
-
-- The mandatory execution order (`[01]` → `[07]`)
-- The dependency rules (what blocks what)
-- The validation commands for each task
+Determinar o estado atual do POC, validar critérios de aceite da task anterior e executar a próxima task.
+Nunca pule etapas — cada checklist deve ser cumprido antes de avançar.
 
 ---
 
-## Step 2 — Determine current state
+## Fonte da Verdade de Design
 
-Run the following to map the repo state:
+**Sempre utilize o Figma via MCP FramLink como fonte primária para tokens, componentes e layouts.**
 
-```bash
-git branch -a
-git log --oneline -10
-git stash list
-```
-
-Then cross-reference with the execution order:
-
-- Which branches exist? (`feat/design-system`, `feat/db-schema`, etc.)
-- Which branches are already merged into `main`?
-- Which task is currently in progress (open branch, uncommitted work)?
-
-Task → branch mapping:
-
-| Task               | Branch               |
-| ------------------ | -------------------- |
-| [01] Design System | `feat/design-system` |
-| [02] DB Schema     | `feat/db-schema`     |
-| [03] Auth          | `feat/auth`          |
-| [04] Upload        | `feat/upload`        |
-| [05] Leitor PDF    | `feat/leitor`        |
-| [06] Home          | `feat/home`          |
-| [07] Perfil        | `feat/perfil`        |
+- Os arquivos locais `.agents/figma.meta.json` e `.agents/design-system.meta.json` servem apenas como apoio/fallback.
+- Não há mais assets locais em `.agents/figma/` — ignore qualquer menção a SVG/PNG/PDF locais.
+- Os links oficiais do Figma para referência são:
+  - Fluxo principal: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1388
+  - Cadastro de roteiro: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1350
+  - Perfil do usuário: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-2075
 
 ---
 
-## Step 3 — Verify the previous task's acceptance criteria
+## Passos principais
 
-Read the task file for the **last completed or in-progress task** from `.agents/tasks/`:
+1. Carregue `.agents/poc-context.json` para obter `execution_order` e tasks.
+2. Identifique a task alvo (próxima pendente ou fornecida via `task_id`).
+3. Valide critérios de aceite locais:
 
-| Task               | File                                    |
-| ------------------ | --------------------------------------- |
-| [01] Design System | `.agents/tasks/poc-01-design-system.md` |
-| [02] DB Schema     | `.agents/tasks/poc-02-db-schema.md`     |
-| [03] Auth          | `.agents/tasks/poc-03-auth.md`          |
-| [04] Upload        | `.agents/tasks/poc-04-upload.md`        |
-| [05] Leitor PDF    | `.agents/tasks/poc-05-leitor.md`        |
-| [06] Home          | `.agents/tasks/poc-06-home.md`          |
-| [07] Perfil        | `.agents/tasks/poc-07-perfil.md`        |
+- `yarn build` (zero erros)
+- `yarn lint` (zero warnings)
+- `yarn drizzle-kit generate` se schema foi alterado
 
-Check every item in that task's **Checklist de aceite / Acceptance Criteria**:
+4. Para qualquer necessidade de design (tokens, componentes, layouts):
 
-- Run `yarn build` — must produce zero TypeScript errors.
-- Run `yarn lint` — must produce zero ESLint warnings.
-- Verify git state: branch merged into `main`, no uncommitted changes.
-- Run `yarn drizzle-kit generate` if the task touched `server/db/schema.ts`.
+- Consulte sempre o Figma via MCP FramLink (`mcp_framelink_fig_get_figma_data`) usando os links oficiais e nodeIds relevantes.
+- Use arquivos locais de metadados apenas se MCP não estiver disponível.
 
-- Check for local visual assets in `.agents/figma/` (folders `components/`, `frames/`, `screens/`). If matching SVG/PNG/PDF assets exist for the task's components/screens, prefer those local files for visual diffs and verification before calling the Figma MCP API (saves quota and is reproducible).
-
-**If any criterion is NOT met:** fix the gap first. Do not proceed to the next task until this step is clean.
+5. Atualize checklists das tasks conforme critérios verificados.
+6. Nunca execute `git commit` ou `git push` — apenas gere sugestões de commit.
 
 ---
 
-## Step 4 — Identify and read the next task
+## Regras operacionais
 
-Dependency graph:
-
-```
-[01] merged into main  →  unblocks [02]
-[02] merged into main  →  unblocks [03] and [04] (parallel)
-[03] + [04] merged     →  unblocks [05], [06], [07]
-```
-
-Identify the next task according to this order and read its full spec file from `.agents/tasks/`.
+- Sempre priorize o Figma via MCP FramLink.
+- Ignore qualquer instrução para buscar assets locais em `.agents/figma/`.
+- Arquivos locais `.agents/figma.meta.json` e `.agents/design-system.meta.json` são apenas fallback.
+- Nunca grave tokens ou segredos em arquivos do projeto.
+- Mudanças mínimas e focadas; não reescreva seções não relacionadas.
 
 ---
 
-## Step 5 — Execute the next task
+## Exemplo de fluxo
 
-Follow every step in the task file exactly as written:
-
-1. Create or check out the feature branch specified in the task.
-2. Implement all required files, components, routes, schemas, and configurations.
-3. Run the validation commands listed in the task (`yarn build`, `yarn lint`, `yarn drizzle-kit generate` when applicable).
-4. Fix all errors before declaring the task complete.
-
----
-
-## Step 6 — Final gate
-
-Before closing, confirm every item in the next task's acceptance checklist:
-
-- [ ] `yarn build` passes with zero errors
-- [ ] `yarn lint` passes with zero warnings
-- [ ] All specified files exist and match the expected structure
-- [ ] Branch is ready to merge (or already merged, per task instructions)
-
-Report which task was completed, which criteria passed, and what the next task in the queue is.
+1. Validar critérios locais (`yarn build`, `yarn lint`, etc.)
+2. Consultar Figma via MCP para obter tokens/componentes/layouts necessários
+3. Atualizar metadados locais apenas se MCP não estiver disponível
+4. Atualizar checklist da task
+5. Gerar sugestão de Conventional Commit
 
 ---
 
 ## Constraints
 
-- Never use `npm install` — always `yarn add`.
-- Tailwind v3 only — do not use v4 syntax.
-- Use `cn()` from `@/lib/utils` for all className composition.
-- `createServerClient` in Server Components, `createBrowserClient` in Client Components.
-- Schema source of truth: `server/db/schema.ts` — never edit generated migration files directly.
-- All output (code, comments, commits, docs) in English.
+- Nunca use `npm install` — sempre `yarn add`.
+- Tailwind v3 apenas — não use sintaxe v4.
+- Use `cn()` de `@/lib/utils` para composição de classes.
+- `createServerClient` em Server Components, `createBrowserClient` em Client Components.
+- Fonte de schema: `server/db/schema.ts` — nunca edite migrations geradas diretamente.
+- Todo output (código, comentários, commits, docs) em inglês.

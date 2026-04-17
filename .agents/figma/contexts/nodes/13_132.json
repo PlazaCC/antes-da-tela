@@ -1,8 +1,0 @@
-{
-  "id": "13:132",
-  "name": "ReactionBar",
-  "type": "COMPONENT",
-  "components": [],
-  "screenshot": ".agents/figma/screens/reaction-bar.png",
-  "notes": "Inline reaction controls (like/clap/comment) used on script cards and comments."
-}
