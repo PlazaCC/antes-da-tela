@@ -1,8 +1,0 @@
-{
-  "id": "3:51",
-  "name": "ScriptCard",
-  "type": "COMPONENT_SET",
-  "components": [],
-  "screenshot": ".agents/figma/screens/script-card.png",
-  "notes": "Card used for script previews; contains title, meta, excerpt, and actions."
-}

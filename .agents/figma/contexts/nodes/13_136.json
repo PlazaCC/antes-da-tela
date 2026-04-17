@@ -1,8 +1,0 @@
-{
-  "id": "13:136",
-  "name": "Comment",
-  "type": "COMPONENT_SET",
-  "components": [],
-  "screenshot": ".agents/figma/screens/comment.png",
-  "notes": "Comment block with avatar, author, timestamp, and body. Includes nested replies variant."
-}

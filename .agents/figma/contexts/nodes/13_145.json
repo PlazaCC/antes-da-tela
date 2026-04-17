@@ -1,8 +1,0 @@
-{
-  "id": "13:145",
-  "name": "MetricCard",
-  "type": "COMPONENT_SET",
-  "components": [],
-  "screenshot": ".agents/figma/screens/metric-card.png",
-  "notes": "Summary metric card with title, value, delta, and icon."
-}
