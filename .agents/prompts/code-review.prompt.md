@@ -3,6 +3,8 @@ name: code-review
 agent: agent
 description: |
   Realiza code review automatizado do código atual, mas só se você NÃO estiver na branch main. Se estiver na main, pare imediatamente e alerte o usuário para trocar de branch antes de prosseguir.
+  Use sempre as skills de React/Vercel e Supabase para entender a arquitetura da aplicação, incluindo @file:vercel-react-best-practices, as skills relacionadas a Supabase e o guia de workflow @file:supabase-workflow.md.
+  Use o package.json como referência de scripts e prefira executar os comandos nele definidos quando possível.
 tools:
   [
     vscode,
@@ -34,6 +36,7 @@ Automatizar o code review da branch atual, analisando detalhadamente o conteúdo
    - Liste todos os arquivos alterados em relação à main (use `git diff --name-status main...HEAD`).
    - Analise erros de compilação/lint apenas nos arquivos alterados.
    - Leia o conteúdo dos arquivos alterados e aponte problemas concretos (bugs, más práticas, violações de padrão, código morto, duplicidade, falta de teste, etc).
+   - Use `package.json` como referência para os scripts de validação e execute todos os testes relevantes: `yarn tsc --noEmit`, `yarn lint`, `yarn test` e `yarn build`.
    - Sugira melhorias, refatorações e aponte problemas apenas no que mudou.
    - Monte um plano de correção detalhado, em formato de TODOs, com ações específicas para cada problema encontrado.
 

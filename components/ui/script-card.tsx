@@ -1,7 +1,7 @@
-import { StarRating } from '@/components/ui/star-rating'
 import { Tag } from '@/components/ui/tag'
 import { cn } from '@/lib/utils'
 import * as React from 'react'
+import { RatingSummary } from './rating-summary'
 
 type ScriptCardElement = HTMLAnchorElement | HTMLDivElement
 
@@ -10,8 +10,10 @@ interface ScriptCardBaseProps {
   author: string
   genre: string
   rating: number | null
+  ratingTotal?: number
   pages: number | null
   status?: 'publicado' | 'rascunho' | 'privado'
+  onPreview?: () => void
 }
 
 type ScriptCardAnchorProps = ScriptCardBaseProps &
@@ -29,7 +31,7 @@ export type ScriptCardProps = ScriptCardAnchorProps | ScriptCardDivProps
 const baseClasses =
   'group flex flex-col gap-3 rounded-sm border border-border-subtle bg-surface p-5 transition-all duration-150 hover:border-brand-accent hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base'
 
-const renderContent = ({ title, author, genre, rating, pages, status }: ScriptCardBaseProps) => (
+const renderContent = ({ title, author, genre, rating, ratingTotal, pages, status }: ScriptCardBaseProps) => (
   <>
     <div className='flex items-start justify-between gap-3'>
       <div className='flex flex-col gap-1 min-w-0'>
@@ -51,22 +53,41 @@ const renderContent = ({ title, author, genre, rating, pages, status }: ScriptCa
     </div>
 
     <div className='flex items-center gap-2'>
-      <StarRating value={rating ?? 0} readOnly allowHalf />
-      <span className='font-mono text-label-mono-small text-text-muted'>{rating != null ? rating.toFixed(1) : ''}</span>
+      <RatingSummary average={rating ?? 0} total={ratingTotal ?? 0} />
     </div>
   </>
 )
 
 export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((props, ref) => {
-  const { title, author, genre, rating, pages, status, className } = props
+  const { title, author, genre, rating, ratingTotal, pages, status, className, onPreview } = props
 
-  const content = renderContent({ title, author, genre, rating, pages, status })
+  const content = renderContent({ title, author, genre, rating, ratingTotal, pages, status })
   const anchorClasses = cn(baseClasses, 'cursor-pointer', className)
-  const divClasses = cn(baseClasses, className)
+  const divClasses = cn(baseClasses, onPreview && 'cursor-pointer', className)
 
   if ('href' in props && props.href) {
-    const { href, className: _className, ...anchorProps } = props as ScriptCardAnchorProps
+    const {
+      href,
+      title: _title,
+      author: _author,
+      genre: _genre,
+      rating: _rating,
+      ratingTotal: _ratingTotal,
+      pages: _pages,
+      status: _status,
+      className: _className,
+      onPreview: _onPreview,
+      ...anchorProps
+    } = props as ScriptCardAnchorProps & { onPreview?: () => void }
+    void _title
+    void _author
+    void _genre
+    void _rating
+    void _ratingTotal
+    void _pages
+    void _status
     void _className
+    void _onPreview
 
     return (
       <a ref={ref as React.ForwardedRef<HTMLAnchorElement>} href={href} className={anchorClasses} {...anchorProps}>
@@ -75,10 +96,45 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
     )
   }
 
-  const { className: _className, ...divProps } = props as ScriptCardDivProps
+  const {
+    title: _title,
+    author: _author,
+    genre: _genre,
+    rating: _rating,
+    ratingTotal: _ratingTotal,
+    pages: _pages,
+    status: _status,
+    className: _className,
+    onPreview: _onPreview,
+    ...divProps
+  } = props as ScriptCardDivProps & { onPreview?: () => void }
+  void _title
+  void _author
+  void _genre
+  void _rating
+  void _ratingTotal
+  void _pages
+  void _status
   void _className
+  void _onPreview
   return (
-    <div ref={ref as React.ForwardedRef<HTMLDivElement>} className={divClasses} {...divProps}>
+    <div
+      ref={ref as React.ForwardedRef<HTMLDivElement>}
+      className={divClasses}
+      onClick={onPreview}
+      onKeyDown={
+        onPreview
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onPreview()
+              }
+            }
+          : undefined
+      }
+      role={onPreview ? 'button' : undefined}
+      tabIndex={onPreview ? 0 : undefined}
+      {...divProps}>
       {content}
     </div>
   )

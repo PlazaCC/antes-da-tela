@@ -1,9 +1,9 @@
 import AppToaster from '@/components/app-toaster/app-toaster'
 import { NavBar } from '@/components/navbar'
 import { PostHogProvider } from '@/components/posthog-provider'
+import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
 import type { Metadata } from 'next'
-import { ThemeProvider } from 'next-themes'
 import { DM_Mono, DM_Serif_Display, Inter } from 'next/font/google'
 import { Suspense } from 'react'
 import './globals.css'
@@ -48,7 +48,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <PostHogProvider>
             <TRPCReactProvider>
-              <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
+              <ThemeProvider>
                 <NavBar />
                 {children}
                 <AppToaster />

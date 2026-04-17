@@ -1,14 +1,14 @@
 'use client'
 
-import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 import { PDFViewer } from '@/components/pdf-viewer'
+import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
+import { StarRating } from '@/components/ui/star-rating'
 import type { TagVariant } from '@/components/ui/tag'
 import { Tag } from '@/components/ui/tag'
-import { StarRating } from '@/components/ui/star-rating'
 import type { AppRouter } from '@/server/api/root'
-import type { inferRouterOutputs } from '@trpc/server'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { inferRouterOutputs } from '@trpc/server'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -33,9 +33,10 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
   const router = useRouter()
 
   const averageOpts = trpc.ratings.getAverage.queryOptions({ scriptId: script?.id ?? '' })
-  const userRatingOpts = trpc.ratings.getUserRating.queryOptions(
-    { scriptId: script?.id ?? '', userId: currentUserId ?? '' },
-  )
+  const userRatingOpts = trpc.ratings.getUserRating.queryOptions({
+    scriptId: script?.id ?? '',
+    userId: currentUserId ?? '',
+  })
 
   const { data: ratingData } = useQuery({ ...averageOpts, enabled: !!script })
   const { data: userRating } = useQuery({ ...userRatingOpts, enabled: !!script && !!currentUserId })
@@ -54,7 +55,7 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
   const isOwner = !!currentUserId && currentUserId === script.author?.id
 
   return (
-    <div className='h-screen bg-bg-base flex flex-col overflow-hidden'>
+    <div className='bg-bg-base flex flex-col'>
       {/* Script header */}
       <div className='max-w-6xl mx-auto w-full px-5 py-8'>
         <div className='flex flex-col gap-3'>
@@ -65,17 +66,14 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
 
           <h1 className='font-display text-heading-1 text-text-primary'>{script.title}</h1>
 
-          {script.logline && (
-            <p className='text-body-large text-text-secondary max-w-3xl'>{script.logline}</p>
-          )}
+          {script.logline && <p className='text-body-large text-text-secondary max-w-3xl'>{script.logline}</p>}
 
           {script.author && (
             <p className='font-mono text-label-mono-default text-text-muted'>
               por{' '}
               <a
                 href={`/profile/${script.author.id}`}
-                className='text-text-secondary hover:text-brand-accent transition-colors'
-              >
+                className='text-text-secondary hover:text-brand-accent transition-colors'>
                 {script.author.name}
               </a>
             </p>
@@ -85,13 +83,11 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
           {isOwner ? (
             <div
               className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'
-              aria-live='polite'
-            >
+              aria-live='polite'>
               <StarRating value={ratingData?.average ?? 0} readOnly allowHalf />
               {ratingData && ratingData.total > 0 && (
                 <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-                  {ratingData.average.toFixed(1)}{' '}
-                  <span className='text-text-muted'>({ratingData.total})</span>
+                  {ratingData.average.toFixed(1)} <span className='text-text-muted'>({ratingData.total})</span>
                 </span>
               )}
               <span className='font-mono text-label-mono-small text-text-muted'>
@@ -125,8 +121,7 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
               />
               {ratingData && ratingData.total > 0 && (
                 <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-                  {ratingData.average.toFixed(1)}{' '}
-                  <span className='text-text-muted'>({ratingData.total})</span>
+                  {ratingData.average.toFixed(1)} <span className='text-text-muted'>({ratingData.total})</span>
                 </span>
               )}
               {!currentUserId && (
@@ -143,9 +138,9 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
 
       {/* Reader — PDF + sidebar */}
       {pdfUrl ? (
-        <div className='flex flex-col lg:flex-row flex-1 min-h-0 border-t border-border-subtle'>
+        <div className='flex flex-col lg:flex-row flex-1 min-h-0 border-t border-border-subtle max-h-[90vh]'>
           {/* PDF area */}
-          <div className='flex-1 min-w-0 min-h-0 p-5 overflow-auto'>
+          <div className='flex-1 min-w-0 p-5 overflow-auto min-h-[90vh]'>
             <PDFViewer url={pdfUrl} />
           </div>
 
@@ -154,10 +149,10 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
         </div>
       ) : (
         /* Fallback: synopsis when no PDF available */
-        <div className='max-w-4xl mx-auto w-full px-5 pb-12'>
+        <div className='max-w-4xl mx-auto w-full px-5 pb-12 h-full'>
           {script.synopsis && (
             <div className='mb-10'>
-              <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs mb-3'>
+              <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider mb-3'>
                 Synopsis
               </h2>
               <p className='text-body-default text-text-primary leading-relaxed whitespace-pre-wrap'>
@@ -168,7 +163,7 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
 
           {script.script_files?.[0] && (
             <div className='rounded-sm border border-border-subtle bg-surface p-6'>
-              <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs mb-4'>
+              <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider mb-4'>
                 Script File
               </h2>
               <div className='flex flex-col gap-2'>

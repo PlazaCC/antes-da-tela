@@ -122,7 +122,9 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     }
 
     loadPDF().catch(console.error)
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url])
 
@@ -137,10 +139,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     if (!pdfDocRef.current) return
     if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
     zoomTimerRef.current = setTimeout(() => {
-      renderPage(
-        usePDFViewerStore.getState().currentPage,
-        usePDFViewerStore.getState().zoom,
-      )
+      renderPage(usePDFViewerStore.getState().currentPage, usePDFViewerStore.getState().zoom)
     }, 300)
     return () => {
       if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
@@ -154,10 +153,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
       if (!pdfDocRef.current) return
       if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current)
       resizeTimerRef.current = setTimeout(() => {
-        renderPage(
-          usePDFViewerStore.getState().currentPage,
-          usePDFViewerStore.getState().zoom,
-        )
+        renderPage(usePDFViewerStore.getState().currentPage, usePDFViewerStore.getState().zoom)
       }, 150)
     })
     observer.observe(canvasWrapperRef.current)
@@ -181,8 +177,8 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
       {/* Controls bar — sticks to the top of the parent scroll container */}
       <div
         className={cn(
-          'sticky top-0 z-10 py-2 border-b border-border-subtle',
-          'bg-bg-base/90 backdrop-blur-sm',
+          'sticky top-0 left-2 z-10 p-2 max-w-fit rounded-lg',
+          'bg-bg-base/20 backdrop-blur-sm',
           'flex items-center gap-3',
         )}>
         {/* PageController (ref: Figma 50:1837) */}

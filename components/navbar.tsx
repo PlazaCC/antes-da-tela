@@ -1,19 +1,16 @@
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { GoogleAuthButton } from './google-auth-button'
 import { NavBarSearch } from './navbar-search'
 import { UserMenu } from './user-menu'
-import { GoogleAuthButton } from './google-auth-button'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 
 export function NavBar() {
   return (
-    <header
-      aria-label='Principal'
-      className='sticky top-0 z-50 bg-surface border-b border-border-subtle h-16'
-    >
+    <header aria-label='Principal' className='sticky top-0 z-50 bg-surface border-b border-border-subtle h-16'>
       <div className='max-w-[1280px] mx-auto px-5 h-full flex items-center'>
         {/* Logo — left anchor */}
         <Link href='/' className='shrink-0'>
@@ -22,7 +19,7 @@ export function NavBar() {
 
         {/* Right section: search + auth pushed to the right */}
         <div className='flex items-center gap-4 ml-auto'>
-          <div className='w-56 sm:w-72'>
+          <div className='w-56 sm:w-72 hidden md:block'>
             <Suspense>
               <NavBarSearch />
             </Suspense>
@@ -34,8 +31,7 @@ export function NavBar() {
                 <Skeleton className='h-8 w-28 bg-elevated' />
                 <Skeleton className='h-8 w-8 rounded-full bg-elevated' />
               </div>
-            }
-          >
+            }>
             <NavBarUserSection />
           </Suspense>
         </div>
@@ -50,9 +46,7 @@ async function NavBarUserSection() {
   const user = data?.claims
 
   if (!user) {
-    return (
-      <GoogleAuthButton label='Entrar com Google' className='w-auto h-8 px-4 text-sm rounded-sm' />
-    )
+    return <GoogleAuthButton label='Entrar com Google' className='w-auto h-8 px-4 text-sm rounded-sm' />
   }
 
   const userId = user.sub as string
