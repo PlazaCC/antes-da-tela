@@ -14,30 +14,31 @@ export function NavBar() {
       aria-label='Principal'
       className='sticky top-0 z-50 bg-surface border-b border-border-subtle h-16'
     >
-      <div className='max-w-[1280px] mx-auto px-5 h-full flex items-center gap-6'>
-        {/* Logo */}
+      <div className='max-w-[1280px] mx-auto px-5 h-full flex items-center'>
+        {/* Logo — left anchor */}
         <Link href='/' className='shrink-0'>
-          <Image src='/assets/logo.svg' alt='Antes da Tela' width={83} height={19} priority />
+          <Image src='/assets/logo.svg' alt='Antes da Tela' width={124} height={28} priority />
         </Link>
 
-        {/* Search — center, grows to fill space */}
-        <div className='flex-1 max-w-xs'>
-          <Suspense>
-            <NavBarSearch />
+        {/* Right section: search + auth pushed to the right */}
+        <div className='flex items-center gap-4 ml-auto'>
+          <div className='w-56 sm:w-72'>
+            <Suspense>
+              <NavBarSearch />
+            </Suspense>
+          </div>
+
+          <Suspense
+            fallback={
+              <div className='flex items-center gap-3'>
+                <Skeleton className='h-8 w-28 bg-elevated' />
+                <Skeleton className='h-8 w-8 rounded-full bg-elevated' />
+              </div>
+            }
+          >
+            <NavBarUserSection />
           </Suspense>
         </div>
-
-        {/* Right section: auth-aware */}
-        <Suspense
-          fallback={
-            <div className='flex items-center gap-3'>
-              <Skeleton className='h-8 w-28 bg-elevated' />
-              <Skeleton className='h-8 w-8 rounded-full bg-elevated' />
-            </div>
-          }
-        >
-          <NavBarUserSection />
-        </Suspense>
       </div>
     </header>
   )

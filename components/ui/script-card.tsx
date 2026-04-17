@@ -27,20 +27,24 @@ type ScriptCardDivProps = ScriptCardBaseProps &
 export type ScriptCardProps = ScriptCardAnchorProps | ScriptCardDivProps
 
 const baseClasses =
-  'group flex flex-col gap-4 rounded-sm border border-border-subtle bg-surface p-5 transition-colors hover:border-brand-accent hover:bg-elevated'
+  'group flex flex-col gap-3 rounded-sm border border-border-subtle bg-surface p-5 transition-all duration-150 hover:border-brand-accent hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base'
 
 const renderContent = ({ title, author, genre, rating, pages, status }: ScriptCardBaseProps) => (
   <>
     <div className='flex items-start justify-between gap-3'>
       <div className='flex flex-col gap-1 min-w-0'>
-        <p className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider truncate'>{genre}</p>
-        <h3 className='text-heading-3 font-semibold text-text-primary leading-tight line-clamp-2'>{title}</h3>
+        {genre && (
+          <p className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider truncate'>{genre}</p>
+        )}
+        <h3 className='text-heading-3 font-semibold text-text-primary leading-tight line-clamp-2 group-hover:text-brand-accent transition-colors duration-150'>
+          {title}
+        </h3>
       </div>
       {status && <Tag variant={status} className='shrink-0 mt-0.5' />}
     </div>
 
-    <div className='flex items-center justify-between gap-3 mt-auto'>
-      <span className='text-body-small text-text-secondary truncate'>by {author}</span>
+    <div className='flex items-center justify-between gap-3 mt-auto pt-1 border-t border-border-subtle'>
+      <span className='text-body-small text-text-secondary truncate'>por {author}</span>
       <span className='font-mono text-label-mono-small text-text-muted shrink-0'>
         {pages != null ? `${pages}p` : '—'}
       </span>
