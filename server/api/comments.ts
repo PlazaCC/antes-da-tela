@@ -34,7 +34,7 @@ export const commentsRouter = createTRPCRouter({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       }
 
-      return (data ?? []) as CommentWithAuthor[]
+      return (data ?? []) as unknown as CommentWithAuthor[]
     }),
 
   create: authenticatedProcedure
@@ -64,7 +64,7 @@ export const commentsRouter = createTRPCRouter({
         })
       }
 
-      return data as CommentWithAuthor
+      return data as unknown as CommentWithAuthor
     }),
 
   delete: authenticatedProcedure

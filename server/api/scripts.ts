@@ -3,6 +3,24 @@ import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trp
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+type ScriptDetail = {
+  id: string
+  title: string
+  logline: string | null
+  synopsis: string | null
+  genre: string | null
+  age_rating: string | null
+  is_featured: boolean
+  published_at: string | null
+  script_files: Array<{
+    id: string
+    storage_path: string
+    page_count: number | null
+    file_size: number | null
+  }>
+  author: { id: string; name: string | null; image: string | null } | null
+}
+
 export const scriptCreateSchema = z.object({
   title: z.string().min(1).max(200),
   logline: z.string().max(300).optional(),
@@ -91,7 +109,7 @@ export const scriptsRouter = createTRPCRouter({
       .eq('id', input.id)
       .maybeSingle()
 
-    return script ?? null
+    return (script ?? null) as ScriptDetail | null
   }),
 
   listRecent: publicProcedure
