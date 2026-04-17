@@ -160,9 +160,9 @@ export const scriptsRouter = createTRPCRouter({
         // Reject PostgREST-special characters to prevent filter injection via .or()
         query: z
           .string()
-          .min(1)
           .max(100)
-          .regex(/^[^%,().]+$/, 'Invalid search characters'),
+          .regex(/^[^%,().]+$/, 'Invalid search characters')
+          .optional(),
         genre: z.enum(GENRES).optional(),
       }),
     )
@@ -171,8 +171,13 @@ export const scriptsRouter = createTRPCRouter({
         .from('scripts')
         .select('*, author:users!author_id(id, name)')
         .eq('status', 'published')
-        .or(`title.ilike.%${input.query}%,logline.ilike.%${input.query}%`)
         .limit(20)
+
+      if (input.query) {
+        queryBuilder = queryBuilder.or(
+          `title.ilike.%${input.query}%,logline.ilike.%${input.query}%`,
+        )
+      }
 
       if (input.genre) {
         queryBuilder = queryBuilder.eq('genre', input.genre)
