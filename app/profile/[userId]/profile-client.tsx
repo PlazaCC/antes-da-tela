@@ -63,7 +63,8 @@ export function ProfileClient({ user, scripts }: Props) {
                 title={script.title}
                 author={user.name}
                 genre={script.genre ?? ''}
-                rating={ratingsMap && ratingsMap[script.id]?.total > 0 ? ratingsMap[script.id].average : null}
+                rating={ratingsMap?.[script.id]?.average ?? null}
+                ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                 pages={script.script_files?.[0]?.page_count ?? null}
               />
             ))}

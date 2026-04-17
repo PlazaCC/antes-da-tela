@@ -117,7 +117,8 @@ export function HomeClient() {
                 title={script.title}
                 author={script.author?.name ?? ''}
                 genre={script.genre ?? ''}
-                rating={ratingsMap && ratingsMap[script.id]?.total > 0 ? ratingsMap[script.id].average : null}
+                rating={ratingsMap?.[script.id]?.average ?? null}
+                ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                 pages={script.script_files?.[0]?.page_count ?? null}
                 onPreview={() => setPreviewId(script.id)}
               />
@@ -139,7 +140,8 @@ export function HomeClient() {
                 title={script.title}
                 author={script.author?.name ?? ''}
                 genre={script.genre ?? ''}
-                rating={ratingsMap && ratingsMap[script.id]?.total > 0 ? ratingsMap[script.id].average : null}
+                rating={ratingsMap?.[script.id]?.average ?? null}
+                ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                 pages={script.script_files?.[0]?.page_count ?? null}
                 onPreview={() => setPreviewId(script.id)}
               />

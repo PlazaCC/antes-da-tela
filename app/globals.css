@@ -138,7 +138,7 @@ pre,
   @keyframes dialog-open {
     from {
       opacity: 0;
-      transform: translate(-50%, -44%) scale(0.98);
+      transform: translate(-50%, -38%) scale(0.992);
     }
     to {
       opacity: 1;
@@ -153,7 +153,7 @@ pre,
     }
     to {
       opacity: 0;
-      transform: translate(-50%, -44%) scale(0.98);
+      transform: translate(-50%, -38%) scale(0.992);
     }
   }
 

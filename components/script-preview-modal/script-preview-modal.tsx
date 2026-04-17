@@ -2,7 +2,6 @@
 
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { StarRating } from '@/components/ui/star-rating'
 import { Tag } from '@/components/ui/tag'
 import { cn } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
@@ -11,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { RatingSummary } from '../ui/rating-summary'
 
 interface ScriptPreviewModalProps {
   scriptId: string | null
@@ -42,7 +42,6 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
       <DialogContent
         showCloseButton={false}
         className='p-0 sm:max-w-4xl max-h-[90vh] overflow-hidden bg-surface border-border-subtle'>
-        <DialogTitle className='sr-only'>Visualização do roteiro</DialogTitle>
         {/* Custom close button */}
         <DialogPrimitive.Close
           className={cn(
@@ -128,6 +127,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
                       alt={script.author.name ?? ''}
                       width={32}
                       height={32}
+                      unoptimized
                       className='rounded-full object-cover shrink-0'
                     />
                   ) : (
@@ -141,19 +141,9 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
                   </Link>
                 </div>
 
-                {ratingData && (
-                  <div className='flex items-center gap-2 shrink-0'>
-                    <StarRating value={ratingData.average} readOnly allowHalf />
-                    <span className='font-mono text-label-mono-small text-text-secondary'>
-                      {ratingData.average > 0 ? ratingData.average.toFixed(1) : '—'}
-                    </span>
-                    {ratingData.total > 0 && (
-                      <span className='text-body-small text-text-muted'>
-                        ({ratingData.total} {ratingData.total === 1 ? 'avaliação' : 'avaliações'})
-                      </span>
-                    )}
-                  </div>
-                )}
+                <div className='flex items-center gap-2 shrink-0'>
+                  <RatingSummary average={ratingData?.average ?? 0} total={ratingData?.total ?? 0} />
+                </div>
               </div>
 
               {/* Genre / age-rating tags */}
