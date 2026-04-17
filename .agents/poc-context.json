@@ -66,7 +66,10 @@
     "tailwind_version": "v3 — no v4 syntax",
     "package_install": "yarn add — never npm install",
     "tokens_format": "CSS vars use HSL channels (no hex), Tailwind wraps with hsl(var(...))",
-    "db_migrations": "DATABASE_URL_UNPOOLED (port 5432) for migrate only"
+    "db_migrations": "DATABASE_URL_UNPOOLED (port 5432) for migrate only",
+    "supabase_cli": "Always use CLI (npx supabase@latest db query --linked) for writes — MCP is read-only",
+    "select_discipline": "Always use explicit column selection in queries that cross RSC boundary — never select('*') for data passed to Client Components",
+    "mutation_page_capture": "In TanStack Query mutations, capture page/volatile state at submit time via per-call onSuccess, not in mutationOptions closure"
   },
 
   "validation_commands": {

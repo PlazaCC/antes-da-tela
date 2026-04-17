@@ -2,7 +2,18 @@
 
 This file documents the canonical workflow for schema changes, migrations, and applying them to remote Supabase projects. Follow this process to keep local Drizzle migrations and the remote schema in sync.
 
-Principles
+## ⚠️ CLI-first rule
+
+**Always use the Supabase CLI for any write operation.** The Supabase MCP server is read-only for this project — DML and DDL via MCP will fail. Use the CLI for all writes:
+
+```bash
+npx --yes supabase@latest db query --linked "<SQL>"
+npx --yes supabase@latest db query --linked --file ./drizzle/0004_my_migration.sql
+```
+
+The MCP is only useful for read queries (SELECT, schema inspection, listing tables).
+
+## Principles
 
 - Use Drizzle (`drizzle-kit`) for all schema changes and migration generation.
 - Never edit `supabase/migrations/*.sql` directly for authoritative migration history; instead generate a migration via Drizzle and review the SQL.
@@ -57,6 +68,28 @@ Security checklist
 
 - Run `supabase db advisors` and follow security recommendations before applying schema changes to production.
 - Ensure RLS and policies are added for any table exposed to `anon`/`authenticated` roles.
+
+## Serialization and select discipline
+
+**Always use explicit column selection in Supabase queries that cross the RSC boundary.**
+
+The full `*` wildcard serializes every DB column into the RSC payload, including internal columns (`created_at`, `author_id`, `status`, `banner_path`, etc.) that are never rendered by the client. This bloats the HTML response.
+
+```ts
+// ❌ Sends every column across the RSC boundary
+.select('*, script_files(*), author:users!author_id(id, name, image)')
+
+// ✅ Only what the client needs
+.select(
+  'id, title, logline, synopsis, genre, age_rating,' +
+  ' script_files(id, storage_path, page_count, file_size),' +
+  ' author:users!author_id(id, name, image)'
+)
+```
+
+Use `*` only in:
+- **tRPC mutations** that return the inserted row back to the same server function (never passed to a Client Component)
+- **Server-only code** where the data never crosses the RSC boundary
 
 Agent behavior
 
