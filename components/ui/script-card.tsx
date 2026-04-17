@@ -9,8 +9,8 @@ interface ScriptCardBaseProps {
   title: string
   author: string
   genre: string
-  rating: number
-  pages: number
+  rating: number | null
+  pages: number | null
   status?: 'publicado' | 'rascunho' | 'privado'
 }
 
@@ -41,12 +41,16 @@ const renderContent = ({ title, author, genre, rating, pages, status }: ScriptCa
 
     <div className='flex items-center justify-between gap-3 mt-auto'>
       <span className='text-body-small text-text-secondary truncate'>by {author}</span>
-      <span className='font-mono text-label-mono-small text-text-muted shrink-0'>{pages}p</span>
+      <span className='font-mono text-label-mono-small text-text-muted shrink-0'>
+        {pages != null ? `${pages}p` : '—'}
+      </span>
     </div>
 
     <div className='flex items-center gap-2'>
-      <StarRating value={rating} readOnly allowHalf />
-      <span className='font-mono text-label-mono-small text-text-muted'>{rating.toFixed(1)}</span>
+      <StarRating value={rating ?? 0} readOnly allowHalf />
+      <span className='font-mono text-label-mono-small text-text-muted'>
+        {rating != null ? rating.toFixed(1) : '—'}
+      </span>
     </div>
   </>
 )

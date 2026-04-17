@@ -3,6 +3,14 @@ import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trp
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+export type ScriptListItem = {
+  id: string
+  title: string
+  genre: string | null
+  script_files: { page_count: number | null }[]
+  author: { id: string; name: string | null } | null
+}
+
 type ScriptDetail = {
   id: string
   title: string
@@ -121,12 +129,12 @@ export const scriptsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { data: rows } = await ctx.supabase
         .from('scripts')
-        .select('*, author:users!author_id(id, name)')
+        .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
         .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(input.limit + 1)
 
-      const items = rows ?? []
+      const items = (rows ?? []) as unknown as ScriptListItem[]
       const hasMore = items.length > input.limit
       return { items: items.slice(0, input.limit), hasMore }
     }),
@@ -134,24 +142,24 @@ export const scriptsRouter = createTRPCRouter({
   listFeatured: publicProcedure.query(async ({ ctx }) => {
     const { data } = await ctx.supabase
       .from('scripts')
-      .select('*, author:users!author_id(id, name)')
+      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
       .eq('status', 'published')
       .eq('is_featured', true)
       .order('published_at', { ascending: false })
       .limit(6)
 
-    return data ?? []
+    return (data ?? []) as unknown as ScriptListItem[]
   }),
 
   listByAuthor: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input, ctx }) => {
     const { data } = await ctx.supabase
       .from('scripts')
-      .select('*, author:users!author_id(id, name)')
+      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
       .eq('author_id', input.authorId)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
 
-    return data ?? []
+    return (data ?? []) as unknown as ScriptListItem[]
   }),
 
   search: publicProcedure
@@ -169,7 +177,7 @@ export const scriptsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       let queryBuilder = ctx.supabase
         .from('scripts')
-        .select('*, author:users!author_id(id, name)')
+        .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
         .eq('status', 'published')
         .limit(20)
 
@@ -184,6 +192,6 @@ export const scriptsRouter = createTRPCRouter({
       }
 
       const { data } = await queryBuilder
-      return data ?? []
+      return (data ?? []) as unknown as ScriptListItem[]
     }),
 })

@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export function NavBar() {
   return (
-    <nav className="sticky top-0 z-50 bg-bg-base border-b border-border-subtle h-16">
+    <nav aria-label="Principal" className="sticky top-0 z-50 bg-bg-base border-b border-border-subtle h-16">
       <div className="max-w-[1140px] mx-auto px-5 h-full flex items-center justify-between">
         <Link href="/" className="shrink-0">
           <Image src="/assets/logo.svg" alt="Antes da Tela" width={83} height={19} priority />

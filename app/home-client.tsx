@@ -12,7 +12,7 @@ import { GENRES } from '@/lib/constants/scripts'
 export function HomeClient() {
   const trpc = useTRPC()
   const [search, setSearch] = useState('')
-  const [genre, setGenre] = useState<string | undefined>()
+  const [genre, setGenre] = useState<(typeof GENRES)[number] | undefined>()
   const debouncedSearch = useDebounce(search, 300)
 
   const isSearchActive = !!(debouncedSearch || genre)
@@ -27,7 +27,7 @@ export function HomeClient() {
   const { data: searchData } = useQuery({
     ...trpc.scripts.search.queryOptions({
       query: debouncedSearch || undefined,
-      genre: genre as (typeof GENRES)[number] | undefined,
+      genre,
     }),
     enabled: isSearchActive,
   })
@@ -96,10 +96,10 @@ export function HomeClient() {
                 key={script.id}
                 href={`/scripts/${script.id}`}
                 title={script.title}
-                author={(script.author as { name?: string | null } | null)?.name ?? ''}
+                author={script.author?.name ?? ''}
                 genre={script.genre ?? ''}
-                rating={0}
-                pages={0}
+                rating={null}
+                pages={script.script_files?.[0]?.page_count ?? null}
               />
             ))}
           </div>
@@ -118,10 +118,10 @@ export function HomeClient() {
                 key={script.id}
                 href={`/scripts/${script.id}`}
                 title={script.title}
-                author={(script.author as { name?: string | null } | null)?.name ?? ''}
+                author={script.author?.name ?? ''}
                 genre={script.genre ?? ''}
-                rating={0}
-                pages={0}
+                rating={null}
+                pages={script.script_files?.[0]?.page_count ?? null}
               />
             ))}
           </div>
