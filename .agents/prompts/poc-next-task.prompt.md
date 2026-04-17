@@ -59,11 +59,10 @@ Passo-a-passo que o agente deve seguir
    - Ler `.agents/poc-context.json` para `execution_order` e `tasks`.
    - Ler `.agents/tasks/poc-overview.md` e o arquivo da task alvo
      (ex.: `.agents/tasks/poc-01-design-system.md`).
-   - Ler `.agents/figma.meta.json` e `.agents/design-system.meta.json` para
-     valores padrão de `fileKey` e tokens.
-   - Verificar primeiro os assets locais em `.agents/figma/` (subpastas `components/`, `frames/`, `screens/`).
-     - Se houver SVG/PNG/PDF locais referentes aos nodes da task, prefira usá-los como fonte primária
-       para análise e comparações (evita chamadas MCP desnecessárias). Registrar paths e dimensões quando aplicável.
+
+   - Ler `.agents/figma.meta.json` e `.agents/design-system.meta.json` apenas como apoio/fallback para `fileKey` e tokens.
+   - Sempre priorizar a consulta ao Figma via MCP FramLink (`mcp_framelink_fig_get_figma_data`) usando os links oficiais e nodeIds relevantes.
+   - Ignore qualquer menção a assets locais em `.agents/figma/` — não há mais SVG/PNG/PDF locais.
 
 2. Determinar a task alvo
    - Se `task_id` fornecido, usar esse ID.
@@ -78,12 +77,10 @@ Passo-a-passo que o agente deve seguir
      - Se `server/db/schema.ts` foi alterado ou task menciona DB: `yarn drizzle-kit generate`
    - Interpretar sucesso/erro a partir dos códigos de saída e stdout/stderr.
 
-4. Consultar Figma via MCP (quando necessário)
-   - Se a task requer design (identificado pelo campo `files_affected` ou
-     pelo escopo da task), chamar `mcp_framelink_fig_get_figma_data` com
-     `fileKey` (do input ou de `.agents/figma.meta.json`) e opcional `nodeId`.
-   - Extrair tokens relevantes (cores, tipografia) ou assets SVG e salvar como
-     artefatos locais se solicitado.
+4. Consultar Figma via MCP (sempre que necessário)
+   - Sempre que a task requer design (tokens, componentes, layouts), chame `mcp_framelink_fig_get_figma_data` com o `fileKey` dos links oficiais do Figma e os nodeIds relevantes.
+   - Use arquivos locais de metadados apenas se MCP não estiver disponível.
+   - Não salve artefatos locais de SVG/PNG/PDF — utilize sempre o MCP como fonte.
 
 5. Atualizar checklists (resumido)
 
@@ -155,12 +152,11 @@ Perguntas curtas ao usuário
 
 Notas de implementação para o agente
 
-- Priorize leitura de `.agents/poc-context.json` e dos arquivos em
-  `.agents/tasks/` para entender os metadados do POC.
-- Ao chamar o MCP do Figma, prefira pedir apenas as páginas/nodes necessários
-  (tokens e componentes) para reduzir payload.
-- Mantenha as mudanças mínimas e focadas: apenas marque checklist e não
-  reescreva seções não relacionadas.
+- Sempre priorize o Figma via MCP FramLink como fonte da verdade.
+- Ignore qualquer instrução para buscar assets locais em `.agents/figma/`.
+- Use `.agents/figma.meta.json` e `.agents/design-system.meta.json` apenas como fallback.
+- Ao chamar o MCP do Figma, peça apenas os nodes necessários (tokens/componentes/layouts) para reduzir payload.
+- Mantenha as mudanças mínimas e focadas: apenas marque checklist e não reescreva seções não relacionadas.
 
 ---
 

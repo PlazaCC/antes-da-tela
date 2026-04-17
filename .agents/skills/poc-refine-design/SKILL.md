@@ -5,7 +5,14 @@ description: Use when a POC task has been implemented and needs design alignment
 
 # poc-refine-design
 
-Align the last completed (or in-progress) POC task with the Figma design source. Compares `.agents/design-system.meta.json` against live Figma data, resolves token/component divergences, applies all corrections, updates task checklists, and performs layout-regression checks against recent tasks to prevent regressions and security regressions.
+Align the last completed (or in-progress) POC task with the Figma design source. **Always use the Figma via MCP FramLink as the primary source for tokens, components, and layouts.**
+
+- The `.agents/figma.meta.json` and `.agents/design-system.meta.json` files are only fallback/support.
+- There are no more local assets in `.agents/figma/` — ignore any mention of local SVG/PNG/PDF assets.
+- Official Figma links for reference:
+  - Main flow: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1388
+  - Script registration: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1350
+  - User profile: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-2075
 
 ## Workflow
 
@@ -28,13 +35,7 @@ Read in order:
 - `.agents/design-system.meta.json` — current tokens, component registry
 - `.agents/design-system.plan.md` — strategy and priorities
 
-**Before calling FramLink MCP**, check for local Figma exports (prefer local assets to reduce MCP payload and speed comparisons):
-
-- `.agents/figma/components/*.svg` — exported component SVGs (use to map component names to vector assets and avoid re-requesting static renders).
-- `.agents/figma/screens/*.{pdf,png}` — exported screen PDFs/PNGs for visual/layout diffs (task-specific screens).
-- `.agents/figma/frames/*.{pdf,png}` — full-frame exports of the `Foundations` and `Components` pages for reference and baseline comparisons.
-
-Prefer these local exports when available; only call `mcp_framelink_fig_get_figma_data` to fetch node JSON or rendered assets if a required export is missing or when authoritative live data is needed.
+**Always call `mcp_framelink_fig_get_figma_data` to fetch node JSON or rendered assets.** Only use local metadata files if MCP is unavailable.
 
 ### 2. Determine Target Task (with regression context)
 
@@ -59,7 +60,7 @@ From the task file, collect:
 mcp_framelink_fig_get_figma_data(fileKey, nodeIds)
 ```
 
-Use `figma.meta.json.components` to map component names → nodeIds. Prefer mapping via local SVG filenames in `.agents/figma/components/` when names match. Request only nodes relevant to the task (pages `Foundations` + task-specific frames) and fetch rendered exports only when local screen/frame exports are not available or when live assets are required for verification.
+Use `figma.meta.json.components` only as a fallback to map component names → nodeIds. **Always request only nodes relevant to the task from MCP.**
 
 If the MCP call fails with a permissions error → **stop and ask the user for the Figma token**. Do not write partial data.
 
@@ -109,9 +110,9 @@ Commit suggestion:       feat(design): <message>
 
 ## Operational Rules
 
-- Always run the recent tasks verification and regression audit before applying changes that affect layout or interactive components.
-- For `risk` levels `medium` or `high` require manual approval — do not apply automatically.
-- Ask for MCP token on permission failure — never write incomplete data.
-- Never auto-commit or push; produce a commit suggestion and save drafts when needed.
-- Convert hex → HSL only when `poc-context.json.tokens_format` requires it.
-- Preserve existing task acceptance history — when marking checklist items, include audit metadata.
+- **Always prioritize Figma via MCP FramLink.**
+- Ignore any instruction to look for local assets in `.agents/figma/`.
+- Local files `.agents/figma.meta.json` and `.agents/design-system.meta.json` are fallback only.
+- Never write tokens or secrets to project files.
+- Minimal, focused changes only; do not rewrite unrelated sections.
+- Never auto-commit or push; only produce commit suggestions.
