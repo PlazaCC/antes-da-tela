@@ -1,5 +1,6 @@
 import { PostHogProvider } from '@/components/posthog-provider'
 import AppToaster from '@/components/app-toaster/app-toaster'
+import { NavBar } from '@/components/navbar'
 import { TRPCReactProvider } from '@/trpc/client'
 import type { Metadata } from 'next'
 import { ThemeProvider } from 'next-themes'
@@ -46,6 +47,7 @@ export default function RootLayout({
         <PostHogProvider>
           <TRPCReactProvider>
             <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
+              <NavBar />
               {children}
               <AppToaster />
             </ThemeProvider>

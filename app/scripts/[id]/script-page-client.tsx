@@ -51,6 +51,7 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
   }
 
   const genreVariant: TagVariant = GENRE_VARIANT_MAP[script.genre ?? ''] ?? 'default'
+  const isOwner = !!currentUserId && currentUserId === script.author?.id
 
   return (
     <div className='h-screen bg-bg-base flex flex-col overflow-hidden'>
@@ -70,49 +71,73 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
 
           {script.author && (
             <p className='font-mono text-label-mono-default text-text-muted'>
-              by <span className='text-text-secondary'>{script.author.name}</span>
+              por{' '}
+              <a
+                href={`/profile/${script.author.id}`}
+                className='text-text-secondary hover:text-brand-accent transition-colors'
+              >
+                {script.author.name}
+              </a>
             </p>
           )}
 
-          {/* RatingBox — ref: Figma 38:123 — height 29px, padding 6px, gap 6px */}
-          <div className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'>
-            <StarRating
-              value={userRating ?? ratingData?.average ?? 0}
-              allowHalf={!currentUserId}
-              readOnly={!currentUserId}
-              onChange={(score) => {
-                if (!currentUserId) {
-                  router.push('/auth/login')
-                  return
-                }
-                upsertRating.mutate(
-                  { scriptId: script.id, score: Math.round(score) },
-                  {
-                    onSuccess: () => {
-                      void queryClient.invalidateQueries(averageOpts)
-                      void queryClient.invalidateQueries(userRatingOpts)
-                    },
-                    onError: (err) => {
-                      toast.error(err.message)
-                    },
-                  },
-                )
-              }}
-            />
-            {ratingData && ratingData.total > 0 && (
-              <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-                {ratingData.average.toFixed(1)}{' '}
-                <span className='text-text-muted'>({ratingData.total})</span>
-              </span>
-            )}
-            {!currentUserId && (
+          {/* RatingBox — ref: Figma 38:123 */}
+          {isOwner ? (
+            <div
+              className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'
+              aria-live='polite'
+            >
+              <StarRating value={ratingData?.average ?? 0} readOnly allowHalf />
+              {ratingData && ratingData.total > 0 && (
+                <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
+                  {ratingData.average.toFixed(1)}{' '}
+                  <span className='text-text-muted'>({ratingData.total})</span>
+                </span>
+              )}
               <span className='font-mono text-label-mono-small text-text-muted'>
-                <a href='/auth/login' className='text-brand-accent hover:underline'>
-                  Avaliar
-                </a>
+                Você não pode avaliar seu próprio roteiro
               </span>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'>
+              <StarRating
+                value={userRating ?? ratingData?.average ?? 0}
+                allowHalf={!currentUserId}
+                readOnly={!currentUserId}
+                onChange={(score) => {
+                  if (!currentUserId) {
+                    router.push('/auth/login')
+                    return
+                  }
+                  upsertRating.mutate(
+                    { scriptId: script.id, score: Math.round(score) },
+                    {
+                      onSuccess: () => {
+                        void queryClient.invalidateQueries(averageOpts)
+                        void queryClient.invalidateQueries(userRatingOpts)
+                      },
+                      onError: (err) => {
+                        toast.error(err.message)
+                      },
+                    },
+                  )
+                }}
+              />
+              {ratingData && ratingData.total > 0 && (
+                <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
+                  {ratingData.average.toFixed(1)}{' '}
+                  <span className='text-text-muted'>({ratingData.total})</span>
+                </span>
+              )}
+              {!currentUserId && (
+                <span className='font-mono text-label-mono-small text-text-muted'>
+                  <a href='/auth/login' className='text-brand-accent hover:underline'>
+                    Avaliar
+                  </a>
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,5 @@
 import { Suspense } from 'react'
 import { trpc, HydrateClient, getQueryClient } from '@/trpc/server'
-import { NavBar } from '@/components/navbar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { HomeClient } from './home-client'
 
@@ -44,11 +43,8 @@ async function PrefetchedHome() {
 
 export default function HomePage() {
   return (
-    <>
-      <NavBar />
-      <Suspense fallback={<HomeClientSkeleton />}>
-        <PrefetchedHome />
-      </Suspense>
-    </>
+    <Suspense fallback={<HomeClientSkeleton />}>
+      <PrefetchedHome />
+    </Suspense>
   )
 }

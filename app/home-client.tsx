@@ -62,14 +62,15 @@ export function HomeClient() {
       </div>
 
       {/* Genre filter pills */}
-      <div className='flex gap-2 flex-wrap'>
+      <div className='flex gap-2 flex-wrap' role='group' aria-label='Filtrar por gênero'>
         <button
-          onClick={() => { setGenre(undefined); router.replace('/') }}
+          onClick={() => setGenre(undefined)}
+          aria-pressed={!genre}
           className={cn(
-            'px-3 py-1.5 rounded-full text-body-small border transition-colors',
+            'px-3 py-1.5 rounded-full text-body-small border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
             !genre
               ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
-              : 'bg-elevated border-border-subtle text-text-secondary hover:border-border-default',
+              : 'bg-elevated border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
           )}
         >
           Todos
@@ -78,11 +79,12 @@ export function HomeClient() {
           <button
             key={g}
             onClick={() => setGenre(genre === g ? undefined : g)}
+            aria-pressed={genre === g}
             className={cn(
-              'px-3 py-1.5 rounded-full text-body-small border transition-colors capitalize',
+              'px-3 py-1.5 rounded-full text-body-small border transition-colors capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
               genre === g
                 ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
-                : 'bg-elevated border-border-subtle text-text-secondary hover:border-border-default',
+                : 'bg-elevated border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
             )}
           >
             {g}
@@ -130,9 +132,19 @@ export function HomeClient() {
             ))}
           </div>
         ) : (
-          <p className='text-text-muted text-body-small'>
-            {isSearchActive ? 'Nenhum roteiro encontrado.' : 'Ainda não há roteiros publicados.'}
-          </p>
+          <div className='flex flex-col gap-2 py-8'>
+            <p className='text-text-secondary text-body-default'>
+              {isSearchActive ? 'Nenhum roteiro encontrado.' : 'Ainda não há roteiros publicados.'}
+            </p>
+            {isSearchActive && (
+              <button
+                onClick={() => setGenre(undefined)}
+                className='text-brand-accent text-body-small hover:underline underline-offset-4 w-fit'
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
         )}
       </section>
     </main>
