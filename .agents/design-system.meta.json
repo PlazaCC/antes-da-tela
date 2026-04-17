@@ -553,9 +553,9 @@
       },
       {
         "name": "ScriptCard",
-        "status": "missing",
-        "notes": "Important for core user journeys (home, listings). Implement hover states, metadata layout and responsive grid breakpoints.",
-        "priority": "high",
+        "status": "implemented",
+        "notes": "Implemented at components/ui/script-card.tsx. Supports href (renders as <a>) or div, hover border brand-accent, metadata layout (genre/title/author/pages/rating). No cover image yet — Figma shows editorial cover images which require script.cover_url data.",
+        "priority": "medium",
         "figmaNodeId": "3:51"
       },
       {
@@ -574,9 +574,9 @@
       },
       {
         "name": "Navigation",
-        "status": "missing",
-        "notes": "Top/side navigation variants; implement responsive collapse and active state mapping.",
-        "priority": "high",
+        "status": "partial",
+        "notes": "Implemented as NavBar at components/navbar.tsx (figmaNodeId 13:137). Has logo SVG, Home link, Publicar CTA, AuthButton. Missing: active link state, mobile collapse/hamburger, Roteiros nav link.",
+        "priority": "medium",
         "figmaNodeId": "13:137"
       },
       {

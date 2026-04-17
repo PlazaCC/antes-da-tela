@@ -321,11 +321,14 @@ yarn lint
 
 ## Checklist de aceite
 
-- [ ] `app/page.tsx` é Server Component com prefetch via `HydrateClient`
-- [ ] NavBar com logo + CTA "Publicar" em brand-accent
-- [ ] Roteiros visíveis no source HTML (SSR)
-- [ ] Busca com debounce 300ms
-- [ ] Filtro de gênero com visual brand-accent quando ativo
-- [ ] Títulos de seção em DM Serif Display (`font-display text-heading-2`)
-- [ ] Grid responsiva
-- [ ] `yarn build` limpo
+- [x] `app/page.tsx` é Server Component com prefetch via `HydrateClient` — `PrefetchedHome` uses `queryClient.prefetchQuery` + `HydrateClient`
+- [x] NavBar com logo + CTA "Publicar" em brand-accent — `components/navbar.tsx`, logo SVG, Button asChild linking to /publish
+- [ ] Roteiros visíveis no source HTML (SSR) — requires running server with data
+- [x] Busca com debounce 300ms — `useDebounce(search, 300)` in HomeClient
+- [x] Filtro de gênero com visual brand-accent quando ativo — `bg-brand-accent/10 border-brand-accent text-brand-accent` when active
+- [x] Títulos de seção em DM Serif Display (`font-display text-heading-2`) — h2 uses `font-display text-heading-2`
+- [x] Hero title usa `font-display text-display` (56px) — corrigido em poc-refine-design (era text-heading-1)
+- [x] Grid responsiva — `grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4` ✓
+- [ ] `yarn build` limpo — requires build run
+
+**Regression audit:** { status: "auto-applied", compared_tasks: ["poc-05", "poc-06"], risk: "low" }

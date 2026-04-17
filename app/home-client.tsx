@@ -39,7 +39,7 @@ export function HomeClient() {
 
       {/* Hero section */}
       <section className="flex flex-col gap-5 py-4">
-        <h1 className="font-display text-heading-1 text-text-primary">
+        <h1 className="font-display text-display text-text-primary">
           Roteiros que{' '}
           <span className="text-brand-accent italic">merecem</span>
           <br />
