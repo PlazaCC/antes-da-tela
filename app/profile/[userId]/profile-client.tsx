@@ -1,18 +1,20 @@
 'use client'
 
+import { Avatar } from '@/components/avatar'
+import { FollowButton } from '@/components/follow-button'
 import { ScriptCard } from '@/components/ui/script-card'
 import type { ScriptListItem } from '@/server/api/scripts'
 import type { User } from '@/server/db/schema'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
-import Image from 'next/image'
 
 interface Props {
   user: User | null
   scripts: ScriptListItem[]
+  currentUserId: string | null
 }
 
-export function ProfileClient({ user, scripts }: Props) {
+export function ProfileClient({ user, scripts, currentUserId }: Props) {
   const trpc = useTRPC()
   const scriptIds = scripts.map((script) => script.id)
   const { data: ratingsMap } = useQuery({
@@ -27,26 +29,18 @@ export function ProfileClient({ user, scripts }: Props) {
     )
   }
 
+  const isOwnProfile = currentUserId === user.id
+
   return (
     <main className='max-w-[960px] mx-auto px-5 py-12 flex flex-col gap-10'>
-      {/* Profile header — ref: Avatar (38:115) */}
+      {/* Profile header */}
       <section className='flex items-start gap-5'>
-        {user.image ? (
-          <Image
-            src={user.image}
-            alt={user.name}
-            width={80}
-            height={80}
-            unoptimized
-            className='w-20 h-20 rounded-full object-cover border border-subtle shrink-0'
-          />
-        ) : (
-          <div className='w-20 h-20 rounded-full bg-brand-accent/20 flex items-center justify-center text-2xl font-display text-brand-accent shrink-0'>
-            {user.name[0]}
+        <Avatar src={user.image} name={user.name} size='xl' />
+        <div className='flex flex-col gap-2 pt-1'>
+          <div className='flex items-center gap-3 flex-wrap'>
+            <h1 className='font-display text-heading-2 text-primary'>{user.name}</h1>
+            {!isOwnProfile && <FollowButton authorId={user.id} />}
           </div>
-        )}
-        <div className='flex flex-col gap-1 pt-1'>
-          <h1 className='font-display text-heading-2 text-primary'>{user.name}</h1>
           {user.bio && <p className='text-secondary text-body-default max-w-lg'>{user.bio}</p>}
         </div>
       </section>

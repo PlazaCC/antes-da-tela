@@ -9,7 +9,7 @@ import { useTRPC } from '@/trpc/client'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
-import Image from 'next/image'
+import { Avatar } from '@/components/avatar'
 import Link from 'next/link'
 import { RatingSummary } from '../ui/rating-summary'
 
@@ -125,18 +125,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
               {/* Author row + rating */}
               <div className='flex items-center justify-between gap-4'>
                 <div className='flex items-center gap-3'>
-                  {script.author?.image ? (
-                    <Image
-                      src={script.author.image}
-                      alt={script.author.name ?? ''}
-                      width={32}
-                      height={32}
-                      unoptimized
-                      className='rounded-full object-cover shrink-0'
-                    />
-                  ) : (
-                    <div className='w-8 h-8 rounded-full bg-elevated border border-border-subtle shrink-0' />
-                  )}
+                  <Avatar src={script.author?.image} name={script.author?.name ?? '?'} size='md' />
                   <Link
                     href={`/profile/${script.author?.id}`}
                     className='text-body-small font-medium text-text-primary hover:text-brand-accent transition-colors'

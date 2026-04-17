@@ -6,6 +6,7 @@ import {
   pgEnum,
   pgPolicy,
   pgTable,
+  primaryKey,
   smallint,
   text,
   timestamp,
@@ -219,6 +220,37 @@ export const ratings = pgTable(
   ],
 )
 
+// ── User Follows ──────────────────────────────────────────────────────────────
+
+export const userFollows = pgTable(
+  'user_follows',
+  {
+    followerId: uuid('follower_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    followeeId: uuid('followee_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.followerId, table.followeeId] }),
+    pgPolicy('Follow relationships are publicly readable', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`true`,
+    }),
+    pgPolicy('Authenticated users manage their own follows', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`auth.uid() = follower_id`,
+      withCheck: sql`auth.uid() = follower_id`,
+    }),
+  ],
+)
+
 // ── Relations ─────────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -265,3 +297,4 @@ export type Rating = typeof ratings.$inferSelect
 export type NewScript = typeof scripts.$inferInsert
 export type NewComment = typeof comments.$inferInsert
 export type NewRating = typeof ratings.$inferInsert
+export type UserFollow = typeof userFollows.$inferSelect

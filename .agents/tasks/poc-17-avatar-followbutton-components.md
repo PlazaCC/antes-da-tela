@@ -64,11 +64,11 @@ Requer auth: se não autenticado, redirecionar para login
 3. Adicionar `follow` e `unfollow` ao `usersRouter` (ou criar `followsRouter`) em `server/api/` se necessário — upsert/delete na tabela `user_follows` (verificar se existe no schema ou criar migration).
 
 ## Acceptance Criteria
-- [ ] `<Avatar src={...} name="João Silva" size="md" />` renderiza imagem circular; sem `src` mostra "JS" em bg brand-accent/20
-- [ ] Avatar substituído em todos os usos inline existentes
-- [ ] `<FollowButton authorId={...} />` renderiza botão "Seguir" e ao clicar muda para "Seguindo" (com toggle visual)
-- [ ] Usuário não autenticado clicando FollowButton é redirecionado para login
-- [ ] `yarn build` e `yarn lint` passam
+- [x] `<Avatar src={...} name="João Silva" size="md" />` renderiza imagem circular; sem `src` mostra "JS" em bg brand-accent/20
+- [x] Avatar substituído em todos os usos inline existentes
+- [x] `<FollowButton authorId={...} />` renderiza botão "Seguir" e ao clicar muda para "Seguindo" (com toggle visual)
+- [x] Usuário não autenticado clicando FollowButton é redirecionado para login
+- [x] `yarn build` e `yarn lint` passam
 
 ## Artifacts
 - `components/avatar/avatar.tsx` + `index.ts`
