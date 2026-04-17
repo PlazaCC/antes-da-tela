@@ -44,11 +44,11 @@ Atualizar os CSS custom properties em `app/globals.css` e os tokens do `tailwind
 6. `yarn build` + `yarn lint` devem passar sem erros.
 
 ## Acceptance Criteria
-- [ ] CSS vars em `globals.css` correspondem aos hex values da tabela acima
-- [ ] `border/subtle` e `border/default` estão com os valores corretos (não invertidos)
-- [ ] Card borders são visivelmente `#252525` e não `#343434`
-- [ ] Fundo da app é `#0E0E0E`, header é `#161616`, accent é `#E85C2F`
-- [ ] `yarn build` e `yarn lint` passam
+- [x] CSS vars em `globals.css` correspondem aos hex values da tabela acima
+- [x] `border/subtle` e `border/default` estão com os valores corretos (não invertidos)
+- [x] Card borders são visivelmente `#252525` e não `#343434`
+- [x] Fundo da app é `#0E0E0E`, header é `#161616`, accent é `#E85C2F`
+- [x] `yarn build` e `yarn lint` passam
 
 ## Artifacts
 - `app/globals.css` (CSS vars atualizados)
