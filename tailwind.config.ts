@@ -65,6 +65,7 @@ export default {
       fontSize: {
         'display-hero': ['72px', { lineHeight: '1.06' }],
         'display-hero-italic': ['72px', { lineHeight: '1.06' }],
+        'display': ['56px', { lineHeight: '1.37' }],
         'heading-1': ['48px', { lineHeight: '1.08' }],
         'heading-2': ['32px', { lineHeight: '1.13' }],
         'heading-3': ['24px', { lineHeight: '1.25' }],

@@ -3,6 +3,14 @@ import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trp
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+export type ScriptListItem = {
+  id: string
+  title: string
+  genre: string | null
+  script_files: { page_count: number | null }[]
+  author: { id: string; name: string | null } | null
+}
+
 type ScriptDetail = {
   id: string
   title: string
@@ -41,8 +49,7 @@ export const scriptsRouter = createTRPCRouter({
 
     // Ensure the author's profile exists in `users` to satisfy FK constraints.
     const authorEmail = ctx.user!.email ?? null
-    const authorName =
-      ctx.user!.user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
+    const authorName = ctx.user!.user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
     const { error: upsertError } = await ctx.supabase
       .from('users')
       .upsert({ id: authorId, name: String(authorName).slice(0, 100), email: authorEmail }, { onConflict: 'id' })
@@ -103,8 +110,8 @@ export const scriptsRouter = createTRPCRouter({
       .from('scripts')
       .select(
         'id, title, logline, synopsis, genre, age_rating, is_featured, published_at,' +
-        ' script_files(id, storage_path, page_count, file_size),' +
-        ' author:users!author_id(id, name, image)',
+          ' script_files(id, storage_path, page_count, file_size),' +
+          ' author:users!author_id(id, name, image)',
       )
       .eq('id', input.id)
       .maybeSingle()
@@ -121,12 +128,12 @@ export const scriptsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { data: rows } = await ctx.supabase
         .from('scripts')
-        .select('*, author:users!author_id(id, name)')
+        .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
         .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(input.limit + 1)
 
-      const items = rows ?? []
+      const items = (rows ?? []) as unknown as ScriptListItem[]
       const hasMore = items.length > input.limit
       return { items: items.slice(0, input.limit), hasMore }
     }),
@@ -134,24 +141,24 @@ export const scriptsRouter = createTRPCRouter({
   listFeatured: publicProcedure.query(async ({ ctx }) => {
     const { data } = await ctx.supabase
       .from('scripts')
-      .select('*, author:users!author_id(id, name)')
+      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
       .eq('status', 'published')
       .eq('is_featured', true)
       .order('published_at', { ascending: false })
       .limit(6)
 
-    return data ?? []
+    return (data ?? []) as unknown as ScriptListItem[]
   }),
 
   listByAuthor: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input, ctx }) => {
     const { data } = await ctx.supabase
       .from('scripts')
-      .select('*, author:users!author_id(id, name)')
+      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
       .eq('author_id', input.authorId)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
 
-    return data ?? []
+    return (data ?? []) as unknown as ScriptListItem[]
   }),
 
   search: publicProcedure
@@ -160,25 +167,27 @@ export const scriptsRouter = createTRPCRouter({
         // Reject PostgREST-special characters to prevent filter injection via .or()
         query: z
           .string()
-          .min(1)
           .max(100)
-          .regex(/^[^%,().]+$/, 'Invalid search characters'),
+          .regex(/^[^%,().]+$/, 'Invalid search characters')
+          .optional(),
         genre: z.enum(GENRES).optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
       let queryBuilder = ctx.supabase
         .from('scripts')
-        .select('*, author:users!author_id(id, name)')
+        .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
         .eq('status', 'published')
-        .or(`title.ilike.%${input.query}%,logline.ilike.%${input.query}%`)
-        .limit(20)
+
+      if (input.query) {
+        queryBuilder = queryBuilder.or(`title.ilike.%${input.query}%,logline.ilike.%${input.query}%`)
+      }
 
       if (input.genre) {
         queryBuilder = queryBuilder.eq('genre', input.genre)
       }
 
-      const { data } = await queryBuilder
-      return data ?? []
+      const { data } = await queryBuilder.limit(20)
+      return (data ?? []) as unknown as ScriptListItem[]
     }),
 })

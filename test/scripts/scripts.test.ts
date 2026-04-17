@@ -234,15 +234,13 @@ describe('scriptsRouter.search — input validation', () => {
   })
 
   it('accepts normal search queries', async () => {
+    const chain: Record<string, unknown> = {}
+    chain.select = vi.fn(() => chain)
+    chain.eq = vi.fn(() => chain)
+    chain.or = vi.fn(() => chain)
+    chain.limit = vi.fn(() => Promise.resolve({ data: [], error: null }))
     const supabase = {
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn().mockReturnThis(),
-          or: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-        })),
-      })),
+      from: vi.fn(() => chain),
     } as unknown as SupabaseClient
 
     const caller = router.createCaller(makeCtx(supabase))
