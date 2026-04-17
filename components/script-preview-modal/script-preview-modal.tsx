@@ -1,8 +1,9 @@
 'use client'
 
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tag } from '@/components/ui/tag'
+import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { cn } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
@@ -41,7 +42,14 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className='p-0 sm:max-w-4xl max-h-[90vh] overflow-hidden bg-surface border-border-subtle'>
+        className='p-0 sm:max-w-4xl max-h-[90vh] overflow-hidden bg-surface border-border-subtle gap-0'>
+        {/* Always include a DialogTitle for accessibility, visually hidden if loading or no script */}
+        <DialogHeader>
+          <VisuallyHidden>
+            {isLoading || !script ? <DialogTitle>Visualização do roteiro</DialogTitle> : script.title}{' '}
+          </VisuallyHidden>
+        </DialogHeader>
+
         {/* Custom close button */}
         <DialogPrimitive.Close
           className={cn(
@@ -61,7 +69,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
         ) : (
           <div className='flex overflow-y-auto max-h-[90vh]'>
             {/* Left sidebar — metadata + CTA */}
-            <aside className='hidden md:flex flex-col w-64 shrink-0 border-r border-border-subtle bg-elevated/50 p-6 gap-6'>
+            <aside className='hidden md:flex flex-col w-64 shrink-0 border-r border-border-subtle p-6 gap-6'>
               {/* Cover placeholder */}
               <div className='w-full aspect-[2/3] rounded-sm bg-elevated border border-border-subtle flex items-center justify-center'>
                 <span className='font-mono text-label-mono-small text-text-muted'>Thumbnail 2:3</span>
@@ -113,11 +121,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
 
             {/* Right content */}
             <div className='flex-1 overflow-y-auto p-6 md:p-8 flex flex-col gap-5 pr-12'>
-              {/* Title */}
-              <DialogTitle className='font-display text-heading-1 text-text-primary leading-tight'>
-                {script.title}
-              </DialogTitle>
-
+              {script.title && <h1 className='font-serif uppercase tracking-wider text-2xl'>{script.title}</h1>}
               {/* Author row + rating */}
               <div className='flex items-center justify-between gap-4'>
                 <div className='flex items-center gap-3'>
