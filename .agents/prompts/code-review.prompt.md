@@ -3,6 +3,7 @@ name: code-review
 agent: agent
 description: |
   Realiza code review automatizado do código atual, mas só se você NÃO estiver na branch main. Se estiver na main, pare imediatamente e alerte o usuário para trocar de branch antes de prosseguir.
+  Use sempre as skills de React/Vercel e Supabase para entender a arquitetura da aplicação, incluindo @file:vercel-react-best-practices, as skills relacionadas a Supabase e o guia de workflow @file:supabase-workflow.md.
 tools:
   [
     vscode,
