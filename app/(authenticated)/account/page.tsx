@@ -57,7 +57,7 @@ export default function AccountPage() {
       { name: values.name, bio: values.bio ?? '' },
       {
         onSuccess: () => {
-          void queryClient.invalidateQueries(profileOpts)
+          void queryClient.invalidateQueries({ queryKey: profileOpts.queryKey })
           toast.success('Profile updated.')
         },
         onError: (err) => toast.error(err.message),
@@ -69,17 +69,22 @@ export default function AccountPage() {
     if (!userId) return
     setUploading(true)
     try {
-      const ext = file.name.split('.').pop()
+      const ext = file.name.split('.').pop() ?? 'png'
       const path = `${userId}/${Date.now()}_avatar.${ext}`
       const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
       if (uploadError) throw uploadError
 
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+      const publicUrl = urlData?.publicUrl
+      if (!publicUrl) {
+        throw new Error('Unable to generate avatar URL.')
+      }
+
       updateProfile.mutate(
-        { image: urlData.publicUrl },
+        { image: publicUrl },
         {
           onSuccess: () => {
-            void queryClient.invalidateQueries(profileOpts)
+            void queryClient.invalidateQueries({ queryKey: profileOpts.queryKey })
             toast.success('Avatar updated.')
           },
           onError: (err) => toast.error(err.message),
@@ -98,12 +103,17 @@ export default function AccountPage() {
 
       {/* Avatar */}
       <section className='flex flex-col gap-3'>
-        <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>
-          Avatar
-        </label>
+        <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>Avatar</label>
         <div className='flex items-center gap-4'>
           {profile?.image ? (
-            <Image src={profile.image} alt={profile.name} width={80} height={80} unoptimized className='w-20 h-20 rounded-full object-cover border border-subtle' />
+            <Image
+              src={profile.image}
+              alt={profile.name}
+              width={80}
+              height={80}
+              unoptimized
+              className='w-20 h-20 rounded-full object-cover border border-subtle'
+            />
           ) : (
             <div className='w-20 h-20 rounded-full bg-brand-accent/20 flex items-center justify-center text-2xl font-display text-brand-accent shrink-0'>
               {profile?.name?.[0] ?? '?'}
@@ -133,17 +143,13 @@ export default function AccountPage() {
       {/* Profile form */}
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-6'>
         <div className='flex flex-col gap-2'>
-          <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>
-            Name
-          </label>
+          <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>Name</label>
           <Input {...register('name')} placeholder='Your name' />
           {errors.name && <p className='text-state-error text-xs font-mono'>{errors.name.message}</p>}
         </div>
 
         <div className='flex flex-col gap-2'>
-          <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>
-            Bio
-          </label>
+          <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>Bio</label>
           <Input {...register('bio')} placeholder='A short bio (optional)' />
           {errors.bio && <p className='text-state-error text-xs font-mono'>{errors.bio.message}</p>}
         </div>

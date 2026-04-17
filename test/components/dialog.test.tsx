@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '../utils/render'
 
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 test('Dialog opens and displays title when triggered', async () => {
   const user = userEvent.setup()
@@ -12,6 +12,7 @@ test('Dialog opens and displays title when triggered', async () => {
       </DialogTrigger>
       <DialogContent>
         <DialogTitle>Test Dialog</DialogTitle>
+        <DialogDescription>Test description</DialogDescription>
         <div>Body content</div>
       </DialogContent>
     </Dialog>,

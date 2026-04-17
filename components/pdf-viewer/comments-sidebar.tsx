@@ -6,6 +6,7 @@ import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
 interface CommentsSidebarProps {
@@ -19,9 +20,10 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
   const queryClient = useQueryClient()
   const [content, setContent] = useState('')
 
-  const { data: comments = [] } = useQuery(
-    trpc.comments.list.queryOptions({ scriptId, pageNumber: currentPage }),
-  )
+  const { data: comments = [] } = useQuery({
+    ...trpc.comments.list.queryOptions({ scriptId, pageNumber: currentPage }),
+    enabled: !!currentPage,
+  })
 
   // Mutation without a global onSuccess — page is captured at submit time to avoid
   // stale closure: if the user navigates to a different page while the request is
@@ -31,17 +33,12 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
   return (
     <aside className='flex flex-col gap-4 w-full lg:w-[400px] shrink-0 bg-surface border-l border-border-subtle p-5 min-h-full'>
       {/* Page header — DM Mono uppercase (ref: design spec) */}
-      <p className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider'>
-        Page {currentPage}
-      </p>
+      <p className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider'>Page {currentPage}</p>
 
       {/* Comment list (ref: Figma Comment 13:136) */}
       <div className='flex flex-col gap-3 flex-1 overflow-y-auto'>
         {(comments as CommentWithAuthor[]).map((c) => (
-          <div
-            key={c.id}
-            className='bg-elevated rounded-sm p-3 border border-border-subtle flex flex-col gap-2'
-          >
+          <div key={c.id} className='bg-elevated rounded-sm p-3 border border-border-subtle flex flex-col gap-2'>
             <div className='flex items-center gap-2'>
               {/* Avatar (ref: Figma 38:115) — initials fallback, clickable to profile */}
               {c.author?.id ? (
@@ -56,7 +53,9 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
                 </div>
               )}
               {c.author?.id ? (
-                <Link href={`/profile/${c.author.id}`} className='text-text-primary text-body-small font-medium truncate hover:text-brand-accent transition-colors'>
+                <Link
+                  href={`/profile/${c.author.id}`}
+                  className='text-text-primary text-body-small font-medium truncate hover:text-brand-accent transition-colors'>
                   {c.author.name ?? 'Anonymous'}
                 </Link>
               ) : (
@@ -65,16 +64,14 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
                 </span>
               )}
               <span className='font-mono text-label-mono-small text-text-muted ml-auto shrink-0'>
-                {new Date(c.created_at).toLocaleDateString('pt-BR')}
+                {c.created_at ? new Date(c.created_at).toLocaleDateString('pt-BR') : '—'}
               </span>
             </div>
             <p className='text-text-secondary text-body-small leading-relaxed'>{c.content}</p>
           </div>
         ))}
 
-        {comments.length === 0 && (
-          <p className='text-text-muted text-body-small'>No comments on this page yet.</p>
-        )}
+        {comments.length === 0 && <p className='text-text-muted text-body-small'>No comments on this page yet.</p>}
       </div>
 
       {/* Comment form or login CTA */}
@@ -91,16 +88,18 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
               { scriptId, pageNumber: submittedPage, content: trimmed },
               {
                 onSuccess: () => {
-                  void queryClient.invalidateQueries(
-                    trpc.comments.list.queryOptions({ scriptId, pageNumber: submittedPage }),
-                  )
+                  void queryClient.invalidateQueries({
+                    queryKey: trpc.comments.list.queryOptions({ scriptId, pageNumber: submittedPage }).queryKey,
+                  })
                   setContent('')
+                },
+                onError: (err) => {
+                  toast.error(err.message)
                 },
               },
             )
           }}
-          className='flex flex-col gap-2 border-t border-border-subtle pt-4'
-        >
+          className='flex flex-col gap-2 border-t border-border-subtle pt-4'>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}

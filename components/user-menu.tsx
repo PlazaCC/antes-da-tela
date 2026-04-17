@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface UserMenuProps {
   userId: string
@@ -24,9 +25,12 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
 
   const handleLogout = async () => {
     const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    try {
+      await supabase.auth.signOut()
+      router.replace('/')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Logout failed')
+    }
   }
 
   return (
@@ -34,10 +38,16 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <button
           className='w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent shrink-0 hover:bg-brand-accent/30 transition-colors overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent'
-          aria-label='User menu'
-        >
+          aria-label='User menu'>
           {userImage ? (
-            <Image src={userImage} alt={userName ?? 'Avatar'} width={32} height={32} unoptimized className='w-8 h-8 object-cover' />
+            <Image
+              src={userImage}
+              alt={userName ?? 'Avatar'}
+              width={32}
+              height={32}
+              unoptimized
+              className='w-8 h-8 object-cover'
+            />
           ) : (
             initial
           )}
@@ -55,10 +65,7 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className='cursor-pointer text-text-muted focus:text-text-secondary'
-          onSelect={handleLogout}
-        >
+        <DropdownMenuItem className='cursor-pointer text-text-muted focus:text-text-secondary' onSelect={handleLogout}>
           Sair
         </DropdownMenuItem>
       </DropdownMenuContent>

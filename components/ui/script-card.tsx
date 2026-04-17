@@ -46,15 +46,13 @@ const renderContent = ({ title, author, genre, rating, pages, status }: ScriptCa
     <div className='flex items-center justify-between gap-3 mt-auto pt-1 border-t border-border-subtle'>
       <span className='text-body-small text-text-secondary truncate'>por {author}</span>
       <span className='font-mono text-label-mono-small text-text-muted shrink-0'>
-        {pages != null ? `${pages}p` : '—'}
+        {pages != null ? `${pages}p` : ''}
       </span>
     </div>
 
     <div className='flex items-center gap-2'>
       <StarRating value={rating ?? 0} readOnly allowHalf />
-      <span className='font-mono text-label-mono-small text-text-muted'>
-        {rating != null ? rating.toFixed(1) : '—'}
-      </span>
+      <span className='font-mono text-label-mono-small text-text-muted'>{rating != null ? rating.toFixed(1) : ''}</span>
     </div>
   </>
 )

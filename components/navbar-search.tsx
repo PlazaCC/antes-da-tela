@@ -14,6 +14,11 @@ export function NavBarSearch() {
   // Sync input if URL changes externally
   useEffect(() => {
     setValue(searchParams.get('q') ?? '')
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
   }, [searchParams])
 
   const handleChange = (next: string) => {
@@ -24,7 +29,8 @@ export function NavBarSearch() {
       if (next) params.set('q', next)
       const genre = searchParams.get('genre')
       if (genre) params.set('genre', genre)
-      const target = `/?${params.toString()}`
+      const query = params.toString()
+      const target = query ? `/?${query}` : '/'
       if (pathname === '/') {
         router.replace(target)
       } else {
