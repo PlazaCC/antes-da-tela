@@ -213,7 +213,7 @@
       "scope": "Leitor",
       "title": "[Leitor] - PDF viewer com comentários ancorados por página",
       "clickup": "https://app.clickup.com/t/86agq8yv2",
-      "status": "pending",
+      "status": "in_review",
       "priority": "urgent",
       "depends_on": ["poc-02", "poc-04"],
       "task_file": ".agents/tasks/poc-05-leitor.md",
@@ -231,14 +231,14 @@
       "pdf_constraint": "next/dynamic with ssr: false — pdfjs is client-only",
       "comment_model": "soft delete via deleted_at field",
       "acceptance": [
-        { "id": "lei-1", "item": "PDFViewer carregado com next/dynamic ssr:false", "done": false },
-        { "id": "lei-2", "item": "Zustand store controla currentPage compartilhado com sidebar", "done": false },
-        { "id": "lei-3", "item": "Navegar página atualiza comentários da sidebar automaticamente", "done": false },
-        { "id": "lei-4", "item": "Usuário autenticado cria comentário sem reload", "done": false },
-        { "id": "lei-5", "item": "Usuário não autenticado vê comentários + CTA login", "done": false },
+        { "id": "lei-1", "item": "PDFViewer carregado com next/dynamic ssr:false", "done": true },
+        { "id": "lei-2", "item": "Zustand store controla currentPage compartilhado com sidebar", "done": true },
+        { "id": "lei-3", "item": "Navegar página atualiza comentários da sidebar automaticamente", "done": true },
+        { "id": "lei-4", "item": "Usuário autenticado cria comentário sem reload", "done": true },
+        { "id": "lei-5", "item": "Usuário não autenticado vê comentários + CTA login", "done": true },
         { "id": "lei-6", "item": "Sem erros de CORS ao carregar PDF do bucket scripts", "done": false },
         { "id": "lei-7", "item": "Performance aceitável em roteiros de até 120 páginas", "done": false },
-        { "id": "lei-8", "item": "yarn build limpo (sem erros SSR do pdfjs)", "done": false }
+        { "id": "lei-8", "item": "yarn build limpo (sem erros SSR do pdfjs)", "done": true }
       ]
     },
 

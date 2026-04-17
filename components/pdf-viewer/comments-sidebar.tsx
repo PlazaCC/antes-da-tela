@@ -47,7 +47,7 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
           >
             <div className='flex items-center gap-2'>
               {/* Avatar (ref: Figma 38:115) — initials fallback */}
-              <div className='w-6 h-6 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent shrink-0'>
+              <div className='w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent shrink-0'>
                 {(c.author as { name?: string } | null)?.name?.[0]?.toUpperCase() ?? '?'}
               </div>
               <span className='text-text-primary text-body-small font-medium truncate'>
