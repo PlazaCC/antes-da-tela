@@ -14,7 +14,7 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
         const isActive = reaction.active || selected === i
         return (
           <button
-            key={reaction.label}
+            key={`${reaction.label}-${i}`}
             type='button'
             className={cn(
               'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors min-h-[44px] sm:min-h-0',
@@ -24,8 +24,7 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
             )}
             onClick={() => onSelect?.(i)}
             aria-pressed={isActive}
-            aria-label={`${reaction.label}: ${reaction.count} reaction${reaction.count !== 1 ? 's' : ''}${isActive ? ', active' : ''}`}
-          >
+            aria-label={`${reaction.label}: ${reaction.count} reaction${reaction.count !== 1 ? 's' : ''}${isActive ? ', active' : ''}`}>
             <span aria-hidden='true'>{reaction.icon}</span>
             <span>{reaction.count}</span>
           </button>

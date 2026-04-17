@@ -36,10 +36,7 @@ function StarIcon({ fill, size = 20 }: { fill: 'full' | 'half' | 'empty'; size?:
 
   return (
     <svg width={size} height={size} viewBox='0 0 20 20' aria-hidden='true'>
-      <polygon
-        points={STAR_POINTS}
-        className={fill === 'full' ? 'fill-state-warning' : 'fill-elevated'}
-      />
+      <polygon points={STAR_POINTS} className={fill === 'full' ? 'fill-state-warning' : 'fill-elevated'} />
     </svg>
   )
 }
@@ -72,9 +69,24 @@ export const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, starIndex: number) => {
       if (readOnly || !onChange) return
-      if (e.key === 'ArrowRight') onChange(Math.min(starIndex + 1, max))
-      if (e.key === 'ArrowLeft') onChange(Math.max(0, allowHalf ? value - 0.5 : value - 1))
-      if (e.key === 'Enter' || e.key === ' ') onChange(starIndex + 1)
+
+      const currentValue = hovered ?? value
+      const step = allowHalf ? 0.5 : 1
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        onChange(Math.min(currentValue + step, max))
+      }
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        onChange(Math.max(0, currentValue - step))
+      }
+
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        onChange(starIndex + 1)
+      }
     }
 
     return (
@@ -83,8 +95,7 @@ export const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
         className={cn('flex gap-0.5', className)}
         role='group'
         aria-label={`Rating: ${value} out of ${max} stars`}
-        {...props}
-      >
+        {...props}>
         {Array.from({ length: max }).map((_, i) => (
           <button
             key={i}
@@ -99,8 +110,7 @@ export const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
             onMouseLeave={() => setHovered(null)}
             onKeyDown={(e) => handleKeyDown(e, i)}
             aria-label={allowHalf ? `${i + 0.5} or ${i + 1} stars` : `${i + 1} star${i === 0 ? '' : 's'}`}
-            tabIndex={readOnly ? -1 : 0}
-          >
+            tabIndex={readOnly ? -1 : 0}>
             <StarIcon fill={getFill(i, displayValue)} size={20} />
           </button>
         ))}
