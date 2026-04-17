@@ -2,7 +2,7 @@
 title: "E2E validation: build, lint, and migrations smoke test"
 type: infra
 priority: P0
-branch: feature/poc-e2e-validation
+branch: feature/e2e-validation
 ---
 
 ## Objective
