@@ -1,9 +1,11 @@
-import { PostHogProvider } from '@/components/posthog-provider'
 import AppToaster from '@/components/app-toaster/app-toaster'
+import { NavBar } from '@/components/navbar'
+import { PostHogProvider } from '@/components/posthog-provider'
 import { TRPCReactProvider } from '@/trpc/client'
 import type { Metadata } from 'next'
 import { ThemeProvider } from 'next-themes'
 import { DM_Mono, DM_Serif_Display, Inter } from 'next/font/google'
+import { Suspense } from 'react'
 import './globals.css'
 
 const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
@@ -43,14 +45,17 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning className='dark'>
       <body className={`${inter.variable} ${dmSerifDisplay.variable} ${dmMono.variable} antialiased`}>
-        <PostHogProvider>
-          <TRPCReactProvider>
-            <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
-              {children}
-              <AppToaster />
-            </ThemeProvider>
-          </TRPCReactProvider>
-        </PostHogProvider>
+        <Suspense fallback={null}>
+          <PostHogProvider>
+            <TRPCReactProvider>
+              <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
+                <NavBar />
+                {children}
+                <AppToaster />
+              </ThemeProvider>
+            </TRPCReactProvider>
+          </PostHogProvider>
+        </Suspense>
       </body>
     </html>
   )

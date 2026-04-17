@@ -14,8 +14,9 @@ export type TRPCUser = {
 }
 
 export const createTRPCContext = async (opts: {
-  headers: Headers
+  headers: Headers | Promise<Headers>
 }): Promise<{ headers: Headers; user: TRPCUser | null; supabase: SupabaseClient }> => {
+  const headersObj = await opts.headers
   // CookieStore shape used by Supabase client
   type CookieEntry = { name: string; value: string; options?: Record<string, unknown> }
   type CookieStore = {
@@ -33,7 +34,7 @@ export const createTRPCContext = async (opts: {
   }
 
   if (!cookieStore) {
-    const cookieHeader = opts.headers?.get?.('cookie') ?? ''
+    const cookieHeader = headersObj?.get?.('cookie') ?? ''
     cookieStore = {
       getAll() {
         if (!cookieHeader) return []
@@ -52,7 +53,7 @@ export const createTRPCContext = async (opts: {
   // getUser() is called lazily by authenticatedProcedure below.
   const supabase = await createSupabaseClient(cookieStore)
 
-  return { headers: opts.headers, user: null, supabase }
+  return { headers: headersObj, user: null, supabase }
 }
 
 const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create({

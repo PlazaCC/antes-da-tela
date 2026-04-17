@@ -4,8 +4,13 @@ import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 import { PDFViewer } from '@/components/pdf-viewer'
 import type { TagVariant } from '@/components/ui/tag'
 import { Tag } from '@/components/ui/tag'
+import { StarRating } from '@/components/ui/star-rating'
 import type { AppRouter } from '@/server/api/root'
 import type { inferRouterOutputs } from '@trpc/server'
+import { useTRPC } from '@/trpc/client'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 type RouterOutput = inferRouterOutputs<AppRouter>
 type ScriptDetail = RouterOutput['scripts']['getById']
@@ -23,6 +28,20 @@ interface Props {
 }
 
 export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Props) {
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  const averageOpts = trpc.ratings.getAverage.queryOptions({ scriptId: script?.id ?? '' })
+  const userRatingOpts = trpc.ratings.getUserRating.queryOptions(
+    { scriptId: script?.id ?? '', userId: currentUserId ?? '' },
+  )
+
+  const { data: ratingData } = useQuery({ ...averageOpts, enabled: !!script })
+  const { data: userRating } = useQuery({ ...userRatingOpts, enabled: !!script && !!currentUserId })
+
+  const upsertRating = useMutation(trpc.ratings.upsert.mutationOptions())
+
   if (!script) {
     return (
       <div className='min-h-screen bg-bg-base flex items-center justify-center'>
@@ -32,6 +51,7 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
   }
 
   const genreVariant: TagVariant = GENRE_VARIANT_MAP[script.genre ?? ''] ?? 'default'
+  const isOwner = !!currentUserId && currentUserId === script.author?.id
 
   return (
     <div className='h-screen bg-bg-base flex flex-col overflow-hidden'>
@@ -51,8 +71,72 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
 
           {script.author && (
             <p className='font-mono text-label-mono-default text-text-muted'>
-              by <span className='text-text-secondary'>{script.author.name}</span>
+              por{' '}
+              <a
+                href={`/profile/${script.author.id}`}
+                className='text-text-secondary hover:text-brand-accent transition-colors'
+              >
+                {script.author.name}
+              </a>
             </p>
+          )}
+
+          {/* RatingBox — ref: Figma 38:123 */}
+          {isOwner ? (
+            <div
+              className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'
+              aria-live='polite'
+            >
+              <StarRating value={ratingData?.average ?? 0} readOnly allowHalf />
+              {ratingData && ratingData.total > 0 && (
+                <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
+                  {ratingData.average.toFixed(1)}{' '}
+                  <span className='text-text-muted'>({ratingData.total})</span>
+                </span>
+              )}
+              <span className='font-mono text-label-mono-small text-text-muted'>
+                Você não pode avaliar seu próprio roteiro
+              </span>
+            </div>
+          ) : (
+            <div className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'>
+              <StarRating
+                value={userRating ?? ratingData?.average ?? 0}
+                allowHalf={!currentUserId}
+                readOnly={!currentUserId}
+                onChange={(score) => {
+                  if (!currentUserId) {
+                    router.push('/auth/login')
+                    return
+                  }
+                  upsertRating.mutate(
+                    { scriptId: script.id, score: Math.round(score) },
+                    {
+                      onSuccess: () => {
+                        void queryClient.invalidateQueries(averageOpts)
+                        void queryClient.invalidateQueries(userRatingOpts)
+                      },
+                      onError: (err) => {
+                        toast.error(err.message)
+                      },
+                    },
+                  )
+                }}
+              />
+              {ratingData && ratingData.total > 0 && (
+                <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
+                  {ratingData.average.toFixed(1)}{' '}
+                  <span className='text-text-muted'>({ratingData.total})</span>
+                </span>
+              )}
+              {!currentUserId && (
+                <span className='font-mono text-label-mono-small text-text-muted'>
+                  <a href='/auth/login' className='text-brand-accent hover:underline'>
+                    Avaliar
+                  </a>
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { authenticatedProcedure, createTRPCRouter, publicProcedure, TRPCUser } from '@/trpc/init'
+import type { User } from '@/server/db/schema'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
@@ -36,11 +37,11 @@ export const usersRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { data: user } = await ctx.supabase
         .from('users')
-        .select()
+        .select('id, name, email, image, bio, created_at')
         .eq('id', input.id)
         .maybeSingle()
 
-      return user ?? null
+      return (user ?? null) as User | null
     }),
 
   updateProfile: authenticatedProcedure
@@ -72,6 +73,6 @@ export const usersRouter = createTRPCRouter({
         })
       }
 
-      return updated
+      return (updated ?? null) as User | null
     }),
 })

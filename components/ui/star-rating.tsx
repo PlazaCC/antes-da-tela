@@ -26,17 +26,15 @@ function StarIcon({ fill, size = 20 }: { fill: 'full' | 'half' | 'empty'; size?:
             <rect x='0' y='0' width='10' height='20' />
           </clipPath>
         </defs>
-        {/* Empty background */}
-        <polygon points={STAR_POINTS} className='fill-elevated' />
-        {/* Half fill using clip */}
-        <polygon points={STAR_POINTS} className='fill-state-warning' clipPath={`url(#${clipId})`} />
+        <polygon points={STAR_POINTS} className='fill-border-default' />
+        <polygon points={STAR_POINTS} className='fill-brand-accent' clipPath={`url(#${clipId})`} />
       </svg>
     )
   }
 
   return (
     <svg width={size} height={size} viewBox='0 0 20 20' aria-hidden='true'>
-      <polygon points={STAR_POINTS} className={fill === 'full' ? 'fill-state-warning' : 'fill-elevated'} />
+      <polygon points={STAR_POINTS} className={fill === 'full' ? 'fill-brand-accent' : 'fill-border-default'} />
     </svg>
   )
 }

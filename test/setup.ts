@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+import { vi } from 'vitest'
 import 'whatwg-fetch'
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
@@ -44,4 +45,43 @@ try {
   afterAll(() => server.close())
 } catch {
   // ignore: server may not be present if msw isn't installed yet
+}
+
+// Simplify Radix primitives for tests to avoid async presence/portal/focus warnings
+try {
+  vi.mock('@radix-ui/react-portal', () => {
+    const React = require('react')
+    return {
+      Portal: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+    }
+  })
+  vi.mock('@radix-ui/react-presence', () => {
+    const React = require('react')
+    return {
+      Presence: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+    }
+  })
+  vi.mock('@radix-ui/react-focus-scope', () => {
+    const React = require('react')
+    return {
+      FocusScope: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+    }
+  })
+  vi.mock('@radix-ui/react-dismissable-layer', () => {
+    const React = require('react')
+    return {
+      DismissableLayer: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(React.Fragment, null, children),
+    }
+  })
+  vi.mock('@radix-ui/react-popover', () => {
+    const React = require('react')
+    return {
+      Popover: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+      PopoverContent: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(React.Fragment, null, children),
+    }
+  })
+} catch {
+  // ignore mocking failures in non-vitest environments
 }
