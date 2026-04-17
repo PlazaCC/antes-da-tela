@@ -44,7 +44,7 @@ export function FollowButton({ authorId, className }: FollowButtonProps) {
   return (
     <button
       onClick={handleClick}
-      disabled={isPending}
+      disabled={isPending || isLoading}
       className={cn(
         'inline-flex items-center justify-center px-3 py-1.5 rounded-sm text-[12px] leading-none',
         'border transition-colors disabled:opacity-60',
