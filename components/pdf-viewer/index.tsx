@@ -5,7 +5,7 @@ export const PDFViewer = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className='animate-pulse rounded-sm bg-elevated' style={{ height: '600px' }} />
+      <div className='animate-pulse rounded-sm bg-elevated h-[600px]' />
     ),
   },
 )

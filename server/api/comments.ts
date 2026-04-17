@@ -2,6 +2,17 @@ import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trp
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+export type CommentAuthor = { id: string; name: string | null; image: string | null }
+
+export type CommentWithAuthor = {
+  id: string
+  script_id: string
+  page_number: number
+  content: string
+  created_at: string
+  author: CommentAuthor | null
+}
+
 export const commentsRouter = createTRPCRouter({
   list: publicProcedure
     .input(
@@ -13,7 +24,7 @@ export const commentsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { data, error } = await ctx.supabase
         .from('comments')
-        .select('*, author:users!author_id(id, name, image)')
+        .select('id, script_id, page_number, content, created_at, author:users!author_id(id, name, image)')
         .eq('script_id', input.scriptId)
         .eq('page_number', input.pageNumber)
         .is('deleted_at', null)
@@ -23,7 +34,7 @@ export const commentsRouter = createTRPCRouter({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       }
 
-      return data ?? []
+      return (data ?? []) as CommentWithAuthor[]
     }),
 
   create: authenticatedProcedure
@@ -43,7 +54,7 @@ export const commentsRouter = createTRPCRouter({
           content: input.content,
           author_id: ctx.user!.id,
         })
-        .select('*, author:users!author_id(id, name, image)')
+        .select('id, script_id, page_number, content, created_at, author:users!author_id(id, name, image)')
         .single()
 
       if (error || !data) {
@@ -53,22 +64,27 @@ export const commentsRouter = createTRPCRouter({
         })
       }
 
-      return data
+      return data as CommentWithAuthor
     }),
 
   delete: authenticatedProcedure
     .input(z.object({ commentId: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
-      // Soft delete — only the comment author can delete their own comment.
-      // RLS enforces this at the DB level; this check provides a clear error.
-      const { error } = await ctx.supabase
+      // Soft delete — only the comment author may delete. The .eq('author_id') filter
+      // means 0 rows are returned when the caller does not own the comment.
+      const { data, error } = await ctx.supabase
         .from('comments')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', input.commentId)
         .eq('author_id', ctx.user!.id)
+        .select('id')
 
       if (error) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+      }
+
+      if (!data?.length) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Comment not found or not owned by you' })
       }
     }),
 })

@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import type { CommentWithAuthor } from '@/server/api/comments'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -8,7 +9,7 @@ import { usePDFViewerStore } from './pdf-viewer-store'
 
 interface CommentsSidebarProps {
   scriptId: string
-  currentUserId?: string | null
+  currentUserId: string | null
 }
 
 export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProps) {
@@ -40,7 +41,7 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
 
       {/* Comment list (ref: Figma Comment 13:136) */}
       <div className='flex flex-col gap-3 flex-1 overflow-y-auto'>
-        {comments.map((c) => (
+        {(comments as CommentWithAuthor[]).map((c) => (
           <div
             key={c.id}
             className='bg-elevated rounded-sm p-3 border border-border-subtle flex flex-col gap-2'
@@ -48,10 +49,10 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
             <div className='flex items-center gap-2'>
               {/* Avatar (ref: Figma 38:115) — initials fallback */}
               <div className='w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-medium text-brand-accent shrink-0'>
-                {(c.author as { name?: string } | null)?.name?.[0]?.toUpperCase() ?? '?'}
+                {c.author?.name?.[0]?.toUpperCase() ?? '?'}
               </div>
               <span className='text-text-primary text-body-small font-medium truncate'>
-                {(c.author as { name?: string } | null)?.name ?? 'Anonymous'}
+                {c.author?.name ?? 'Anonymous'}
               </span>
               <span className='font-mono text-label-mono-small text-text-muted ml-auto shrink-0'>
                 {new Date(c.created_at).toLocaleDateString('pt-BR')}
@@ -82,6 +83,7 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
             onChange={(e) => setContent(e.target.value)}
             placeholder='Comment on this page…'
             rows={3}
+            maxLength={1000}
             className='w-full rounded-sm border border-border-subtle bg-elevated p-3 text-body-small text-text-primary resize-none focus:outline-none focus:ring-1 focus:ring-brand-accent placeholder:text-text-muted'
           />
           <Button type='submit' size='sm' disabled={createComment.isPending || !content.trim()}>

@@ -14,7 +14,8 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
   const pdfDocRef = useRef<{ getPage: (n: number) => Promise<unknown>; numPages: number } | null>(null)
   const renderTaskRef = useRef<{ cancel: () => void } | null>(null)
 
-  const { currentPage, totalPages, zoom, setTotalPages, setLoading, setCurrentPage } = usePDFViewerStore()
+  const { currentPage, totalPages, zoom, isLoading, setTotalPages, setLoading, setCurrentPage } =
+    usePDFViewerStore()
 
   const renderPage = useCallback(
     async (pageNum: number, scale: number) => {
@@ -54,15 +55,16 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
         renderTaskRef.current = null
       }
     },
-    [], // stable: only refs + store setter used
+    [], // stable: only refs used
   )
 
-  // Load PDF document once when URL changes
+  // Load PDF document once when URL changes; reset page state for the new document
   useEffect(() => {
     let cancelled = false
 
     async function loadPDF() {
       setLoading(true)
+      setCurrentPage(1)
       const pdfjsLib = await import('pdfjs-dist')
       pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
         'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -95,13 +97,18 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
   const goToPrev = () => currentPage > 1 && setCurrentPage(currentPage - 1)
   const goToNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1)
 
-  const decreaseZoom = () =>
-    usePDFViewerStore.getState().setZoom(Math.max(0.5, Math.round((zoom - 0.2) * 10) / 10))
-  const increaseZoom = () =>
-    usePDFViewerStore.getState().setZoom(Math.min(3.0, Math.round((zoom + 0.2) * 10) / 10))
+  // Read zoom from store directly to avoid stale closure on rapid clicks
+  const decreaseZoom = () => {
+    const z = usePDFViewerStore.getState().zoom
+    usePDFViewerStore.getState().setZoom(Math.max(0.5, Math.round((z - 0.2) * 10) / 10))
+  }
+  const increaseZoom = () => {
+    const z = usePDFViewerStore.getState().zoom
+    usePDFViewerStore.getState().setZoom(Math.min(3.0, Math.round((z + 0.2) * 10) / 10))
+  }
 
   return (
-    <div className='flex flex-col gap-3'>
+    <div className='relative flex flex-col gap-3'>
       {/* Controls bar — PageController + ZoomController */}
       <div
         className={cn(
@@ -117,7 +124,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             onClick={goToPrev}
             disabled={currentPage <= 1}
             aria-label='Previous page'
-            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[24px] min-h-[24px] flex items-center justify-center'
+            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'
           >
             ←
           </button>
@@ -129,7 +136,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             onClick={goToNext}
             disabled={currentPage >= totalPages}
             aria-label='Next page'
-            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[24px] min-h-[24px] flex items-center justify-center'
+            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'
           >
             →
           </button>
@@ -141,7 +148,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             type='button'
             onClick={decreaseZoom}
             aria-label='Zoom out'
-            className='text-text-secondary hover:text-text-primary w-6 h-6 flex items-center justify-center text-base font-medium'
+            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'
           >
             −
           </button>
@@ -152,12 +159,24 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             type='button'
             onClick={increaseZoom}
             aria-label='Zoom in'
-            className='text-text-secondary hover:text-text-primary w-6 h-6 flex items-center justify-center text-base font-medium'
+            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'
           >
             +
           </button>
         </div>
       </div>
+
+      {/* Loading overlay shown while a new document is being fetched */}
+      {isLoading && (
+        <div className='absolute inset-0 top-[52px] z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='w-8 h-8 rounded-full border-2 border-border-subtle border-t-brand-accent animate-spin' />
+            <span className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>
+              Loading…
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* PDF canvas */}
       <canvas
