@@ -9,11 +9,13 @@ branch: feature/search-filter-sheet
 Implement the `Search Sheet` and `Filter Page` Figma screens: a bottom-sheet for mobile search autocomplete and a full-screen filter panel for genre/age-rating multi-select, consistent with the Figma designs.
 
 ## Context
-- Figma frames: `Search Sheet` (nodeId `51:820`) at `.agents/figma/screens/Search Sheet.png`; `Filter Page` (nodeId `51:930`) at `.agents/figma/screens/Filter Page.png`
+- Figma frames: `Search Sheet` nodeId `51:820`; `Filter Page` nodeId `51:930` — seção `Fluxo principal` (186:1388)
+- Buscar specs via `mcp__Framelink_Figma_MCP__get_figma_data(fileKey="iUb8odefGSZiHz4KjuzX1M", nodeId="51:820")` e `nodeId="51:930"`
+- Assets locais (SVGs/PNGs) foram removidos — usar Framelink MCP como fonte de referência visual
 - `NavBarSearch` at `components/navbar-search.tsx` already handles desktop search via URL params with 300ms debounce
 - shadcn `Sheet` component not yet installed; `Checkbox` and `Radio box` components exist at `components/ui/`
 - `GENRES` constants at `lib/constants/scripts.ts`; `AGE_RATINGS` also available
-- `FilterSectionHeader` SVG component in `.agents/figma/components/Filter Section Header.svg`
+- `FilterSectionHeader` figmaNodeId: `48:1122` — buscar via Framelink MCP
 
 ## Steps
 1. Install shadcn Sheet: `yarn dlx shadcn@latest add sheet`. Create `components/search-sheet/search-sheet.tsx` — a bottom drawer (Sheet from bottom) with an `Input` and a list of recent/suggested scripts using `trpc.scripts.search`; opens from a search icon in NavBar on mobile (`md:hidden`).

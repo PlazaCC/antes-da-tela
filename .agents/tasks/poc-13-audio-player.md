@@ -9,7 +9,9 @@ branch: feature/audio-player
 Integrate the `Player` Figma component into the script reader page (`/scripts/[id]`), allowing authors to upload an optional audio file (narration/reading) and readers to play it while reading the PDF.
 
 ## Context
-- Figma component: `Player` (`.agents/figma/components/Player.svg`) shown in the `PDF Reader` screen (`.agents/figma/screens/PDF Reader.png`)
+- Figma component: `Player` figmaNodeId `50:1915`, visível na tela `PDF Reader` nodeId `51:1007` — seção `Fluxo principal` (186:1388)
+- Buscar spec via `mcp__Framelink_Figma_MCP__get_figma_data(fileKey="iUb8odefGSZiHz4KjuzX1M", nodeId="50:1915")`
+- Assets locais (SVGs/PNGs) foram removidos — usar Framelink MCP como fonte de referência visual
 - DB schema already has `audio_files` table with `script_id`, `storage_path`, `duration_seconds`
 - `audioFiles` Supabase bucket defined in `poc-context.json` (public, 100MB, audio/*)
 - `scriptsRouter.getById` returns `script_files` — extend to also return `audio_files`

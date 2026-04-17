@@ -1,304 +1,70 @@
 {
   "meta": {
-    "source": "Figma MCP API",
-    "description": "Design system extraído e interpretado do arquivo Figma, incluindo tokens, cores, tipografia, componentes, variantes, estados e guidelines. Atualizado para distinguir assets reais de componentes a serem implementados.",
-    "version": 3,
-    "generatedAt": "2026-04-14T00:00:00Z"
+    "source": "Figma MCP API — Framelink",
+    "description": "Design system extracted from the Antes da Tela Figma file. Source of truth: the three canonical sections (Fluxo principal 186:1388, Fluxo cadastro roteiro 186:1350, Perfil 186:2075). Colors and layout specs confirmed against live Figma globalVars.",
+    "version": 4,
+    "generatedAt": "2026-04-17T00:00:00Z"
   },
+
   "foundations": {
     "colors": {
+      "note": "Hex values confirmed from Figma globalVars fill tokens. HSL approximations for Tailwind CSS vars.",
       "palette": [
-        { "name": "bg/base", "value": "hsl(0 0% 5%)" },
-        { "name": "bg/surface", "value": "hsl(0 0% 9%)" },
-        { "name": "bg/elevated", "value": "hsl(0 0% 12%)" },
-        { "name": "border/subtle", "value": "hsl(0 0% 14%)" },
-        { "name": "border/default", "value": "hsl(0 0% 20%)" },
-        { "name": "text/primary", "value": "hsl(42 25% 92%)" },
-        { "name": "text/secondary", "value": "hsl(34 5% 70%)" },
-        { "name": "text/muted", "value": "hsl(43 5% 40%)" },
-        { "name": "brand/accent", "value": "hsl(15 80% 55%)" },
-        { "name": "brand/lime", "value": "hsl(78 71% 69%)" },
-        { "name": "state/error", "value": "hsl(0 84% 60%)" },
-        { "name": "state/success", "value": "hsl(150 52% 49%)" },
-        { "name": "state/warning", "value": "hsl(45 91% 56%)" }
+        { "name": "bg/base",          "hex": "#0E0E0E", "hsl": "hsl(0 0% 5.5%)",   "usage": "Root background, screen canvas" },
+        { "name": "bg/surface",       "hex": "#161616", "hsl": "hsl(0 0% 8.6%)",   "usage": "Header, cards, nav background" },
+        { "name": "bg/elevated",      "hex": "#1E1E1E", "hsl": "hsl(0 0% 11.8%)",  "usage": "Modals, dropdowns, elevated surfaces" },
+        { "name": "border/subtle",    "hex": "#343434", "hsl": "hsl(0 0% 20.4%)",  "usage": "Low-contrast separators, inactive state borders" },
+        { "name": "border/default",   "hex": "#252525", "hsl": "hsl(0 0% 14.5%)",  "usage": "Card borders, input outlines, dividers" },
+        { "name": "text/primary",     "hex": "#F0EDE6", "hsl": "hsl(42 20% 92%)",  "usage": "Headings, body text" },
+        { "name": "text/secondary",   "hex": "#B7B4B0", "hsl": "hsl(40 3% 69%)",   "usage": "Metadata, captions, secondary labels" },
+        { "name": "text/muted",       "hex": "#6B6860", "hsl": "hsl(36 4% 40%)",   "usage": "Placeholders, disabled text, tertiary labels" },
+        { "name": "brand/accent",     "hex": "#E85C2F", "hsl": "hsl(15 79% 55%)",  "usage": "Primary CTAs, active states, highlights" },
+        { "name": "brand/lime",       "hex": "#C8E87A", "hsl": "hsl(78 71% 69%)",  "usage": "Secondary highlights, tags, progress indicators" },
+        { "name": "state/error",      "hex": "#EF4545", "hsl": "hsl(0 84% 60%)",   "usage": "Error states, destructive actions" },
+        { "name": "state/success",    "hex": "#3CBF7E", "hsl": "hsl(150 52% 49%)", "usage": "Success states, published status" },
+        { "name": "state/warning",    "hex": "#F0C040", "hsl": "hsl(45 87% 59%)",  "usage": "Warning states (design implied, not yet confirmed in Figma fills)" }
       ]
     },
     "typography": {
       "fontFamilies": ["Inter", "DM Serif Display", "DM Mono"],
+      "note": "Named styles confirmed from Figma globalVars. Others inferred from existing design-system v3.",
       "scales": [
-        { "name": "display", "fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 56, "lineHeight": 1.37 },
-        { "name": "heading", "fontFamily": "Inter", "fontWeight": 600, "fontSize": 20, "lineHeight": 1.21 },
-        { "name": "body", "fontFamily": "Inter", "fontWeight": 400, "fontSize": 13, "lineHeight": 1.38 },
-        { "name": "mono", "fontFamily": "DM Mono", "fontWeight": 400, "fontSize": 11, "lineHeight": 1.3 },
-        {
-          "name": "display/hero",
-          "fontFamily": "DM Serif Display",
-          "fontWeight": 400,
-          "fontSize": 72,
-          "lineHeight": 1.06
-        },
-        {
-          "name": "display/hero-italic",
-          "fontFamily": "DM Serif Display",
-          "fontWeight": 400,
-          "fontSize": 72,
-          "lineHeight": 1.06
-        },
-        {
-          "name": "heading/1",
-          "fontFamily": "DM Serif Display",
-          "fontWeight": 400,
-          "fontSize": 48,
-          "lineHeight": 1.08
-        },
-        {
-          "name": "heading/2",
-          "fontFamily": "DM Serif Display",
-          "fontWeight": 400,
-          "fontSize": 32,
-          "lineHeight": 1.13
-        },
-        { "name": "heading/3", "fontFamily": "Inter", "fontWeight": 600, "fontSize": 24, "lineHeight": 1.25 },
-        { "name": "body/large", "fontFamily": "Inter", "fontWeight": 400, "fontSize": 18, "lineHeight": 1.56 },
-        { "name": "body/default", "fontFamily": "Inter", "fontWeight": 400, "fontSize": 16, "lineHeight": 1.5 },
-        { "name": "body/small", "fontFamily": "Inter", "fontWeight": 400, "fontSize": 13, "lineHeight": 1.33 },
-        {
-          "name": "label/mono-default",
-          "fontFamily": "DM Mono",
-          "fontWeight": 400,
-          "fontSize": 13,
-          "lineHeight": 1.38
-        },
-        { "name": "label/mono-caps", "fontFamily": "DM Mono", "fontWeight": 500, "fontSize": 11, "lineHeight": 1.45 },
-        { "name": "label/mono-small", "fontFamily": "DM Mono", "fontWeight": 500, "fontSize": 10, "lineHeight": 1.4 }
+        { "name": "Display/Hero",       "fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 72, "lineHeight": "1.06em" },
+        { "name": "Display/Hero-Italic","fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 72, "lineHeight": "1.06em", "fontStyle": "italic" },
+        { "name": "Heading/1",          "fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 48, "lineHeight": "1.08em" },
+        { "name": "Heading/2",          "fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 32, "lineHeight": "1.125em", "confirmed": true },
+        { "name": "Heading/3",          "fontFamily": "Inter",            "fontWeight": 600, "fontSize": 24, "lineHeight": "1.25em" },
+        { "name": "Body/Large",         "fontFamily": "Inter",            "fontWeight": 400, "fontSize": 18, "lineHeight": "1.56em" },
+        { "name": "Body/Default",       "fontFamily": "Inter",            "fontWeight": 400, "fontSize": 16, "lineHeight": "1.5em",  "confirmed": true },
+        { "name": "Body/Small",         "fontFamily": "Inter",            "fontWeight": 400, "fontSize": 14, "lineHeight": "1.14em", "confirmed": true },
+        { "name": "Label/Mono-Default", "fontFamily": "DM Mono",          "fontWeight": 400, "fontSize": 13, "lineHeight": "1.38em" },
+        { "name": "Label/Mono-Caps",    "fontFamily": "DM Mono",          "fontWeight": 500, "fontSize": 11, "lineHeight": "1.45em" },
+        { "name": "Label/Mono-Small",   "fontFamily": "DM Mono",          "fontWeight": 500, "fontSize": 10, "lineHeight": "1.4em" }
       ]
     },
     "spacing": {
-      "scale": [4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80],
-      "system": "4px"
+      "scale": [4, 8, 10, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64],
+      "system": "4px base unit",
+      "confirmedGaps": ["8px (component internal)", "10px (search input gap)", "16px (header padding)", "28px (nav items gap)", "32px (user section gap)", "40px (navigation gap)"]
     },
     "radius": {
       "default": 2,
-      "pill": 999
+      "card": 8,
+      "pill": 999,
+      "note": "Screen frames confirmed at borderRadius: 8px"
     },
-    "shadows": {
-      "elevation-1": "0 1px 2px rgba(0,0,0,0.04)",
-      "elevation-2": "0 2px 8px rgba(0,0,0,0.08)"
+    "screenDimensions": {
+      "desktop": "1440×1080px",
+      "note": "All screens confirmed as 1440px wide, fixed sizing"
     }
   },
-  "assets": [
-    {
-      "name": "ZoomController",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Zoom Controller.svg",
-      "figmaNodeId": "50:1836",
-      "description": "Zoom in/out controls for the PDF viewer (+/− buttons + percentage label)."
-    },
-    {
-      "name": "PageController",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Page Controller.svg",
-      "figmaNodeId": "50:1837",
-      "description": "Page navigation controls for the PDF viewer (◀ N/total ▶)."
-    },
-    {
-      "name": "Logo",
-      "type": "image",
-      "format": "svg",
-      "path": ".agents/figma/components/Logo.svg",
-      "figmaNodeId": "28:56",
-      "description": "Logo institucional do projeto. Prefer local SVG when available."
-    },
-    {
-      "name": "Button",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Button.svg",
-      "figmaNodeId": "13:84",
-      "description": "Button visual assets (variants in Figma)."
-    },
-    {
-      "name": "Checkbox Input",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Checkbox Input.svg"
-    },
-    { "name": "Checkbox", "type": "asset", "format": "svg", "path": ".agents/figma/components/Checkbox.svg" },
-    { "name": "CloseButton", "type": "asset", "format": "svg", "path": ".agents/figma/components/CloseButton.svg" },
-    {
-      "name": "Comment",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Comment.svg",
-      "figmaNodeId": "13:136"
-    },
-    { "name": "Drag", "type": "asset", "format": "svg", "path": ".agents/figma/components/Drag.svg" },
-    {
-      "name": "Dropdown",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Dropdown.svg",
-      "figmaNodeId": "29:105"
-    },
-    {
-      "name": "Filter Section Header",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Filter Section Header.svg"
-    },
-    { "name": "Header", "type": "asset", "format": "svg", "path": ".agents/figma/components/Header.svg" },
-    { "name": "Info", "type": "asset", "format": "svg", "path": ".agents/figma/components/Info.svg" },
-    { "name": "Input-1", "type": "asset", "format": "svg", "path": ".agents/figma/components/Input-1.svg" },
-    {
-      "name": "Input",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Input.svg",
-      "figmaNodeId": "3:66"
-    },
-    {
-      "name": "MetricCard",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/MetricCard.svg",
-      "figmaNodeId": "13:145"
-    },
-    {
-      "name": "NavBar",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/NavBar.svg",
-      "figmaNodeId": "13:137"
-    },
-    {
-      "name": "Page Controller",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Page Controller.svg"
-    },
-    { "name": "Player", "type": "asset", "format": "svg", "path": ".agents/figma/components/Player.svg" },
-    {
-      "name": "Progress",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Progress.svg",
-      "figmaNodeId": "115:1296"
-    },
-    {
-      "name": "Radio box",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Radio box.svg",
-      "figmaNodeId": "102:564"
-    },
-    { "name": "RatingInfo", "type": "asset", "format": "svg", "path": ".agents/figma/components/RatingInfo.svg" },
-    { "name": "Reaction", "type": "asset", "format": "svg", "path": ".agents/figma/components/Reaction.svg" },
-    {
-      "name": "ReactionBar",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/ReactionBar.svg",
-      "figmaNodeId": "13:132"
-    },
-    {
-      "name": "ScriptCard",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/ScriptCard.svg",
-      "figmaNodeId": "3:51"
-    },
-    { "name": "Simple Info", "type": "asset", "format": "svg", "path": ".agents/figma/components/Simple Info.svg" },
-    {
-      "name": "StarRating",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/StarRating.svg",
-      "figmaNodeId": "13:133"
-    },
-    {
-      "name": "Tag",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Tag.svg",
-      "figmaNodeId": "13:95"
-    },
-    {
-      "name": "Zoom Controller",
-      "type": "asset",
-      "format": "svg",
-      "path": ".agents/figma/components/Zoom Controller.svg"
-    },
-    {
-      "name": "Frames: Components (PDF)",
-      "type": "frame",
-      "format": "pdf",
-      "path": ".agents/figma/frames/Components.pdf"
-    },
-    {
-      "name": "Frames: Components (PNG)",
-      "type": "frame",
-      "format": "png",
-      "path": ".agents/figma/frames/Components.png"
-    },
-    {
-      "name": "Frames: Foundations (PDF)",
-      "type": "frame",
-      "format": "pdf",
-      "path": ".agents/figma/frames/Foundations.pdf"
-    },
-    {
-      "name": "Frames: Foundations (PNG)",
-      "type": "frame",
-      "format": "png",
-      "path": ".agents/figma/frames/Foundations.png"
-    },
-    { "name": "Screen: Home (PDF)", "type": "screen", "format": "pdf", "path": ".agents/figma/screens/Home.pdf" },
-    { "name": "Screen: Home (PNG)", "type": "screen", "format": "png", "path": ".agents/figma/screens/Home.png" },
-    {
-      "name": "Screen: Filter Page (PDF)",
-      "type": "screen",
-      "format": "pdf",
-      "path": ".agents/figma/screens/Filter Page.pdf"
-    },
-    {
-      "name": "Screen: Filter Page (PNG)",
-      "type": "screen",
-      "format": "png",
-      "path": ".agents/figma/screens/Filter Page.png"
-    },
-    {
-      "name": "Screen: PDF Reader (PDF)",
-      "type": "screen",
-      "format": "pdf",
-      "path": ".agents/figma/screens/PDF Reader.pdf"
-    },
-    {
-      "name": "Screen: PDF Reader (PNG)",
-      "type": "screen",
-      "format": "png",
-      "path": ".agents/figma/screens/PDF Reader.png"
-    },
-    {
-      "name": "Screen: Search Sheet (PDF)",
-      "type": "screen",
-      "format": "pdf",
-      "path": ".agents/figma/screens/Search Sheet.pdf"
-    },
-    {
-      "name": "Screen: Search Sheet (PNG)",
-      "type": "screen",
-      "format": "png",
-      "path": ".agents/figma/screens/Search Sheet.png"
-    }
-  ],
+
   "components": [
     {
       "name": "Button",
       "type": "component",
       "figmaNodeId": "13:84",
-      "description": "Botão primário, secundário e ghost, com variantes de tamanho (sm, md, lg) e estados (default, hover, disabled)",
+      "description": "Primary, secondary, and ghost CTAs. Size variants SM/MD/LG.",
       "props": ["variant", "size", "disabled", "icon"],
       "variants": ["primary", "secondary", "ghost", "destructive"],
       "sizes": ["sm", "md", "lg"],
@@ -308,329 +74,421 @@
       "name": "Tag",
       "type": "component",
       "figmaNodeId": "13:95",
-      "description": "Tag de status, cor customizável, com opção de ícone.",
-      "props": ["color", "icon"],
-      "variants": [
-        "default",
-        "success",
-        "warning",
-        "error",
-        "crítico",
-        "importante",
-        "neutro",
-        "publicado",
-        "rascunho",
-        "privado",
-        "drama",
-        "thriller",
-        "comédia",
-        "type10",
-        "new"
-      ],
+      "description": "Semantic pill tags for genre, status, rating severity.",
+      "props": ["color", "icon", "label"],
+      "variants": ["default", "success", "warning", "error", "crítico", "importante", "neutro", "publicado", "rascunho", "privado", "drama", "thriller", "comédia"],
       "states": ["default"]
     },
     {
       "name": "Input",
       "type": "component",
       "figmaNodeId": "3:66",
-      "description": "Campo de input padrão, com label, placeholder, estado de erro e helper text.",
-      "props": ["label", "placeholder", "error", "helperText"],
+      "description": "Standard text input with label, placeholder, error and helper text.",
+      "props": ["label", "placeholder", "error", "helperText", "disabled"],
       "states": ["default", "focus", "error", "disabled"]
     },
     {
-      "name": "Card",
+      "name": "Input (form)",
       "type": "component",
-      "figmaNodeId": null,
-      "description": "Container com sombra, borda e padding, usado para agrupar conteúdo.",
-      "props": ["elevation", "bordered"],
-      "variants": ["default", "outlined"]
-    },
-    {
-      "name": "ReactionBar",
-      "type": "component",
-      "figmaNodeId": "13:132",
-      "description": "Barra de reações com ícones customizáveis. Precisa ser implementada como componente, não é asset pronto.",
-      "props": ["reactions", "selected"]
-    },
-    {
-      "name": "StarRating",
-      "type": "component",
-      "figmaNodeId": "13:133",
-      "description": "Componente de avaliação por estrelas, suporta seleção parcial. Precisa ser implementado como componente, não é asset pronto.",
-      "props": ["value", "max", "readOnly"]
-    },
-    {
-      "name": "Navigation",
-      "type": "component",
-      "figmaNodeId": "13:137",
-      "description": "Menu de navegação lateral ou superior, com suporte a ícones e badges. Precisa ser implementado como componente, não é asset pronto.",
-      "props": ["items", "active", "orientation"]
+      "figmaNodeId": "100:622",
+      "description": "Extended input variants used in the upload/publish flow (profile, tagline, description, etc.).",
+      "props": ["type", "placeholder", "value", "error", "helper"],
+      "variants": ["input-selected", "input-base", "input-profile", "input-tagline", "input-description"]
     },
     {
       "name": "ScriptCard",
       "type": "component",
-      "figmaNodeId": "3:51",
-      "description": "Card de script com hover states e metadados.",
-      "props": ["title", "author", "genre", "rating", "pages", "hover"],
+      "figmaNodeId": "48:644",
+      "description": "Card for a script in lists. Hover border brand-accent. Shows title, author, genre tag, star rating, page count.",
+      "props": ["title", "author", "genre", "rating", "pages", "coverUrl", "href", "onPreview"],
       "states": ["default", "hover"]
     },
     {
-      "name": "Comment",
+      "name": "Header",
       "type": "component",
-      "figmaNodeId": "13:136",
-      "description": "Item de comentário com avatar, autor e conteúdo.",
-      "props": ["author", "avatar", "content", "time", "reply"],
-      "variants": ["root", "simple", "reply"]
-    },
-    {
-      "name": "MetricCard",
-      "type": "component",
-      "figmaNodeId": "13:145",
-      "description": "Card de métricas com valores e variação percentual.",
-      "props": ["title", "value", "variation", "color"],
-      "variants": ["positive", "negative", "neutral"]
-    },
-    {
-      "name": "Dropdown",
-      "type": "component",
-      "figmaNodeId": "29:105",
-      "description": "Dropdown menu com opções e seta.",
-      "props": ["options", "selected", "placeholder"]
-    },
-    {
-      "name": "Radio box",
-      "type": "component",
-      "figmaNodeId": "102:564",
-      "description": "Radio button com estados on/off e conteúdo customizável.",
-      "props": ["label", "value", "checked", "content"]
-    },
-    {
-      "name": "Drag",
-      "type": "component",
-      "figmaNodeId": "100:1303",
-      "description": "Área de drag and drop para upload de arquivos.",
-      "props": ["type", "files", "uploaded"],
-      "variants": ["file", "audio", "variant4"]
-    },
-    {
-      "name": "Progress",
-      "type": "component",
-      "figmaNodeId": "115:1296",
-      "description": "Indicador de progresso com etapas.",
-      "props": ["current", "total", "completed"]
-    },
-    {
-      "name": "Info",
-      "type": "component",
-      "figmaNodeId": "48:905",
-      "description": "Card de informações com título e conteúdo.",
-      "props": ["title", "content"],
-      "variants": ["default", "simple"]
-    },
-    {
-      "name": "Input (extended)",
-      "type": "component",
-      "figmaNodeId": "100:622",
-      "description": "Várias variações de input com diferentes propósitos.",
-      "props": ["type", "placeholder", "value", "error", "helper"],
-      "variants": ["input-selected", "input-base", "input-profile", "input-tagline", "input-description"]
+      "figmaNodeId": "50:1747",
+      "description": "Top navigation bar. Contains Logo, nav links, search input, and Avatar/auth actions.",
+      "props": ["user", "activePath"],
+      "slots": ["logo", "navItems", "searchInput", "userSection"]
     },
     {
       "name": "Avatar",
       "type": "component",
       "figmaNodeId": "38:115",
-      "description": "User avatar with circular crop, initials fallback, and optional status badge. Used in comments sidebar and profile pages.",
-      "props": ["src", "name", "size", "status"],
+      "description": "Circular user avatar with image or initials fallback. Used in Header, comments, profile.",
+      "props": ["src", "name", "size"],
       "sizes": ["sm", "md", "lg"],
-      "states": ["default", "online", "offline"]
+      "states": ["default"]
     },
     {
       "name": "RatingBox",
       "type": "component",
       "figmaNodeId": "38:123",
-      "description": "Container da avaliação na página do roteiro; inclui StarRating e mostra média numérica e total de avaliações.",
+      "description": "Star rating + numeric average + total count container. Used in ScriptCard hover and Modal/Roteiro.",
       "props": ["average", "total", "readOnly"],
-      "states": ["default", "readonly", "interactive"],
-      "layout": {
-        "height": 29,
-        "padding": 6,
-        "gap": 6
-      },
+      "layout": { "height": 29, "padding": 6, "gap": 6 },
       "tokenMapping": {
         "background": "bg/elevated",
         "border": "border/default",
         "stars": "brand/accent",
         "ratingText": "text/secondary"
-      },
-      "typography": {
-        "stars": { "fontFamily": "Inter", "fontWeight": 400, "fontSize": 14, "lineHeight": 1.21 },
-        "rating": { "fontFamily": "Inter", "fontWeight": 400, "fontSize": 12, "lineHeight": 1.21 }
       }
+    },
+    {
+      "name": "FollowButton",
+      "type": "component",
+      "figmaNodeId": "38:119",
+      "description": "Follow/Unfollow toggle button for authors. States: default (follow) and following.",
+      "props": ["following", "onToggle"],
+      "variants": ["default", "expanded"],
+      "states": ["default", "following"]
+    },
+    {
+      "name": "RatingInfo",
+      "type": "component",
+      "figmaNodeId": "48:920",
+      "description": "Ratings summary shown in Modal/Roteiro: aggregate star breakdown.",
+      "props": ["ratings", "average", "total"]
+    },
+    {
+      "name": "Comment",
+      "type": "component",
+      "figmaNodeId": "13:136",
+      "description": "Comment item with avatar, author name, timestamp, content, and optional page anchor.",
+      "props": ["author", "avatar", "content", "time", "pageNumber", "reply"],
+      "variants": ["root", "simple", "reply"]
+    },
+    {
+      "name": "ReactionBar",
+      "type": "component",
+      "figmaNodeId": "13:132",
+      "description": "Row of reaction emoji buttons shown in the PDF reader sidebar for page-level reactions.",
+      "props": ["reactions", "selected", "onSelect"]
+    },
+    {
+      "name": "Reaction",
+      "type": "component",
+      "figmaNodeId": "13:114",
+      "description": "Single emoji reaction pill with count. Used inside ReactionBar.",
+      "props": ["emoji", "count", "selected"]
+    },
+    {
+      "name": "Player",
+      "type": "component",
+      "figmaNodeId": "50:1915",
+      "description": "Audio player component shown in PDF Reader sidebar. Play/pause, progress, track info.",
+      "props": ["src", "title", "duration", "onPlay", "onPause"]
+    },
+    {
+      "name": "Zoom Controller",
+      "type": "component",
+      "figmaNodeId": "50:1836",
+      "description": "Zoom in/out controls for the PDF viewer (+/− buttons + percentage label).",
+      "props": ["zoom", "onZoomIn", "onZoomOut", "onReset"]
+    },
+    {
+      "name": "Page Controller",
+      "type": "component",
+      "figmaNodeId": "50:1837",
+      "description": "Page navigation (◀ N/total ▶) for the PDF viewer.",
+      "props": ["currentPage", "totalPages", "onPrev", "onNext"]
+    },
+    {
+      "name": "Filter Section Header",
+      "type": "component",
+      "figmaNodeId": "48:1122",
+      "description": "Collapsible section header used in the Search Sheet filter panel.",
+      "props": ["label", "expanded", "onToggle"]
+    },
+    {
+      "name": "Checkbox",
+      "type": "component",
+      "figmaNodeId": "48:1107",
+      "description": "Checkbox with label, used in filter panels and categorization step.",
+      "props": ["label", "checked", "onChange"]
+    },
+    {
+      "name": "Checkbox Input",
+      "type": "component",
+      "figmaNodeId": "48:1094",
+      "description": "Checkbox input variant for filter search with inline text input.",
+      "props": ["label", "checked", "value", "onChange"]
+    },
+    {
+      "name": "Radio box",
+      "type": "component",
+      "figmaNodeId": "102:564",
+      "description": "Radio button with label and optional description content.",
+      "props": ["label", "value", "checked", "description"]
+    },
+    {
+      "name": "Drag",
+      "type": "component",
+      "figmaNodeId": "100:1303",
+      "description": "Drag-and-drop upload zone. Variants for PDF and audio file types.",
+      "props": ["accept", "files", "uploaded", "onDrop"],
+      "variants": ["file", "audio"]
+    },
+    {
+      "name": "Progress",
+      "type": "component",
+      "figmaNodeId": "115:1296",
+      "description": "Step indicator for the multi-step upload wizard. Shows completed/active/pending steps.",
+      "props": ["current", "total", "steps"]
+    },
+    {
+      "name": "MetricCard",
+      "type": "component",
+      "figmaNodeId": "13:145",
+      "description": "Dashboard metric tile with title, value, and trend indicator.",
+      "props": ["title", "value", "variation", "color"],
+      "variants": ["positive", "negative", "neutral"]
+    },
+    {
+      "name": "Simple Info",
+      "type": "component",
+      "figmaNodeId": "48:797",
+      "description": "Compact info row with icon, label and value. Used in Modal/Roteiro sidebar.",
+      "props": ["label", "value", "icon"]
+    },
+    {
+      "name": "Info",
+      "type": "component",
+      "figmaNodeId": "48:905",
+      "description": "Info card with title and body content. Two variants: default (with border) and simple.",
+      "props": ["title", "content"],
+      "variants": ["default", "simple"]
+    },
+    {
+      "name": "CloseButton",
+      "type": "component",
+      "figmaNodeId": "48:851",
+      "description": "Icon-only close/dismiss button. Used in overlays and modals.",
+      "props": ["onClick", "size"]
+    },
+    {
+      "name": "Logo",
+      "type": "image",
+      "figmaNodeId": "44:252",
+      "description": "Antes da Tela wordmark / logotype SVG."
     }
   ],
+
   "guidelines": {
     "usage": {
-      "spacing": "Utilize a escala de espaçamento definida para margens e paddings.",
-      "grid": "Use grid de 12 colunas para layouts desktop, 4 colunas para mobile.",
-      "breakpoints": [375, 768, 1280],
-      "containerMaxWidths": {
-        "sm": 540,
-        "md": 720,
-        "lg": 960,
-        "xl": 1140
-      },
-      "sidebar": "880px PDF + 400px sidebar (desktop) | Stacked (mobile)"
+      "spacing": "Use the 4px-base scale. Confirmed gaps from Figma: 8px (internal component), 16px (section padding), 28px (nav items), 32px (section gap), 40px (large layout gap).",
+      "grid": "12-column grid for desktop layouts, 4 columns for mobile.",
+      "breakpoints": [375, 768, 1440],
+      "containerMaxWidth": 1440,
+      "screenSize": "All screens designed at 1440×1080px desktop-first.",
+      "sidebar": "PDF Reader: ~880px content + ~400px sidebar (desktop) | stacked on mobile."
     },
     "bestPractices": {
       "do": [
-        "Mantenha consistência de cores e tipografia.",
-        "Use espaçamentos e grids do sistema.",
-        "Aplique estados visuais claros para feedback.",
-        "Use brand/accent (#E85C2F) somente para ações primárias e destaques.",
-        "Use DM Mono para labels, tokens, metadados e dados técnicos.",
-        "Bordas com 1px solid #252525 para delimitar áreas de superfície.",
-        "Mínimo 44px de área de toque para elementos interativos."
+        "Use brand/accent (#E85C2F) only for primary CTAs and active states — one per context.",
+        "Use DM Mono for all numerical metadata, page counts, ratings, and code-like labels.",
+        "Use DM Serif Display for headings and display copy.",
+        "Use bg/surface (#161616) for the Header and elevated containers.",
+        "Use 1px solid #252525 (border/default) for card and input borders.",
+        "Minimum 44px touch target for all interactive elements.",
+        "Resolve PDF URLs server-side and pass as prop — never call getPublicUrl client-side."
       ],
       "dont": [
-        "Não crie novos estilos fora dos tokens definidos.",
-        "Evite misturar fontes ou pesos não previstos.",
-        "Não altere o raio de borda padrão sem motivo.",
-        "Não use accent em múltiplos elementos — perde o impacto visual.",
-        "Não use DM Mono em parágrafos longos — prejudica legibilidade.",
-        "Não use box-shadow em dark mode — use border-contrast em vez disso.",
-        "Não use elementos clicáveis menores que 32px em mobile."
+        "Do not use color values outside the confirmed palette.",
+        "Do not use DM Mono in long body paragraphs.",
+        "Do not use box-shadow in dark mode — use border tokens instead.",
+        "Do not use accent color on multiple sibling elements.",
+        "Do not use .select('*') across the RSC boundary — select only columns the client renders."
       ]
     }
   },
+
   "exportContext": {
     "cssVars": {
-      "--color-bg-base": "0 0% 5%",
-      "--color-bg-surface": "0 0% 9%",
-      "--color-bg-elevated": "0 0% 12%",
-      "--color-border-subtle": "0 0% 14%",
-      "--color-border-default": "0 0% 20%",
-      "--color-text-primary": "42 25% 92%",
-      "--color-text-secondary": "34 5% 70%",
-      "--color-text-muted": "43 5% 40%",
-      "--color-brand-accent": "15 80% 55%",
-      "--color-brand-lime": "78 71% 69%",
-      "--color-state-error": "0 84% 60%",
-      "--color-state-success": "150 52% 49%",
-      "--color-state-warning": "45 91% 56%"
+      "--color-bg-base":        "0 0% 5.5%",
+      "--color-bg-surface":     "0 0% 8.6%",
+      "--color-bg-elevated":    "0 0% 11.8%",
+      "--color-border-subtle":  "0 0% 20.4%",
+      "--color-border-default": "0 0% 14.5%",
+      "--color-text-primary":   "42 20% 92%",
+      "--color-text-secondary": "40 3% 69%",
+      "--color-text-muted":     "36 4% 40%",
+      "--color-brand-accent":   "15 79% 55%",
+      "--color-brand-lime":     "78 71% 69%",
+      "--color-state-error":    "0 84% 60%",
+      "--color-state-success":  "150 52% 49%",
+      "--color-state-warning":  "45 87% 59%"
     },
     "tailwindMapping": {
-      "bg/base": "bg-base",
-      "bg/surface": "surface",
-      "bg/elevated": "elevated",
-      "text/primary": "text-primary",
-      "brand/accent": "brand-accent",
+      "bg/base":       "bg-base",
+      "bg/surface":    "surface",
+      "bg/elevated":   "elevated",
+      "text/primary":  "text-primary",
+      "text/muted":    "text-muted",
+      "brand/accent":  "brand-accent",
+      "brand/lime":    "brand-lime",
       "state/success": "state-success",
-      "state/error": "state-error",
-      "state/warning": "state-warning"
+      "state/error":   "state-error"
     },
     "componentAudit": [
       {
         "name": "Button",
         "status": "partial",
-        "notes": "Primary implemented; need ghost and destructive variants, icon alignment, and size tokens (sm/md/lg). Map variants to `variant` prop and sizes to `size` prop.",
+        "notes": "Primary implemented. Ghost and destructive variants missing. Need size tokens (sm/md/lg) and icon slot.",
         "priority": "high",
-        "figmaNodeId": "13:84",
-        "suggestedProps": ["variant", "size", "disabled", "icon"]
+        "figmaNodeId": "13:84"
       },
       {
         "name": "Tag",
         "status": "partial",
-        "notes": "Many semantic variants in Figma; implement core variants first (default, success, warning, error, draft, published). Provide color prop mapping to design tokens.",
+        "notes": "Core variants (default, error, warning) exist. Genre and status-specific variants (drama, thriller, publicado, rascunho) need adding.",
         "priority": "medium",
         "figmaNodeId": "13:95"
       },
       {
         "name": "Input",
         "status": "partial",
-        "notes": "Extend existing Input to support helperText and error state UI. Ensure focus ring uses brand accent token.",
+        "notes": "Base input exists. Needs helperText support, error state UI, and focus ring using brand/accent token.",
         "priority": "high",
         "figmaNodeId": "3:66"
       },
       {
-        "name": "ScriptCard",
-        "status": "implemented",
-        "notes": "Implemented at components/ui/script-card.tsx. Supports href (renders as <a>) or div with onPreview callback (opens ScriptPreviewModal), hover border brand-accent, metadata layout (genre/title/author/pages/rating). onPreview prop adds role=button, tabIndex=0, and keyboard handler. No cover image yet — Figma shows editorial cover images which require script.cover_url data.",
-        "priority": "medium",
-        "figmaNodeId": "3:51"
+        "name": "Header",
+        "status": "partial",
+        "notes": "Implemented as components/navbar.tsx. Missing: active link highlighting, search input integration, mobile collapse. figmaNodeId corrected to 50:1747 (was 13:137).",
+        "priority": "high",
+        "figmaNodeId": "50:1747",
+        "implementedAt": "components/navbar.tsx"
       },
       {
-        "name": "ScriptPreviewModal",
-        "status": "implemented",
-        "notes": "Implemented at components/script-preview-modal/script-preview-modal.tsx. 2-column layout (left sidebar: cover placeholder/metadata/CTA, right: content). Figma nodeId 51:718 (Modal/Roteiro). Aligns with: heading/1 title, brand-accent LOGLINE/SINOPSE labels, blockquote logline with left border, author+rating on same row, genre/age_rating Tag pills row, metadata sidebar (Gênero/Páginas/Publicado). Deferred: cover thumbnail, audio player, metrics row (Leituras/Comentários/Lidos), Seguir button — require additional data/features not available in POC.",
+        "name": "ScriptCard",
+        "status": "partial",
+        "notes": "Implemented at components/ui/script-card.tsx. figmaNodeId corrected to 48:644 (was 3:51). Cover image still missing — requires script.cover_url data.",
+        "priority": "medium",
+        "figmaNodeId": "48:644",
+        "implementedAt": "components/ui/script-card.tsx"
+      },
+      {
+        "name": "Modal/Roteiro (ScriptPreviewModal)",
+        "status": "partial",
+        "notes": "Implemented at components/script-preview-modal/. Deferred: cover thumbnail, audio Player component, full RatingInfo breakdown, FollowButton.",
         "priority": "medium",
         "figmaNodeId": "51:718",
-        "suggestedProps": ["scriptId", "open", "onOpenChange"],
-        "regression_audit": { "status": "auto-applied", "compared_tasks": ["poc-10", "poc-09", "poc-08"], "risk": "low" }
-      },
-      {
-        "name": "ReactionBar",
-        "status": "missing",
-        "notes": "Functional component required for commenting UX; needs accessible buttons and keyboard navigation.",
-        "priority": "medium",
-        "figmaNodeId": "13:132"
-      },
-      {
-        "name": "StarRating",
-        "status": "partial",
-        "notes": "Visual exists but needs interactivity and partial star selection. Use accessible ARIA roles.",
-        "priority": "medium",
-        "figmaNodeId": "13:133"
-      },
-      {
-        "name": "Navigation",
-        "status": "partial",
-        "notes": "Implemented as NavBar at components/navbar.tsx (figmaNodeId 13:137). Has logo SVG, Home link, Publicar CTA, AuthButton. Missing: active link state, mobile collapse/hamburger, Roteiros nav link.",
-        "priority": "medium",
-        "figmaNodeId": "13:137"
-      },
-      {
-        "name": "Comment",
-        "status": "partial",
-        "notes": "Variants: root, simple, reply. Ensure avatar sizing tokens and reply nesting.",
-        "priority": "medium",
-        "figmaNodeId": "13:136"
-      },
-      {
-        "name": "MetricCard",
-        "status": "missing",
-        "notes": "Metrics used in admin/dashboard; implement positive/negative/neutral variants with color token mapping.",
-        "priority": "low",
-        "figmaNodeId": "13:145"
-      },
-      {
-        "name": "ZoomController",
-        "status": "implemented",
-        "notes": "Inline implementation in pdf-viewer.tsx; uses bg-elevated, border-border-subtle, font-mono tokens. No standalone component file — inline in PDFViewerInner.",
-        "priority": "low",
-        "figmaNodeId": "50:1836"
-      },
-      {
-        "name": "PageController",
-        "status": "implemented",
-        "notes": "Inline implementation in pdf-viewer.tsx; shares sticky controls bar with ZoomController. aria-label on each button.",
-        "priority": "low",
-        "figmaNodeId": "50:1837"
+        "implementedAt": "components/script-preview-modal/script-preview-modal.tsx"
       },
       {
         "name": "Avatar",
         "status": "partial",
-        "notes": "Inline initials-fallback div used in comments-sidebar.tsx (w-8 h-8, bg-brand-accent/20). No standalone Avatar component yet. Needs extracting before poc-07 (profile page).",
-        "priority": "medium",
-        "figmaNodeId": "38:115",
-        "suggestedProps": ["src", "name", "size"]
+        "notes": "Inline initials fallback in comments-sidebar.tsx. Needs extraction to standalone Avatar component before profile page work.",
+        "priority": "high",
+        "figmaNodeId": "38:115"
+      },
+      {
+        "name": "FollowButton",
+        "status": "missing",
+        "notes": "NEW — not implemented. Used on Home (author cards), Modal/Roteiro, and Perfil-Usuario. Toggle between follow/following states.",
+        "priority": "high",
+        "figmaNodeId": "38:119"
       },
       {
         "name": "RatingBox",
         "status": "partial",
-        "notes": "Container used in the script page for StarRating + numeric average display. Figma layout: height 29px, padding 6px, gap 6px. Token mapping: background->bg/elevated, border->border/default, stars->brand/accent, rating text->text/secondary. Implement as a reusable component wrapping StarRating and average/total metadata.",
+        "notes": "Inline in script-card.tsx. Should be a reusable RatingBox component wrapping StarRating + numeric average.",
         "priority": "high",
-        "figmaNodeId": "38:123",
-        "suggestedProps": ["average", "total", "readOnly"]
+        "figmaNodeId": "38:123"
+      },
+      {
+        "name": "RatingInfo",
+        "status": "missing",
+        "notes": "NEW — not implemented. Ratings breakdown panel used in Modal/Roteiro.",
+        "priority": "medium",
+        "figmaNodeId": "48:920"
+      },
+      {
+        "name": "Comment",
+        "status": "partial",
+        "notes": "Exists in PDF reader sidebar. Needs avatar, page-anchor label, and reply nesting.",
+        "priority": "medium",
+        "figmaNodeId": "13:136"
+      },
+      {
+        "name": "ReactionBar",
+        "status": "missing",
+        "notes": "NOT implemented. Required for PDF reader sidebar UX.",
+        "priority": "medium",
+        "figmaNodeId": "13:132"
+      },
+      {
+        "name": "Reaction",
+        "status": "missing",
+        "notes": "NEW — single emoji reaction pill. Child of ReactionBar.",
+        "priority": "medium",
+        "figmaNodeId": "13:114"
+      },
+      {
+        "name": "Player",
+        "status": "missing",
+        "notes": "NEW — audio player in PDF Reader sidebar. Needs play/pause, progress bar, track info.",
+        "priority": "medium",
+        "figmaNodeId": "50:1915"
+      },
+      {
+        "name": "Zoom Controller",
+        "status": "implemented",
+        "notes": "Inline in pdf-viewer.tsx. Consider extracting to standalone component.",
+        "priority": "low",
+        "figmaNodeId": "50:1836",
+        "implementedAt": "components/pdf-viewer/pdf-viewer.tsx (inline)"
+      },
+      {
+        "name": "Page Controller",
+        "status": "implemented",
+        "notes": "Inline in pdf-viewer.tsx alongside ZoomController.",
+        "priority": "low",
+        "figmaNodeId": "50:1837",
+        "implementedAt": "components/pdf-viewer/pdf-viewer.tsx (inline)"
+      },
+      {
+        "name": "Progress",
+        "status": "missing",
+        "notes": "Upload wizard step indicator. Needed before /publish flow implementation.",
+        "priority": "high",
+        "figmaNodeId": "115:1296"
+      },
+      {
+        "name": "Drag",
+        "status": "partial",
+        "notes": "DragZone exists. Needs PDF and audio variants per Figma (file vs audio types).",
+        "priority": "high",
+        "figmaNodeId": "100:1303"
+      },
+      {
+        "name": "MetricCard",
+        "status": "missing",
+        "notes": "Required for Dashboard-Autor screen. Positive/negative/neutral variants with trend indicator.",
+        "priority": "medium",
+        "figmaNodeId": "13:145"
+      },
+      {
+        "name": "Filter Section Header",
+        "status": "missing",
+        "notes": "Collapsible header used in Search Sheet filter panel.",
+        "priority": "low",
+        "figmaNodeId": "48:1122"
+      },
+      {
+        "name": "Checkbox",
+        "status": "partial",
+        "notes": "shadcn Checkbox installed. Needs wrapping with label for filter use.",
+        "priority": "low",
+        "figmaNodeId": "48:1107"
+      },
+      {
+        "name": "Radio box",
+        "status": "missing",
+        "notes": "Used in Categorização step of upload flow.",
+        "priority": "medium",
+        "figmaNodeId": "102:564"
       }
     ],
     "screens": [
@@ -638,42 +496,104 @@
         "name": "Home",
         "route": "/",
         "figmaNodeId": "51:562",
-        "requiredComponents": ["NavBar", "ScriptCard", "Tag", "StarRating", "MetricCard"],
-        "status": "implemented"
+        "section": "Fluxo principal",
+        "requiredComponents": ["Header", "ScriptCard", "Tag", "RatingBox", "Avatar", "Input", "Button", "FollowButton"],
+        "status": "partial",
+        "notes": "Basic listing implemented. Missing: FollowButton on author cards, search input in Header, RatingBox as standalone component."
       },
       {
         "name": "Modal/Roteiro",
         "route": "/ (overlay)",
         "figmaNodeId": "51:718",
-        "requiredComponents": ["Dialog", "StarRating", "Tag", "Skeleton"],
-        "status": "implemented",
-        "deferred": ["cover thumbnail", "audio player", "metrics row", "Seguir button"]
+        "section": "Fluxo principal",
+        "requiredComponents": ["Button", "CloseButton", "Tag", "Comment", "Avatar", "FollowButton", "RatingInfo"],
+        "status": "partial",
+        "deferred": ["cover thumbnail", "Player (audio)", "RatingInfo breakdown", "FollowButton"],
+        "implementedAt": "components/script-preview-modal/script-preview-modal.tsx"
+      },
+      {
+        "name": "Search Sheet",
+        "route": "/ (bottom sheet)",
+        "figmaNodeId": "51:820",
+        "section": "Fluxo principal",
+        "requiredComponents": ["Input", "Filter Section Header", "Checkbox", "Checkbox Input", "Button"],
+        "status": "missing"
+      },
+      {
+        "name": "Filter Page",
+        "route": "/filter",
+        "figmaNodeId": "51:930",
+        "section": "Fluxo principal",
+        "requiredComponents": ["Header", "Avatar", "Input", "ScriptCard", "Button"],
+        "status": "missing"
       },
       {
         "name": "PDF Reader",
         "route": "/scripts/[id]",
         "figmaNodeId": "51:1007",
-        "requiredComponents": ["PDFViewer", "ReactionBar", "Comment", "NavBar"]
+        "section": "Fluxo principal",
+        "requiredComponents": ["Header", "Avatar", "Page Controller", "Zoom Controller", "Player", "ReactionBar", "Reaction", "Comment", "Button"],
+        "status": "partial",
+        "notes": "PDFViewer implemented. Missing: Player, ReactionBar, Reaction components. Comments sidebar partially done."
       },
       {
-        "name": "Publish Flow",
+        "name": "Upload / Informações Básicas",
         "route": "/publish",
         "figmaNodeId": "115:1008",
-        "requiredComponents": ["Drag", "Input", "Dropdown", "Progress"]
+        "section": "Fluxo de cadastro de roteiro",
+        "requiredComponents": ["Header", "Avatar", "Input", "Input (form)", "Button", "Progress"],
+        "status": "partial",
+        "notes": "Basic form exists. Missing: Progress step indicator, correct Input (form) variants."
+      },
+      {
+        "name": "Upload / Arquivos",
+        "route": "/publish (step 2)",
+        "figmaNodeId": "115:1075",
+        "section": "Fluxo de cadastro de roteiro",
+        "requiredComponents": ["Header", "Avatar", "Drag", "Button", "Progress"],
+        "status": "partial",
+        "notes": "DragZone exists but audio variant missing."
+      },
+      {
+        "name": "Upload / Categorização",
+        "route": "/publish (step 3)",
+        "figmaNodeId": "125:1430",
+        "section": "Fluxo de cadastro de roteiro",
+        "requiredComponents": ["Header", "Avatar", "Input", "Checkbox", "Button", "Progress"],
+        "status": "missing"
+      },
+      {
+        "name": "Upload / Revisar",
+        "route": "/publish (step 4)",
+        "figmaNodeId": "128:1691",
+        "section": "Fluxo de cadastro de roteiro",
+        "requiredComponents": ["Header", "Avatar", "Button", "Progress"],
+        "status": "missing"
+      },
+      {
+        "name": "Perfil do Usuário",
+        "route": "/profile/[username]",
+        "figmaNodeId": "186:1834",
+        "section": "Perfil do usuário",
+        "requiredComponents": ["Header", "Avatar", "Button", "FollowButton", "ScriptCard", "Tag", "RatingBox"],
+        "status": "missing"
+      },
+      {
+        "name": "Editar Perfil",
+        "route": "/profile/edit",
+        "figmaNodeId": "186:1907",
+        "section": "Perfil do usuário",
+        "requiredComponents": ["Header", "Avatar", "Input", "Button"],
+        "status": "missing"
+      },
+      {
+        "name": "Dashboard do Autor",
+        "route": "/dashboard",
+        "figmaNodeId": "186:1963",
+        "section": "Perfil do usuário",
+        "requiredComponents": ["Header", "Avatar", "MetricCard", "ScriptCard", "Tag"],
+        "status": "missing"
       }
-    ],
-    "mcp_instructions": {
-      "note": "Recommended Framelink MCP export steps to minimize payload and be performant.",
-      "commands": [
-        "get_metadata(fileKey=\"iUb8odefGSZiHz4KjuzX1M\", nodeId=\"0:1\")",
-        "for each component nodeId run get_design_context(fileKey=\"iUb8odefGSZiHz4KjuzX1M\", nodeId=\":nodeId\")",
-        "get_screenshot(fileKey=\"iUb8odefGSZiHz4KjuzX1M\", nodeId=\":nodeId\")"
-      ],
-      "performanceTips": [
-        "Fetch metadata first and then request individual child nodes instead of the whole page.",
-        "Request screenshots at component-level (not full page) to keep payload small.",
-        "Download only assets referenced by components (avoid entire page image export)."
-      ]
-    }
+    ]
   }
 }
