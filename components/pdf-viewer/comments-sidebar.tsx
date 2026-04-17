@@ -22,15 +22,10 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
     trpc.comments.list.queryOptions({ scriptId, pageNumber: currentPage }),
   )
 
-  const createComment = useMutation({
-    ...trpc.comments.create.mutationOptions(),
-    onSuccess: () => {
-      void queryClient.invalidateQueries(
-        trpc.comments.list.queryOptions({ scriptId, pageNumber: currentPage }),
-      )
-      setContent('')
-    },
-  })
+  // Mutation without a global onSuccess — page is captured at submit time to avoid
+  // stale closure: if the user navigates to a different page while the request is
+  // in-flight, we still invalidate the page where the comment was actually posted.
+  const createComment = useMutation(trpc.comments.create.mutationOptions())
 
   return (
     <aside className='flex flex-col gap-4 w-full lg:w-[400px] shrink-0 bg-surface border-l border-border-subtle p-5 min-h-full'>
@@ -74,7 +69,20 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
             e.preventDefault()
             const trimmed = content.trim()
             if (!trimmed) return
-            createComment.mutate({ scriptId, pageNumber: currentPage, content: trimmed })
+            // Capture pageNumber now so the invalidation targets the submitted page,
+            // not whatever page the user has navigated to by the time onSuccess fires.
+            const submittedPage = currentPage
+            createComment.mutate(
+              { scriptId, pageNumber: submittedPage, content: trimmed },
+              {
+                onSuccess: () => {
+                  void queryClient.invalidateQueries(
+                    trpc.comments.list.queryOptions({ scriptId, pageNumber: submittedPage }),
+                  )
+                  setContent('')
+                },
+              },
+            )
           }}
           className='flex flex-col gap-2 border-t border-border-subtle pt-4'
         >

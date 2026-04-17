@@ -83,7 +83,11 @@ export const scriptsRouter = createTRPCRouter({
   getById: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input, ctx }) => {
     const { data: script } = await ctx.supabase
       .from('scripts')
-      .select('*, script_files(*), author:users!author_id(id, name, image)')
+      .select(
+        'id, title, logline, synopsis, genre, age_rating, is_featured, published_at,' +
+        ' script_files(id, storage_path, page_count, file_size),' +
+        ' author:users!author_id(id, name, image)',
+      )
       .eq('id', input.id)
       .maybeSingle()
 

@@ -1,8 +1,11 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import type { PDFDocumentProxy, PDFPageProxy, PageViewport } from 'pdfjs-dist'
 import { useCallback, useEffect, useRef } from 'react'
 import { usePDFViewerStore } from './pdf-viewer-store'
+
+type PdfjsLib = typeof import('pdfjs-dist')
 
 interface PDFViewerProps {
   url: string
@@ -10,55 +13,92 @@ interface PDFViewerProps {
 
 export function PDFViewerInner({ url }: PDFViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  // Cache the loaded PDF document so page/zoom changes don't re-fetch
-  const pdfDocRef = useRef<{ getPage: (n: number) => Promise<unknown>; numPages: number } | null>(null)
+  const canvasWrapperRef = useRef<HTMLDivElement>(null)
+  const textLayerRef = useRef<HTMLDivElement>(null)
+  const pdfDocRef = useRef<PDFDocumentProxy | null>(null)
   const renderTaskRef = useRef<{ cancel: () => void } | null>(null)
+  const textLayerTaskRef = useRef<{ cancel: () => void } | null>(null)
+  const pdfjsRef = useRef<PdfjsLib | null>(null)
+  const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const { currentPage, totalPages, zoom, isLoading, setTotalPages, setLoading, setCurrentPage } =
-    usePDFViewerStore()
+  const { currentPage, totalPages, zoom, isLoading, setTotalPages, setLoading, setCurrentPage } = usePDFViewerStore()
 
-  const renderPage = useCallback(
-    async (pageNum: number, scale: number) => {
-      if (!canvasRef.current || !pdfDocRef.current) return
+  const renderPage = useCallback(async (pageNum: number, userZoom: number) => {
+    if (!canvasRef.current || !canvasWrapperRef.current || !pdfDocRef.current || !pdfjsRef.current) return
 
-      // Cancel any in-progress render before starting a new one
-      if (renderTaskRef.current) {
-        renderTaskRef.current.cancel()
-        renderTaskRef.current = null
-      }
+    if (renderTaskRef.current) {
+      renderTaskRef.current.cancel()
+      renderTaskRef.current = null
+    }
+    if (textLayerTaskRef.current) {
+      textLayerTaskRef.current.cancel()
+      textLayerTaskRef.current = null
+    }
 
-      const page = await pdfDocRef.current.getPage(pageNum)
-      const typedPage = page as {
-        getViewport: (opts: { scale: number }) => { width: number; height: number }
-        render: (opts: { canvasContext: CanvasRenderingContext2D; viewport: unknown }) => {
-          promise: Promise<void>
-          cancel: () => void
-        }
-      }
+    const page = (await pdfDocRef.current.getPage(pageNum)) as PDFPageProxy
 
-      const viewport = typedPage.getViewport({ scale })
-      const canvas = canvasRef.current
-      canvas.width = viewport.width
-      canvas.height = viewport.height
+    // Compute fit-to-width scale, then apply user zoom on top
+    const naturalViewport = page.getViewport({ scale: 1 }) as PageViewport
+    const containerWidth = canvasWrapperRef.current.clientWidth || naturalViewport.width
+    const baseScale = containerWidth / naturalViewport.width
+    const scale = baseScale * userZoom
 
-      const context = canvas.getContext('2d')
-      if (!context) return
+    const viewport = page.getViewport({ scale }) as PageViewport
+    const canvas = canvasRef.current
+    const outputScale = window.devicePixelRatio || 1
 
-      const renderTask = typedPage.render({ canvasContext: context, viewport })
-      renderTaskRef.current = renderTask
+    canvas.width = Math.floor(viewport.width * outputScale)
+    canvas.height = Math.floor(viewport.height * outputScale)
+    canvas.style.width = `${Math.floor(viewport.width)}px`
+    canvas.style.height = `${Math.floor(viewport.height)}px`
+
+    const context = canvas.getContext('2d')
+    if (!context) return
+
+    if (typeof context.resetTransform === 'function') {
+      context.resetTransform()
+    } else {
+      context.setTransform(1, 0, 0, 1, 0, 0)
+    }
+    context.setTransform(outputScale, 0, 0, outputScale, 0, 0)
+    context.clearRect(0, 0, canvas.width, canvas.height)
+
+    const renderTask = page.render({ canvasContext: context, viewport, canvas })
+    renderTaskRef.current = renderTask
+
+    try {
+      await renderTask.promise
+    } catch {
+      return
+    } finally {
+      renderTaskRef.current = null
+    }
+
+    // Text layer — enables text selection over the canvas
+    if (textLayerRef.current) {
+      const container = textLayerRef.current
+      container.innerHTML = ''
+      container.style.width = `${Math.floor(viewport.width)}px`
+      container.style.height = `${Math.floor(viewport.height)}px`
 
       try {
-        await renderTask.promise
+        const tl = new pdfjsRef.current.TextLayer({
+          textContentSource: page.streamTextContent(),
+          container,
+          viewport,
+        })
+        textLayerTaskRef.current = tl
+        await tl.render()
       } catch {
-        // Render was cancelled — ignore
+        // text layer cancelled or unsupported
       } finally {
-        renderTaskRef.current = null
+        textLayerTaskRef.current = null
       }
-    },
-    [], // stable: only refs used
-  )
+    }
+  }, [])
 
-  // Load PDF document once when URL changes; reset page state for the new document
+  // Load PDF document once per URL
   useEffect(() => {
     let cancelled = false
 
@@ -70,53 +110,81 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
         'pdfjs-dist/build/pdf.worker.min.mjs',
         import.meta.url,
       ).toString()
+      pdfjsRef.current = pdfjsLib
 
       const pdf = await pdfjsLib.getDocument(url).promise
       if (cancelled) return
 
-      pdfDocRef.current = pdf as typeof pdfDocRef.current
+      pdfDocRef.current = pdf
       setTotalPages(pdf.numPages)
       setLoading(false)
-      await renderPage(1, 1.0)
+      await renderPage(1, usePDFViewerStore.getState().zoom)
     }
 
     loadPDF().catch(console.error)
-
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url])
 
-  // Re-render on page or zoom change
+  // Re-render on page change using current zoom
   useEffect(() => {
     if (!pdfDocRef.current) return
-    renderPage(currentPage, zoom)
-  }, [currentPage, zoom, renderPage])
+    renderPage(currentPage, usePDFViewerStore.getState().zoom)
+  }, [currentPage, renderPage])
+
+  // Re-render on zoom change — debounced 300ms
+  useEffect(() => {
+    if (!pdfDocRef.current) return
+    if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
+    zoomTimerRef.current = setTimeout(() => {
+      renderPage(
+        usePDFViewerStore.getState().currentPage,
+        usePDFViewerStore.getState().zoom,
+      )
+    }, 300)
+    return () => {
+      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
+    }
+  }, [zoom, renderPage])
+
+  // Re-render on container resize (e.g. sidebar toggle, window resize)
+  useEffect(() => {
+    if (!canvasWrapperRef.current) return
+    const observer = new ResizeObserver(() => {
+      if (!pdfDocRef.current) return
+      if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current)
+      resizeTimerRef.current = setTimeout(() => {
+        renderPage(
+          usePDFViewerStore.getState().currentPage,
+          usePDFViewerStore.getState().zoom,
+        )
+      }, 150)
+    })
+    observer.observe(canvasWrapperRef.current)
+    return () => observer.disconnect()
+  }, [renderPage])
 
   const goToPrev = () => currentPage > 1 && setCurrentPage(currentPage - 1)
   const goToNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1)
 
-  // Read zoom from store directly to avoid stale closure on rapid clicks
   const decreaseZoom = () => {
     const z = usePDFViewerStore.getState().zoom
-    usePDFViewerStore.getState().setZoom(Math.max(0.5, Math.round((z - 0.2) * 10) / 10))
+    usePDFViewerStore.getState().setZoom(Math.max(0.5, Math.round((z - 0.25) * 4) / 4))
   }
   const increaseZoom = () => {
     const z = usePDFViewerStore.getState().zoom
-    usePDFViewerStore.getState().setZoom(Math.min(3.0, Math.round((z + 0.2) * 10) / 10))
+    usePDFViewerStore.getState().setZoom(Math.min(3.0, Math.round((z + 0.25) * 4) / 4))
   }
 
   return (
-    <div className='relative flex flex-col gap-3'>
-      {/* Controls bar — PageController + ZoomController */}
+    <div className='flex flex-col w-full'>
+      {/* Controls bar — sticks to the top of the parent scroll container */}
       <div
         className={cn(
           'sticky top-0 z-10 py-2 border-b border-border-subtle',
           'bg-bg-base/90 backdrop-blur-sm',
           'flex items-center gap-3',
-        )}
-      >
+        )}>
         {/* PageController (ref: Figma 50:1837) */}
         <div className='bg-elevated border border-border-subtle rounded-sm flex items-center gap-2 px-3 py-1.5'>
           <button
@@ -124,8 +192,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             onClick={goToPrev}
             disabled={currentPage <= 1}
             aria-label='Previous page'
-            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'
-          >
+            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
             ←
           </button>
           <span className='font-mono text-label-mono-default text-text-secondary tabular-nums'>
@@ -136,8 +203,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             onClick={goToNext}
             disabled={currentPage >= totalPages}
             aria-label='Next page'
-            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'
-          >
+            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
             →
           </button>
         </div>
@@ -148,8 +214,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             type='button'
             onClick={decreaseZoom}
             aria-label='Zoom out'
-            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'
-          >
+            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
             −
           </button>
           <span className='font-mono text-label-mono-small text-text-muted w-10 text-center tabular-nums'>
@@ -159,31 +224,29 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             type='button'
             onClick={increaseZoom}
             aria-label='Zoom in'
-            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'
-          >
+            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
             +
           </button>
         </div>
       </div>
 
-      {/* Loading overlay shown while a new document is being fetched */}
-      {isLoading && (
-        <div className='absolute inset-0 top-[52px] z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm'>
-          <div className='flex flex-col items-center gap-3'>
-            <div className='w-8 h-8 rounded-full border-2 border-border-subtle border-t-brand-accent animate-spin' />
-            <span className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>
-              Loading…
-            </span>
+      {/* Canvas wrapper — fills container width, measured for fit-to-width scale */}
+      <div ref={canvasWrapperRef} className='relative w-full'>
+        {isLoading && (
+          <div className='absolute inset-0 z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm min-h-[400px]'>
+            <div className='flex flex-col items-center gap-3'>
+              <div className='w-8 h-8 rounded-full border-2 border-border-subtle border-t-brand-accent animate-spin' />
+              <span className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>Loading…</span>
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* PDF canvas */}
-      <canvas
-        ref={canvasRef}
-        className='max-w-full rounded-sm border border-border-subtle shadow-elevation-1'
-        aria-label={`PDF page ${currentPage} of ${totalPages}`}
-      />
+        )}
+        <canvas
+          ref={canvasRef}
+          className='block rounded-sm border border-border-subtle shadow-elevation-1'
+          aria-label={`PDF page ${currentPage} of ${totalPages}`}
+        />
+        <div ref={textLayerRef} className='pdf-text-layer' aria-hidden='true' />
+      </div>
     </div>
   )
 }

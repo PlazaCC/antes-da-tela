@@ -34,7 +34,7 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
   const genreVariant: TagVariant = GENRE_VARIANT_MAP[script.genre ?? ''] ?? 'default'
 
   return (
-    <div className='min-h-screen bg-bg-base flex flex-col'>
+    <div className='h-screen bg-bg-base flex flex-col overflow-hidden'>
       {/* Script header */}
       <div className='max-w-6xl mx-auto w-full px-5 py-8'>
         <div className='flex flex-col gap-3'>
@@ -59,9 +59,9 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
 
       {/* Reader — PDF + sidebar */}
       {pdfUrl ? (
-        <div className='flex flex-col lg:flex-row flex-1 border-t border-border-subtle'>
+        <div className='flex flex-col lg:flex-row flex-1 min-h-0 border-t border-border-subtle'>
           {/* PDF area */}
-          <div className='flex-1 min-w-0 p-5 overflow-auto'>
+          <div className='flex-1 min-w-0 min-h-0 p-5 overflow-auto'>
             <PDFViewer url={pdfUrl} />
           </div>
 
