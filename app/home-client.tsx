@@ -1,17 +1,19 @@
 'use client'
 
+import { ScriptPreviewModal } from '@/components/script-preview-modal'
 import { ScriptCard } from '@/components/ui/script-card'
 import { GENRES } from '@/lib/constants/scripts'
 import { cn } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 export function HomeClient() {
   const trpc = useTRPC()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const [previewId, setPreviewId] = useState<string | null>(null)
 
   const search = searchParams.get('q') ?? ''
   const genre = (searchParams.get('genre') ?? undefined) as (typeof GENRES)[number] | undefined
@@ -50,6 +52,11 @@ export function HomeClient() {
 
   return (
     <main className='max-w-[1140px] mx-auto px-5 pt-8 pb-16 flex flex-col gap-12'>
+      <ScriptPreviewModal
+        scriptId={previewId}
+        open={!!previewId}
+        onOpenChange={(open) => { if (!open) setPreviewId(null) }}
+      />
 
       {/* Hero headline */}
       <div className='flex flex-col gap-3'>
@@ -100,12 +107,12 @@ export function HomeClient() {
             {featured.map((script) => (
               <ScriptCard
                 key={script.id}
-                href={`/scripts/${script.id}`}
                 title={script.title}
                 author={script.author?.name ?? ''}
                 genre={script.genre ?? ''}
                 rating={null}
                 pages={script.script_files?.[0]?.page_count ?? null}
+                onPreview={() => setPreviewId(script.id)}
               />
             ))}
           </div>
@@ -122,12 +129,12 @@ export function HomeClient() {
             {displayedScripts.map((script) => (
               <ScriptCard
                 key={script.id}
-                href={`/scripts/${script.id}`}
                 title={script.title}
                 author={script.author?.name ?? ''}
                 genre={script.genre ?? ''}
                 rating={null}
                 pages={script.script_files?.[0]?.page_count ?? null}
+                onPreview={() => setPreviewId(script.id)}
               />
             ))}
           </div>

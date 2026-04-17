@@ -12,6 +12,7 @@ interface ScriptCardBaseProps {
   rating: number | null
   pages: number | null
   status?: 'publicado' | 'rascunho' | 'privado'
+  onPreview?: () => void
 }
 
 type ScriptCardAnchorProps = ScriptCardBaseProps &
@@ -58,15 +59,16 @@ const renderContent = ({ title, author, genre, rating, pages, status }: ScriptCa
 )
 
 export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((props, ref) => {
-  const { title, author, genre, rating, pages, status, className } = props
+  const { title, author, genre, rating, pages, status, className, onPreview } = props
 
   const content = renderContent({ title, author, genre, rating, pages, status })
   const anchorClasses = cn(baseClasses, 'cursor-pointer', className)
-  const divClasses = cn(baseClasses, className)
+  const divClasses = cn(baseClasses, onPreview && 'cursor-pointer', className)
 
   if ('href' in props && props.href) {
-    const { href, className: _className, ...anchorProps } = props as ScriptCardAnchorProps
+    const { href, className: _className, onPreview: _onPreview, ...anchorProps } = props as ScriptCardAnchorProps & { onPreview?: () => void }
     void _className
+    void _onPreview
 
     return (
       <a ref={ref as React.ForwardedRef<HTMLAnchorElement>} href={href} className={anchorClasses} {...anchorProps}>
@@ -75,10 +77,19 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
     )
   }
 
-  const { className: _className, ...divProps } = props as ScriptCardDivProps
+  const { className: _className, onPreview: _onPreview, ...divProps } = props as ScriptCardDivProps & { onPreview?: () => void }
   void _className
+  void _onPreview
   return (
-    <div ref={ref as React.ForwardedRef<HTMLDivElement>} className={divClasses} {...divProps}>
+    <div
+      ref={ref as React.ForwardedRef<HTMLDivElement>}
+      className={divClasses}
+      onClick={onPreview}
+      onKeyDown={onPreview ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPreview() } } : undefined}
+      role={onPreview ? 'button' : undefined}
+      tabIndex={onPreview ? 0 : undefined}
+      {...divProps}
+    >
       {content}
     </div>
   )
