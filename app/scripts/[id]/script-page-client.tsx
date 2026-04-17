@@ -4,8 +4,13 @@ import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 import { PDFViewer } from '@/components/pdf-viewer'
 import type { TagVariant } from '@/components/ui/tag'
 import { Tag } from '@/components/ui/tag'
+import { StarRating } from '@/components/ui/star-rating'
 import type { AppRouter } from '@/server/api/root'
 import type { inferRouterOutputs } from '@trpc/server'
+import { useTRPC } from '@/trpc/client'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 type RouterOutput = inferRouterOutputs<AppRouter>
 type ScriptDetail = RouterOutput['scripts']['getById']
@@ -23,6 +28,20 @@ interface Props {
 }
 
 export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Props) {
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  const averageOpts = trpc.ratings.getAverage.queryOptions({ scriptId: script?.id ?? '' })
+  const userRatingOpts = trpc.ratings.getUserRating.queryOptions(
+    { scriptId: script?.id ?? '', userId: currentUserId ?? '' },
+  )
+
+  const { data: ratingData } = useQuery({ ...averageOpts, enabled: !!script })
+  const { data: userRating } = useQuery({ ...userRatingOpts, enabled: !!script && !!currentUserId })
+
+  const upsertRating = useMutation(trpc.ratings.upsert.mutationOptions())
+
   if (!script) {
     return (
       <div className='min-h-screen bg-bg-base flex items-center justify-center'>
@@ -54,6 +73,42 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
               by <span className='text-text-secondary'>{script.author.name}</span>
             </p>
           )}
+
+          {/* RatingBox — ref: Figma 38:123 */}
+          <div className='flex items-center gap-3 p-3 bg-elevated rounded-sm border border-subtle w-fit'>
+            <StarRating
+              value={userRating ?? 0}
+              allowHalf={false}
+              readOnly={!currentUserId}
+              onChange={(score) => {
+                if (!currentUserId) {
+                  router.push('/auth/login')
+                  return
+                }
+                const page = ratingData
+                upsertRating.mutate(
+                  { scriptId: script.id, score: Math.round(score) },
+                  {
+                    onSuccess: () => {
+                      void queryClient.invalidateQueries(averageOpts)
+                      if (page !== undefined) {
+                        void queryClient.invalidateQueries(userRatingOpts)
+                      }
+                    },
+                    onError: (err) => {
+                      toast.error(err.message)
+                    },
+                  },
+                )
+              }}
+            />
+            {ratingData && ratingData.total > 0 && (
+              <span className='font-mono text-label-mono-default text-text-secondary'>
+                {ratingData.average.toFixed(1)} · {ratingData.total}{' '}
+                {ratingData.total === 1 ? 'rating' : 'ratings'}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
