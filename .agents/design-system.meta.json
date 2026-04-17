@@ -443,6 +443,29 @@
       "props": ["src", "name", "size", "status"],
       "sizes": ["sm", "md", "lg"],
       "states": ["default", "online", "offline"]
+    },
+    {
+      "name": "RatingBox",
+      "type": "component",
+      "figmaNodeId": "38:123",
+      "description": "Container da avaliação na página do roteiro; inclui StarRating e mostra média numérica e total de avaliações.",
+      "props": ["average", "total", "readOnly"],
+      "states": ["default", "readonly", "interactive"],
+      "layout": {
+        "height": 29,
+        "padding": 6,
+        "gap": 6
+      },
+      "tokenMapping": {
+        "background": "bg/elevated",
+        "border": "border/default",
+        "stars": "brand/accent",
+        "ratingText": "text/secondary"
+      },
+      "typography": {
+        "stars": { "fontFamily": "Inter", "fontWeight": 400, "fontSize": 14, "lineHeight": 1.21 },
+        "rating": { "fontFamily": "Inter", "fontWeight": 400, "fontSize": 12, "lineHeight": 1.21 }
+      }
     }
   ],
   "guidelines": {
@@ -591,6 +614,14 @@
         "priority": "medium",
         "figmaNodeId": "38:115",
         "suggestedProps": ["src", "name", "size"]
+      },
+      {
+        "name": "RatingBox",
+        "status": "partial",
+        "notes": "Container used in the script page for StarRating + numeric average display. Figma layout: height 29px, padding 6px, gap 6px. Token mapping: background->bg/elevated, border->border/default, stars->brand/accent, rating text->text/secondary. Implement as a reusable component wrapping StarRating and average/total metadata.",
+        "priority": "high",
+        "figmaNodeId": "38:123",
+        "suggestedProps": ["average", "total", "readOnly"]
       }
     ],
     "screens": [

@@ -41,6 +41,16 @@ Este prompt guia um agente a executar refinamentos de design específicos para a
 2. Determinar task alvo: usar `task_id` se fornecido; caso contrário, escolher a
    última task com status `in_progress` ou `pending` conforme `execution_order`.
 3. Extrair referências de design da task alvo (componentes, nodes, tokens).
+
+Escopo e restrição (AJUSTE SOLICITADO)
+
+- Este prompt deve manter-se estritamente no escopo da task alvo e das
+  dependências imediatas (tasks listadas em `execution_order`), para evitar
+  regressões em trabalho previamente concluído.
+- Objetivos adicionais: enriquecer a UI do escopo tratado de forma incremental
+  e detectar gaps visuais ou tokens faltantes que impactem a task atual ou as
+  dependências próximas. Não execute mudanças globais sem validação manual.
+
 4. Consultar o Figma via FramLink MCP (`mcp_framelink_fig_get_figma_data`) usando
    `figma_fileKey` e os `nodeId`s relevantes. Baixar apenas nodes necessários.
 5. Comparar: `design-system.meta.json` vs dados extraídos do Figma. Detectar:
@@ -54,11 +64,37 @@ Este prompt guia um agente a executar refinamentos de design específicos para a
      aplicável) e atualizar `design-system.plan.md` quando houver alteração de
      estratégia
    - gerar diffs/patches mínimos para atualizar arquivos locais extraídos
+
+Diretrizes operacionais (escopo restrito)
+
+- Priorize apenas os `nodeId`s e componentes referenciados diretamente na task
+  alvo e em tasks dependentes imediatas. Evite tocar tokens ou componentes que
+  não impactem a entrega da task.
+- Prefira assets locais em `.agents/figma/` para comparação e export (reduz
+  payload e garante reprodutibilidade).
+- NÃO modificar `components/ui/*` de forma ampla. Alterações em UI só são
+  permitidas se forem mínimas, localizadas e claramente não causarem
+  regressão (ex.: extrair wrapper, adicionar prop pass-through). Para mudanças
+  maiores, gere uma sugestão de PR/issue em vez de aplicar automaticamente.
+- Converter hex→HSL somente quando `poc-context.json.tokens_format` exigir.
+- Ao atualizar `.agents/design-system.meta.json`, preserve referências e
+  notas existentes; faça consolidações mínimas e documente o motivo.
+
 7. Aplicar mudanças e checklists:
    - se `apply_changes=true` e `dry_run=false`, aplicar patches com
      `apply_patch` (NÃO executar `git commit` nem `git push`)
    - atualizar checklist de acceptance na task alvo em `.agents/tasks/*.md`
      marcando apenas itens que foram verificadamente atendidos
+
+Critérios de verificação (quando marcar acceptance como done)
+
+- Só marque um acceptance item como `done` se a evidência for localmente
+  verificável (ex.: token existe em `.agents/design-system.meta.json`, asset
+  SVG salvo em `.agents/figma/components/`, ou componente adicionado em
+  `components/ui/` como mudança mínima). Se a verificação exigir build ou QA
+  visual, adicione uma entrada na checklist indicando verificação manual
+  pendente.
+
 8. Entregar relatório resumido com:
    - task processada
    - dados Figma extraídos (nodes consultados)
