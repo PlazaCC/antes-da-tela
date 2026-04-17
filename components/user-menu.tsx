@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
+import { FileTextIcon, SettingsIcon, UserCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -30,6 +31,7 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Logout failed')
     }
+    router.refresh()
   }
 
   return (
@@ -43,13 +45,21 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-44'>
         <DropdownMenuItem asChild>
+          <Link href='/publish' className='cursor-pointer'>
+            <FileTextIcon />
+            Publicar Roteiro
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <Link href={`/profile/${userId}`} className='cursor-pointer'>
-            Meu perfil
+            <UserCircle2 />
+            Ver perfil
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href='/account' className='cursor-pointer'>
-            Minha conta
+            <SettingsIcon />
+            Editar conta
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
