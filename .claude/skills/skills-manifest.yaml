@@ -60,9 +60,9 @@ skills:
   - name: poc-next-task
     description: Determines current POC state, verifies previous task acceptance criteria, and executes the next task end-to-end (tasks [01]–[07]).
     path: poc-next-task/SKILL.md
-  - name: refine-design-poc-task
+  - name: poc-refine-design
     description: Use when the last POC task has been implemented and the UI needs to be validated and aligned against the Figma source of truth.
-    path: refine-design-poc-task/SKILL.md
+    path: poc-refine-design/SKILL.md
   - name: new-shadcn-component
     description: Installs a shadcn/ui component and creates a typed wrapper.
     path: new-shadcn-component/SKILL.md

@@ -57,6 +57,9 @@ skills:
   - name: new-page
     description: Scaffolds a new Next.js App Router page with proper Server Component patterns.
     path: new-page/SKILL.md
+  - name: poc-refine-design
+    description: Use when the last POC task has been implemented and the UI needs to be validated and aligned against the Figma source of truth.
+    path: poc-refine-design/SKILL.md
   - name: poc-next-task
     description: Determines current POC state, verifies previous task acceptance criteria, and executes the next task end-to-end (tasks [01]–[07]).
     path: poc-next-task/SKILL.md

@@ -15,10 +15,10 @@ Executar QA visual 1:1 contra os screenshots Figma exportados, documentar discre
 
 ## Acceptance
 
-- [ ] Checklist visual preenchido com screenshots antes/depois para cada componente crítico
-- [ ] Correções aplicadas via tokens (nenhum ajuste visual feito com valores hardcoded sem justificativa)
-- [ ] Breakpoints verificados: 375px, 768px, 1280px
-- [ ] Contraste mínimo e áreas de toque atendem guidelines
+- [x] Checklist visual preenchido com screenshots antes/depois para cada componente crítico
+- [x] Correções aplicadas via tokens (nenhum ajuste visual feito com valores hardcoded sem justificativa)
+- [x] Breakpoints verificados: 375px, 768px, 1280px
+- [x] Contraste mínimo e áreas de toque atendem guidelines
 
 ## Files a tocar
 

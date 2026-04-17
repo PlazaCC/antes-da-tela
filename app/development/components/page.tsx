@@ -38,7 +38,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { StarRating } from '@/components/ui/star-rating'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tag } from '@/components/ui/tag'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
+const DEMO_SCRIPTS = [
+  { title: 'The Last Draft', author: 'Mariana Ramos', genre: 'Drama', rating: 4.5, pages: 128, status: 'publicado' as const },
+  { title: 'Silêncio no Terceiro Ato', author: 'Pedro Alves', genre: 'Thriller', rating: 3.5, pages: 95, status: 'rascunho' as const },
+  { title: 'Entre Cenas', author: 'Clara Vaz', genre: 'Comédia', rating: 5, pages: 112, status: 'publicado' as const },
+]
 
 export default function DevelopmentComponentsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -46,9 +53,11 @@ export default function DevelopmentComponentsPage() {
   const [name, setName] = useState('')
   const [dropdownStatus, setDropdownStatus] = useState('None selected')
   const [radioValue, setRadioValue] = useState('first')
+  const [starValue, setStarValue] = useState(3.5)
+  const [reactionSelected, setReactionSelected] = useState<number | undefined>(undefined)
 
   return (
-    <div className='grid gap-6'>
+    <div className='grid gap-8'>
       <section className='grid gap-4'>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
           <div className='space-y-2'>
@@ -61,6 +70,108 @@ export default function DevelopmentComponentsPage() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* ScriptCard responsive grid — 1 col mobile → 3 col desktop */}
+      <section className='grid gap-4'>
+        <h3 className='text-lg font-semibold text-text-primary'>ScriptCard — responsive grid</h3>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          {DEMO_SCRIPTS.map((script) => (
+            <ScriptCard key={script.title} {...script} />
+          ))}
+        </div>
+      </section>
+
+      {/* Tag semantic variants */}
+      <section className='grid gap-4'>
+        <h3 className='text-lg font-semibold text-text-primary'>Tag — semantic variants</h3>
+        <Card>
+          <CardContent className='pt-6 flex flex-wrap gap-3'>
+            <Tag variant='default'>Default</Tag>
+            <Tag variant='success'>Success</Tag>
+            <Tag variant='warning'>Warning</Tag>
+            <Tag variant='error'>Error</Tag>
+            <Tag variant='publicado'>Published</Tag>
+            <Tag variant='rascunho'>Draft</Tag>
+            <Tag variant='privado'>Private</Tag>
+            <Tag variant='crítico'>Critical</Tag>
+            <Tag variant='importante'>Important</Tag>
+            <Tag variant='neutro'>Neutral</Tag>
+            <Tag variant='drama'>Drama</Tag>
+            <Tag variant='thriller'>Thriller</Tag>
+            <Tag variant='comédia'>Comédia</Tag>
+            <Tag variant='new'>New</Tag>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* StarRating interactive */}
+      <section className='grid gap-4'>
+        <h3 className='text-lg font-semibold text-text-primary'>StarRating — interactive with half-stars</h3>
+        <Card>
+          <CardContent className='pt-6 grid gap-6'>
+            <div className='flex flex-col gap-2'>
+              <p className='text-sm text-text-secondary'>Interactive (hover for half-stars)</p>
+              <div className='flex items-center gap-3'>
+                <StarRating value={starValue} onChange={setStarValue} allowHalf />
+                <span className='font-mono text-label-mono-default text-text-muted'>{starValue.toFixed(1)}</span>
+              </div>
+            </div>
+            <div className='flex flex-col gap-2'>
+              <p className='text-sm text-text-secondary'>Read-only states</p>
+              <div className='flex flex-col gap-2'>
+                {[5, 4.5, 3, 1.5, 0].map((v) => (
+                  <div key={v} className='flex items-center gap-3'>
+                    <StarRating value={v} readOnly allowHalf />
+                    <span className='font-mono text-label-mono-small text-text-muted'>{v.toFixed(1)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ReactionBar */}
+      <section className='grid gap-4'>
+        <h3 className='text-lg font-semibold text-text-primary'>ReactionBar — accessible</h3>
+        <Card>
+          <CardContent className='pt-6 grid gap-4'>
+            <ReactionBar
+              selected={reactionSelected}
+              onSelect={setReactionSelected}
+              reactions={[
+                { icon: '👍', label: 'Like', count: 12 },
+                { icon: '🔥', label: 'Fire', count: 8 },
+                { icon: '💬', label: 'Comment', count: 3 },
+                { icon: '⭐', label: 'Favorite', count: 5 },
+              ]}
+            />
+            {reactionSelected !== undefined && (
+              <p className='text-sm text-text-muted font-mono'>
+                Selected: reaction #{reactionSelected}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* NavBar */}
+      <section className='grid gap-4'>
+        <h3 className='text-lg font-semibold text-text-primary'>NavBar — desktop + mobile collapse</h3>
+        <Card>
+          <CardContent className='pt-6'>
+            <p className='text-sm text-text-muted mb-4'>Resize below 1280px to see the hamburger menu.</p>
+            <NavBar
+              items={[
+                { label: 'Home', active: true, href: '/' },
+                { label: 'Scripts', href: '/scripts' },
+                { label: 'Library', href: '/library' },
+                { label: 'Profile', href: '/profile' },
+              ]}
+            />
+          </CardContent>
+        </Card>
       </section>
 
       <Tabs defaultValue='buttons' className='grid gap-4'>
@@ -211,23 +322,13 @@ export default function DevelopmentComponentsPage() {
             <CardDescription>New Figma-aligned patterns for the project.</CardDescription>
           </CardHeader>
           <CardContent className='grid gap-4'>
-            <div className='grid gap-4'>
-              <NavBar
-                items={[
-                  { label: 'Home', active: true, href: '/' },
-                  { label: 'Library', href: '/library' },
-                  { label: 'Profile', href: '/profile' },
-                ]}
-              />
-              <Info
-                title='Design system guidance'
-                description='Use dark surfaces, clear contrast, and the semantic accent color for primary actions. Keep the layout spacious and the navigation minimal.'
-                badge='Guideline'
-              />
-              <ScriptCard title='The Last Draft' author='Mariana Ramos' genre='Drama' rating={4.8} pages={128} />
-              <MetricCard title='Conversion Rate' value='12.4%' variation='+3.2%' color='positive' />
-              <MetricCard title='Refunds' value='1.8%' variation='-0.4%' color='negative' />
-            </div>
+            <Info
+              title='Design system guidance'
+              description='Use dark surfaces, clear contrast, and the semantic accent color for primary actions. Keep the layout spacious and the navigation minimal.'
+              badge='Guideline'
+            />
+            <MetricCard title='Conversion Rate' value='12.4%' variation='+3.2%' color='positive' />
+            <MetricCard title='Refunds' value='1.8%' variation='-0.4%' color='negative' />
           </CardContent>
         </Card>
 
@@ -279,22 +380,9 @@ export default function DevelopmentComponentsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Feedback</CardTitle>
+            <CardTitle>Utilities</CardTitle>
           </CardHeader>
           <CardContent className='grid gap-4'>
-            <div className='grid gap-3'>
-              <p className='text-sm text-muted-foreground'>
-                Interactive response patterns from the current design system.
-              </p>
-              <ReactionBar
-                reactions={[
-                  { icon: '👍', label: 'Like', count: 12 },
-                  { icon: '🔥', label: 'Fire', count: 8 },
-                  { icon: '💬', label: 'Comment', count: 3 },
-                ]}
-              />
-              <StarRating value={4} />
-            </div>
             <div className='flex flex-wrap items-center gap-3'>
               <TooltipProvider>
                 <Tooltip>

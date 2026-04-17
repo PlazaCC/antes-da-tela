@@ -19,7 +19,7 @@ Auditar e normalizar todas as variáveis CSS do design system para usar HSL chan
 - [x] Todas as CSS vars estão no formato HSL channels (ex: `0 0% 5%`) em `app/globals.css`.
 - [x] `tailwind.config.ts` usa `hsl(var(--...))` para tokens.
 - [x] `.agents/design-system.meta.json` atualizado com mapping e instruções de export.
-- [ ] `yarn build` e `yarn lint` passam sem erros.
+- [x] `yarn build` e `yarn lint` passam sem erros.
 
 ## Files a tocar
 

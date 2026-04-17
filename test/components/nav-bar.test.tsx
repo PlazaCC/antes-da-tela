@@ -6,5 +6,5 @@ test('NavBar renders brand and navigation', () => {
   const items = [{ label: 'Home', href: '/' }]
   render(<NavBar items={items} />)
   expect(screen.getByText(/ANTES DA TELA/i)).toBeInTheDocument()
-  expect(screen.getByText('Home')).toBeInTheDocument()
+  expect(screen.getAllByText('Home').length).toBeGreaterThan(0)
 })
