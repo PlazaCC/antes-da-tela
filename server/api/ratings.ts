@@ -36,18 +36,15 @@ export const ratingsRouter = createTRPCRouter({
     }),
 
   getAverage: publicProcedure.input(z.object({ scriptId: z.string().uuid() })).query(async ({ input, ctx }) => {
-    const { data, error } = await ctx.supabase
-      .from('ratings')
-      .select('avg:avg(score), total:count(*)', { count: 'exact' })
-      .eq('script_id', input.scriptId)
-      .maybeSingle()
+    const { data, error } = await ctx.supabase.from('ratings').select('score').eq('script_id', input.scriptId)
 
     if (error) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
     }
 
-    const average = data?.avg != null ? Number(data.avg) : 0
-    const total = data?.total != null ? Number(data.total) : 0
+    const scores = ((data ?? []) as Array<{ score: number }>).map((row) => Number(row.score))
+    const total = scores.length
+    const average = total > 0 ? scores.reduce((sum, value) => sum + value, 0) / total : 0
 
     return { average, total }
   }),
@@ -58,27 +55,37 @@ export const ratingsRouter = createTRPCRouter({
       const ids = input.scriptIds ?? []
       if (ids.length === 0) return {}
 
-      const { data, error } = await ctx.supabase
-        .from('ratings')
-        .select('script_id, avg:avg(score), total:count(*)', { count: 'exact' })
-        .in('script_id', ids)
-        .group('script_id')
+      const { data, error } = await ctx.supabase.from('ratings').select('script_id, score').in('script_id', ids)
 
       if (error) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       }
 
-      const rows = data ?? []
-      const map: Record<string, { average: number; total: number }> = {}
+      const rows = (data ?? []) as Array<{ script_id: string; score: number }>
+      const accumulator: Record<string, { sum: number; count: number }> = {}
+
       for (const id of ids) {
-        map[id] = { average: 0, total: 0 }
+        accumulator[id] = { sum: 0, count: 0 }
       }
 
       for (const row of rows) {
-        const scriptId = (row as any).script_id as string
-        const average = Number((row as any).avg ?? 0)
-        const total = Number((row as any).total ?? 0)
-        map[scriptId] = { average, total }
+        const scriptId = row.script_id
+        const value = Number(row.score)
+        const current = accumulator[scriptId] ?? { sum: 0, count: 0 }
+        accumulator[scriptId] = {
+          sum: current.sum + value,
+          count: current.count + 1,
+        }
+      }
+
+      const map: Record<string, { average: number; total: number }> = {}
+      for (const id of ids) {
+        const current = accumulator[id]
+        const total = current.count
+        map[id] = {
+          average: total > 0 ? current.sum / total : 0,
+          total,
+        }
       }
 
       return map

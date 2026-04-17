@@ -39,13 +39,15 @@ const readStoredTheme = (): Theme | null => {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = React.useState<Theme>('dark')
-  const [resolvedTheme, setResolvedTheme] = React.useState<'light' | 'dark'>('dark')
+  const [theme, setTheme] = React.useState<Theme>('system')
+  const [resolvedTheme, setResolvedTheme] = React.useState<'light' | 'dark'>('light')
   const [mounted, setMounted] = React.useState(false)
 
-  React.useEffect(() => {
-    const storedTheme = readStoredTheme() ?? 'dark'
+  React.useLayoutEffect(() => {
+    const storedTheme = readStoredTheme() ?? 'system'
     setTheme(storedTheme)
+    const nextResolved = applyTheme(storedTheme)
+    setResolvedTheme(nextResolved)
     setMounted(true)
   }, [])
 
