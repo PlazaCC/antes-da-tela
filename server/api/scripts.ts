@@ -49,8 +49,7 @@ export const scriptsRouter = createTRPCRouter({
 
     // Ensure the author's profile exists in `users` to satisfy FK constraints.
     const authorEmail = ctx.user!.email ?? null
-    const authorName =
-      ctx.user!.user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
+    const authorName = ctx.user!.user_metadata?.full_name ?? (authorEmail ? String(authorEmail).split('@')[0] : 'User')
     const { error: upsertError } = await ctx.supabase
       .from('users')
       .upsert({ id: authorId, name: String(authorName).slice(0, 100), email: authorEmail }, { onConflict: 'id' })
@@ -111,8 +110,8 @@ export const scriptsRouter = createTRPCRouter({
       .from('scripts')
       .select(
         'id, title, logline, synopsis, genre, age_rating, is_featured, published_at,' +
-        ' script_files(id, storage_path, page_count, file_size),' +
-        ' author:users!author_id(id, name, image)',
+          ' script_files(id, storage_path, page_count, file_size),' +
+          ' author:users!author_id(id, name, image)',
       )
       .eq('id', input.id)
       .maybeSingle()
@@ -179,19 +178,16 @@ export const scriptsRouter = createTRPCRouter({
         .from('scripts')
         .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
         .eq('status', 'published')
-        .limit(20)
 
       if (input.query) {
-        queryBuilder = queryBuilder.or(
-          `title.ilike.%${input.query}%,logline.ilike.%${input.query}%`,
-        )
+        queryBuilder = queryBuilder.or(`title.ilike.%${input.query}%,logline.ilike.%${input.query}%`)
       }
 
       if (input.genre) {
         queryBuilder = queryBuilder.eq('genre', input.genre)
       }
 
-      const { data } = await queryBuilder
+      const { data } = await queryBuilder.limit(20)
       return (data ?? []) as unknown as ScriptListItem[]
     }),
 })
