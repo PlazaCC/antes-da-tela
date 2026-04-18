@@ -1,7 +1,10 @@
 'use client'
 
 import { Avatar } from '@/components/avatar'
+import { FollowButton } from '@/components/follow-button'
+import { RatingInfo } from '@/components/rating-info'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { RatingSummary } from '@/components/ui/rating-summary'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tag } from '@/components/ui/tag'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
@@ -11,7 +14,6 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
 import Link from 'next/link'
-import { RatingSummary } from '../ui/rating-summary'
 
 interface ScriptPreviewModalProps {
   scriptId: string | null
@@ -29,6 +31,11 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
 
   const { data: ratingData, isLoading: ratingLoading } = useQuery({
     ...trpc.ratings.getAverage.queryOptions({ scriptId: scriptId ?? '' }),
+    enabled: open && !!scriptId,
+  })
+
+  const { data: commentData } = useQuery({
+    ...trpc.comments.countByScript.queryOptions({ scriptId: scriptId ?? '' }),
     enabled: open && !!scriptId,
   })
 
@@ -132,6 +139,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
                     onClick={() => onOpenChange(false)}>
                     {script.author?.name ?? 'Autor desconhecido'}
                   </Link>
+                  {script.author?.id && <FollowButton authorId={script.author.id} />}
                 </div>
 
                 <div className='flex items-center gap-2 shrink-0'>
@@ -154,6 +162,18 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
                   )}
                 </div>
               )}
+
+              <div className='w-full h-px bg-border-subtle' />
+
+              {/* Stats row */}
+              <div className='flex gap-8'>
+                <RatingInfo value={ratingData?.total ?? 0} label='Avaliações' />
+                <RatingInfo
+                  value={ratingData?.average ? ratingData.average.toFixed(1) : '—'}
+                  label='Nota média'
+                />
+                <RatingInfo value={commentData?.count ?? 0} label='Comentários' />
+              </div>
 
               <div className='w-full h-px bg-border-subtle' />
 

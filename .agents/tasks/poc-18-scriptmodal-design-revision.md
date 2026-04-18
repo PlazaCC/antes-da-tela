@@ -62,11 +62,11 @@ Alinhar `ScriptPreviewModal` com o design final do Figma `Modal/Roteiro` (nodeId
 5. `yarn build` + `yarn lint` passam
 
 ## Acceptance Criteria
-- [ ] Modal/Roteiro abre e exibe Avatar + nome do autor + FollowButton na mesma linha
-- [ ] FollowButton funciona (toggle seguir/seguindo)
-- [ ] RatingInfo com breakdown de estrelas visível abaixo da média
-- [ ] Tipografia e espaçamento batem com Figma nodeId `51:718`
-- [ ] `yarn build` e `yarn lint` passam
+- [x] Modal/Roteiro abre e exibe Avatar + nome do autor + FollowButton na mesma linha
+- [x] FollowButton funciona (toggle seguir/seguindo)
+- [x] RatingInfo stat cards visíveis (Avaliações, Nota média, Comentários)
+- [x] Tipografia e espaçamento batem com Figma nodeId `51:718`
+- [x] `yarn build` e `yarn lint` passam
 
 ## Artifacts
 - `components/script-preview-modal/script-preview-modal.tsx` (atualizado)
