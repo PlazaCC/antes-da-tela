@@ -1,5 +1,6 @@
 'use client'
 
+import { Avatar } from '@/components/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tag } from '@/components/ui/tag'
@@ -9,7 +10,6 @@ import { useTRPC } from '@/trpc/client'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
-import { Avatar } from '@/components/avatar'
 import Link from 'next/link'
 import { RatingSummary } from '../ui/rating-summary'
 
@@ -46,7 +46,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
         {/* Always include a DialogTitle for accessibility, visually hidden if loading or no script */}
         <DialogHeader>
           <VisuallyHidden>
-            {isLoading || !script ? <DialogTitle>Visualização do roteiro</DialogTitle> : script.title}{' '}
+            <DialogTitle>{isLoading || !script ? 'Visualização do roteiro' : script.title}</DialogTitle>
           </VisuallyHidden>
         </DialogHeader>
 
