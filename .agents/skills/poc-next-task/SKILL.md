@@ -1,79 +1,65 @@
 ---
 name: poc-next-task
-description: >-
-  Determines the current POC state, verifies the previous task's acceptance
-  criteria are fully met, and executes the next task end-to-end. Never skips
-  ahead — each task's checklist must pass before the next begins.
+description: Identifies and executes the next pending POC task. Fast context pickup from poc-context.json — no build/lint at start. Use for starting the next task, resuming in-progress work, or targeting a specific task by ID.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# POC — Next Task Executor (Atualizado)
+# poc-next-task
 
-## Objetivo
+## Fast Context Pickup
 
-Determinar o estado atual do POC, validar critérios de aceite da task anterior e executar a próxima task.
-Nunca pule etapas — cada checklist deve ser cumprido antes de avançar.
+**2 reads max to identify the target:**
 
----
+1. Read `.agents/poc-context.json` — scan `new_tasks` + `execution_order`:
+   - Argument provided (e.g. `poc-10`) → match `id` directly
+   - `in_progress` tasks by execution_order step → resume first match
+   - `pending` tasks by execution_order step → start first match
+2. Read the `task_file` path from the matched task entry.
 
-## Fonte da Verdade de Design
-
-**Sempre utilize o Figma via MCP FramLink como fonte primária para tokens, componentes e layouts.**
-
-- Os arquivos locais `.agents/figma.meta.json` e `.agents/design-system.meta.json` servem apenas como apoio/fallback.
-- Não há mais assets locais em `.agents/figma/` — ignore qualquer menção a SVG/PNG/PDF locais.
-- Os links oficiais do Figma para referência são:
-  - Fluxo principal: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1388
-  - Cadastro de roteiro: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1350
-  - Perfil do usuário: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-2075
+**Never run `yarn build` or `yarn lint` at task start.** Released code is already validated. Builds run only post-implementation when an acceptance item explicitly requires it.
 
 ---
 
-## Passos principais
+## Design Source
 
-1. Carregue `.agents/poc-context.json` para obter `execution_order` e tasks.
-2. Identifique a task alvo (próxima pendente ou fornecida via `task_id`).
-3. Valide critérios de aceite locais:
+Figma via MCP FramLink is the only source of truth.
 
-- `yarn build` (zero erros)
-- `yarn lint` (zero warnings)
-- `yarn drizzle-kit generate` se schema foi alterado
-
-4. Para qualquer necessidade de design (tokens, componentes, layouts):
-
-- Consulte sempre o Figma via MCP FramLink (`mcp_framelink_fig_get_figma_data`) usando os links oficiais e nodeIds relevantes.
-- Use arquivos locais de metadados apenas se MCP não estiver disponível.
-
-5. Atualize checklists das tasks conforme critérios verificados.
-6. Nunca execute `git commit` ou `git push` — apenas gere sugestões de commit.
+- `.agents/figma.meta.json` + `.agents/design-system.meta.json` → fallback only if MCP unavailable
+- No local assets in `.agents/figma/` — always use MCP
+- Official Figma links (file key from `figma.meta.json`):
+  - Main flow: `node-id=186-1388`
+  - Script registration: `node-id=186-1350`
+  - User profile: `node-id=186-2075`
 
 ---
 
-## Regras operacionais
+## Execution
 
-- Sempre priorize o Figma via MCP FramLink.
-- Ignore qualquer instrução para buscar assets locais em `.agents/figma/`.
-- Arquivos locais `.agents/figma.meta.json` e `.agents/design-system.meta.json` são apenas fallback.
-- Nunca grave tokens ou segredos em arquivos do projeto.
-- Mudanças mínimas e focadas; não reescreva seções não relacionadas.
+1. Read task file — capture `objective`, `files_to_create/update`, component refs, acceptance items
+2. For design tasks → call `mcp_framelink_fig_get_figma_data` with only the nodeIds in scope
+3. Implement — minimal, focused changes to listed files only
+4. Update Plaza MCP: `pending → in_progress` on start; `in_progress → done` on completion
+5. Mark acceptance items verifiably complete (`- [ ]` → `- [x]`)
+6. Output commit suggestion — **never run `git commit` or `git push`**
 
----
-
-## Exemplo de fluxo
-
-1. Validar critérios locais (`yarn build`, `yarn lint`, etc.)
-2. Consultar Figma via MCP para obter tokens/componentes/layouts necessários
-3. Atualizar metadados locais apenas se MCP não estiver disponível
-4. Atualizar checklist da task
-5. Gerar sugestão de Conventional Commit
+Commit format: `<conventional-commit>: <brief description>`
 
 ---
 
-## Constraints
+## Build / Lint
 
-- Nunca use `npm install` — sempre `yarn add`.
-- Tailwind v3 apenas — não use sintaxe v4.
-- Use `cn()` de `@/lib/utils` para composição de classes.
-- `createServerClient` em Server Components, `createBrowserClient` em Client Components.
-- Fonte de schema: `server/db/schema.ts` — nunca edite migrations geradas diretamente.
-- Todo output (código, comentários, commits, docs) em inglês.
+Run `yarn build` and `yarn lint` **only** when:
+
+- Implementation is complete
+- An acceptance item explicitly states "yarn build passes" or "yarn lint passes"
+
+---
+
+## Hard Constraints
+
+- `yarn add` only — never `npm install`
+- Tailwind v3 — no v4 syntax; `cn()` from `@/lib/utils`
+- Schema source: `server/db/schema.ts` — never edit generated migrations directly
+- All output (code, comments, commits) in English
+- Never write secrets to project files
+- `createServerClient` in Server Components; `createBrowserClient` in Client Components
