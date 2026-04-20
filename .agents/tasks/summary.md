@@ -42,7 +42,7 @@ Metadados atualizados:
 | Search Sheet + Filter Page  | `poc-11-search-filter-sheet.md`            | concluído              |
 | ScriptModal design revision | `poc-18-scriptmodal-design-revision.md`    | pendente (dep: poc-17) |
 | Upload wizard redesign      | `poc-20-upload-wizard-redesign.md`         | pendente               |
-| SEO/OG meta                 | `poc-12-script-seo-og-meta.md`             | pendente               |
+| SEO/OG meta                 | `poc-12-script-seo-og-meta.md`             | concluído              |
 
 ### P1 — Features e perfil (priorizado)
 
