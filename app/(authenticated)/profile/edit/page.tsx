@@ -23,18 +23,12 @@ type FormValues = z.infer<typeof profileSchema>
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className='font-mono text-[11px] font-medium tracking-[0.08em] text-brand-accent uppercase mb-4'>
-      {children}
-    </p>
+    <p className='font-mono text-[11px] font-medium tracking-[0.08em] text-brand-accent uppercase mb-4'>{children}</p>
   )
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <label className='block font-sans text-[11px] font-medium text-text-secondary mb-1.5'>
-      {children}
-    </label>
-  )
+  return <label className='block font-sans text-[11px] font-medium text-text-secondary mb-1.5'>{children}</label>
 }
 
 const NAV_ITEMS = [
@@ -48,7 +42,7 @@ const NAV_ITEMS = [
 export default function EditProfilePage() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [userId, setUserId] = useState<string | null>(null)
@@ -122,9 +116,7 @@ export default function EditProfilePage() {
   return (
     <div className='min-h-screen bg-bg-base'>
       <div className='max-w-[1280px] mx-auto px-10 py-8'>
-        <h1 className='font-display text-[24px] leading-[1.37] text-text-primary mb-6'>
-          Configurações do perfil
-        </h1>
+        <h1 className='font-display text-[24px] leading-[1.37] text-text-primary mb-6'>Configurações do perfil</h1>
 
         <div className='flex gap-6 items-start'>
           {/* Sidebar nav */}

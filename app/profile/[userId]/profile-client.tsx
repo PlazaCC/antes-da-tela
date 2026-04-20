@@ -3,11 +3,11 @@
 import { Avatar } from '@/components/avatar'
 import { FollowButton } from '@/components/follow-button'
 import { ScriptCard } from '@/components/ui/script-card'
+import { cn } from '@/lib/utils'
 import type { ScriptListItem } from '@/server/api/scripts'
 import type { User } from '@/server/db/schema'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
-import { cn } from '@/lib/utils'
 import { useState } from 'react'
 
 interface ProfileStats {
@@ -27,7 +27,8 @@ interface Props {
 function StatItem({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
   return (
     <div className='flex flex-col gap-0.5'>
-      <span className={cn('font-display text-[18px] leading-[1.37]', accent ? 'text-brand-accent' : 'text-text-primary')}>
+      <span
+        className={cn('font-display text-[18px] leading-[1.37]', accent ? 'text-brand-accent' : 'text-text-primary')}>
         {value}
       </span>
       <span className='font-mono text-label-mono-small text-text-muted uppercase tracking-[0.04em]'>{label}</span>
@@ -54,7 +55,8 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
   }
 
   const isOwnProfile = currentUserId === user.id
-  const handle = `@${user.name.toLowerCase().replace(/\s+/g, '')} · Roteirista`
+  const userName = user.name?.trim() || 'Usuário'
+  const handle = `@${userName.toLowerCase().replace(/\s+/g, '')} · Roteirista`
 
   return (
     <div className='min-h-screen bg-bg-base'>
@@ -68,7 +70,7 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
           <div className='absolute -top-10 left-10'>
             <Avatar
               src={user.image}
-              name={user.name}
+              name={userName}
               size='xl'
               className='border-[3px] border-border-subtle w-20 h-20'
             />
@@ -80,9 +82,7 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
               <div className='flex flex-col gap-1'>
                 <h1 className='font-display text-[22px] leading-[1.37] text-text-primary'>{user.name}</h1>
                 <p className='font-mono text-[12px] leading-[1.3] text-text-muted'>{handle}</p>
-                {user.bio && (
-                  <p className='text-body-small text-text-secondary mt-1 max-w-[500px]'>{user.bio}</p>
-                )}
+                {user.bio && <p className='text-body-small text-text-secondary mt-1 max-w-[500px]'>{user.bio}</p>}
               </div>
 
               {/* Action buttons */}
@@ -99,9 +99,7 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
               <StatItem value={String(stats.scripts)} label='Roteiros' />
               <StatItem value={String(stats.followers)} label='Seguidores' />
               <StatItem value={String(stats.following)} label='Seguindo' />
-              {stats.avgRating !== null && (
-                <StatItem value={`★ ${stats.avgRating}`} label='Avaliação média' accent />
-              )}
+              {stats.avgRating !== null && <StatItem value={`★ ${stats.avgRating}`} label='Avaliação média' accent />}
             </div>
           </div>
         </div>
@@ -140,9 +138,7 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
           <>
             {/* Sort bar */}
             <div className='flex items-center justify-between mb-5'>
-              <p className='font-mono text-[12px] text-text-muted'>
-                {stats.scripts} roteiros publicados
-              </p>
+              <p className='font-mono text-[12px] text-text-muted'>{stats.scripts} roteiros publicados</p>
               <button className='flex items-center gap-1 px-3 h-7 rounded-sm border border-border-default text-text-secondary font-sans text-[11px] hover:border-border-subtle transition-colors'>
                 Mais recentes ▾
               </button>

@@ -1,21 +1,23 @@
 ---
-title: "Implementar páginas de perfil — Perfil, Editar e Dashboard do Autor"
+title: 'Implementar páginas de perfil — Perfil, Editar e Dashboard do Autor'
 type: frontend
 priority: P1
-branch: feat/profile-pages
+branch: feat/profile-design-upgrade
 clickup: https://app.clickup.com/t/86agytvxw
 figmaNodeIds:
-  PerfilUsuario: "186:1834"
-  EditarPerfil: "186:1907"
-  DashboardAutor: "186:1963"
-figmaSection: "Perfil do usuário (186:2075)"
-dependsOn: ["poc-17-avatar-followbutton-components"]
+  PerfilUsuario: '186:1834'
+  EditarPerfil: '186:1907'
+  DashboardAutor: '186:1963'
+figmaSection: 'Perfil do usuário (186:2075)'
+dependsOn: ['poc-17-avatar-followbutton-components']
 ---
 
 ## Objetivo
+
 Implementar as três telas de perfil definidas na seção `Perfil do usuário` do Figma: perfil público do roteirista, formulário de edição de perfil e dashboard de métricas do autor.
 
 ## Contexto
+
 - Figma: seção `Perfil do usuário` nodeId `186:2075`
   - `S06/Perfil-Usuario` → nodeId `186:1834` → rota `/profile/[username]`
   - `S07/Editar-Perfil` → nodeId `186:1907` → rota `/profile/edit`
@@ -28,6 +30,7 @@ Implementar as três telas de perfil definidas na seção `Perfil do usuário` d
 ## Telas a implementar
 
 ### S06 — Perfil Público (`/profile/[username]`)
+
 - Acesso público (sem login)
 - Layout: Header + hero do autor (Avatar lg + Nome + Bio + FollowButton) + grid de roteiros publicados
 - tRPC: `users.getPublicProfile(username)` → `{ user, scripts[] }`
@@ -35,6 +38,7 @@ Implementar as três telas de perfil definidas na seção `Perfil do usuário` d
 - Componentes: `Avatar` (lg), `FollowButton`, `ScriptCard` (grid), `Tag`, `RatingBox`
 
 ### S07 — Editar Perfil (`/profile/edit`)
+
 - Rota protegida (autenticado)
 - Formulário: nome, bio (textarea), upload de avatar → Supabase Storage bucket `avatars`
 - React Hook Form + Zod validation
@@ -43,6 +47,7 @@ Implementar as três telas de perfil definidas na seção `Perfil do usuário` d
 - Componentes: `Header`, `Avatar` (preview ao vivo), `Input`, `Button`
 
 ### S09 — Dashboard do Autor (`/dashboard`)
+
 - Rota protegida
 - Métricas: total de leituras, comentários, avaliações médias por roteiro
 - Grid de roteiros do autor com ações (editar/despublicar)
@@ -83,6 +88,7 @@ Implementar as três telas de perfil definidas na seção `Perfil do usuário` d
 7. Schema DB: verificar se `users` tem coluna `bio` e `username`. Se não, criar migration Drizzle.
 
 ## Acceptance Criteria
+
 - [x] `/profile/[username]` carrega sem login e exibe roteiros do autor em SSR
 - [x] FollowButton funciona na página de perfil
 - [x] `/profile/edit` atualiza nome, bio e avatar; avatar aparece no Header após update
@@ -91,6 +97,7 @@ Implementar as três telas de perfil definidas na seção `Perfil do usuário` d
 - [x] `yarn build` e `yarn lint` passam
 
 ## Artifacts
+
 - `app/profile/[username]/page.tsx`
 - `app/profile/edit/page.tsx`
 - `app/dashboard/page.tsx`
