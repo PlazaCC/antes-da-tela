@@ -1,5 +1,3 @@
-'use client'
-
 import { RatingInfo, StatItem } from '@/components/rating-info'
 
 interface RatingDistribution {

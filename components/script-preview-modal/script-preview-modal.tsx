@@ -29,8 +29,8 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
     enabled: open && !!scriptId,
   })
 
-  const { data: ratingData, isLoading: ratingLoading } = useQuery({
-    ...trpc.ratings.getAverage.queryOptions({ scriptId: scriptId ?? '' }),
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    ...trpc.ratings.getStats.queryOptions({ scriptId: scriptId ?? '' }),
     enabled: open && !!scriptId,
   })
 
@@ -38,13 +38,8 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
     ...trpc.comments.countByScript.queryOptions({ scriptId: scriptId ?? '' }),
     enabled: open && !!scriptId,
   })
-  
-  const { data: distributionData } = useQuery({
-    ...trpc.ratings.getDistribution.queryOptions({ scriptId: scriptId ?? '' }),
-    enabled: open && !!scriptId,
-  })
 
-  const isLoading = scriptLoading || ratingLoading
+  const isLoading = scriptLoading || statsLoading
 
   const publishedAt = script?.published_at
     ? new Date(script.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -87,7 +82,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
                 </h1>
               )}
               
-              <AuthorSection author={script.author} ratingData={ratingData} onClose={onClose} />
+              <AuthorSection author={script.author} ratingData={stats} onClose={onClose} />
 
               {(script.genre || script.age_rating) && (
                 <div className='flex flex-wrap gap-2'>
@@ -107,9 +102,9 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
               <div className='w-full h-px bg-border-subtle' />
 
               <StatsSection
-                ratingData={ratingData}
+                ratingData={stats}
                 commentData={commentData}
-                distributionData={distributionData}
+                distributionData={stats}
               />
 
               <div className='w-full h-px bg-border-subtle' />

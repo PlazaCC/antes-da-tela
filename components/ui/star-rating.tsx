@@ -1,3 +1,4 @@
+// custom — not shadcn-managed
 'use client'
 
 import { cn } from '@/lib/utils'

@@ -1,6 +1,5 @@
-'use client'
-
 import { cn } from '@/lib/utils'
+import { Film } from 'lucide-react'
 import Link from 'next/link'
 
 interface SidebarProps {
@@ -18,8 +17,9 @@ export function ModalSidebar({ script, publishedAtFormatted, onClose }: SidebarP
   return (
     <aside className='hidden md:flex flex-col w-64 shrink-0 border-r border-border-subtle p-6 gap-6'>
       {/* Cover placeholder */}
-      <div className='w-full aspect-[2/3] rounded-sm bg-elevated border border-border-subtle flex items-center justify-center'>
-        <span className='font-mono text-label-mono-small text-text-muted'>Thumbnail 2:3</span>
+      <div className='w-full aspect-[2/3] rounded-sm bg-elevated border border-border-subtle flex flex-col items-center justify-center gap-2'>
+        <Film className='w-8 h-8 text-text-muted' />
+        <span className='font-mono text-[10px] text-text-muted uppercase tracking-wider'>Sem Capa</span>
       </div>
 
       {/* Metadata */}
