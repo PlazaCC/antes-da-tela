@@ -117,6 +117,7 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
             <div>
               <ReactionBar
                 disabled={c.author?.id === currentUserId}
+                loading={toggleReaction.isPending}
                 reactions={buildReactionBarItems(c.id, reactionsMap)}
                 onSelect={(index) => handleToggleReaction(c.id, REACTION_EMOJIS[index] as ReactionEmoji)}
               />
