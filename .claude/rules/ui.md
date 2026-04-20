@@ -1,36 +1,51 @@
 ---
 name: ui
-description: Regras e convenções para trabalhar com shadcn/ui e Tailwind neste projeto.
+description: Rules and conventions for shadcn/ui and Tailwind in this project.
 ---
 
-# UI Rules — shadcn + Tailwind
+# UI Rules — shadcn/ui + Tailwind CSS v3
 
-Este arquivo define regras de uso para componentes de UI gerados pelo `shadcn` e boas práticas relacionadas.
+## shadcn/ui — PRIMARY component system
 
-- Regra principal: sempre instale componentes do `shadcn` usando o comando oficial da ferramenta. Use o comando abaixo para adicionar componentes ao projeto:
+> **Always check `components/ui/` before building any UI element.** If a shadcn primitive exists, use it.
 
+### Installing — official CLI only (no exceptions)
 ```bash
-yarn dlx shadcn@latest add <component>
+yarn dlx shadcn@latest add <component>   # e.g. dialog, table, form, select, button
 ```
+- `components/ui/` is **read-only** — managed exclusively by the shadcn CLI and registry.
+- **Never** create, copy, or manually edit files inside `components/ui/`.
 
-- Racional: o CLI do `shadcn` gera os arquivos, placeholders e integra os estilos corretamente. Instalar manualmente ou copiar arquivos pode levar a inconsistências e quebrar atualizações futuras.
+### Customising — wrapper pattern
+When you need app-specific behavior, create a wrapper in `components/<feature>/`:
+```tsx
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
 
-- Nunca edite manualmente arquivos em `components/ui/` que foram gerados pelo `shadcn` sem antes executar o processo de upgrade/instalação correto.
+export function ConfirmDialog({ className, ...props }) {
+  return <Dialog><DialogContent className={cn(className)} {...props} /></Dialog>
+}
+```
+- Accept and forward `className` on every wrapper.
+- Use `cn()` from `@/lib/utils` — never string-concatenate classes.
+- Use `asChild` (Radix `Slot`) to compose without extra DOM nodes.
 
-- Quando for necessário compor ou adaptar um componente para a aplicação, crie um wrapper em `components/<component>/` e mantenha o código gerado intacto. Sempre:
-  - aceite e encaminhe a prop `className`;
-  - use `cn()` de `@/lib/utils` para mesclar classes;
-  - documente o wrapper e explique porque a composição foi necessária.
+**Skill:** invoke `/shadcn` or read `.agents/skills/new-shadcn-component/SKILL.md` for the full workflow.
 
-- Para alterações estruturais (mudanças que exigem alteração de primitives), prefira submeter um PR com a justificativa e os passos para reproduzir a alteração localmente usando o CLI oficial.
+---
 
-- Exemplos rápidos:
-  - Adicionar um `dialog`:
+## Tailwind CSS v3
 
-    ```bash
-    yarn dlx shadcn@latest add dialog
-    ```
+- Do **not** use v4 syntax (`@import "tailwindcss"` or `@theme` blocks).
+- Use design tokens from `tailwind.config.ts` — no hardcoded hex values.
+- Dark mode via `next-themes` `class` strategy (already configured).
+- Animations from `tailwindcss-animate` are available.
 
-  - Criar wrapper: `components/confirm-dialog/confirm-dialog.tsx` que usa `components/ui/dialog` internamente e expõe API específica da aplicação.
+---
 
-Seguindo esta regra mantemos consistência com o ecossistema `shadcn` e reduzimos riscos ao atualizar a biblioteca ou regenerar componentes.
+## Component Conventions
+
+- `"use client"` at the top for any component using hooks or event handlers.
+- Prefer named exports over default exports.
+- Extend HTML props with `React.ComponentProps<"element">`.
+- Keep components under ~100 lines — extract sub-components when needed.

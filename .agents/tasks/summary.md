@@ -48,8 +48,8 @@ Metadados atualizados:
 
 | Task                    | Arquivo                       | Status                 |
 | ----------------------- | ----------------------------- | ---------------------- |
-| Profile pages (3 telas) | `poc-19-profile-pages.md`     | pendente (dep: poc-17) |
 | Audio player            | `poc-13-audio-player.md`      | pendente               |
+| Profile pages (3 telas) | `poc-19-profile-pages.md`     | pendente (dep: poc-17) |
 | Comment reactions       | `poc-14-comment-reactions.md` | pendente               |
 
 ## Dependências
