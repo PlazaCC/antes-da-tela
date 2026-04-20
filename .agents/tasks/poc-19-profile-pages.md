@@ -83,12 +83,12 @@ Implementar as três telas de perfil definidas na seção `Perfil do usuário` d
 7. Schema DB: verificar se `users` tem coluna `bio` e `username`. Se não, criar migration Drizzle.
 
 ## Acceptance Criteria
-- [ ] `/profile/[username]` carrega sem login e exibe roteiros do autor em SSR
-- [ ] FollowButton funciona na página de perfil
-- [ ] `/profile/edit` atualiza nome, bio e avatar; avatar aparece no Header após update
-- [ ] `/dashboard` exibe MetricCards com dados reais de leituras/comentários/avaliação
-- [ ] MetricCard positive usa `state/success`, negative usa `state/error`
-- [ ] `yarn build` e `yarn lint` passam
+- [x] `/profile/[username]` carrega sem login e exibe roteiros do autor em SSR
+- [x] FollowButton funciona na página de perfil
+- [x] `/profile/edit` atualiza nome, bio e avatar; avatar aparece no Header após update
+- [x] `/dashboard` exibe MetricCards com dados reais de leituras/comentários/avaliação
+- [x] MetricCard positive usa `state/success`, negative usa `state/error`
+- [x] `yarn build` e `yarn lint` passam
 
 ## Artifacts
 - `app/profile/[username]/page.tsx`

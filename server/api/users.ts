@@ -116,4 +116,39 @@ export const usersRouter = createTRPCRouter({
       if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       return { following: false }
     }),
+
+  getProfileStats: publicProcedure
+    .input(z.object({ userId: z.string().uuid() }))
+    .query(async ({ input, ctx }) => {
+      const [followersRes, followingRes, scriptsRes, ratingsRes] = await Promise.all([
+        ctx.supabase
+          .from('user_follows')
+          .select('follower_id', { count: 'exact', head: true })
+          .eq('followee_id', input.userId),
+        ctx.supabase
+          .from('user_follows')
+          .select('followee_id', { count: 'exact', head: true })
+          .eq('follower_id', input.userId),
+        ctx.supabase
+          .from('scripts')
+          .select('id', { count: 'exact', head: true })
+          .eq('author_id', input.userId)
+          .eq('status', 'published'),
+        ctx.supabase
+          .from('ratings')
+          .select('score, scripts!inner(author_id)')
+          .eq('scripts.author_id', input.userId),
+      ])
+
+      const scores = ((ratingsRes.data ?? []) as Array<{ score: number }>).map((r) => Number(r.score))
+      const avgRating =
+        scores.length > 0 ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : null
+
+      return {
+        followers: followersRes.count ?? 0,
+        following: followingRes.count ?? 0,
+        scripts: scriptsRes.count ?? 0,
+        avgRating,
+      }
+    }),
 })

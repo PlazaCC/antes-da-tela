@@ -206,6 +206,59 @@ export const scriptsRouter = createTRPCRouter({
     return (data ?? []) as unknown as ScriptListItem[]
   }),
 
+  getDashboardMetrics: authenticatedProcedure.query(async ({ ctx }) => {
+    const authorId = ctx.user!.id
+
+    const { data: scripts } = await ctx.supabase
+      .from('scripts')
+      .select('id, title, status, genre')
+      .eq('author_id', authorId)
+      .order('published_at', { ascending: false })
+
+    if (!scripts || scripts.length === 0) {
+      return { scripts: [], avgRating: null, totalScripts: 0 }
+    }
+
+    const scriptIds = scripts.map((s) => s.id)
+
+    const [ratingsRes, commentsRes] = await Promise.all([
+      ctx.supabase.from('ratings').select('script_id, score').in('script_id', scriptIds),
+      ctx.supabase.from('comments').select('script_id').in('script_id', scriptIds).is('deleted_at', null),
+    ])
+
+    const ratingsByScript: Record<string, number[]> = {}
+    for (const r of (ratingsRes.data ?? []) as Array<{ script_id: string; score: number }>) {
+      const arr = ratingsByScript[r.script_id] ?? []
+      arr.push(Number(r.score))
+      ratingsByScript[r.script_id] = arr
+    }
+
+    const commentsByScript: Record<string, number> = {}
+    for (const c of (commentsRes.data ?? []) as Array<{ script_id: string }>) {
+      commentsByScript[c.script_id] = (commentsByScript[c.script_id] ?? 0) + 1
+    }
+
+    const metrics = scripts.map((s) => {
+      const scores = ratingsByScript[s.id] ?? []
+      const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null
+      return {
+        id: s.id,
+        title: s.title,
+        status: s.status as string,
+        avgRating: avg !== null ? Math.round(avg * 10) / 10 : null,
+        commentCount: commentsByScript[s.id] ?? 0,
+      }
+    })
+
+    const allScores = Object.values(ratingsByScript).flat()
+    const overallAvg =
+      allScores.length > 0
+        ? Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10
+        : null
+
+    return { scripts: metrics, avgRating: overallAvg, totalScripts: scripts.length }
+  }),
+
   search: publicProcedure
     .input(
       z.object({
