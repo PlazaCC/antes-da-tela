@@ -105,3 +105,6 @@ skills:
   - name: validators
     description: Configure input and output validation with .input() and .output().
     path: validators/SKILL.md
+  - name: create-pr
+    description: Analyze changes and generate a professional PR description following conventional standards.
+    path: create-pr/SKILL.md
