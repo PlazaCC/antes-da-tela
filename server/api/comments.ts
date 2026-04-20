@@ -30,13 +30,29 @@ export const commentsRouter = createTRPCRouter({
         .eq('script_id', input.scriptId)
         .eq('page_number', input.pageNumber)
         .is('deleted_at', null)
-        .order('created_at', { ascending: true })
 
       if (error) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       }
 
-      return (data ?? []) as unknown as CommentWithAuthor[]
+      const rows = data ?? []
+      if (!rows.length) return [] as CommentWithAuthor[]
+
+      // Fetch reaction totals to sort by "hottest comment" (most reactions first)
+      const { data: reactionData } = await ctx.supabase
+        .from('comment_reactions')
+        .select('comment_id')
+        .in('comment_id', rows.map((c) => c.id))
+
+      const counts = new Map<string, number>()
+      for (const r of reactionData ?? []) {
+        counts.set(r.comment_id, (counts.get(r.comment_id) ?? 0) + 1)
+      }
+
+      return [...rows].sort((a, b) => {
+        const diff = (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0)
+        return diff !== 0 ? diff : new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      }) as unknown as CommentWithAuthor[]
     }),
 
   create: authenticatedProcedure
@@ -163,6 +179,20 @@ export const commentsRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const userId = ctx.user!.id
+
+      const { data: comment } = await ctx.supabase
+        .from('comments')
+        .select('author_id')
+        .eq('id', input.commentId)
+        .maybeSingle()
+
+      if (!comment) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Comment not found' })
+      }
+
+      if (comment.author_id === userId) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Cannot react to your own comment' })
+      }
 
       const { data: existing } = await ctx.supabase
         .from('comment_reactions')

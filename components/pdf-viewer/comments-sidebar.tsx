@@ -4,8 +4,7 @@ import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
 import { ReactionBar } from '@/components/ui/reaction-bar'
 import { REACTION_EMOJIS } from '@/lib/constants/reactions'
-import type { ReactionSummary } from '@/server/api/comments'
-import type { CommentWithAuthor } from '@/server/api/comments'
+import type { CommentWithAuthor, ReactionSummary } from '@/server/api/comments'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
@@ -65,12 +64,16 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
       { commentId, emoji },
       {
         onSuccess: () => {
+          // Invalidate reactions (counts/userReacted) and comment list (ordering may change)
           void queryClient.invalidateQueries({
             queryKey: trpc.comments.listReactionsByPage.queryOptions({
               scriptId,
               pageNumber: page,
               currentUserId: currentUserId ?? undefined,
             }).queryKey,
+          })
+          void queryClient.invalidateQueries({
+            queryKey: trpc.comments.list.queryOptions({ scriptId, pageNumber: page }).queryKey,
           })
         },
         onError: (err) => {
@@ -111,10 +114,13 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
               </span>
             </div>
             <p className='text-text-secondary text-body-small leading-relaxed'>{c.content}</p>
-            <ReactionBar
-              reactions={buildReactionBarItems(c.id, reactionsMap)}
-              onSelect={(index) => handleToggleReaction(c.id, REACTION_EMOJIS[index])}
-            />
+            <div>
+              <ReactionBar
+                disabled={c.author?.id === currentUserId}
+                reactions={buildReactionBarItems(c.id, reactionsMap)}
+                onSelect={(index) => handleToggleReaction(c.id, REACTION_EMOJIS[index])}
+              />
+            </div>
           </div>
         ))}
 
