@@ -2,7 +2,7 @@
 
 import { Avatar } from '@/components/avatar'
 import { FollowButton } from '@/components/follow-button'
-import { RatingInfo } from '@/components/rating-info'
+import { RatingInfo, StatItem } from '@/components/rating-info'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { RatingSummary } from '@/components/ui/rating-summary'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -36,6 +36,11 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
 
   const { data: commentData } = useQuery({
     ...trpc.comments.countByScript.queryOptions({ scriptId: scriptId ?? '' }),
+    enabled: open && !!scriptId,
+  })
+  
+  const { data: distributionData } = useQuery({
+    ...trpc.ratings.getDistribution.queryOptions({ scriptId: scriptId ?? '' }),
     enabled: open && !!scriptId,
   })
 
@@ -127,19 +132,34 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
             </aside>
 
             {/* Right content */}
-            <div className='flex-1 overflow-y-auto p-6 md:p-8 flex flex-col gap-5 pr-12'>
-              {script.title && <h1 className='font-serif uppercase tracking-wider text-2xl'>{script.title}</h1>}
+            <div className='flex-1 overflow-y-auto p-6 md:p-8 flex flex-col gap-6 pr-12'>
+              {script.title && (
+                <h1 className='font-display text-heading-2 text-text-primary uppercase tracking-wide'>
+                  {script.title}
+                </h1>
+              )}
               {/* Author row + rating */}
               <div className='flex items-center justify-between gap-4'>
                 <div className='flex items-center gap-3'>
                   <Avatar src={script.author?.image} name={script.author?.name ?? '?'} size='md' />
-                  <Link
-                    href={`/profile/${script.author?.id}`}
-                    className='text-body-small font-medium text-text-primary hover:text-brand-accent transition-colors'
-                    onClick={() => onOpenChange(false)}>
-                    {script.author?.name ?? 'Autor desconhecido'}
-                  </Link>
-                  {script.author?.id && <FollowButton authorId={script.author.id} />}
+                  <div className='flex flex-col min-w-0'>
+                    <Link
+                      href={`/profile/${script.author?.id}`}
+                      className='text-body-small font-medium text-text-primary hover:text-brand-accent transition-colors truncate'
+                      onClick={() => onOpenChange(false)}>
+                      {script.author?.name ?? 'Autor desconhecido'}
+                    </Link>
+                    {script.author?.bio && (
+                      <span className='text-[10px] text-text-muted truncate leading-tight'>
+                        {script.author.bio}
+                      </span>
+                    )}
+                  </div>
+                  {script.author?.id && (
+                    <div className='ml-2'>
+                      <FollowButton authorId={script.author.id} />
+                    </div>
+                  )}
                 </div>
 
                 <div className='flex items-center gap-2 shrink-0'>
@@ -166,24 +186,34 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
               <div className='w-full h-px bg-border-subtle' />
 
               {/* Stats row */}
-              <div className='flex gap-8'>
-                <RatingInfo value={ratingData?.total ?? 0} label='Avaliações' />
-                <RatingInfo
+              <div className='flex gap-10'>
+                <StatItem value={ratingData?.total ?? 0} label='Avaliações' />
+                <StatItem
                   value={ratingData?.average ? ratingData.average.toFixed(1) : '—'}
                   label='Nota média'
                 />
-                <RatingInfo value={commentData?.count ?? 0} label='Comentários' />
+                <StatItem value={commentData?.count ?? 0} label='Comentários' />
               </div>
+
+              {distributionData && (
+                <div className='bg-elevated/50 p-6 rounded-sm border border-border-default'>
+                  <RatingInfo
+                    distribution={distributionData.distribution}
+                    average={ratingData?.average ?? 0}
+                    total={distributionData.total}
+                  />
+                </div>
+              )}
 
               <div className='w-full h-px bg-border-subtle' />
 
               {/* Logline */}
               {script.logline && (
-                <div className='flex flex-col gap-2'>
-                  <span className='font-mono text-label-mono-caps text-brand-accent uppercase tracking-wider text-[10px]'>
+                <div className='flex flex-col gap-3'>
+                  <span className='font-mono text-label-mono-caps text-brand-accent uppercase tracking-[0.05em]'>
                     Logline
                   </span>
-                  <blockquote className='border-l-2 border-brand-accent pl-4'>
+                  <blockquote className='border-l-2 border-brand-accent pl-5'>
                     <p className='text-body-default text-text-primary leading-relaxed'>{script.logline}</p>
                   </blockquote>
                 </div>
@@ -191,8 +221,8 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
 
               {/* Synopsis */}
               {script.synopsis && (
-                <div className='flex flex-col gap-2'>
-                  <span className='font-mono text-label-mono-caps text-brand-accent uppercase tracking-wider text-[10px]'>
+                <div className='flex flex-col gap-3'>
+                  <span className='font-mono text-label-mono-caps text-brand-accent uppercase tracking-[0.05em]'>
                     Sinopse
                   </span>
                   <p className='text-body-default text-text-secondary leading-relaxed line-clamp-6'>
