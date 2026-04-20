@@ -25,3 +25,7 @@ export type Genre = (typeof GENRES)[number]
 export const AGE_RATINGS = ['livre', '10', '12', '14', '16', '18'] as const
 
 export type AgeRating = (typeof AGE_RATINGS)[number]
+
+export function formatAgeRating(r: AgeRating): string {
+  return r === 'livre' ? 'Livre' : `${r} anos`
+}

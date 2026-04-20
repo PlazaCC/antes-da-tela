@@ -97,13 +97,13 @@ Variantes confirmadas no Figma:
 6. Verificar se `scripts.create()` aceita todos os campos novos (gênero como array, classificação etária, audio_path)
 
 ## Acceptance Criteria
-- [ ] Progress indicator visível no topo com 4 steps, estado ativo/concluído visualmente distinto
-- [ ] Step 1 coleta título, logline, sinopse com validação Zod
-- [ ] Step 2 faz upload de PDF com barra de progresso percentual; áudio é opcional
-- [ ] Step 3 permite selecionar gênero(s) via Checkbox
-- [ ] Step 4 exibe preview e o botão "Publicar" chama tRPC e redireciona
-- [ ] Dados não se perdem ao navegar entre steps
-- [ ] `yarn build` e `yarn lint` passam
+- [x] Progress indicator visível no topo com 4 steps, estado ativo/concluído visualmente distinto
+- [x] Step 1 coleta título, logline, sinopse com validação Zod
+- [x] Step 2 faz upload de PDF com barra de progresso percentual; áudio é opcional
+- [x] Step 3 permite selecionar gênero(s) via Checkbox
+- [x] Step 4 exibe preview e o botão "Publicar" chama tRPC e redireciona
+- [x] Dados não se perdem ao navegar entre steps
+- [x] `yarn build` e `yarn lint` passam
 
 ## Artifacts
 - `components/progress/progress.tsx` + `index.ts` (novo)

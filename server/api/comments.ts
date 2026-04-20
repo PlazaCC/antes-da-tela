@@ -67,6 +67,22 @@ export const commentsRouter = createTRPCRouter({
       return data as unknown as CommentWithAuthor
     }),
 
+  countByScript: publicProcedure
+    .input(z.object({ scriptId: z.string().uuid() }))
+    .query(async ({ input, ctx }) => {
+      const { count, error } = await ctx.supabase
+        .from('comments')
+        .select('id', { count: 'exact', head: true })
+        .eq('script_id', input.scriptId)
+        .is('deleted_at', null)
+
+      if (error) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+      }
+
+      return { count: count ?? 0 }
+    }),
+
   delete: authenticatedProcedure
     .input(z.object({ commentId: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {

@@ -1,163 +1,63 @@
 ---
 name: poc-next-task
 agent: agent
-description: >-
-  Prompt para a skill `poc-next-task` — automatiza a identificação da próxima
-  task POC, valida critérios de aceite, consome o MCP Figma (Framelink) para
-  extrair tokens/artefatos quando necessário e atualiza automaticamente os
-  checklists em `.agents/tasks/*`. Projetado para uso por um agente com acesso
-  a ferramentas de I/O e ao MCP do Figma.
-tools:
-  [
-    vscode,
-    execute,
-    read,
-    agent,
-    edit,
-    search,
-    web,
-    'framelink_figma_mcp/*',
-    'io.github.upstash/context7/*',
-    'playwright/*',
-    'plaza.mcp/*',
-    browser,
-    todo,
-  ]
-inputs:
-  task_id:
-    type: string
-    description: 'ID opcional da task (ex: poc-01). Se omitido, detecta a próxima pendente a partir de .agents/poc-context.json'
-  figma_fileKey:
-    type: string
-    description: 'Opcional: fileKey do Figma. Se omitido, usa .agents/figma.meta.json.fileKey ou .agents/design-system.meta.json'
+description: Executes the next pending POC task. Reads poc-context.json for fast context pickup — no build/lint at start. Implements the task, queries Figma MCP for design tasks, updates checklists and Plaza status.
+argument-hint: '[task_id] — optional (e.g. poc-10). Omit to auto-detect the next pending/in-progress task from .agents/poc-context.json'
+tools: [read, edit, write, search, 'framelink_figma_mcp/*', 'plaza.mcp/*', todo]
 ---
 
-Descrição curta
+## Fast Context Pickup
 
-Este prompt orienta o agente a executar o fluxo padrão da skill `poc-next-task`:
+**2 reads to start:**
 
-1. identificar a próxima task POC ou usar `task_id`; 2) rodar validações locais
-   (`yarn build`, `yarn lint`, `yarn drizzle-kit generate` quando aplicável); 3)
-   consultar o Figma via MCP FramLink para extrair tokens ou assets (quando o task
-   requer design), 4) atualizar checklists em `.agents/tasks/*.md` marcando itens
-   concluídos; 5) opcionalmente commitar as mudanças.
+1. Read `.agents/poc-context.json` — scan `new_tasks` + `execution_order` for target:
+   - Argument provided → match `id` directly
+   - `in_progress` by execution_order → resume first match
+   - `pending` by execution_order → start first match
+2. Read the `task_file` path from the matched entry.
 
-Regras operacionais (resumido)
-
-- Modo operante (padrão): aplicar alterações locais com `apply_patch` (escrever arquivos), MAS NUNCA executar `git commit` nem `git push`.
-- Após aplicar alterações locais o agente apresenta:
-  - resumo das ações realizadas;
-  - diff/patch aplicado;
-  - sugestão de Conventional Commit (formato: `tipo(scope): descrição — breve`) para uso manual.
-- Se `dry_run: true`, o agente gera apenas diff/relatório sem gravar.
-- Formatos de checklist suportados: Markdown (`- [ ]` → `- [x]`) e YAML/JSON-like (`done: false` → `done: true`).
-- Princípios: mudanças mínimas e focadas; não gravar segredos.
-
-Passo-a-passo que o agente deve seguir
-
-1. Carregar contexto local
-   - Ler `.agents/poc-context.json` para `execution_order` e `tasks`.
-   - Ler `.agents/tasks/poc-overview.md` e o arquivo da task alvo
-     (ex.: `.agents/tasks/poc-01-design-system.md`).
-
-   - Ler `.agents/figma.meta.json` e `.agents/design-system.meta.json` apenas como apoio/fallback para `fileKey` e tokens.
-   - Sempre priorizar a consulta ao Figma via MCP FramLink (`mcp_framelink_fig_get_figma_data`) usando os links oficiais e nodeIds relevantes.
-   - Ignore qualquer menção a assets locais em `.agents/figma/` — não há mais SVG/PNG/PDF locais.
-
-2. Determinar a task alvo
-   - Se `task_id` fornecido, usar esse ID.
-   - Caso contrário, selecionar a primeira task listada em
-     `execution_order` que esteja `pending` ou `in_progress` conforme
-     `.agents/poc-context.json` (ou usar heurística similar).
-
-3. Validar critérios de aceite localmente
-   - Executar os comandos relevantes via `run_in_terminal` e coletar saída:
-     - `yarn build`
-     - `yarn lint`
-     - Se `server/db/schema.ts` foi alterado ou task menciona DB: `yarn drizzle-kit generate`
-   - Interpretar sucesso/erro a partir dos códigos de saída e stdout/stderr.
-
-4. Consultar Figma via MCP (sempre que necessário)
-   - Sempre que a task requer design (tokens, componentes, layouts), chame `mcp_framelink_fig_get_figma_data` com o `fileKey` dos links oficiais do Figma e os nodeIds relevantes.
-   - Use arquivos locais de metadados apenas se MCP não estiver disponível.
-   - Não salve artefatos locais de SVG/PNG/PDF — utilize sempre o MCP como fonte.
-
-5. Atualizar checklists (resumido)
-
-- Para cada item de acceptance comprovado: marcar como concluído (`- [x]` ou `done: true`).
-- Comportamento padrão: aplicar alterações locais com `apply_patch` e gravar arquivos, mas NÃO criar commits nem fazer push.
-- Se `dry_run: true`, gerar apenas diff/relatório sem gravar.
-- Ao final, gerar sugestão de Conventional Commit para uso manual (ex.: `feat(poc-03): mark acceptance items as done — yarn build, lint`).
-
-6. Registrar progresso no TODO do agente
-   - Atualizar `manage_todo_list` para refletir progresso (opcional, mas
-     recomendado). Use o padrão do repositório para mensagens/formatos.
-
-7. Relatório final
-   - Entregar um resumo curto indicando:
-     - Task processada
-     - Validações rodadas + resultados
-     - Itens de checklist atualizados (listar)
-     - Arquivos alterados e commit criado (se aplicável)
-     - Próximo passo recomendado
-
-Segurança e confirmação
-
-- Nunca execute `git commit`, `git push` ou qualquer operação remota de versionamento. Sempre gere apenas o diff/patch e uma sugestão de Conventional Commit; não realize commits nem pushes.
-- Se a operação requer chaves/segredos para MCP, reporte que precisa do token e peça instruções; não grave tokens em arquivos de projeto.
-
-- Nunca execute commits ou pushes sem confirmação quando não for explicitamente
-  autorizado (`auto_commit: false` por padrão).
-- Se a operação requer chaves/segredos para MCP, reporte que precisa do token e
-  peça instruções; não grave tokens em arquivos de projeto.
-
-Padrões de edição de checklist (exemplos)
-
-- Markdown checklist (exemplo de transformação):
-
-  Antes:
-  - [ ] yarn build passes
-  - [ ] yarn lint passes
-
-  Depois:
-  - [x] yarn build passes
-  - [x] yarn lint passes
-
-- YAML/inline (exemplo):
-
-  Antes: `- name: build; done: false`
-  Depois: `- name: build; done: true`
-
-Exemplos de invocação (curto)
-
-1. Aplicar alterações locais (padrão):
-
-{
-"task_id": "poc-03",
-"apply_changes": true
-}
-
-2. Inspecionar sem gravar:
-
-{
-"task_id": "poc-03",
-"dry_run": true
-}
-
-Perguntas curtas ao usuário
-
-- Aplicar alterações locais agora ou só inspecionar? (default: aplicar)
-- Gerar sugestão de Conventional Commit? (default: sim)
-- Usar `figma_fileKey` do meta.json ou outro?
-
-Notas de implementação para o agente
-
-- Sempre priorize o Figma via MCP FramLink como fonte da verdade.
-- Ignore qualquer instrução para buscar assets locais em `.agents/figma/`.
-- Use `.agents/figma.meta.json` e `.agents/design-system.meta.json` apenas como fallback.
-- Ao chamar o MCP do Figma, peça apenas os nodes necessários (tokens/componentes/layouts) para reduzir payload.
-- Mantenha as mudanças mínimas e focadas: apenas marque checklist e não reescreva seções não relacionadas.
+**Do NOT run `yarn build` or `yarn lint` at the start.** Released code is already validated. Run builds only post-implementation when verifying acceptance items that explicitly require it.
 
 ---
 
-File created by agent-template: poc-next-task.prompt.md
+## Design Source
+
+Figma via MCP FramLink is the only source of truth. No local assets in `.agents/figma/`.
+
+- `.agents/figma.meta.json` + `.agents/design-system.meta.json` → fallback only if MCP unavailable
+- Official Figma links:
+  - Main flow: `node-id=186-1388`
+  - Script registration: `node-id=186-1350`
+  - User profile: `node-id=186-2075`
+  - File key: from `.agents/figma.meta.json`
+
+---
+
+## Execution Steps
+
+1. Read task file → capture `objective`, `files_to_create/update`, component refs, acceptance items
+2. For design tasks → call `mcp_framelink_fig_get_figma_data` with only the nodeIds in scope
+3. Implement — minimal, focused changes to listed files only
+4. Update Plaza MCP: `pending → in_progress` on start; `in_progress → done` on completion
+5. Mark acceptance checklist items that are verifiably complete (`- [ ]` → `- [x]`)
+6. Output commit suggestion ( `<conventional-commit>: <brief description>`) — **never run git commit/push**
+
+---
+
+## Build / Lint
+
+Run `yarn build` and `yarn lint` **only** when:
+
+- Implementation is complete
+- Acceptance item explicitly states "yarn build passes" or "yarn lint passes"
+
+---
+
+## Hard Constraints
+
+- `yarn add` only — never `npm install`
+- Tailwind v3 — no v4 syntax; `cn()` from `@/lib/utils`
+- Schema: `server/db/schema.ts` — never edit generated migrations directly
+- All code, comments, commits in English
+- Never write secrets to project files
+- Checklist format: `- [ ]` → `- [x]` (Markdown) or `done: false` → `done: true` (JSON)

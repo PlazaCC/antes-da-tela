@@ -595,10 +595,10 @@
       "note": "P1 — OG meta for script pages"
     },
     {
-      "step": 3,
+      "step": 1,
       "task_id": "poc-13-audio-player",
-      "parallel_with": "poc-14-comment-reactions",
-      "note": "P2 — Figma Player component"
+      "parallel_with": null,
+      "note": "P1 (priorizado) — Figma Player component"
     },
     {
       "step": 3,
@@ -696,9 +696,9 @@
       "id": "poc-13-audio-player",
       "scope": "Frontend",
       "title": "Audio player on script reader page",
-      "status": "pending",
-      "priority": "P2",
-      "task_file": ".agents/tasks/review/poc-13-audio-player.md"
+      "status": "done",
+      "priority": "P1",
+      "task_file": ".agents/tasks/poc-13-audio-player.md"
     },
     {
       "id": "poc-14-comment-reactions",

@@ -94,12 +94,38 @@ yarn drizzle-kit migrate   # Apply migrations to Supabase Postgres
 - `DATABASE_URL_UNPOOLED` is only needed for running `yarn drizzle-kit migrate` locally — it is not an application runtime env var.
 - Schema lives in `server/db/schema.ts`; migrations output to `drizzle/`.
 
-### Tailwind + shadcn/ui
+### shadcn/ui — MANDATORY rules
 
-- Use `cn()` from `@/lib/utils` (combines `clsx` + `tailwind-merge`).
-- Always use existing shadcn primitives before creating custom components.
-- Tailwind v3 — do NOT use v4 syntax.
-- Always install shadcn components using the official CLI: `yarn dlx shadcn@latest add <component>`. Never manually copy or edit files under `components/ui/` — those files are managed by the shadcn registry and the CLI.
+> **Rule #1 — Always check `components/ui/` first.** Before building any UI element, check if a shadcn primitive already exists. Use it as-is or compose a wrapper.
+
+**Installing components — official CLI only:**
+```bash
+yarn dlx shadcn@latest add <component>   # e.g. dialog, table, form, select
+```
+- **Never** manually create or copy files into `components/ui/` — that directory is owned by the shadcn registry and the CLI.
+- **Never** edit files inside `components/ui/` directly. If you need custom behavior, create a wrapper (see below).
+
+**Customising components — wrapper pattern:**
+Create wrappers in `components/<feature>/<component>.tsx`, not in `components/ui/`:
+```tsx
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
+
+export function ConfirmDialog({ className, ...props }) {
+  return <Dialog><DialogContent className={cn(className)} {...props} /></Dialog>
+}
+```
+- Always accept and forward the `className` prop.
+- Always use `cn()` from `@/lib/utils` for class merging (never string concatenation).
+- Use the `asChild` prop (Radix `Slot`) to compose without extra DOM nodes.
+
+**Skill for shadcn work:** invoke `/shadcn` or read `.agents/skills/new-shadcn-component/SKILL.md` for the full install-and-wrap workflow.
+
+### Tailwind CSS v3
+
+- Tailwind v3 — do NOT use v4 syntax (`@import "tailwindcss"` or `@theme` blocks).
+- Use design tokens from `tailwind.config.ts` — do not hardcode hex values.
+- `tailwind-merge` is in the stack — always use `cn()`, never concatenate class strings.
 
 ### Package Manager
 
