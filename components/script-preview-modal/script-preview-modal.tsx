@@ -1,10 +1,6 @@
 'use client'
 
-import { Avatar } from '@/components/avatar'
-import { FollowButton } from '@/components/follow-button'
-import { RatingInfo, StatItem } from '@/components/rating-info'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { RatingSummary } from '@/components/ui/rating-summary'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tag } from '@/components/ui/tag'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
@@ -14,6 +10,9 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
 import Link from 'next/link'
+import { AuthorSection } from './author-section'
+import { ModalSidebar } from './sidebar'
+import { StatsSection } from './stats-section'
 
 interface ScriptPreviewModalProps {
   scriptId: string | null
@@ -23,6 +22,7 @@ interface ScriptPreviewModalProps {
 
 export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPreviewModalProps) {
   const trpc = useTRPC()
+  const onClose = () => onOpenChange(false)
 
   const { data: script, isLoading: scriptLoading } = useQuery({
     ...trpc.scripts.getById.queryOptions({ id: scriptId ?? '' }),
@@ -55,14 +55,12 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
       <DialogContent
         showCloseButton={false}
         className='p-0 sm:max-w-4xl max-h-[90vh] overflow-hidden bg-surface border-border-subtle gap-0'>
-        {/* Always include a DialogTitle for accessibility, visually hidden if loading or no script */}
         <DialogHeader>
           <VisuallyHidden>
             <DialogTitle>{isLoading || !script ? 'Visualização do roteiro' : script.title}</DialogTitle>
           </VisuallyHidden>
         </DialogHeader>
 
-        {/* Custom close button */}
         <DialogPrimitive.Close
           className={cn(
             'absolute top-4 right-4 z-10 w-8 h-8 rounded-sm flex items-center justify-center',
@@ -80,94 +78,17 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
           </div>
         ) : (
           <div className='flex overflow-y-auto max-h-[90vh]'>
-            {/* Left sidebar — metadata + CTA */}
-            <aside className='hidden md:flex flex-col w-64 shrink-0 border-r border-border-subtle p-6 gap-6'>
-              {/* Cover placeholder */}
-              <div className='w-full aspect-[2/3] rounded-sm bg-elevated border border-border-subtle flex items-center justify-center'>
-                <span className='font-mono text-label-mono-small text-text-muted'>Thumbnail 2:3</span>
-              </div>
+            <ModalSidebar script={script} publishedAtFormatted={publishedAt} onClose={onClose} />
 
-              {/* Metadata */}
-              <dl className='flex flex-col gap-4'>
-                {script.genre && (
-                  <div className='flex flex-col gap-0.5'>
-                    <dt className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider text-[10px]'>
-                      Gênero
-                    </dt>
-                    <dd className='text-body-small text-text-primary capitalize'>{script.genre}</dd>
-                  </div>
-                )}
-                {script.script_files?.[0]?.page_count && (
-                  <div className='flex flex-col gap-0.5'>
-                    <dt className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider text-[10px]'>
-                      Páginas
-                    </dt>
-                    <dd className='text-body-small text-text-primary'>{script.script_files[0].page_count} páginas</dd>
-                  </div>
-                )}
-                {publishedAt && (
-                  <div className='flex flex-col gap-0.5'>
-                    <dt className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider text-[10px]'>
-                      Publicado
-                    </dt>
-                    <dd className='text-body-small text-text-primary'>{publishedAt}</dd>
-                  </div>
-                )}
-              </dl>
-
-              {/* CTA — anchored at bottom */}
-              <div className='mt-auto'>
-                <Link
-                  href={`/scripts/${script.id}`}
-                  className={cn(
-                    'flex items-center justify-center w-full py-2.5 rounded-sm',
-                    'bg-brand-accent text-white font-semibold text-body-small',
-                    'hover:bg-brand-accent/90 transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
-                  )}
-                  onClick={() => onOpenChange(false)}>
-                  Ler Roteiro
-                </Link>
-              </div>
-            </aside>
-
-            {/* Right content */}
             <div className='flex-1 overflow-y-auto p-6 md:p-8 flex flex-col gap-6 pr-12'>
               {script.title && (
                 <h1 className='font-display text-heading-2 text-text-primary uppercase tracking-wide'>
                   {script.title}
                 </h1>
               )}
-              {/* Author row + rating */}
-              <div className='flex items-center justify-between gap-4'>
-                <div className='flex items-center gap-3'>
-                  <Avatar src={script.author?.image} name={script.author?.name ?? '?'} size='md' />
-                  <div className='flex flex-col min-w-0'>
-                    <Link
-                      href={`/profile/${script.author?.id}`}
-                      className='text-body-small font-medium text-text-primary hover:text-brand-accent transition-colors truncate'
-                      onClick={() => onOpenChange(false)}>
-                      {script.author?.name ?? 'Autor desconhecido'}
-                    </Link>
-                    {script.author?.bio && (
-                      <span className='text-[10px] text-text-muted truncate leading-tight'>
-                        {script.author.bio}
-                      </span>
-                    )}
-                  </div>
-                  {script.author?.id && (
-                    <div className='ml-2'>
-                      <FollowButton authorId={script.author.id} />
-                    </div>
-                  )}
-                </div>
+              
+              <AuthorSection author={script.author} ratingData={ratingData} onClose={onClose} />
 
-                <div className='flex items-center gap-2 shrink-0'>
-                  <RatingSummary average={ratingData?.average ?? 0} total={ratingData?.total ?? 0} />
-                </div>
-              </div>
-
-              {/* Genre / age-rating tags */}
               {(script.genre || script.age_rating) && (
                 <div className='flex flex-wrap gap-2'>
                   {script.genre && (
@@ -185,29 +106,14 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
 
               <div className='w-full h-px bg-border-subtle' />
 
-              {/* Stats row */}
-              <div className='flex gap-10'>
-                <StatItem value={ratingData?.total ?? 0} label='Avaliações' />
-                <StatItem
-                  value={ratingData?.average ? ratingData.average.toFixed(1) : '—'}
-                  label='Nota média'
-                />
-                <StatItem value={commentData?.count ?? 0} label='Comentários' />
-              </div>
-
-              {distributionData && (
-                <div className='bg-elevated/50 p-6 rounded-sm border border-border-default'>
-                  <RatingInfo
-                    distribution={distributionData.distribution}
-                    average={ratingData?.average ?? 0}
-                    total={distributionData.total}
-                  />
-                </div>
-              )}
+              <StatsSection
+                ratingData={ratingData}
+                commentData={commentData}
+                distributionData={distributionData}
+              />
 
               <div className='w-full h-px bg-border-subtle' />
 
-              {/* Logline */}
               {script.logline && (
                 <div className='flex flex-col gap-3'>
                   <span className='font-mono text-label-mono-caps text-brand-accent uppercase tracking-[0.05em]'>
@@ -219,7 +125,6 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
                 </div>
               )}
 
-              {/* Synopsis */}
               {script.synopsis && (
                 <div className='flex flex-col gap-3'>
                   <span className='font-mono text-label-mono-caps text-brand-accent uppercase tracking-[0.05em]'>
@@ -231,7 +136,6 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
                 </div>
               )}
 
-              {/* Mobile CTA */}
               <div className='pt-2 md:hidden'>
                 <Link
                   href={`/scripts/${script.id}`}
@@ -241,7 +145,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
                     'hover:bg-brand-accent/90 transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
                   )}
-                  onClick={() => onOpenChange(false)}>
+                  onClick={onClose}>
                   Ler Roteiro
                 </Link>
               </div>

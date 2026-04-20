@@ -125,7 +125,7 @@ export const ratingsRouter = createTRPCRouter({
       const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
 
       rows.forEach((row) => {
-        const score = Math.round(row.score)
+        const score = Number(row.score)
         if (score >= 1 && score <= 5) {
           counts[score] = (counts[score] || 0) + 1
         }
