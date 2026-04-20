@@ -1,12 +1,15 @@
 # Task Review Summary — 2026-04-17 (atualizado)
 
+> Canonical POC summary: use `.agents/poc-context.json` for task state and `.agents/tasks/summary.md` for a human-readable status report.
+
 ## Status geral
 
 - Tasks poc-01 a poc-07: **arquivadas** (implementadas)
-- Tasks poc-08 e poc-09: **executadas** (E2E validation + Storage buckets)
-- Task poc-10: **executada** (ScriptPreviewModal)
-- Tasks poc-11 a poc-14: **pendentes** (ver `.agents/tasks/`)
-- Tasks poc-15 a poc-20: **novas** (correções de design + perfil + wizard) — em `.agents/tasks/`
+- Tasks poc-08 a poc-10: **executadas** (E2E validation, storage buckets, script preview modal)
+- Tasks poc-11 a poc-13: **concluídas** (search/filter sheet, SEO/OG meta, audio player)
+- Task poc-14: **pendente** (comment reactions)
+- Tasks poc-15, poc-16 e poc-17: **concluídas** (token corrections, header redesign, avatar/follow button)
+- Tasks poc-18 a poc-20: **pendentes** (ScriptModal design revision, profile pages, upload wizard redesign)
 
 ## Mudança de referência visual (2026-04-17)
 

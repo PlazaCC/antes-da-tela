@@ -16,6 +16,8 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
    - `pending` tasks by execution_order step → start first match
 2. Read the `task_file` path from the matched task entry.
 
+For a quick human-readable summary, also consult `.agents/tasks/summary.md`.
+
 **Never run `yarn build` or `yarn lint` at task start.** Released code is already validated. Builds run only post-implementation when an acceptance item explicitly requires it.
 
 ---

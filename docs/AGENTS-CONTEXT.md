@@ -91,7 +91,7 @@ Notas técnicas e convenções importantes
 
 Checklist rápida para agentes antes de criar/alterar código
 
-1. Ler este documento e `docs/POC-STATUS.md` (resumo de estado que existe no repositório).
+1. Ler este documento e `.agents/tasks/summary.md` (resumo de estado canônico para a POC).
 2. Verificar ADR/RFC correspondentes antes de propor mudanças (`docs/adrs/`, `docs/rfc/`).
 3. Se for mexer em DB, editar `server/db/schema.ts` e gerar migration (`yarn drizzle-kit generate`) — não aplique migrations sem revisar `DATABASE_URL_UNPOOLED`.
 4. Para upload de arquivos, preferir implementar upload direto cliente → Supabase Storage; só criar endpoint server-side se houver necessidade de processamento.
