@@ -108,4 +108,41 @@ export const ratingsRouter = createTRPCRouter({
 
       return (data?.score as number | null) ?? null
     }),
+
+  getStats: publicProcedure
+    .input(z.object({ scriptId: z.string().uuid() }))
+    .query(async ({ input, ctx }) => {
+      const { data, error } = await ctx.supabase
+        .from('ratings')
+        .select('score')
+        .eq('script_id', input.scriptId)
+
+      if (error) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+      }
+
+      const rows = (data ?? []) as Array<{ score: number }>
+      const total = rows.length
+      
+      // Calculate Average
+      const scores = rows.map((row) => Number(row.score))
+      const average = total > 0 ? scores.reduce((sum, value) => sum + value, 0) / total : 0
+
+      // Calculate Distribution with explicit order (5 down to 1)
+      const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      rows.forEach((row) => {
+        const score = Number(row.score)
+        if (score >= 1 && score <= 5) {
+          counts[score] = (counts[score] || 0) + 1
+        }
+      })
+
+      const distribution = [5, 4, 3, 2, 1].map((stars) => ({
+        stars,
+        count: counts[stars],
+        percentage: total > 0 ? (counts[stars] / total) * 100 : 0,
+      }))
+
+      return { average, total, distribution }
+    }),
 })

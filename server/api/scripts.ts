@@ -32,7 +32,7 @@ type ScriptDetail = {
     storage_path: string
     duration_seconds: number | null
   }>
-  author: { id: string; name: string | null; image: string | null } | null
+  author: { id: string; name: string | null; image: string | null; bio: string | null } | null
 }
 
 export const scriptCreateSchema = z.object({
@@ -156,7 +156,7 @@ export const scriptsRouter = createTRPCRouter({
         'id, title, logline, synopsis, genre, age_rating, is_featured, published_at, banner_path,' +
           ' script_files(id, storage_path, page_count, file_size),' +
           ' audio_files(id, storage_path, duration_seconds),' +
-          ' author:users!author_id(id, name, image)',
+          ' author:users!author_id(id, name, image, bio)',
       )
       .eq('id', input.id)
       .maybeSingle()

@@ -45,7 +45,7 @@ Record the file list. If empty → "No changes found vs main. Nothing to review.
 
 ## Step 2 — Read Every Changed File
 
-For each file in the diff, read its **current state** (not just the patch). Understand context, not just the lines that changed.
+For each file in the diff, read its **current state** using the Read tool (not just the patch). Understand context, not just the lines that changed.
 
 Priority order:
 1. New files (highest risk — no previous review)
@@ -73,35 +73,35 @@ Capture output. Include failures verbatim in the report.
 
 ## Step 4 — Review Against Project Rules
 
-Check each changed file against the applicable rules. Reference the project's CLAUDE.md, `.agents/rules/`, and `.claude/rules/`.
+Check each changed file against the applicable rules. Reference the CLAUDE.md and `.claude/rules/` for this project:
 
-### Supabase / Auth
+### Supabase / Auth (`.claude/rules/supabase.md`)
 - `createServerClient` used in Server Components, `createBrowserClient` in Client Components
 - No `SUPABASE_SERVICE_ROLE_KEY` in auth flows or client code
 - No `NEXT_PUBLIC_` prefix on service role key
 - No `.select('*')` when result crosses RSC → Client Component boundary
 - Uploads are client-side only (Supabase Storage direct upload)
-- URLs resolved server-side via `getPublicUrl()`, passed as props to Client Components
+- URLs resolved server-side via `getPublicUrl()`, passed as props
 
-### tRPC
+### tRPC (`.claude/rules/typescript.md`, CLAUDE.md)
 - `ctx.supabase` used for all data queries — no raw DB connections
 - `ctx.user` only in `authenticatedProcedure`, never in `publicProcedure`
 - `useTRPC()` from `@/trpc/client` in Client Components
 - `trpc` / `HydrateClient` from `@/trpc/server` for RSC prefetch
 - Zod schemas on all procedure inputs
 
-### Drizzle / Migrations
+### Drizzle / Migrations (`.claude/rules/drizzle.md`)
 - No runtime Drizzle client (`server/db/index.ts` was removed)
 - Schema changes in `server/db/schema.ts` + new migration file in `drizzle/`
 - Never retroactively edit generated migration files
 
-### Next.js App Router
+### Next.js App Router (`.claude/rules/nextjs.md`)
 - `"use client"` only on components that use hooks or event handlers
-- No sequential `await` chains that could be parallelized
+- No `async` Server Component that waterfalls — use `Promise.all` or parallel fetches
 - Dynamic imports for heavy components (`pdf.js`, etc.)
 - No sensitive data serialized through RSC → Client boundary
 
-### shadcn/ui + Tailwind
+### shadcn/ui + Tailwind (`.claude/rules/ui.md`)
 - No files manually created/edited in `components/ui/`
 - Wrappers in `components/<feature>/`, not `components/ui/`
 - `cn()` from `@/lib/utils` — never string concatenation
@@ -175,7 +175,7 @@ Files changed: <N> (<list file names>)
 - **Never** reference a function, import, or variable that you haven't confirmed exists in the current diff or file.
 - **Always** include `[FILE:LINE]` for every issue.
 - If you're unsure whether a pattern is a problem, say "Unverified — needs human review at [FILE:LINE]."
-- Do not invent rules not present in the project's CLAUDE.md or `.agents/rules/`.
+- Do not invent rules not present in CLAUDE.md or `.claude/rules/`.
 
 ---
 
@@ -207,6 +207,6 @@ Files changed: <N> (<list file names>)
 
 ## Integration
 
-**Called before:** creating a PR — run code-review, fix issues, then push and open the PR.
+**Called before:** `finishing-a-development-branch` — run code-review, fix issues, then create PR.
 
 **After completing review:** If issues found, fix them in the branch, then re-run this skill to confirm no regressions before creating the PR.

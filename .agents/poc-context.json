@@ -716,7 +716,7 @@
       "id": "poc-18-scriptmodal-design-revision",
       "scope": "Frontend",
       "title": "Script modal design revision",
-      "status": "pending",
+      "status": "done",
       "priority": "P1",
       "task_file": ".agents/tasks/poc-18-scriptmodal-design-revision.md"
     },

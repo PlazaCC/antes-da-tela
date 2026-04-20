@@ -1,3 +1,4 @@
+// custom — not shadcn-managed
 'use client'
 
 import { cn } from '@/lib/utils'
@@ -10,6 +11,7 @@ export interface StarRatingProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   readOnly?: boolean
   onChange?: (value: number) => void
   allowHalf?: boolean
+  size?: number
 }
 
 const STAR_POINTS = '10,2 12.59,7.36 18.51,8.09 14,12.26 15.18,18.09 10,15.27 4.82,18.09 6,12.26 1.49,8.09 7.41,7.36'
@@ -46,7 +48,7 @@ function getFill(starIndex: number, value: number): 'full' | 'half' | 'empty' {
 }
 
 export const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
-  ({ value, max = 5, readOnly = false, onChange, allowHalf = true, className, ...props }, ref) => {
+  ({ value, max = 5, readOnly = false, onChange, allowHalf = true, size = 20, className, ...props }, ref) => {
     const [hovered, setHovered] = useState<number | null>(null)
 
     const displayValue = hovered !== null ? hovered : value
@@ -109,7 +111,7 @@ export const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
             onKeyDown={(e) => handleKeyDown(e, i)}
             aria-label={allowHalf ? `${i + 0.5} or ${i + 1} stars` : `${i + 1} star${i === 0 ? '' : 's'}`}
             tabIndex={readOnly ? -1 : 0}>
-            <StarIcon fill={getFill(i, displayValue)} size={20} />
+            <StarIcon fill={getFill(i, displayValue)} size={size} />
           </button>
         ))}
       </div>
