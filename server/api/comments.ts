@@ -1,3 +1,4 @@
+import { REACTION_EMOJIS } from '@/lib/constants/reactions'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
@@ -38,7 +39,6 @@ export const commentsRouter = createTRPCRouter({
       const rows = data ?? []
       if (!rows.length) return [] as CommentWithAuthor[]
 
-      // Fetch reaction totals to sort by "hottest comment" (most reactions first)
       const { data: reactionData } = await ctx.supabase
         .from('comment_reactions')
         .select('comment_id')
@@ -174,7 +174,7 @@ export const commentsRouter = createTRPCRouter({
     .input(
       z.object({
         commentId: z.string().uuid(),
-        emoji: z.string().min(1).max(10),
+        emoji: z.enum(REACTION_EMOJIS),
       }),
     )
     .mutation(async ({ input, ctx }) => {

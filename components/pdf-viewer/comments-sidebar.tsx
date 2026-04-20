@@ -2,8 +2,8 @@
 
 import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
-import { ReactionBar } from '@/components/ui/reaction-bar'
-import { REACTION_EMOJIS } from '@/lib/constants/reactions'
+import { ReactionBar } from '@/components/comments/reaction-bar'
+import { REACTION_EMOJIS, type ReactionEmoji } from '@/lib/constants/reactions'
 import type { CommentWithAuthor, ReactionSummary } from '@/server/api/comments'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -54,7 +54,7 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
 
   const toggleReaction = useMutation(trpc.comments.toggleReaction.mutationOptions())
 
-  const handleToggleReaction = (commentId: string, emoji: string) => {
+  const handleToggleReaction = (commentId: string, emoji: ReactionEmoji) => {
     if (!currentUserId) {
       toast.error('Log in to react to comments.')
       return
@@ -118,7 +118,7 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
               <ReactionBar
                 disabled={c.author?.id === currentUserId}
                 reactions={buildReactionBarItems(c.id, reactionsMap)}
-                onSelect={(index) => handleToggleReaction(c.id, REACTION_EMOJIS[index])}
+                onSelect={(index) => handleToggleReaction(c.id, REACTION_EMOJIS[index] as ReactionEmoji)}
               />
             </div>
           </div>
