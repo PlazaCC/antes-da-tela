@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
-import { FileTextIcon, SettingsIcon, UserCircle2 } from 'lucide-react'
+import { FileUpIcon, LogOutIcon, SettingsIcon, UserCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -46,10 +46,11 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
       <DropdownMenuContent align='end' className='w-44'>
         <DropdownMenuItem asChild>
           <Link href='/publish' className='cursor-pointer'>
-            <FileTextIcon />
+            <FileUpIcon />
             Publicar Roteiro
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href={`/profile/${userId}`} className='cursor-pointer'>
             <UserCircle2 />
@@ -63,7 +64,8 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className='cursor-pointer text-text-muted focus:text-text-secondary' onSelect={handleLogout}>
+        <DropdownMenuItem className='cursor-pointer text-state-error focus:text-text-secondary' onSelect={handleLogout}>
+          <LogOutIcon />
           Sair
         </DropdownMenuItem>
       </DropdownMenuContent>

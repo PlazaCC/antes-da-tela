@@ -170,7 +170,8 @@ export const scriptsRouter = createTRPCRouter({
           .max(100)
           .regex(/^[^%,().]+$/, 'Invalid search characters')
           .optional(),
-        genre: z.enum(GENRES).optional(),
+        genres: z.array(z.enum(GENRES)).optional(),
+        ageRatings: z.array(z.enum(AGE_RATINGS)).optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -183,8 +184,12 @@ export const scriptsRouter = createTRPCRouter({
         queryBuilder = queryBuilder.or(`title.ilike.%${input.query}%,logline.ilike.%${input.query}%`)
       }
 
-      if (input.genre) {
-        queryBuilder = queryBuilder.eq('genre', input.genre)
+      if (input.genres && input.genres.length > 0) {
+        queryBuilder = queryBuilder.in('genre', input.genres)
+      }
+
+      if (input.ageRatings && input.ageRatings.length > 0) {
+        queryBuilder = queryBuilder.in('age_rating', input.ageRatings)
       }
 
       const { data } = await queryBuilder.limit(20)

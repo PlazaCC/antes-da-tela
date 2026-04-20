@@ -30,3 +30,13 @@ Implement the `Search Sheet` and `Filter Page` Figma screens: a bottom-sheet for
 - `components/filter-panel/filter-panel.tsx`
 - Updated `components/navbar.tsx` or `components/navbar-search.tsx`
 - Updated `app/home-client.tsx`
+
+## Completion
+
+- [x] `components/search-sheet/search-sheet.tsx` created (bottom Sheet, search input + live results via `trpc.scripts.search`, debounced 300ms)
+- [x] `components/filter-panel/filter-panel.tsx` created (left Sheet, Genre checkboxes + Age Rating checkboxes, Aplicar Filtros updates URL params)
+- [x] `components/navbar-mobile-controls.tsx` created (client component with SearchIcon md:hidden, manages SearchSheet state)
+- [x] `components/navbar.tsx` updated — mobile: shows NavBarMobileControls; desktop: NavBarSearch hidden md:block
+- [x] `app/home-client.tsx` updated — "Filtrar" button wired to FilterPanel, `age_rating` URL param passed to search query
+- [x] `server/api/scripts.ts` search endpoint updated with `ageRating` filter
+- [x] `yarn build` passes

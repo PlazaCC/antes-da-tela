@@ -1,17 +1,19 @@
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/server'
+import { FileUpIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { GoogleAuthButton } from './google-auth-button'
+import { NavBarMobileControls } from './navbar-mobile-controls'
 import { NavBarSearch } from './navbar-search'
 import { UserMenu } from './user-menu'
 
 export function NavBar() {
   return (
     <header aria-label='Principal' className='sticky top-0 z-50 bg-surface border-b border-border-default md:h-14'>
-      <div className='px-4 py-2 md:py-0 h-full flex md:items-center justify-between md:flex-row flex-col gap-1'>
+      <div className='px-4 py-2 md:py-0 h-full flex  justify-between gap-1'>
         {/* Left: Logo + Nav links */}
         <div className='flex items-center gap-10'>
           <Link href='/' className='shrink-0'>
@@ -35,6 +37,7 @@ export function NavBar() {
                 <Skeleton className='h-8 w-[352px] bg-elevated' />
                 <Skeleton className='h-8 w-[120px] bg-elevated' />
               </div>
+              <Skeleton className='h-7 w-7 rounded bg-elevated md:hidden' />
               <Skeleton className='h-7 w-7 rounded bg-elevated' />
             </div>
           }>
@@ -52,12 +55,13 @@ async function NavBarRightSection() {
 
   if (!user) {
     return (
-      <div className='flex items-center gap-8 justify-between'>
-        <div className='w-[352px]'>
+      <div className='flex items-center gap-4 justify-between'>
+        <div className='hidden md:block w-[352px]'>
           <Suspense>
             <NavBarSearch />
           </Suspense>
         </div>
+        <NavBarMobileControls />
         <GoogleAuthButton label='Login' className='w-auto h-8 px-4 text-sm rounded-sm' />
       </div>
     )
@@ -76,17 +80,23 @@ async function NavBarRightSection() {
 
   return (
     <div className='flex items-center gap-8 justify-between'>
-      {/* Search container: input + CTA */}
-      <div className='flex items-center md:gap-2.5 gap-0.5 w-full'>
+      {/* Desktop: search input + CTA */}
+      <div className='hidden md:flex items-center gap-2.5 w-full'>
         <div className='w-full max-w-[352px]'>
           <Suspense>
             <NavBarSearch />
           </Suspense>
         </div>
-        <Button asChild size='sm' className='h-8 w-[120px] text-sm rounded-[2px] shrink-0 md:d-block hidden'>
-          <Link href='/publish'>Novo Roteiro</Link>
+        <Button asChild size='sm' className='h-8 text-sm w-[124px] rounded-[2px] shrink-0'>
+          <Link href='/publish'>
+            <FileUpIcon />
+            Publicar
+          </Link>
         </Button>
       </div>
+
+      {/* Mobile: search icon */}
+      <NavBarMobileControls />
 
       {/* Profile container */}
       <UserMenu userId={userId} userName={userName} userImage={userImage} />

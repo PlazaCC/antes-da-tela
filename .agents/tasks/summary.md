@@ -39,7 +39,7 @@ Metadados atualizados:
 | --------------------------- | ------------------------------------------ | ---------------------- |
 | Header redesign             | `poc-16-header-redesign.md`                | concluído              |
 | Avatar + FollowButton       | `poc-17-avatar-followbutton-components.md` | concluído              |
-| Search Sheet + Filter Page  | `poc-11-search-filter-sheet.md`            | pendente               |
+| Search Sheet + Filter Page  | `poc-11-search-filter-sheet.md`            | concluído              |
 | ScriptModal design revision | `poc-18-scriptmodal-design-revision.md`    | pendente (dep: poc-17) |
 | Upload wizard redesign      | `poc-20-upload-wizard-redesign.md`         | pendente               |
 | SEO/OG meta                 | `poc-12-script-seo-og-meta.md`             | pendente               |
