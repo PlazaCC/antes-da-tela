@@ -24,7 +24,7 @@ export function Progress({ current, steps, className }: ProgressProps) {
                 'flex items-center gap-2 rounded-sm px-4 py-2 transition-colors whitespace-nowrap',
                 isCompleted && 'bg-state-success/70 border border-state-success',
                 isActive && 'bg-brand-accent',
-                !isCompleted && !isActive && 'bg-bg-elevated border border-border-default',
+                !isCompleted && !isActive && 'bg-elevated border border-border-default',
               )}>
               {isCompleted ? (
                 <Check className='h-3 w-3 text-text-primary flex-shrink-0' />

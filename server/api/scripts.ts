@@ -79,7 +79,7 @@ export const scriptsRouter = createTRPCRouter({
         status: 'published',
         published_at: new Date().toISOString(),
       })
-      .select()
+      .select('id, title')
       .single()
 
     if (scriptError || !script) {

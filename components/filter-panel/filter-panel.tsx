@@ -26,7 +26,6 @@ export function FilterPanel({ open, onOpenChange }: FilterPanelProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side='left'
-        showCloseButton={false}
         className={cn('p-0 gap-0 flex flex-col w-80 bg-surface border-border-subtle')}>
         <SheetTitle className='sr-only'>Filtrar roteiros</SheetTitle>
 

@@ -16,7 +16,7 @@ export function NavBarMobileControls() {
         aria-label='Publicar roteiro'
         size='icon'
         variant={'ghost'}
-        className='flex md:hidden items-center justify-center h-auto'>
+        className='flex md:hidden items-center justify-center h-auto text-muted-foreground'>
         <Link href='/publish'>
           <FileUpIcon />
         </Link>
@@ -26,7 +26,7 @@ export function NavBarMobileControls() {
         aria-label='Buscar roteiros'
         size='icon'
         variant={'ghost'}
-        className='flex md:hidden items-center justify-center'>
+        className='flex md:hidden items-center justify-center text-muted-foreground'>
         <SearchIcon />
       </Button>
       <SearchSheet open={searchOpen} onOpenChange={setSearchOpen} />

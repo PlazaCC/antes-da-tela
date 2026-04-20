@@ -43,7 +43,6 @@ export function SearchSheet({ open, onOpenChange }: SearchSheetProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side='bottom'
-        showCloseButton={false}
         className='p-0 gap-0 flex flex-col h-[80vh] bg-surface border-border-subtle'>
         <SheetTitle className='sr-only'>Buscar roteiros</SheetTitle>
 
