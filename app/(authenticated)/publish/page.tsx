@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DragZone } from '@/components/ui/drag-zone'
 import { Input } from '@/components/ui/input'
 import { useAutoFillPublishForm } from '@/lib/dev-mocks'
-import { AGE_RATINGS, GENRES } from '@/lib/constants/scripts'
+import { AGE_RATINGS, GENRES, formatAgeRating } from '@/lib/constants/scripts'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
@@ -416,7 +416,7 @@ export default function PublishPage() {
                           : 'border-border-subtle bg-elevated hover:border-brand-accent/50',
                       )}>
                       <span className='text-sm font-medium text-text-primary'>
-                        {value === 'livre' ? 'Livre' : `${value} anos`}
+                        {formatAgeRating(value)}
                       </span>
                       <input
                         type='radio'
@@ -457,7 +457,7 @@ export default function PublishPage() {
                 {form.ageRating && (
                   <ReviewRow
                     label='Faixa Etária'
-                    value={form.ageRating === 'livre' ? 'Livre' : `${form.ageRating} anos`}
+                    value={formatAgeRating(form.ageRating)}
                   />
                 )}
               </div>

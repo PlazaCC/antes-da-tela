@@ -31,7 +31,7 @@ export function Progress({ current, steps, className }: ProgressProps) {
               ) : (
                 <span
                   className={cn(
-                    'font-mono text-[11px] font-medium tracking-[2%]',
+                    'font-mono text-[11px] font-medium tracking-[0.02em]',
                     isActive ? 'text-text-primary' : 'text-text-muted',
                   )}>
                   {step}
@@ -39,7 +39,7 @@ export function Progress({ current, steps, className }: ProgressProps) {
               )}
               <span
                 className={cn(
-                  'hidden sm:inline font-mono text-[11px] font-medium tracking-[2%] uppercase',
+                  'hidden sm:inline font-mono text-[11px] font-medium tracking-[0.02em] uppercase',
                   isActive || isCompleted ? 'text-text-primary' : 'text-text-muted',
                 )}>
                 {label}

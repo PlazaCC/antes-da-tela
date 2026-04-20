@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { PauseIcon, PlayIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface Props {
@@ -85,7 +86,11 @@ export function AudioPlayer({ src, durationSeconds, className }: Props) {
         onClick={togglePlay}
         className='flex-none flex items-center justify-center w-8 h-8 rounded-full bg-brand-accent hover:bg-brand-accent/90 transition-colors'
         aria-label={playing ? 'Pausar' : 'Reproduzir'}>
-        <span className='text-[10px] text-text-primary leading-none'>{playing ? '⏸' : '▶'}</span>
+        {playing ? (
+          <PauseIcon className='w-3.5 h-3.5 text-text-primary' />
+        ) : (
+          <PlayIcon className='w-3.5 h-3.5 text-text-primary' />
+        )}
       </button>
 
       <div className='flex flex-col gap-2 flex-1 min-w-0'>

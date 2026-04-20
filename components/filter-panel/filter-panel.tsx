@@ -2,7 +2,7 @@
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
-import { AGE_RATINGS, GENRES } from '@/lib/constants/scripts'
+import { AGE_RATINGS, GENRES, formatAgeRating } from '@/lib/constants/scripts'
 import { useFilterParams } from '@/lib/hooks/use-filter-params'
 import { cn } from '@/lib/utils'
 
@@ -68,7 +68,7 @@ export function FilterPanel({ open, onOpenChange }: FilterPanelProps) {
                     className='h-4 w-4 rounded-sm bg-elevated border-border-subtle data-[state=checked]:bg-brand-accent data-[state=checked]:border-brand-accent'
                   />
                   <span className='text-xs text-text-secondary uppercase'>
-                    {r === 'livre' ? 'Livre' : `${r} anos`}
+                    {formatAgeRating(r)}
                   </span>
                 </label>
               ))}
