@@ -684,7 +684,7 @@
       "id": "poc-14-comment-reactions",
       "scope": "Backend",
       "title": "Wire ReactionBar to tRPC for comment reactions",
-      "status": "pending",
+      "status": "done",
       "priority": "P2",
       "task_file": ".agents/tasks/poc-14-comment-reactions.md"
     },
@@ -724,7 +724,7 @@
       "id": "poc-19-profile-pages",
       "scope": "Frontend",
       "title": "Profile pages and author dashboard",
-      "status": "pending",
+      "status": "done",
       "priority": "P1",
       "task_file": ".agents/tasks/poc-19-profile-pages.md"
     },
@@ -732,7 +732,7 @@
       "id": "poc-20-upload-wizard-redesign",
       "scope": "Frontend",
       "title": "Upload wizard redesign",
-      "status": "pending",
+      "status": "done",
       "priority": "P1",
       "task_file": ".agents/tasks/poc-20-upload-wizard-redesign.md"
     }

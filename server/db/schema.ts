@@ -251,6 +251,39 @@ export const userFollows = pgTable(
   ],
 )
 
+// ── Comment Reactions ─────────────────────────────────────────────────────────
+
+export const commentReactions = pgTable(
+  'comment_reactions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    commentId: uuid('comment_id')
+      .notNull()
+      .references(() => comments.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    emoji: text('emoji').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('comment_reactions_unique').on(table.commentId, table.userId, table.emoji),
+    pgPolicy('Reactions are publicly readable', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`true`,
+    }),
+    pgPolicy('Authenticated users manage their own reactions', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`auth.uid() = user_id`,
+      withCheck: sql`auth.uid() = user_id`,
+    }),
+  ],
+)
+
 // ── Relations ─────────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -275,9 +308,15 @@ export const audioFilesRelations = relations(audioFiles, ({ one }) => ({
   script: one(scripts, { fields: [audioFiles.scriptId], references: [scripts.id] }),
 }))
 
-export const commentsRelations = relations(comments, ({ one }) => ({
+export const commentsRelations = relations(comments, ({ one, many }) => ({
   script: one(scripts, { fields: [comments.scriptId], references: [scripts.id] }),
   author: one(users, { fields: [comments.authorId], references: [users.id] }),
+  reactions: many(commentReactions),
+}))
+
+export const commentReactionsRelations = relations(commentReactions, ({ one }) => ({
+  comment: one(comments, { fields: [commentReactions.commentId], references: [comments.id] }),
+  user: one(users, { fields: [commentReactions.userId], references: [users.id] }),
 }))
 
 export const ratingsRelations = relations(ratings, ({ one }) => ({
@@ -293,6 +332,7 @@ export type ScriptFile = typeof scriptFiles.$inferSelect
 export type AudioFile = typeof audioFiles.$inferSelect
 export type Comment = typeof comments.$inferSelect
 export type Rating = typeof ratings.$inferSelect
+export type CommentReaction = typeof commentReactions.$inferSelect
 
 export type NewScript = typeof scripts.$inferInsert
 export type NewComment = typeof comments.$inferInsert

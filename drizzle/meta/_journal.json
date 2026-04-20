@@ -36,6 +36,13 @@
       "when": 1776453476546,
       "tag": "0004_medical_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776711710285,
+      "tag": "0005_wealthy_starhawk",
+      "breakpoints": true
     }
   ]
 }

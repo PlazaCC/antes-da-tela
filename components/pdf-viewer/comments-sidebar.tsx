@@ -2,6 +2,9 @@
 
 import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
+import { ReactionBar } from '@/components/ui/reaction-bar'
+import { REACTION_EMOJIS } from '@/lib/constants/reactions'
+import type { ReactionSummary } from '@/server/api/comments'
 import type { CommentWithAuthor } from '@/server/api/comments'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -15,6 +18,19 @@ interface CommentsSidebarProps {
   currentUserId: string | null
 }
 
+function buildReactionBarItems(commentId: string, reactionsMap: Record<string, ReactionSummary[]>) {
+  const commentReactions = reactionsMap[commentId] ?? []
+  return REACTION_EMOJIS.map((emoji) => {
+    const found = commentReactions.find((r) => r.emoji === emoji)
+    return {
+      icon: emoji,
+      label: emoji,
+      count: found?.count ?? 0,
+      active: found?.userReacted ?? false,
+    }
+  })
+}
+
 export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProps) {
   const { currentPage } = usePDFViewerStore()
   const trpc = useTRPC()
@@ -26,22 +42,52 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
     enabled: !!currentPage,
   })
 
-  // Mutation without a global onSuccess — page is captured at submit time to avoid
-  // stale closure: if the user navigates to a different page while the request is
-  // in-flight, we still invalidate the page where the comment was actually posted.
+  const { data: reactionsMap = {} } = useQuery({
+    ...trpc.comments.listReactionsByPage.queryOptions({
+      scriptId,
+      pageNumber: currentPage,
+      currentUserId: currentUserId ?? undefined,
+    }),
+    enabled: !!currentPage,
+  })
+
   const createComment = useMutation(trpc.comments.create.mutationOptions())
+
+  const toggleReaction = useMutation(trpc.comments.toggleReaction.mutationOptions())
+
+  const handleToggleReaction = (commentId: string, emoji: string) => {
+    if (!currentUserId) {
+      toast.error('Log in to react to comments.')
+      return
+    }
+    const page = currentPage
+    toggleReaction.mutate(
+      { commentId, emoji },
+      {
+        onSuccess: () => {
+          void queryClient.invalidateQueries({
+            queryKey: trpc.comments.listReactionsByPage.queryOptions({
+              scriptId,
+              pageNumber: page,
+              currentUserId: currentUserId ?? undefined,
+            }).queryKey,
+          })
+        },
+        onError: (err) => {
+          toast.error(err.message)
+        },
+      },
+    )
+  }
 
   return (
     <aside className='flex flex-col gap-4 w-full lg:w-[400px] shrink-0 bg-surface border-l border-border-subtle p-5 min-h-full'>
-      {/* Page header — DM Mono uppercase (ref: design spec) */}
       <p className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider'>Page {currentPage}</p>
 
-      {/* Comment list (ref: Figma Comment 13:136) */}
       <div className='flex flex-col gap-3 flex-1 overflow-y-auto'>
         {(comments as CommentWithAuthor[]).map((c) => (
           <div key={c.id} className='bg-elevated rounded-sm p-3 border border-border-subtle flex flex-col gap-2'>
             <div className='flex items-center gap-2'>
-              {/* Avatar (ref: Figma 38:115) — initials fallback, clickable to profile */}
               {c.author?.id ? (
                 <Link href={`/profile/${c.author.id}`} className='shrink-0 hover:opacity-80 transition-opacity'>
                   <Avatar src={c.author.image} name={c.author.name ?? '?'} size='md' />
@@ -65,21 +111,22 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
               </span>
             </div>
             <p className='text-text-secondary text-body-small leading-relaxed'>{c.content}</p>
+            <ReactionBar
+              reactions={buildReactionBarItems(c.id, reactionsMap)}
+              onSelect={(index) => handleToggleReaction(c.id, REACTION_EMOJIS[index])}
+            />
           </div>
         ))}
 
         {comments.length === 0 && <p className='text-text-muted text-body-small'>No comments on this page yet.</p>}
       </div>
 
-      {/* Comment form or login CTA */}
       {currentUserId ? (
         <form
           onSubmit={(e) => {
             e.preventDefault()
             const trimmed = content.trim()
             if (!trimmed) return
-            // Capture pageNumber now so the invalidation targets the submitted page,
-            // not whatever page the user has navigated to by the time onSuccess fires.
             const submittedPage = currentPage
             createComment.mutate(
               { scriptId, pageNumber: submittedPage, content: trimmed },
