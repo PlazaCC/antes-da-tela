@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '../utils/render'
 
-import { ReactionBar } from '@/components/ui/reaction-bar'
+import { ReactionBar } from '@/components/comments/reaction-bar'
 
 test('ReactionBar renders reactions and calls onSelect', async () => {
   const user = userEvent.setup()

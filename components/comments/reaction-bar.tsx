@@ -5,10 +5,12 @@ export interface ReactionBarProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   reactions: { icon: React.ReactNode; label: string; count: number; active?: boolean }[]
   onSelect?: (index: number) => void
   selected?: number
+  disabled?: boolean
+  loading?: boolean
 }
 
 export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
-  ({ className, reactions, onSelect, selected, ...props }, ref) => (
+  ({ className, reactions, onSelect, selected, disabled, loading, ...props }, ref) => (
     <div ref={ref} className={cn('flex flex-wrap gap-2', className)} role='group' aria-label='Reactions' {...props}>
       {reactions.map((reaction, i) => {
         const isActive = reaction.active || selected === i
@@ -21,10 +23,13 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
               isActive
                 ? 'bg-brand-accent text-text-primary border-brand-accent'
                 : 'bg-elevated text-text-secondary border-border-subtle hover:border-brand-accent hover:text-text-primary',
+              disabled && 'pointer-events-none bg-transparent border-transparent',
+              loading && 'pointer-events-none opacity-50',
             )}
             onClick={() => onSelect?.(i)}
             aria-pressed={isActive}
-            aria-label={`${reaction.label}: ${reaction.count} reaction${reaction.count !== 1 ? 's' : ''}${isActive ? ', active' : ''}`}>
+            aria-label={`${reaction.label}: ${reaction.count} reaction${reaction.count !== 1 ? 's' : ''}${isActive ? ', active' : ''}`}
+            disabled={disabled || loading}>
             <span aria-hidden='true'>{reaction.icon}</span>
             <span>{reaction.count}</span>
           </button>

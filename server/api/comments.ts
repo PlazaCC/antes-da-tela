@@ -1,6 +1,9 @@
+import { REACTION_EMOJIS } from '@/lib/constants/reactions'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+
+export type ReactionSummary = { emoji: string; count: number; userReacted: boolean }
 
 export type CommentAuthor = { id: string; name: string | null; image: string | null }
 
@@ -28,13 +31,28 @@ export const commentsRouter = createTRPCRouter({
         .eq('script_id', input.scriptId)
         .eq('page_number', input.pageNumber)
         .is('deleted_at', null)
-        .order('created_at', { ascending: true })
 
       if (error) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       }
 
-      return (data ?? []) as unknown as CommentWithAuthor[]
+      const rows = data ?? []
+      if (!rows.length) return [] as CommentWithAuthor[]
+
+      const { data: reactionData } = await ctx.supabase
+        .from('comment_reactions')
+        .select('comment_id')
+        .in('comment_id', rows.map((c) => c.id))
+
+      const counts = new Map<string, number>()
+      for (const r of reactionData ?? []) {
+        counts.set(r.comment_id, (counts.get(r.comment_id) ?? 0) + 1)
+      }
+
+      return [...rows].sort((a, b) => {
+        const diff = (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0)
+        return diff !== 0 ? diff : new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      }) as unknown as CommentWithAuthor[]
     }),
 
   create: authenticatedProcedure
@@ -102,5 +120,98 @@ export const commentsRouter = createTRPCRouter({
       if (!data?.length) {
         throw new TRPCError({ code: 'FORBIDDEN', message: 'Comment not found or not owned by you' })
       }
+    }),
+
+  listReactionsByPage: publicProcedure
+    .input(
+      z.object({
+        scriptId: z.string().uuid(),
+        pageNumber: z.number().int().min(1),
+        currentUserId: z.string().uuid().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { data: commentData } = await ctx.supabase
+        .from('comments')
+        .select('id')
+        .eq('script_id', input.scriptId)
+        .eq('page_number', input.pageNumber)
+        .is('deleted_at', null)
+
+      if (!commentData?.length) return {} as Record<string, ReactionSummary[]>
+
+      const commentIds = commentData.map((c) => c.id)
+
+      const { data, error } = await ctx.supabase
+        .from('comment_reactions')
+        .select('comment_id, emoji, user_id')
+        .in('comment_id', commentIds)
+
+      if (error) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+      }
+
+      const result: Record<string, ReactionSummary[]> = {}
+      for (const row of data ?? []) {
+        if (!result[row.comment_id]) result[row.comment_id] = []
+        const existing = result[row.comment_id].find((r) => r.emoji === row.emoji)
+        if (existing) {
+          existing.count++
+          if (input.currentUserId && row.user_id === input.currentUserId) existing.userReacted = true
+        } else {
+          result[row.comment_id].push({
+            emoji: row.emoji,
+            count: 1,
+            userReacted: !!(input.currentUserId && row.user_id === input.currentUserId),
+          })
+        }
+      }
+
+      return result as Record<string, ReactionSummary[]>
+    }),
+
+  toggleReaction: authenticatedProcedure
+    .input(
+      z.object({
+        commentId: z.string().uuid(),
+        emoji: z.enum(REACTION_EMOJIS),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const userId = ctx.user!.id
+
+      const { data: comment } = await ctx.supabase
+        .from('comments')
+        .select('author_id')
+        .eq('id', input.commentId)
+        .maybeSingle()
+
+      if (!comment) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Comment not found' })
+      }
+
+      if (comment.author_id === userId) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Cannot react to your own comment' })
+      }
+
+      const { data: existing } = await ctx.supabase
+        .from('comment_reactions')
+        .select('id')
+        .eq('comment_id', input.commentId)
+        .eq('user_id', userId)
+        .eq('emoji', input.emoji)
+        .maybeSingle()
+
+      if (existing) {
+        const { error } = await ctx.supabase.from('comment_reactions').delete().eq('id', existing.id)
+        if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+        return { reacted: false }
+      }
+
+      const { error } = await ctx.supabase
+        .from('comment_reactions')
+        .insert({ comment_id: input.commentId, user_id: userId, emoji: input.emoji })
+      if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+      return { reacted: true }
     }),
 })
