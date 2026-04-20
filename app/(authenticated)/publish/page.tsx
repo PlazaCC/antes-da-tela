@@ -1,9 +1,12 @@
 'use client'
 
+import { Progress } from '@/components/progress'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { DragZone } from '@/components/ui/drag-zone'
 import { Input } from '@/components/ui/input'
 import { useAutoFillPublishForm } from '@/lib/dev-mocks'
+import { AGE_RATINGS, GENRES } from '@/lib/constants/scripts'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
@@ -11,34 +14,13 @@ import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
-const STEP_LABELS = ['Informações', 'Arquivo', 'Categorias', 'Revisão'] as const
-
-const GENRES = [
-  'drama',
-  'thriller',
-  'comédia',
-  'ficção científica',
-  'terror',
-  'romance',
-  'documentário',
-  'animação',
-  'outro',
-] as const
-
-const AGE_RATINGS = [
-  { value: 'livre', label: 'Livre' },
-  { value: '10', label: '10 anos' },
-  { value: '12', label: '12 anos' },
-  { value: '14', label: '14 anos' },
-  { value: '16', label: '16 anos' },
-  { value: '18', label: '18 anos' },
-] as const
-
 type Genre = (typeof GENRES)[number]
-type AgeRating = (typeof AGE_RATINGS)[number]['value']
+type AgeRating = (typeof AGE_RATINGS)[number]
 
-const MAX_PDF_BYTES = 50 * 1024 * 1024 // 50 MB
-const MAX_AUDIO_BYTES = 100 * 1024 * 1024 // 100 MB
+const STEP_LABELS = ['Informações', 'Arquivos', 'Categorias', 'Revisão'] as const
+
+const MAX_PDF_BYTES = 50 * 1024 * 1024
+const MAX_AUDIO_BYTES = 100 * 1024 * 1024
 
 function validatePDF(file: File): string | null {
   if (file.type !== 'application/pdf') return 'Apenas arquivos PDF são aceitos'
@@ -80,15 +62,42 @@ const INITIAL_FORM_STATE: PublishFormState = {
   audioError: '',
 }
 
+async function uploadWithProgress(
+  supabaseUrl: string,
+  accessToken: string,
+  bucket: string,
+  storagePath: string,
+  file: File,
+  onProgress: (pct: number) => void,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', `${supabaseUrl}/storage/v1/object/${bucket}/${storagePath}`)
+    xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
+    xhr.setRequestHeader('x-upsert', 'false')
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve()
+      else reject(new Error(`Upload falhou: ${xhr.status}`))
+    }
+    xhr.onerror = () => reject(new Error('Erro de rede durante o upload'))
+    xhr.send(file)
+  })
+}
+
 export default function PublishPage() {
   const router = useRouter()
-  // Stable browser Supabase client — layout has already verified the session.
   const supabase = useMemo(() => createClient(), [])
   const trpc = useTRPC()
 
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<PublishFormState>(INITIAL_FORM_STATE)
   const [userId, setUserId] = useState<string | null>(null)
+  const [pdfProgress, setPdfProgress] = useState(0)
+  const [audioProgress, setAudioProgress] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const pdfInputRef = useRef<HTMLInputElement>(null)
@@ -96,8 +105,6 @@ export default function PublishPage() {
   const isDraggingOver = useRef(false)
   const [dragActive, setDragActive] = useState(false)
 
-  // Read the user ID client-side so we can build the storage path.
-  // The layout already guards the route server-side, so this is always defined.
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUserId(data.user?.id ?? null)
@@ -114,7 +121,8 @@ export default function PublishPage() {
 
   const handlePDFSelect = useCallback((file: File) => {
     const error = validatePDF(file)
-    setForm((prev) => ({ ...prev, pdfFile: error ? null : file, pdfError: error ?? '' }))
+    setForm((prev) => ({ ...prev, pdfFile: error ? null : file, pdfError: error ?? '', pdfStoragePath: '' }))
+    setPdfProgress(0)
   }, [])
 
   const handleDrop = useCallback(
@@ -140,61 +148,55 @@ export default function PublishPage() {
     setDragActive(false)
   }
 
-  // All uploads are client-side — Vercel server functions time out at 10s.
-  const uploadPDF = async (): Promise<string> => {
-    if (!form.pdfFile) throw new Error('No PDF selected')
-    const storagePath = `${userId}/${Date.now()}_${form.pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-    setUploading(true)
-    const { error } = await supabase.storage.from('scripts').upload(storagePath, form.pdfFile)
-    setUploading(false)
-    if (error) throw new Error(error.message)
-    return storagePath
-  }
-
-  const uploadAudio = async (): Promise<string> => {
-    if (!form.audioFile) throw new Error('No audio file selected')
-    const storagePath = `${userId}/${Date.now()}_${form.audioFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-    setUploading(true)
-    const { error } = await supabase.storage.from('audio').upload(storagePath, form.audioFile)
-    setUploading(false)
-    if (error) throw new Error(error.message)
-    return storagePath
-  }
-
   const handlePublish = async () => {
     if (!userId) return
     setUploadError('')
-    // Preserve storagePaths so a retry after a mutation failure skips re-upload.
-    let storagePath = form.pdfStoragePath
-    let audioStoragePath = form.audioStoragePath
+
+    const session = await supabase.auth.getSession()
+    const accessToken = session.data.session?.access_token
+    if (!accessToken) {
+      setUploadError('Sessão expirada. Faça login novamente.')
+      return
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    let pdfPath = form.pdfStoragePath
+    let audioPath = form.audioStoragePath
+
     try {
-      if (!storagePath) {
-        storagePath = await uploadPDF()
-        setForm((prev) => ({ ...prev, pdfStoragePath: storagePath }))
+      setUploading(true)
+
+      if (!pdfPath && form.pdfFile) {
+        pdfPath = `${userId}/${Date.now()}_${form.pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+        await uploadWithProgress(supabaseUrl, accessToken, 'scripts', pdfPath, form.pdfFile, setPdfProgress)
+        setForm((prev) => ({ ...prev, pdfStoragePath: pdfPath }))
       }
-      if (form.audioFile && !audioStoragePath) {
-        audioStoragePath = await uploadAudio()
-        setForm((prev) => ({ ...prev, audioStoragePath }))
+
+      if (!audioPath && form.audioFile) {
+        audioPath = `${userId}/${Date.now()}_${form.audioFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+        await uploadWithProgress(supabaseUrl, accessToken, 'audio', audioPath, form.audioFile, setAudioProgress)
+        setForm((prev) => ({ ...prev, audioStoragePath: audioPath }))
       }
+
+      setUploading(false)
+
       await createMutation.mutateAsync({
         title: form.title,
         logline: form.logline || undefined,
         synopsis: form.synopsis || undefined,
         genre: form.genre || undefined,
         ageRating: form.ageRating || undefined,
-        storagePath,
+        storagePath: pdfPath,
         fileSize: form.pdfFile?.size,
-        audioStoragePath: audioStoragePath || undefined,
+        audioStoragePath: audioPath || undefined,
       })
     } catch (err) {
-      if (!storagePath) {
-        // Upload failed — mutation errors are surfaced via createMutation.error
-        setUploadError(err instanceof Error ? err.message : 'Falha no envio. Tente novamente.')
-      }
+      setUploading(false)
+      setUploadError(err instanceof Error ? err.message : 'Falha no envio. Tente novamente.')
     }
   }
 
-  // Auto-fill in development for faster form testing.
+  // Auto-fill in development for faster form testing
   useAutoFillPublishForm(setForm as unknown as Dispatch<SetStateAction<Record<string, unknown>>>)
 
   const canProceedStep1 = form.title.trim().length > 0
@@ -203,39 +205,13 @@ export default function PublishPage() {
   return (
     <div className='min-h-screen bg-bg-base'>
       <div className='max-w-2xl mx-auto px-5 py-12'>
-        {/* Progress indicator — pill tabs matching Figma Progress component */}
-        <div className='flex items-center mb-8'>
-          {STEP_LABELS.map((label, i) => {
-            const s = i + 1
-            return (
-              <div key={s} className='flex items-center'>
-                <div
-                  className={cn(
-                    'flex items-center gap-2 rounded-sm px-4 py-2 transition-colors',
-                    s < step
-                      ? 'bg-brand-accent/10 text-brand-accent/60'
-                      : s === step
-                        ? 'bg-brand-accent text-text-primary'
-                        : 'bg-surface border border-border-subtle text-text-secondary',
-                  )}>
-                  <span className='font-mono text-label-mono-caps text-xs font-medium tracking-wider'>{s}</span>
-                  <span className='hidden sm:inline font-mono text-label-mono-caps text-xs font-medium tracking-wider uppercase'>
-                    {label}
-                  </span>
-                </div>
-                {s < 4 && <div className='w-4 h-px bg-border-subtle' />}
-              </div>
-            )
-          })}
-        </div>
+        <Progress current={step} steps={[...STEP_LABELS]} className='mb-8' />
 
         <div className='bg-surface border border-border-subtle rounded-sm p-8'>
-          {/* ── Step 1: Basic Info ─────────────────────────────────── */}
+          {/* Step 1: Basic Info */}
           {step === 1 && (
             <div className='flex flex-col gap-6'>
               <h1 className='font-display text-heading-3 text-text-primary'>Informações Básicas</h1>
-
-              {/* dev auto-fill handled by useAutoFillPublishForm */}
 
               <div className='flex flex-col gap-2'>
                 <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
@@ -288,7 +264,7 @@ export default function PublishPage() {
             </div>
           )}
 
-          {/* ── Step 2: Files ──────────────────────────────────────── */}
+          {/* Step 2: Files */}
           {step === 2 && (
             <div className='flex flex-col gap-6'>
               <h1 className='font-display text-heading-3 text-text-primary'>Upload do Roteiro</h1>
@@ -330,14 +306,11 @@ export default function PublishPage() {
                 {form.pdfError && <p className='text-xs text-state-error'>{form.pdfError}</p>}
               </div>
 
-              {/* Optional audio upload */}
               <div className='flex flex-col gap-2'>
                 <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
                   Áudio de Leitura <span className='normal-case text-text-muted'>(opcional)</span>
                 </label>
-                <div
-                  onClick={() => audioInputRef.current?.click()}
-                  className='cursor-pointer'>
+                <div onClick={() => audioInputRef.current?.click()} className='cursor-pointer'>
                   <DragZone
                     title={form.audioFile ? form.audioFile.name : 'Arraste o áudio aqui'}
                     subtitle={
@@ -361,14 +334,18 @@ export default function PublishPage() {
                     const file = e.target.files?.[0]
                     if (!file) return
                     const error = validateAudio(file)
-                    setForm((prev) => ({ ...prev, audioFile: error ? null : file, audioError: error ?? '' }))
+                    setForm((prev) => ({ ...prev, audioFile: error ? null : file, audioError: error ?? '', audioStoragePath: '' }))
+                    setAudioProgress(0)
                   }}
                 />
                 {form.audioError && <p className='text-xs text-state-error'>{form.audioError}</p>}
                 {form.audioFile && (
                   <button
                     type='button'
-                    onClick={() => setForm((prev) => ({ ...prev, audioFile: null, audioStoragePath: '', audioError: '' }))}
+                    onClick={() => {
+                      setForm((prev) => ({ ...prev, audioFile: null, audioStoragePath: '', audioError: '' }))
+                      setAudioProgress(0)
+                    }}
                     className='text-xs text-text-muted hover:text-state-error text-left'>
                     Remover áudio
                   </button>
@@ -389,7 +366,7 @@ export default function PublishPage() {
             </div>
           )}
 
-          {/* ── Step 3: Categorization ─────────────────────────────── */}
+          {/* Step 3: Categorization */}
           {step === 3 && (
             <div className='flex flex-col gap-6'>
               <h1 className='font-display text-heading-3 text-text-primary'>Categorias</h1>
@@ -398,20 +375,28 @@ export default function PublishPage() {
                 <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
                   Gênero
                 </label>
-                <div className='flex flex-wrap gap-2'>
+                <div className='flex flex-col gap-2'>
                   {GENRES.map((g) => (
-                    <button
+                    <label
                       key={g}
-                      type='button'
-                      onClick={() => setForm((prev) => ({ ...prev, genre: prev.genre === g ? '' : g }))}
                       className={cn(
-                        'inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border transition-colors',
+                        'flex items-center gap-3 rounded-sm border px-4 py-3 cursor-pointer transition-colors',
                         form.genre === g
-                          ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
-                          : 'bg-surface border-border-subtle text-text-secondary hover:border-brand-accent/50',
+                          ? 'border-brand-accent bg-brand-accent/10'
+                          : 'border-border-subtle bg-elevated hover:border-brand-accent/50',
                       )}>
-                      {g}
-                    </button>
+                      <Checkbox
+                        checked={form.genre === g}
+                        onCheckedChange={() =>
+                          setForm((prev) => ({ ...prev, genre: prev.genre === g ? '' : g }))
+                        }
+                        className={cn(
+                          'border-border-subtle',
+                          form.genre === g && 'border-brand-accent data-[state=checked]:bg-brand-accent',
+                        )}
+                      />
+                      <span className='text-sm text-text-primary capitalize'>{g}</span>
+                    </label>
                   ))}
                 </div>
               </div>
@@ -421,7 +406,7 @@ export default function PublishPage() {
                   Faixa Etária
                 </label>
                 <div className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
-                  {AGE_RATINGS.map(({ value, label }) => (
+                  {AGE_RATINGS.map((value) => (
                     <label
                       key={value}
                       className={cn(
@@ -430,7 +415,9 @@ export default function PublishPage() {
                           ? 'border-brand-accent bg-brand-accent/10'
                           : 'border-border-subtle bg-elevated hover:border-brand-accent/50',
                       )}>
-                      <span className='text-sm font-medium text-text-primary'>{label}</span>
+                      <span className='text-sm font-medium text-text-primary'>
+                        {value === 'livre' ? 'Livre' : `${value} anos`}
+                      </span>
                       <input
                         type='radio'
                         name='ageRating'
@@ -455,7 +442,7 @@ export default function PublishPage() {
             </div>
           )}
 
-          {/* ── Step 4: Review ─────────────────────────────────────── */}
+          {/* Step 4: Review */}
           {step === 4 && (
             <div className='flex flex-col gap-6'>
               <h1 className='font-display text-heading-3 text-text-primary'>Revisão e Publicação</h1>
@@ -467,16 +454,30 @@ export default function PublishPage() {
                 {form.pdfFile && <ReviewRow label='PDF' value={form.pdfFile.name} />}
                 {form.audioFile && <ReviewRow label='Áudio' value={form.audioFile.name} />}
                 {form.genre && <ReviewRow label='Gênero' value={form.genre} />}
-                {form.ageRating && <ReviewRow label='Faixa Etária' value={form.ageRating} />}
+                {form.ageRating && (
+                  <ReviewRow
+                    label='Faixa Etária'
+                    value={form.ageRating === 'livre' ? 'Livre' : `${form.ageRating} anos`}
+                  />
+                )}
               </div>
+
+              {uploading && (
+                <div className='flex flex-col gap-3'>
+                  {form.pdfFile && pdfProgress < 100 && (
+                    <UploadProgressBar label='Enviando PDF' progress={pdfProgress} />
+                  )}
+                  {form.audioFile && audioProgress < 100 && (
+                    <UploadProgressBar label='Enviando áudio' progress={audioProgress} />
+                  )}
+                </div>
+              )}
 
               {(createMutation.error || uploadError) && (
                 <p className='text-sm text-state-error'>
                   {uploadError || 'Erro ao publicar o roteiro. Tente novamente.'}
                 </p>
               )}
-
-              {uploading && <p className='text-sm text-text-secondary'>Enviando PDF...</p>}
 
               <div className='flex justify-between'>
                 <Button variant='ghost' onClick={() => setStep(3)} disabled={uploading || createMutation.isPending}>
@@ -504,6 +505,23 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
         {label}
       </span>
       <span className='text-sm text-text-primary'>{value}</span>
+    </div>
+  )
+}
+
+function UploadProgressBar({ label, progress }: { label: string; progress: number }) {
+  return (
+    <div className='flex flex-col gap-1'>
+      <div className='flex justify-between text-xs text-text-secondary font-mono'>
+        <span>{label}</span>
+        <span>{progress}%</span>
+      </div>
+      <div className='h-1 w-full bg-border-subtle rounded-full overflow-hidden'>
+        <div
+          className='h-full bg-brand-accent transition-all duration-200'
+          style={{ width: `${progress}%` }}
+        />
+      </div>
     </div>
   )
 }
