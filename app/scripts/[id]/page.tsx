@@ -31,20 +31,43 @@ const getPageData = cache(async (id: string) => {
     audioUrl = data.publicUrl
   }
 
+  let bannerUrl: string | null = null
+  if (script?.banner_path) {
+    const { data } = ctx.supabase.storage
+      .from('scripts')
+      .getPublicUrl(script.banner_path)
+    bannerUrl = data.publicUrl
+  }
+
   return {
     script,
     pdfUrl,
     audioUrl,
+    bannerUrl,
     currentUserId: authData.user?.id ?? null,
   }
 })
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const { script } = await getPageData(id)
+  const { script, bannerUrl } = await getPageData(id)
+  const title = script?.title ?? 'Roteiro'
+  const description = script?.logline ?? 'Leia e discuta roteiros audiovisuais.'
+  const image = bannerUrl ?? '/opengraph-image.png'
   return {
-    title: script?.title ?? 'Roteiro',
-    description: script?.logline ?? 'Leia e discuta roteiros audiovisuais.',
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: image }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
   }
 }
 

@@ -20,6 +20,7 @@ type ScriptDetail = {
   age_rating: string | null
   is_featured: boolean
   published_at: string | null
+  banner_path: string | null
   script_files: Array<{
     id: string
     storage_path: string
@@ -152,7 +153,7 @@ export const scriptsRouter = createTRPCRouter({
     const { data: script } = await ctx.supabase
       .from('scripts')
       .select(
-        'id, title, logline, synopsis, genre, age_rating, is_featured, published_at,' +
+        'id, title, logline, synopsis, genre, age_rating, is_featured, published_at, banner_path,' +
           ' script_files(id, storage_path, page_count, file_size),' +
           ' audio_files(id, storage_path, duration_seconds),' +
           ' author:users!author_id(id, name, image)',

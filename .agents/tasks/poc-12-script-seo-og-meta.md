@@ -21,7 +21,7 @@ Add dynamic `metadata` export to `app/scripts/[id]/page.tsx` so each script page
 3. Add `NEXT_PUBLIC_APP_URL` to `.env.example` with placeholder value.
 
 ## Acceptance criterion
-`yarn build` passes; `curl https://<host>/scripts/<id>` response HTML contains `<meta property="og:title"` with the script's actual title.
+- [x] `yarn build` passes; `curl https://<host>/scripts/<id>` response HTML contains `<meta property="og:title"` with the script's actual title.
 
 ## Artifacts
 - Updated `app/scripts/[id]/page.tsx` (generateMetadata)
