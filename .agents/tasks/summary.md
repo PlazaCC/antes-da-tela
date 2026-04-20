@@ -44,11 +44,11 @@ Metadados atualizados:
 | Upload wizard redesign      | `poc-20-upload-wizard-redesign.md`         | pendente               |
 | SEO/OG meta                 | `poc-12-script-seo-og-meta.md`             | pendente               |
 
-### P2 — Features e perfil
+### P1 — Features e perfil (priorizado)
 
 | Task                    | Arquivo                       | Status                 |
 | ----------------------- | ----------------------------- | ---------------------- |
-| Audio player            | `poc-13-audio-player.md`      | pendente               |
+| Audio player            | `poc-13-audio-player.md`      | concluído              |
 | Profile pages (3 telas) | `poc-19-profile-pages.md`     | pendente (dep: poc-17) |
 | Comment reactions       | `poc-14-comment-reactions.md` | pendente               |
 

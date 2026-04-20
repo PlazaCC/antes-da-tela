@@ -26,6 +26,11 @@ type ScriptDetail = {
     page_count: number | null
     file_size: number | null
   }>
+  audio_files: Array<{
+    id: string
+    storage_path: string
+    duration_seconds: number | null
+  }>
   author: { id: string; name: string | null; image: string | null } | null
 }
 
@@ -39,12 +44,14 @@ export const scriptCreateSchema = z.object({
   fileSize: z.number().int().positive().optional(),
   pageCount: z.number().int().positive().optional(),
   bannerPath: z.string().optional(),
+  audioStoragePath: z.string().optional(),
+  audioDurationSeconds: z.number().int().positive().optional(),
   // authorId is read from the session — never accepted from client input
 })
 
 export const scriptsRouter = createTRPCRouter({
   create: authenticatedProcedure.input(scriptCreateSchema).mutation(async ({ input, ctx }) => {
-    const { storagePath, fileSize, pageCount, ageRating, bannerPath, ...scriptData } = input
+    const { storagePath, fileSize, pageCount, ageRating, bannerPath, audioStoragePath, audioDurationSeconds, ...scriptData } = input
     const authorId = ctx.user!.id
 
     // Ensure the author's profile exists in `users` to satisfy FK constraints.
@@ -102,8 +109,44 @@ export const scriptsRouter = createTRPCRouter({
       })
     }
 
+    if (audioStoragePath) {
+      await ctx.supabase.from('audio_files').insert({
+        script_id: script.id,
+        storage_path: audioStoragePath,
+        duration_seconds: audioDurationSeconds ?? null,
+      })
+    }
+
     return script
   }),
+
+  addAudioFile: authenticatedProcedure
+    .input(
+      z.object({
+        scriptId: z.string().uuid(),
+        storagePath: z.string().min(1),
+        durationSeconds: z.number().int().positive().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { data: script } = await ctx.supabase
+        .from('scripts')
+        .select('author_id')
+        .eq('id', input.scriptId)
+        .single()
+
+      if (!script || script.author_id !== ctx.user!.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Not the script author' })
+      }
+
+      const { error } = await ctx.supabase.from('audio_files').insert({
+        script_id: input.scriptId,
+        storage_path: input.storagePath,
+        duration_seconds: input.durationSeconds ?? null,
+      })
+
+      if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }),
 
   getById: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input, ctx }) => {
     const { data: script } = await ctx.supabase
@@ -111,6 +154,7 @@ export const scriptsRouter = createTRPCRouter({
       .select(
         'id, title, logline, synopsis, genre, age_rating, is_featured, published_at,' +
           ' script_files(id, storage_path, page_count, file_size),' +
+          ' audio_files(id, storage_path, duration_seconds),' +
           ' author:users!author_id(id, name, image)',
       )
       .eq('id', input.id)

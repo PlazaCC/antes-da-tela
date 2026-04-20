@@ -1,5 +1,6 @@
 'use client'
 
+import { AudioPlayer } from '@/components/audio-player'
 import { PDFViewer } from '@/components/pdf-viewer'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 import { StarRating } from '@/components/ui/star-rating'
@@ -24,10 +25,11 @@ const GENRE_VARIANT_MAP: Record<string, TagVariant> = {
 interface Props {
   script: ScriptDetail
   pdfUrl: string | null
+  audioUrl: string | null
   currentUserId: string | null
 }
 
-export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Props) {
+export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUserId }: Props) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -135,6 +137,13 @@ export default function ScriptPageClient({ script, pdfUrl, currentUserId }: Prop
           )}
         </div>
       </div>
+
+      {/* Audio player */}
+      {audioUrl && (
+        <div className='max-w-6xl mx-auto w-full px-5 pb-4'>
+          <AudioPlayer src={audioUrl} className='max-w-sm' />
+        </div>
+      )}
 
       {/* Reader — PDF + sidebar */}
       {pdfUrl ? (

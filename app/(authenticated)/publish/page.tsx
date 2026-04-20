@@ -38,10 +38,17 @@ type Genre = (typeof GENRES)[number]
 type AgeRating = (typeof AGE_RATINGS)[number]['value']
 
 const MAX_PDF_BYTES = 50 * 1024 * 1024 // 50 MB
+const MAX_AUDIO_BYTES = 100 * 1024 * 1024 // 100 MB
 
 function validatePDF(file: File): string | null {
   if (file.type !== 'application/pdf') return 'Apenas arquivos PDF são aceitos'
   if (file.size > MAX_PDF_BYTES) return 'O arquivo deve ter no máximo 50 MB'
+  return null
+}
+
+function validateAudio(file: File): string | null {
+  if (!file.type.startsWith('audio/')) return 'Apenas arquivos de áudio são aceitos'
+  if (file.size > MAX_AUDIO_BYTES) return 'O arquivo deve ter no máximo 100 MB'
   return null
 }
 
@@ -54,6 +61,9 @@ interface PublishFormState {
   pdfFile: File | null
   pdfStoragePath: string
   pdfError: string
+  audioFile: File | null
+  audioStoragePath: string
+  audioError: string
 }
 
 const INITIAL_FORM_STATE: PublishFormState = {
@@ -65,6 +75,9 @@ const INITIAL_FORM_STATE: PublishFormState = {
   pdfFile: null,
   pdfStoragePath: '',
   pdfError: '',
+  audioFile: null,
+  audioStoragePath: '',
+  audioError: '',
 }
 
 export default function PublishPage() {
@@ -79,6 +92,7 @@ export default function PublishPage() {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const pdfInputRef = useRef<HTMLInputElement>(null)
+  const audioInputRef = useRef<HTMLInputElement>(null)
   const isDraggingOver = useRef(false)
   const [dragActive, setDragActive] = useState(false)
 
@@ -126,8 +140,7 @@ export default function PublishPage() {
     setDragActive(false)
   }
 
-  // Upload is always client-side — Vercel server functions time out at 10s,
-  // which is not enough for PDF files up to 50 MB.
+  // All uploads are client-side — Vercel server functions time out at 10s.
   const uploadPDF = async (): Promise<string> => {
     if (!form.pdfFile) throw new Error('No PDF selected')
     const storagePath = `${userId}/${Date.now()}_${form.pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
@@ -138,15 +151,30 @@ export default function PublishPage() {
     return storagePath
   }
 
+  const uploadAudio = async (): Promise<string> => {
+    if (!form.audioFile) throw new Error('No audio file selected')
+    const storagePath = `${userId}/${Date.now()}_${form.audioFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+    setUploading(true)
+    const { error } = await supabase.storage.from('audio').upload(storagePath, form.audioFile)
+    setUploading(false)
+    if (error) throw new Error(error.message)
+    return storagePath
+  }
+
   const handlePublish = async () => {
     if (!userId) return
     setUploadError('')
-    // Preserve storagePath so a retry after a mutation failure skips re-upload.
+    // Preserve storagePaths so a retry after a mutation failure skips re-upload.
     let storagePath = form.pdfStoragePath
+    let audioStoragePath = form.audioStoragePath
     try {
       if (!storagePath) {
         storagePath = await uploadPDF()
         setForm((prev) => ({ ...prev, pdfStoragePath: storagePath }))
+      }
+      if (form.audioFile && !audioStoragePath) {
+        audioStoragePath = await uploadAudio()
+        setForm((prev) => ({ ...prev, audioStoragePath }))
       }
       await createMutation.mutateAsync({
         title: form.title,
@@ -156,6 +184,7 @@ export default function PublishPage() {
         ageRating: form.ageRating || undefined,
         storagePath,
         fileSize: form.pdfFile?.size,
+        audioStoragePath: audioStoragePath || undefined,
       })
     } catch (err) {
       if (!storagePath) {
@@ -301,6 +330,51 @@ export default function PublishPage() {
                 {form.pdfError && <p className='text-xs text-state-error'>{form.pdfError}</p>}
               </div>
 
+              {/* Optional audio upload */}
+              <div className='flex flex-col gap-2'>
+                <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
+                  Áudio de Leitura <span className='normal-case text-text-muted'>(opcional)</span>
+                </label>
+                <div
+                  onClick={() => audioInputRef.current?.click()}
+                  className='cursor-pointer'>
+                  <DragZone
+                    title={form.audioFile ? form.audioFile.name : 'Arraste o áudio aqui'}
+                    subtitle={
+                      form.audioFile
+                        ? `${(form.audioFile.size / 1024 / 1024).toFixed(1)} MB`
+                        : 'ou clique para selecionar — MP3, WAV, AAC — máx. 100 MB'
+                    }
+                    className={cn(
+                      'cursor-pointer',
+                      form.audioFile && !form.audioError && 'border-state-success/60 bg-state-success/5',
+                      form.audioError && 'border-state-error/60 bg-state-error/5',
+                    )}
+                  />
+                </div>
+                <input
+                  ref={audioInputRef}
+                  type='file'
+                  accept='audio/*'
+                  className='hidden'
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const error = validateAudio(file)
+                    setForm((prev) => ({ ...prev, audioFile: error ? null : file, audioError: error ?? '' }))
+                  }}
+                />
+                {form.audioError && <p className='text-xs text-state-error'>{form.audioError}</p>}
+                {form.audioFile && (
+                  <button
+                    type='button'
+                    onClick={() => setForm((prev) => ({ ...prev, audioFile: null, audioStoragePath: '', audioError: '' }))}
+                    className='text-xs text-text-muted hover:text-state-error text-left'>
+                    Remover áudio
+                  </button>
+                )}
+              </div>
+
               <div className='flex justify-between'>
                 <Button variant='ghost' onClick={() => setStep(1)}>
                   Voltar
@@ -391,6 +465,7 @@ export default function PublishPage() {
                 {form.logline && <ReviewRow label='Logline' value={form.logline} />}
                 {form.synopsis && <ReviewRow label='Sinopse' value={form.synopsis} />}
                 {form.pdfFile && <ReviewRow label='PDF' value={form.pdfFile.name} />}
+                {form.audioFile && <ReviewRow label='Áudio' value={form.audioFile.name} />}
                 {form.genre && <ReviewRow label='Gênero' value={form.genre} />}
                 {form.ageRating && <ReviewRow label='Faixa Etária' value={form.ageRating} />}
               </div>
