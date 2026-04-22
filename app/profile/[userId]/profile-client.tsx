@@ -12,7 +12,6 @@ import { useState } from 'react'
 interface Props {
   user: UserProfile | null
   scripts: ScriptListItem[]
-  currentUserId: string | null
   stats: ProfileStats
 }
 
@@ -28,7 +27,7 @@ function StatItem({ value, label, accent }: { value: string; label: string; acce
   )
 }
 
-export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
+export function ProfileClient({ user, scripts, stats }: Props) {
   const trpc = useTRPC()
   const [activeTab, setActiveTab] = useState<'scripts' | 'ratings' | 'activity'>('scripts')
 
@@ -46,7 +45,6 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
     )
   }
 
-  const isOwnProfile = currentUserId === user.id
   const userName = user.name?.trim() || 'Usuário'
   const handle = `@${userName.toLowerCase().replace(/\s+/g, '')} · Roteirista`
 

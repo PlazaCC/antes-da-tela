@@ -108,7 +108,7 @@ export class ScriptsService {
       .maybeSingle()
 
     if (!script) return null
-    const scriptData = script as any
+    const scriptData = script as unknown as Record<string, unknown> & { author?: unknown }
     return {
       ...scriptData,
       author: Array.isArray(scriptData.author) ? scriptData.author[0] : (scriptData.author ?? null),
@@ -123,10 +123,13 @@ export class ScriptsService {
       .order('published_at', { ascending: false })
       .limit(limit + 1)
 
-    const items = (rows ?? []).map((row: any) => ({
-      ...row,
-      author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
-    })) as ScriptListItem[]
+    const items = (rows ?? []).map((row) => {
+      const r = row as Record<string, unknown> & { author?: unknown }
+      return {
+        ...r,
+        author: Array.isArray(r.author) ? r.author[0] : (r.author ?? null),
+      }
+    }) as ScriptListItem[]
     const hasMore = items.length > limit
     return { items: items.slice(0, limit), hasMore }
   }
@@ -139,10 +142,13 @@ export class ScriptsService {
       .order('published_at', { ascending: false })
       .limit(6)
 
-    return (data ?? []).map((row: any) => ({
-      ...row,
-      author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
-    })) as ScriptListItem[]
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown> & { author?: unknown }
+      return {
+        ...r,
+        author: Array.isArray(r.author) ? r.author[0] : (r.author ?? null),
+      }
+    }) as ScriptListItem[]
   }
 
   async listByAuthor(authorId: string): Promise<ScriptListItem[]> {
@@ -153,10 +159,13 @@ export class ScriptsService {
       .eq('status', 'published')
       .order('published_at', { ascending: false })
 
-    return (data ?? []).map((row: any) => ({
-      ...row,
-      author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
-    })) as ScriptListItem[]
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown> & { author?: unknown }
+      return {
+        ...r,
+        author: Array.isArray(r.author) ? r.author[0] : (r.author ?? null),
+      }
+    }) as ScriptListItem[]
   }
 
   async getDashboardMetrics(authorId: string): Promise<DashboardMetrics> {
@@ -190,9 +199,12 @@ export class ScriptsService {
     }
 
     const { data } = await queryBuilder.limit(20)
-    return (data ?? []).map((row: any) => ({
-      ...row,
-      author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
-    })) as ScriptListItem[]
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown> & { author?: unknown }
+      return {
+        ...r,
+        author: Array.isArray(r.author) ? r.author[0] : (r.author ?? null),
+      }
+    }) as ScriptListItem[]
   }
 }

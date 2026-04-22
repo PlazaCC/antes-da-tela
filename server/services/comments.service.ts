@@ -32,10 +32,13 @@ export class CommentsService {
     }
 
     return rows
-      .map((row: any) => ({
-        ...row,
-        author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
-      }))
+      .map((row) => {
+        const r = row as Record<string, unknown> & { id: string; created_at: string; author?: unknown }
+        return {
+          ...r,
+          author: Array.isArray(r.author) ? r.author[0] : (r.author ?? null),
+        }
+      })
       .sort((a, b) => {
         const diff = (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0)
         return diff !== 0 ? diff : new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -61,7 +64,7 @@ export class CommentsService {
       })
     }
 
-    const comment = data as any
+    const comment = data as unknown as Record<string, unknown> & { author?: unknown }
     return {
       ...comment,
       author: Array.isArray(comment.author) ? comment.author[0] : (comment.author ?? null),

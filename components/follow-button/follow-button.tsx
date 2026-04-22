@@ -10,7 +10,7 @@ interface FollowButtonProps {
 }
 
 export function FollowButton({ authorId, className }: FollowButtonProps) {
-  const { userId, isLoading: authLoading } = useCurrentUser()
+  const { userId } = useCurrentUser()
   const { following, isLoading, isPending, toggle } = useFollow(authorId)
 
   if (userId === authorId) return null
