@@ -1,70 +1,68 @@
-# Task Review Summary — 2026-04-17 (atualizado)
+# Task Summary — 2026-04-22 (revisado)
 
-> Canonical POC summary: use `.agents/poc-context.json` for task state and `.agents/tasks/summary.md` for a human-readable status report.
+## Phase 1 (poc-01 to poc-20): COMPLETE ✓
 
-## Status geral
+---
 
-- Tasks poc-01 a poc-07: **arquivadas** (implementadas)
-- Tasks poc-08 a poc-10: **executadas** (E2E validation, storage buckets, script preview modal)
-- Tasks poc-11 a poc-13: **concluídas** (search/filter sheet, SEO/OG meta, audio player)
-- Task poc-14: **pendente** (comment reactions)
-- Tasks poc-15, poc-16 e poc-17: **concluídas** (token corrections, header redesign, avatar/follow button)
-- Tasks poc-18 a poc-20: **pendentes** (ScriptModal design revision, profile pages, upload wizard redesign)
+## Phase 2 — Design final (poc-21 to poc-26)
 
-## Mudança de referência visual (2026-04-17)
-
-Assets locais `.agents/figma/components/*.svg` e `.agents/figma/screens/*.png` foram **removidos**.
-A fonte de referência visual agora é o Figma via Framelink MCP:
+### Prioridades e dependências
 
 ```
-mcp__Framelink_Figma_MCP__get_figma_data(
-  fileKey="iUb8odefGSZiHz4KjuzX1M",
-  nodeId="<nodeId>"
-)
+poc-25 (cover/banner upload — schema + wizard)
+  └── poc-21 (Home: cover thumbnail + "Em Alta")
+        └── poc-22 (Modal: cover + audio no sidebar)
+
+poc-24 (PDF Reader mobile)  — independente
+poc-23 (Search/Filter)      — independente, P2
+poc-26 (Profile)            — depende de poc-21 para ScriptCard cover
 ```
 
-Metadados atualizados:
+### Status das tasks
 
-- `.agents/figma.meta.json` — v2 (sections-based, não pages-based)
-- `.agents/design-system.meta.json` — v4 (hex values confirmados via Figma)
+| Task | Arquivo | Prioridade | Status | Escopo real |
+|---|---|---|---|---|
+| poc-25 — Upload: capa e banner | `poc-25-upload-wizard-final-design.md` | **P0** | pending | Schema migration + 2 novos uploads no FileStep |
+| poc-21 — Home: "Em Alta" + cover | `poc-21-home-final-design.md` | **P1** | pending | Seção hot (JS/POC) + ScriptCard cover thumbnail |
+| poc-22 — Modal: cover + player | `poc-22-script-modal-final-design.md` | **P1** | pending | Cover placeholder + AudioPlayer no sidebar |
+| poc-24 — PDF Reader mobile | `poc-24-pdf-reader-final-design.md` | **P1** | pending | Breadcrumbs + player fixo mobile + comments sheet |
+| poc-23 — Search/Filter depar | `poc-23-search-filter-final-design.md` | **P2** | pending | 2 ajustes menores (link resultados + apply fix) |
+| poc-26 — Profile: banner upload | `poc-26-profile-flow-final-design.md` | **P2** | pending | Banner upload no edit profile + depar ScriptCards |
 
-## Ordem de execução recomendada
+### O que já está feito em cada tela
 
-### P0 — Fundação (executar primeiro, bloqueiam tudo)
+| Tela | Implementado | Falta |
+|---|---|---|
+| Home | Genre chips, grid, featured, filtros | Cover no ScriptCard, seção "Em Alta" |
+| Script Modal | 2 painéis, author, stats, tags | Cover placeholder, audio no sidebar |
+| Search Sheet | Bottom sheet com busca + resultados | Link "ver todos os resultados" |
+| Filter Panel | Gênero + classificação + checkboxes | Apply antes de fechar |
+| PDF Reader | Viewer, controles, comments, reactions | Breadcrumbs, mobile player fixo, comments sheet |
+| Upload Wizard | 4 steps completos, PDF + audio | Cover image upload, banner image upload |
+| Perfil público | Banner, avatar, stats, FollowButton, grid | Cover no ScriptCard (dep poc-21) |
+| Editar Perfil | Nav sidebar, avatar upload, nome/bio | Banner image upload |
+| Dashboard | Sidebar, MetricCards, tabela | Leituras únicas (POC: mostra "--") |
 
-| Task                | Arquivo                              | Status   |
-| ------------------- | ------------------------------------ | -------- |
-| Correção tokens CSS | `poc-15-design-token-corrections.md` | pendente |
+---
 
-### P1 — Correções de design e componentes críticos
+## Figma references
 
-| Task                        | Arquivo                                    | Status                 |
-| --------------------------- | ------------------------------------------ | ---------------------- |
-| Header redesign             | `poc-16-header-redesign.md`                | concluído              |
-| Avatar + FollowButton       | `poc-17-avatar-followbutton-components.md` | concluído              |
-| Search Sheet + Filter Page  | `poc-11-search-filter-sheet.md`            | concluído              |
-| ScriptModal design revision | `poc-18-scriptmodal-design-revision.md`    | pendente (dep: poc-17) |
-| Upload wizard redesign      | `poc-20-upload-wizard-redesign.md`         | pendente               |
-| SEO/OG meta                 | `poc-12-script-seo-og-meta.md`             | concluído              |
+- **File key:** `iUb8odefGSZiHz4KjuzX1M`
+- **MCP tool:** `mcp__Framelink_Figma_MCP__get_figma_data(fileKey, nodeId)`
+- Full component map: `.agents/figma.meta.json`
+- Design tokens: `.agents/design-system.meta.json`
 
-### P1 — Features e perfil (priorizado)
-
-| Task                    | Arquivo                       | Status                 |
-| ----------------------- | ----------------------------- | ---------------------- |
-| Audio player            | `poc-13-audio-player.md`      | concluído              |
-| Profile pages (3 telas) | `poc-19-profile-pages.md`     | pendente (dep: poc-17) |
-| Comment reactions       | `poc-14-comment-reactions.md` | pendente               |
-
-## Dependências
-
-```
-poc-15 → base para tudo
-poc-17 (Avatar + FollowButton) → poc-18, poc-19
-poc-16 (Header) → poc-19, poc-20
-```
-
-## NodeIds Figma confirmados (seções)
-
-- Fluxo principal: `186:1388`
-- Fluxo cadastro roteiro: `186:1350`
-- Perfil do usuário: `186:2075`
+| Screen | nodeId |
+|---|---|
+| Home | `51:562` |
+| Modal/Roteiro | `51:718` |
+| Search Sheet | `51:820` |
+| Filter Page | `51:930` |
+| PDF Reader | `51:1007` |
+| Upload Step 1 | `115:1008` |
+| Upload Step 2 | `115:1075` |
+| Upload Step 3 | `125:1430` |
+| Upload Step 4 | `128:1691` |
+| Perfil do Usuário | `186:1834` |
+| Editar Perfil | `186:1907` |
+| Dashboard | `186:1963` |
