@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '../utils/render'
 
-import { StarRating } from '@/components/ui/star-rating'
+import { StarRating } from '@/components/star-rating/star-rating'
 
 test('StarRating renders stars and triggers onChange', async () => {
   const user = userEvent.setup()

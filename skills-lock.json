@@ -166,6 +166,11 @@
       "sourceType": "github",
       "computedHash": "642a177bee320618caa49f5106cadb4e7594c606e867f61ba7b56d19cf745cd5"
     },
+    "simplify": {
+      "source": "brianlovin/claude-config",
+      "sourceType": "github",
+      "computedHash": "80ddf9f6ae4ad33f03b4e84e183c9458e19f6e13d85129261394634529aeb4b8"
+    },
     "subagent-driven-development": {
       "source": "obra/superpowers",
       "sourceType": "github",

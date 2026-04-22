@@ -3,8 +3,10 @@
 import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { createClient } from '@/lib/supabase/client'
+import { useAvatarUpload } from '@/lib/hooks/use-avatar-upload'
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { cn } from '@/lib/utils'
+import { profileSchema, type ProfileFormValues } from '@/lib/validators/profile'
 import { useTRPC } from '@/trpc/client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -12,14 +14,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod'
-
-const profileSchema = z.object({
-  name: z.string().min(2, 'Mínimo de 2 caracteres').max(100),
-  bio: z.string().max(500).optional(),
-})
-
-type FormValues = z.infer<typeof profileSchema>
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -42,18 +36,12 @@ const NAV_ITEMS = [
 export default function EditProfilePage() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const [supabase] = useState(() => createClient())
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
   const [activeNav, setActiveNav] = useState<string>('profile')
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUserId(data.user?.id ?? null)
-    })
-  }, [supabase])
+  const { userId } = useCurrentUser()
+  const { upload, isUploading } = useAvatarUpload()
 
   const profileOpts = trpc.users.getProfile.queryOptions({ id: userId ?? '' })
   const { data: profile } = useQuery({ ...profileOpts, enabled: !!userId })
@@ -65,17 +53,17 @@ export default function EditProfilePage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(profileSchema) })
+  } = useForm<ProfileFormValues>({ resolver: zodResolver(profileSchema) })
 
   useEffect(() => {
     if (profile) {
-      reset({ name: profile.name, bio: profile.bio ?? '' })
+      reset({ name: profile.name, bio: profile.bio ?? undefined })
     }
   }, [profile, reset])
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: ProfileFormValues) => {
     updateProfile.mutate(
-      { name: values.name, bio: values.bio ?? '' },
+      { name: values.name, bio: values.bio || null },
       {
         onSuccess: () => {
           void queryClient.invalidateQueries({ queryKey: profileOpts.queryKey })
@@ -84,33 +72,6 @@ export default function EditProfilePage() {
         onError: (err) => toast.error(err.message),
       },
     )
-  }
-
-  const handleAvatarUpload = async (file: File) => {
-    if (!userId) return
-    setUploading(true)
-    try {
-      const ext = file.name.split('.').pop() ?? 'png'
-      const path = `${userId}/${Date.now()}_avatar.${ext}`
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
-      if (uploadError) throw uploadError
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
-      if (!urlData?.publicUrl) throw new Error('Unable to generate avatar URL.')
-      updateProfile.mutate(
-        { image: urlData.publicUrl },
-        {
-          onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: profileOpts.queryKey })
-            toast.success('Avatar atualizado.')
-          },
-          onError: (err) => toast.error(err.message),
-        },
-      )
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Upload failed.')
-    } finally {
-      setUploading(false)
-    }
   }
 
   return (
@@ -149,10 +110,10 @@ export default function EditProfilePage() {
                 <div>
                   <button
                     type='button'
-                    disabled={uploading}
+                    disabled={isUploading}
                     onClick={() => fileRef.current?.click()}
                     className='flex items-center px-4 h-8 rounded-sm border border-border-subtle bg-elevated text-text-secondary font-sans text-[12px] hover:border-brand-accent hover:text-text-primary transition-colors disabled:opacity-50'>
-                    {uploading ? 'Enviando…' : 'Trocar foto'}
+                    {isUploading ? 'Enviando…' : 'Trocar foto'}
                   </button>
                   <input
                     ref={fileRef}
@@ -161,7 +122,7 @@ export default function EditProfilePage() {
                     className='hidden'
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file) void handleAvatarUpload(file)
+                      if (file) void upload(file)
                     }}
                   />
                 </div>

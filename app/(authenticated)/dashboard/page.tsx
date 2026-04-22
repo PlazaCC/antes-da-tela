@@ -92,7 +92,7 @@ export default function DashboardPage() {
         <div className='flex gap-6 mb-8'>
           <MetricCard value={String(totalScripts)} label='Roteiros publicados' />
           <MetricCard
-            value={avgRating !== null && avgRating !== undefined ? `${avgRating} ★` : '--'}
+            value={avgRating !== null && avgRating !== undefined ? `${avgRating.toFixed(1)} ★` : '--'}
             label='Avaliação média'
           />
           <MetricCard value={String(totalComments)} label='Comentários totais' />
@@ -144,7 +144,7 @@ export default function DashboardPage() {
                     {script.title}
                   </Link>
                   <span className='w-[100px] font-sans text-[12px] text-brand-accent'>
-                    {script.avgRating !== null ? `★ ${script.avgRating}` : '--'}
+                    {script.avgRating !== null ? `★ ${script.avgRating.toFixed(1)}` : '--'}
                   </span>
                   <span className='w-[100px] font-sans text-[12px] text-text-secondary'>
                     {script.commentCount}

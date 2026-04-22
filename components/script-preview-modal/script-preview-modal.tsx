@@ -2,9 +2,10 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Tag } from '@/components/ui/tag'
+import { Tag } from '@/components/tag/tag'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { cn } from '@/lib/utils'
+import { formatPublishedDate } from '@/lib/utils/format-date'
 import { useTRPC } from '@/trpc/client'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
@@ -41,9 +42,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
 
   const isLoading = scriptLoading || statsLoading
 
-  const publishedAt = script?.published_at
-    ? new Date(script.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
-    : null
+  const publishedAt = script?.published_at ? formatPublishedDate(script.published_at) : null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -3,6 +3,10 @@ import { createTRPCRouter } from '@/trpc/init'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { TRPCError } from '@trpc/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { RatingsService } from '@/server/services/ratings.service'
+import { UsersService } from '@/server/services/users.service'
+import { ScriptsService } from '@/server/services/scripts.service'
+import { CommentsService } from '@/server/services/comments.service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -35,13 +39,13 @@ const MOCK_SCRIPT = {
 
 /** Build a minimal Supabase mock for a given table operation chain. */
 function makeSupabaseMock(overrides: Record<string, unknown> = {}): SupabaseClient {
-  const upsert = vi.fn(() => Promise.resolve({ error: null }))
+  const upsert = vi.fn(() => Promise.resolve({ error: null, count: null, status: 200, statusText: 'OK' }))
   const selectAfterInsert = vi.fn(() => ({
-    single: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null })),
+    single: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null, count: null, status: 200, statusText: 'OK' })),
   }))
   const insertScript = vi.fn(() => ({ select: selectAfterInsert }))
-  const insertFile = vi.fn(() => Promise.resolve({ error: null }))
-  const deleteScript = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) }))
+  const insertFile = vi.fn(() => Promise.resolve({ error: null, count: null, status: 201, statusText: 'Created' }))
+  const deleteScript = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null, count: null, status: 204, statusText: 'No Content' })) }))
 
   const fromMap: Record<string, unknown> = {
     users: { upsert },
@@ -50,9 +54,9 @@ function makeSupabaseMock(overrides: Record<string, unknown> = {}): SupabaseClie
       delete: deleteScript,
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
-          maybeSingle: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null })),
+          maybeSingle: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null, count: null, status: 200, statusText: 'OK' })),
           order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [MOCK_SCRIPT], error: null })),
+            limit: vi.fn(() => Promise.resolve({ data: [MOCK_SCRIPT], error: null, count: null, status: 200, statusText: 'OK' })),
           })),
         })),
       })),
@@ -74,6 +78,10 @@ function makeCtx(supabase: SupabaseClient, user = MOCK_USER) {
     headers: new Headers(),
     user,
     supabase,
+    ratingsService: new RatingsService(supabase),
+    usersService: new UsersService(supabase),
+    scriptsService: new ScriptsService(supabase),
+    commentsService: new CommentsService(supabase),
   }
 }
 
@@ -128,7 +136,7 @@ describe('scriptsRouter.create', () => {
       scripts: {
         insert: vi.fn(() => ({
           select: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null })),
+            single: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null, count: null, status: 200, statusText: 'OK' })),
           })),
         })),
         delete: deleteMock,
@@ -163,7 +171,7 @@ describe('scriptsRouter.getById', () => {
       from: vi.fn(() => ({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
-            maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })),
+            maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null, count: null, status: 200, statusText: 'OK' })),
           })),
         })),
       })),
@@ -186,7 +194,7 @@ describe('scriptsRouter.listRecent', () => {
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
             order: vi.fn(() => ({
-              limit: vi.fn(() => Promise.resolve({ data: [MOCK_SCRIPT], error: null })),
+              limit: vi.fn(() => Promise.resolve({ data: [MOCK_SCRIPT], error: null, count: null, status: 200, statusText: 'OK' })),
             })),
           })),
         })),
@@ -207,7 +215,7 @@ describe('scriptsRouter.listRecent', () => {
           eq: vi.fn(() => ({
             order: vi.fn(() => ({
               // limit is called with limit+1; returning 2 items when limit=1 means hasMore=true
-              limit: vi.fn(() => Promise.resolve({ data: twoItems, error: null })),
+              limit: vi.fn(() => Promise.resolve({ data: twoItems, error: null, count: null, status: 200, statusText: 'OK' })),
             })),
           })),
         })),
@@ -238,7 +246,7 @@ describe('scriptsRouter.search — input validation', () => {
     chain.select = vi.fn(() => chain)
     chain.eq = vi.fn(() => chain)
     chain.or = vi.fn(() => chain)
-    chain.limit = vi.fn(() => Promise.resolve({ data: [], error: null }))
+    chain.limit = vi.fn(() => Promise.resolve({ data: [], error: null, count: null, status: 200, statusText: 'OK' }))
     const supabase = {
       from: vi.fn(() => chain),
     } as unknown as SupabaseClient

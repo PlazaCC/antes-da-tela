@@ -4,12 +4,13 @@ import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
 import { ReactionBar } from '@/components/comments/reaction-bar'
 import { REACTION_EMOJIS, type ReactionEmoji } from '@/lib/constants/reactions'
-import type { CommentWithAuthor, ReactionSummary } from '@/server/api/comments'
+import { useCommentActions } from '@/lib/hooks/use-comment-actions'
+import { formatPublishedDate } from '@/lib/utils/format-date'
+import type { CommentWithAuthor, ReactionSummary } from '@/lib/types'
 import { useTRPC } from '@/trpc/client'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
 interface CommentsSidebarProps {
@@ -33,7 +34,6 @@ function buildReactionBarItems(commentId: string, reactionsMap: Record<string, R
 export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProps) {
   const { currentPage } = usePDFViewerStore()
   const trpc = useTRPC()
-  const queryClient = useQueryClient()
   const [content, setContent] = useState('')
 
   const { data: comments = [] } = useQuery({
@@ -50,38 +50,10 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
     enabled: !!currentPage,
   })
 
-  const createComment = useMutation(trpc.comments.create.mutationOptions())
-
-  const toggleReaction = useMutation(trpc.comments.toggleReaction.mutationOptions())
-
-  const handleToggleReaction = (commentId: string, emoji: ReactionEmoji) => {
-    if (!currentUserId) {
-      toast.error('Log in to react to comments.')
-      return
-    }
-    const page = currentPage
-    toggleReaction.mutate(
-      { commentId, emoji },
-      {
-        onSuccess: () => {
-          // Invalidate reactions (counts/userReacted) and comment list (ordering may change)
-          void queryClient.invalidateQueries({
-            queryKey: trpc.comments.listReactionsByPage.queryOptions({
-              scriptId,
-              pageNumber: page,
-              currentUserId: currentUserId ?? undefined,
-            }).queryKey,
-          })
-          void queryClient.invalidateQueries({
-            queryKey: trpc.comments.list.queryOptions({ scriptId, pageNumber: page }).queryKey,
-          })
-        },
-        onError: (err) => {
-          toast.error(err.message)
-        },
-      },
-    )
-  }
+  const { createComment, toggleReaction, isCreating, isToggling } = useCommentActions(
+    scriptId,
+    currentUserId,
+  )
 
   return (
     <aside className='flex flex-col gap-4 w-full lg:w-[400px] shrink-0 bg-surface border-l border-border-subtle p-5 min-h-full'>
@@ -110,16 +82,18 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
                 </span>
               )}
               <span className='font-mono text-label-mono-small text-text-muted ml-auto shrink-0'>
-                {c.created_at ? new Date(c.created_at).toLocaleDateString('pt-BR') : '—'}
+                {c.created_at ? formatPublishedDate(c.created_at) : '—'}
               </span>
             </div>
             <p className='text-text-secondary text-body-small leading-relaxed'>{c.content}</p>
             <div>
               <ReactionBar
                 disabled={c.author?.id === currentUserId}
-                loading={toggleReaction.isPending}
+                loading={isToggling}
                 reactions={buildReactionBarItems(c.id, reactionsMap)}
-                onSelect={(index) => handleToggleReaction(c.id, REACTION_EMOJIS[index] as ReactionEmoji)}
+                onSelect={(index) =>
+                  toggleReaction(c.id, REACTION_EMOJIS[index] as ReactionEmoji, currentPage)
+                }
               />
             </div>
           </div>
@@ -130,25 +104,10 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
 
       {currentUserId ? (
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault()
-            const trimmed = content.trim()
-            if (!trimmed) return
-            const submittedPage = currentPage
-            createComment.mutate(
-              { scriptId, pageNumber: submittedPage, content: trimmed },
-              {
-                onSuccess: () => {
-                  void queryClient.invalidateQueries({
-                    queryKey: trpc.comments.list.queryOptions({ scriptId, pageNumber: submittedPage }).queryKey,
-                  })
-                  setContent('')
-                },
-                onError: (err) => {
-                  toast.error(err.message)
-                },
-              },
-            )
+            await createComment(currentPage, content)
+            setContent('')
           }}
           className='flex flex-col gap-2 border-t border-border-subtle pt-4'>
           <textarea
@@ -159,8 +118,8 @@ export function CommentsSidebar({ scriptId, currentUserId }: CommentsSidebarProp
             maxLength={1000}
             className='w-full rounded-sm border border-border-subtle bg-elevated p-3 text-body-small text-text-primary resize-none focus:outline-none focus:ring-1 focus:ring-brand-accent placeholder:text-text-muted'
           />
-          <Button type='submit' size='sm' disabled={createComment.isPending || !content.trim()}>
-            {createComment.isPending ? 'Posting…' : 'Comment'}
+          <Button type='submit' size='sm' disabled={isCreating || !content.trim()}>
+            {isCreating ? 'Posting…' : 'Comment'}
           </Button>
         </form>
       ) : (

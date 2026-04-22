@@ -7,18 +7,12 @@
     "branch_active": "main",
     "deploy": "Vercel (free tier)",
     "docs": {
-      "poc": "docs/POC.md",
       "adr": "docs/adrs/ADR-001-antes-da-tela.md",
       "setup": "docs/SETUP.md",
-      "agents_context": "docs/AGENTS-CONTEXT.md",
       "poc_status": ".agents/tasks/summary.md"
-    },
-    "hypotheses": [
-      "Existe demanda por leitura centralizada de roteiros",
-      "Roteiristas querem feedback estruturado por página",
-      "Curadoria aumenta descoberta"
-    ]
+    }
   },
+
   "stack": {
     "framework": "Next.js App Router + TypeScript",
     "auth": "@supabase/ssr (createServerClient / createBrowserClient)",
@@ -35,6 +29,7 @@
     "errors": "Sentry",
     "pkg_manager": "Yarn 4 (Berry)"
   },
+
   "critical_paths": {
     "schema": "server/db/schema.ts",
     "router_root": "server/api/root.ts",
@@ -43,8 +38,6 @@
     "trpc_server": "trpc/server.tsx",
     "supabase_client": "lib/supabase/client.ts",
     "supabase_server": "lib/supabase/server.ts",
-    "proxy": "proxy.ts",
-    "proxy_session": "lib/supabase/proxy.ts",
     "authenticated_layout": "app/(authenticated)/layout.tsx",
     "trpc_handler": "app/api/trpc/[trpc]/route.ts",
     "globals_css": "app/globals.css",
@@ -52,6 +45,7 @@
     "components_ui": "components/ui/",
     "task_files": ".agents/tasks/"
   },
+
   "conventions": {
     "classname": "cn() from @/lib/utils",
     "upload": "always client-side to Supabase Storage (Vercel 10s timeout)",
@@ -68,6 +62,7 @@
     "select_discipline": "Always use explicit column selection in queries that cross RSC boundary — never select('*') for data passed to Client Components",
     "mutation_page_capture": "In TanStack Query mutations, capture page/volatile state at submit time via per-call onSuccess, not in mutationOptions closure"
   },
+
   "validation_commands": {
     "build": "yarn build",
     "lint": "yarn lint",
@@ -75,521 +70,128 @@
     "db_migrate": "yarn drizzle-kit migrate",
     "dev": "yarn dev"
   },
-  "tasks": [
-    {
-      "id": "poc-01",
-      "scope": "Design System",
-      "title": "[Design System] - Tokens visuais, componentes e playground",
-      "clickup": "https://app.clickup.com/t/86agwj9wg",
-      "status": "done",
-      "priority": "urgent",
-      "depends_on": [],
-      "branch": "feat/design-system",
-      "task_file": ".agents/tasks/archived/poc-01-design-system-summary.md",
-      "objective": "Merge da branch de design system, garantindo tokens HSL corretos e playground funcional",
-      "files_affected": [
-        "tailwind.config.ts",
-        "app/globals.css",
-        "app/layout.tsx",
-        "components/ui/*",
-        "app/development/design-system/page.tsx",
-        "app/development/components/page.tsx"
-      ],
-      "acceptance": [
-        {
-          "id": "ds-1",
-          "item": "yarn build e yarn lint passam sem erros após merge",
-          "done": true
-        },
-        {
-          "id": "ds-2",
-          "item": "CSS vars usam HSL channels (não hex) em :root e .dark",
-          "done": true
-        },
-        {
-          "id": "ds-3",
-          "item": "Tailwind tokens usam nested objects (state.success, brand.accent), não slash-keys",
-          "done": true
-        },
-        {
-          "id": "ds-4",
-          "item": "Plugin tailwindcss-animate via static import (não dynamic import)",
-          "done": true
-        },
-        {
-          "id": "ds-5",
-          "item": "MetricCard usa state-success/state-error (não green-500/red-500)",
-          "done": true
-        },
-        {
-          "id": "ds-6",
-          "item": "app/layout.tsx título 'Antes da Tela' (não starter kit padrão)",
-          "done": true
-        },
-        {
-          "id": "ds-7",
-          "item": "Token colors renderizam corretamente em /development/design-system",
-          "done": true
-        },
-        {
-          "id": "ds-8",
-          "item": "Branch feat/design-system merged em main",
-          "done": true
-        }
-      ]
-    },
-    {
-      "id": "poc-02",
-      "scope": "DB",
-      "title": "[DB] - Modelagem Drizzle e migrations",
-      "clickup": "https://app.clickup.com/t/86agq8yhn",
-      "status": "done",
-      "priority": "urgent",
-      "depends_on": [],
-      "blocker": true,
-      "task_file": ".agents/tasks/archived/poc-02-db-schema-summary.md",
-      "objective": "Schema completo Drizzle + migrations aplicadas + Storage buckets com CORS",
-      "files_affected": ["server/db/schema.ts"],
-      "tables_to_create": ["scripts", "script_files", "audio_files", "comments", "ratings"],
-      "table_existing": ["users"],
-      "storage_buckets": [
-        {
-          "name": "scripts",
-          "public": true,
-          "max_mb": 50,
-          "mime": "application/pdf"
-        },
-        {
-          "name": "audio",
-          "public": true,
-          "max_mb": 100,
-          "mime": "audio/*"
-        },
-        {
-          "name": "avatars",
-          "public": true,
-          "max_mb": 5,
-          "mime": "image/*"
-        }
-      ],
-      "acceptance": [
-        {
-          "id": "db-1",
-          "item": "yarn drizzle-kit generate sem erros",
-          "done": true
-        },
-        {
-          "id": "db-2",
-          "item": "yarn drizzle-kit migrate aplicado no Supabase",
-          "done": true
-        },
-        {
-          "id": "db-3",
-          "item": "6 tabelas visíveis no painel Supabase com colunas e FKs corretas",
-          "done": true
-        },
-        {
-          "id": "db-4",
-          "item": "Coluna bio adicionada em users",
-          "done": true
-        },
-        {
-          "id": "db-5",
-          "item": "unique index ratings(script_id, user_id) existe",
-          "done": true
-        },
-        {
-          "id": "db-6",
-          "item": "Buckets scripts, audio, avatars criados com políticas",
-          "done": true
-        },
-        {
-          "id": "db-7",
-          "item": "CORS configurado no bucket scripts para localhost e *.vercel.app",
-          "done": true
-        },
-        {
-          "id": "db-8",
-          "item": "yarn build passa com tipos Drizzle inferidos",
-          "done": true
-        },
-        {
-          "id": "db-9",
-          "item": "Exports de tipos (User, Script, Comment, Rating) em schema.ts",
-          "done": true
-        }
-      ]
-    },
-    {
-      "id": "poc-03",
-      "scope": "Auth",
-      "title": "[Auth] - Autenticação completa e fluxos de sessão",
-      "clickup": "https://app.clickup.com/t/86agq8yny",
-      "status": "done",
-      "priority": "urgent",
-      "depends_on": ["poc-02"],
-      "task_file": ".agents/tasks/archived/poc-03-auth-summary.md",
-      "objective": "Fluxo completo: cadastro, login, recuperação de senha, sessão SSR, middleware de proteção",
-      "files_affected": [
-        "proxy.ts",
-        "lib/supabase/proxy.ts",
-        "app/(authenticated)/layout.tsx",
-        "app/auth/login/page.tsx",
-        "app/auth/callback/route.ts",
-        "server/api/users.ts",
-        "server/api/root.ts"
-      ],
-      "protected_routes": ["/publish", "/account"],
-      "route_group": "app/(authenticated)/",
-      "acceptance": [
-        {
-          "id": "auth-1",
-          "item": "proxy.ts + lib/supabase/proxy.ts refreshSession em todas as rotas",
-          "done": true
-        },
-        {
-          "id": "auth-2",
-          "item": "/publish e /account redirecionam para login quando não autenticado",
-          "done": true
-        },
-        {
-          "id": "auth-3",
-          "item": "Cadastro cria registro na tabela users via tRPC",
-          "done": true
-        },
-        {
-          "id": "auth-4",
-          "item": "Sessão persiste após refresh (cookie SSR correto)",
-          "done": true
-        },
-        {
-          "id": "auth-5",
-          "item": "Email de confirmação e recuperação chegam via Resend",
-          "done": true
-        },
-        {
-          "id": "auth-6",
-          "item": "Formulários exibem erro inline por campo (Zod validation)",
-          "done": true
-        },
-        {
-          "id": "auth-7",
-          "item": "yarn build passa sem erros de tipo",
-          "done": true
-        }
-      ]
-    },
-    {
-      "id": "poc-04",
-      "scope": "Upload",
-      "title": "[Upload] - Formulário de publicação e upload de PDF",
-      "clickup": "https://app.clickup.com/t/86agq8z1h",
-      "status": "done",
-      "priority": "high",
-      "depends_on": ["poc-02", "poc-03"],
-      "task_file": ".agents/tasks/archived/poc-04-upload-summary.md",
-      "objective": "Formulário de publicação + upload direto client→Storage + tRPC scripts router",
-      "files_to_create": [
-        "server/api/scripts.ts",
-        "app/(authenticated)/publish/page.tsx",
-        "app/scripts/[id]/page.tsx",
-        "app/scripts/[id]/script-page-client.tsx"
-      ],
-      "files_to_update": ["server/api/root.ts"],
-      "trpc_router": "scriptsRouter",
-      "trpc_endpoints": ["create", "getById", "listRecent", "listFeatured", "listByAuthor", "search"],
-      "upload_constraint": "client-side only — Vercel server timeout 10s",
-      "max_file_size_mb": 50,
-      "acceptance": [
-        {
-          "id": "up-1",
-          "item": "scriptsRouter com 6 endpoints registrado em root.ts",
-          "done": true
-        },
-        {
-          "id": "up-2",
-          "item": "Upload client-side direto para bucket scripts",
-          "done": true
-        },
-        {
-          "id": "up-3",
-          "item": "Validação: tipo PDF + tamanho max 50MB client-side",
-          "done": true
-        },
-        {
-          "id": "up-4",
-          "item": "Script criado acessível em /scripts/[id] após publicação",
-          "done": true
-        },
-        {
-          "id": "up-5",
-          "item": "Progresso de upload exibido durante envio",
-          "done": true
-        },
-        {
-          "id": "up-6",
-          "item": "yarn build passa sem erros",
-          "done": true
-        }
-      ]
-    },
-    {
-      "id": "poc-05",
-      "scope": "Leitor",
-      "title": "[Leitor] - PDF viewer com comentários ancorados por página",
-      "clickup": "https://app.clickup.com/t/86agq8yv2",
-      "status": "done",
-      "priority": "urgent",
-      "depends_on": ["poc-02", "poc-04"],
-      "task_file": ".agents/tasks/archived/poc-05-leitor-summary.md",
-      "objective": "PDFViewer (pdfjs-dist, dynamic import) + Zustand store + sidebar comentários por página",
-      "files_to_create": [
-        "components/pdf-viewer/pdf-viewer.tsx",
-        "components/pdf-viewer/pdf-viewer-store.ts",
-        "components/pdf-viewer/comments-sidebar.tsx",
-        "components/pdf-viewer/index.ts",
-        "server/api/comments.ts"
-      ],
-      "files_to_update": ["app/scripts/[id]/script-page-client.tsx", "server/api/root.ts"],
-      "trpc_router": "commentsRouter",
-      "trpc_endpoints": ["list", "create", "delete"],
-      "pdf_constraint": "next/dynamic with ssr: false — pdfjs is client-only",
-      "comment_model": "soft delete via deleted_at field",
-      "acceptance": [
-        {
-          "id": "lei-1",
-          "item": "PDFViewer carregado com next/dynamic ssr:false",
-          "done": true
-        },
-        {
-          "id": "lei-2",
-          "item": "Zustand store controla currentPage compartilhado com sidebar",
-          "done": true
-        },
-        {
-          "id": "lei-3",
-          "item": "Navegar página atualiza comentários da sidebar automaticamente",
-          "done": true
-        },
-        {
-          "id": "lei-4",
-          "item": "Usuário autenticado cria comentário sem reload",
-          "done": true
-        },
-        {
-          "id": "lei-5",
-          "item": "Usuário não autenticado vê comentários + CTA login",
-          "done": true
-        },
-        {
-          "id": "lei-6",
-          "item": "Sem erros de CORS ao carregar PDF do bucket scripts",
-          "done": true
-        },
-        {
-          "id": "lei-7",
-          "item": "Performance aceitável em roteiros de até 120 páginas",
-          "done": true
-        },
-        {
-          "id": "lei-8",
-          "item": "yarn build limpo (sem erros SSR do pdfjs)",
-          "done": true
-        }
-      ]
-    },
-    {
-      "id": "poc-06",
-      "scope": "Home",
-      "title": "[Home] - Listagem de roteiros e descoberta",
-      "clickup": "https://app.clickup.com/t/86agq8z5g",
-      "status": "done",
-      "priority": "high",
-      "depends_on": ["poc-02", "poc-04"],
-      "task_file": ".agents/tasks/archived/poc-06-home-summary.md",
-      "objective": "Home SSR com listagem recente + destaque + filtro gênero + busca debounce 300ms",
-      "files_to_create": ["app/home-client.tsx", "lib/hooks/use-debounce.ts"],
-      "files_to_update": ["app/page.tsx"],
-      "ssr_pattern": "trpc.scripts.listRecent.prefetch() + HydrateClient in Server Component",
-      "acceptance": [
-        {
-          "id": "home-1",
-          "item": "Roteiros visíveis no view-source HTML (SSR confirmado)",
-          "done": true
-        },
-        {
-          "id": "home-2",
-          "item": "Filtro por gênero refiltra grid sem reload",
-          "done": true
-        },
-        {
-          "id": "home-3",
-          "item": "Busca com debounce 300ms (sem request por tecla)",
-          "done": true
-        },
-        {
-          "id": "home-4",
-          "item": "Seção 'em destaque' para scripts com is_featured=true",
-          "done": true
-        },
-        {
-          "id": "home-5",
-          "item": "ScriptCard responsivo: 1 coluna mobile (375px), 3 colunas desktop (1280px)",
-          "done": true
-        },
-        {
-          "id": "home-6",
-          "item": "yarn build limpo",
-          "done": true
-        }
-      ]
-    },
-    {
-      "id": "poc-07",
-      "scope": "Perfil",
-      "title": "[Perfil] - Página pública do roteirista e avaliações",
-      "clickup": "https://app.clickup.com/t/86agq8zbq",
-      "status": "done",
-      "priority": "normal",
-      "depends_on": ["poc-02", "poc-03", "poc-04"],
-      "task_file": ".agents/tasks/archived/poc-07-perfil-summary.md",
-      "objective": "Public profile /profile/[userId] + tRPC ratingsRouter + interactive StarRating",
-      "files_to_create": [
-        "server/api/ratings.ts",
-        "app/profile/[userId]/page.tsx",
-        "app/profile/[userId]/profile-client.tsx",
-        "app/(authenticated)/account/page.tsx"
-      ],
-      "files_to_update": ["server/api/root.ts", "app/scripts/[id]/script-page-client.tsx"],
-      "trpc_router": "ratingsRouter",
-      "trpc_endpoints": ["upsert", "getAverage", "getUserRating"],
-      "component_existing": "components/ui/star-rating.tsx",
-      "rules": {
-        "self_rating": "FORBIDDEN — TRPCError if authorId === userId",
-        "upsert": "onConflictDoUpdate on (script_id, user_id)"
+
+  "phase": {
+    "current": "design-final",
+    "description": "Phase 1 (poc-01–poc-20) complete. Phase 2 aligns all screens to final Figma design.",
+    "phase1_complete": [
+      "poc-01 — design system tokens + components",
+      "poc-02 — DB schema + migrations",
+      "poc-03 — auth (Supabase SSR)",
+      "poc-04 — upload + scripts tRPC router",
+      "poc-05 — PDF reader + comments sidebar",
+      "poc-06 — home listing + search",
+      "poc-07 — public profile + ratings",
+      "poc-08 — E2E validation",
+      "poc-09 — storage buckets + CORS",
+      "poc-10 — script preview modal",
+      "poc-11 — search sheet + filter page",
+      "poc-12 — SEO / OG meta",
+      "poc-13 — audio player",
+      "poc-14 — comment reactions",
+      "poc-15 — design token corrections",
+      "poc-16 — header redesign",
+      "poc-17 — Avatar + FollowButton components",
+      "poc-18 — ScriptModal design revision",
+      "poc-19 — profile pages",
+      "poc-20 — upload wizard redesign"
+    ],
+    "execution_order": "poc-25 → poc-21 → poc-22 (parallel: poc-24, poc-23, poc-26)",
+    "phase2_tasks": [
+      {
+        "id": "poc-25",
+        "title": "Upload Wizard: cover + banner image uploads",
+        "status": "pending",
+        "priority": "P0 — bloqueante para poc-21 e poc-22",
+        "task_file": ".agents/tasks/poc-25-upload-wizard-final-design.md",
+        "real_scope": "Schema migration (cover_path em scripts) + 2 novos campos de upload no FileStep",
+        "key_files": ["server/db/schema.ts", "server/api/scripts.ts", "lib/hooks/use-publish-wizard.ts", "components/publish/file-step.tsx", "app/(authenticated)/publish/page.tsx"]
       },
-      "acceptance": [
-        {
-          "id": "perf-1",
-          "item": "ratingsRouter com upsert, getAverage, getUserRating em root.ts",
-          "done": true
-        },
-        {
-          "id": "perf-2",
-          "item": "Auto-avaliação retorna TRPCError FORBIDDEN",
-          "done": true
-        },
-        {
-          "id": "perf-3",
-          "item": "Upsert funciona (segunda nota substitui a primeira)",
-          "done": true
-        },
-        {
-          "id": "perf-4",
-          "item": "/profile/[userId] accessible without login",
-          "done": true
-        },
-        {
-          "id": "perf-5",
-          "item": "StarRating updates average without reload (TanStack Query invalidation)",
-          "done": true
-        },
-        {
-          "id": "perf-6",
-          "item": "/account allows editing name, bio, and avatar",
-          "done": true
-        },
-        {
-          "id": "perf-7",
-          "item": "yarn build limpo",
-          "done": true
-        }
-      ]
-    }
-  ],
-  "execution_order": [
-    {
-      "step": 1,
-      "task_id": "poc-08-e2e-validation",
-      "parallel_with": "poc-09-storage-cors-buckets",
-      "note": "P0 — validate build + apply migrations"
+      {
+        "id": "poc-21",
+        "title": "Home: cover thumbnail + seção Em Alta (POC)",
+        "status": "pending",
+        "priority": "P1",
+        "figma_nodeId": "51:562",
+        "task_file": ".agents/tasks/poc-21-home-final-design.md",
+        "real_scope": "cover_path no schema (via poc-25), prop coverUrl no ScriptCard, seção 'Em Destaque' com banners via banner_path (função JS/POC com fallback para ScriptCards)",
+        "already_done": ["genre chips com active state", "grid 3 cols", "featured section", "filter/search"],
+        "key_files": ["server/db/schema.ts", "server/api/scripts.ts", "components/script-card/script-card.tsx", "app/home-client.tsx"]
+      },
+      {
+        "id": "poc-22",
+        "title": "Script Modal: cover placeholder + audio no sidebar",
+        "status": "pending",
+        "priority": "P1",
+        "figma_nodeId": "51:718",
+        "task_file": ".agents/tasks/poc-22-script-modal-final-design.md",
+        "real_scope": "Cover placeholder 2:3 no ModalSidebar; AudioPlayer no sidebar se audioUrl presente",
+        "already_done": ["dois painéis", "título", "author section", "stats", "tags", "logline/synopsis"],
+        "key_files": ["server/api/scripts.ts", "components/script-preview-modal/sidebar.tsx", "components/script-preview-modal/script-preview-modal.tsx"]
+      },
+      {
+        "id": "poc-24",
+        "title": "PDF Reader: breadcrumbs + mobile (player fixo + comments sheet)",
+        "status": "pending",
+        "priority": "P1",
+        "figma_nodeId": "51:1007",
+        "task_file": ".agents/tasks/poc-24-pdf-reader-final-design.md",
+        "real_scope": "Breadcrumbs bar + audio player fixed mobile + CommentsSidebar como Sheet no mobile",
+        "already_done": ["PDF viewer", "zoom/page controls", "comments sidebar", "reactions", "audio player desktop"],
+        "key_files": ["app/scripts/[id]/script-page-client.tsx"]
+      },
+      {
+        "id": "poc-23",
+        "title": "Search + Filter: 2 ajustes menores",
+        "status": "pending",
+        "priority": "P2",
+        "figma_nodeIds": ["51:820", "51:930"],
+        "task_file": ".agents/tasks/poc-23-search-filter-final-design.md",
+        "real_scope": "Link 'ver todos os resultados' no SearchSheet + fix no apply do FilterPanel",
+        "already_done": ["SearchSheet funcional", "FilterPanel com checkboxes"],
+        "key_files": ["components/search-sheet/search-sheet.tsx", "components/filter-panel/filter-panel.tsx"]
+      },
+      {
+        "id": "poc-26",
+        "title": "Profile: banner upload + depar ScriptCards",
+        "status": "pending",
+        "priority": "P2",
+        "figma_nodeId": "186:2075",
+        "task_file": ".agents/tasks/poc-26-profile-flow-final-design.md",
+        "real_scope": "Banner upload no Edit Profile; coverUrl nos ScriptCards do perfil (após poc-21)",
+        "already_done": ["perfil público completo", "edit profile com avatar + nome/bio", "dashboard com MetricCards"],
+        "key_files": ["server/db/schema.ts", "app/(authenticated)/profile/edit/page.tsx", "app/profile/[userId]/profile-client.tsx"]
+      }
+    ]
+  },
+
+  "figma": {
+    "fileKey": "iUb8odefGSZiHz4KjuzX1M",
+    "meta": ".agents/figma.meta.json",
+    "design_system": ".agents/design-system.meta.json",
+    "sections": {
+      "fluxo_principal": "186:1388",
+      "fluxo_cadastro": "186:1350",
+      "perfil_usuario": "186:2075"
     },
-    {
-      "step": 1,
-      "task_id": "poc-09-storage-cors-buckets",
-      "parallel_with": "poc-08-e2e-validation",
-      "note": "P0 — create buckets, RLS, CORS"
+    "screens": {
+      "home": "51:562",
+      "modal_roteiro": "51:718",
+      "search_sheet": "51:820",
+      "filter_page": "51:930",
+      "pdf_reader": "51:1007",
+      "upload_step1": "115:1008",
+      "upload_step2": "115:1075",
+      "upload_step3": "125:1430",
+      "upload_step4": "128:1691",
+      "perfil_usuario": "186:1834",
+      "editar_perfil": "186:1907",
+      "dashboard_autor": "186:1963"
     },
-    {
-      "step": 2,
-      "task_id": "poc-10-script-modal-preview",
-      "parallel_with": "poc-11-search-filter-sheet",
-      "note": "P1 — Figma Modal/Roteiro screen"
-    },
-    {
-      "step": 2,
-      "task_id": "poc-11-search-filter-sheet",
-      "parallel_with": "poc-12-script-seo-og-meta",
-      "note": "P1 — Figma Search Sheet + Filter Page"
-    },
-    {
-      "step": 2,
-      "task_id": "poc-12-script-seo-og-meta",
-      "parallel_with": "poc-10-script-modal-preview",
-      "note": "P1 — OG meta for script pages"
-    },
-    {
-      "step": 1,
-      "task_id": "poc-13-audio-player",
-      "parallel_with": null,
-      "note": "P1 (priorizado) — Figma Player component"
-    },
-    {
-      "step": 3,
-      "task_id": "poc-14-comment-reactions",
-      "parallel_with": "poc-13-audio-player",
-      "note": "P2 — ReactionBar backed by DB"
-    },
-    {
-      "step": 0,
-      "task_id": "poc-15-design-token-corrections",
-      "parallel_with": null,
-      "note": "P0 — base token correction"
-    },
-    {
-      "step": 1,
-      "task_id": "poc-16-header-redesign",
-      "parallel_with": "poc-17-avatar-followbutton-components",
-      "note": "P1 — header redesign"
-    },
-    {
-      "step": 1,
-      "task_id": "poc-17-avatar-followbutton-components",
-      "parallel_with": "poc-16-header-redesign",
-      "note": "P1 — avatar + follow button components"
-    },
-    {
-      "step": 2,
-      "task_id": "poc-18-scriptmodal-design-revision",
-      "parallel_with": null,
-      "note": "P1 — ScriptModal design revision"
-    },
-    {
-      "step": 2,
-      "task_id": "poc-19-profile-pages",
-      "parallel_with": "poc-18-scriptmodal-design-revision",
-      "note": "P1 — profile pages"
-    },
-    {
-      "step": 2,
-      "task_id": "poc-20-upload-wizard-redesign",
-      "parallel_with": null,
-      "note": "P1 — upload wizard redesign"
-    }
-  ],
+    "mcp_tool": "mcp__Framelink_Figma_MCP__get_figma_data"
+  },
+
   "clickup": {
-    "board": "dev",
-    "list": "Antes da Tela",
     "mcp_tools": {
       "update_status": "plaza_update_task_status",
       "comment": "plaza_comment_task"
@@ -599,142 +201,13 @@
       "in_progress": "em progresso",
       "in_review": "em revisão",
       "blocked": "bloqueado",
-      "staging": "em staging",
       "done": "completo"
-    },
-    "agent_rules": [
-      "Ao INICIAR uma task: chamar plaza_update_task_status com status 'em progresso'",
-      "Ao CONCLUIR uma task: chamar plaza_update_task_status com status 'completo'",
-      "Ao fazer RELEASE (merge em main ou deploy): comentar na task com plaza_comment_task descrevendo o que foi entregue, branch e comando de validação",
-      "Se a task BLOQUEAR por dependência externa: status 'bloqueado' + comentar o motivo"
-    ],
-    "comment_template_release": "🚀 Release: {descricao}. Branch: {branch}. Validação: {comando}. Checks concluídos: {done}/{total}.",
-    "comment_template_progress": "▶️ Em execução: {descricao}. Próximo passo: {proximo_passo}.",
-    "tasks": {
-      "poc-01": "86agwj9wg",
-      "poc-02": "86agq8yhn",
-      "poc-03": "86agq8yny",
-      "poc-04": "86agq8z1h",
-      "poc-05": "86agq8yv2",
-      "poc-06": "86agq8z5g",
-      "poc-07": "86agq8zbq"
     }
   },
+
   "meta": {
-    "generated_at": "2026-04-17",
+    "generated_at": "2026-04-22",
     "agent_rules": ".agents/rules/",
-    "design_system_tokens": ".agents/design-system.meta.json",
-    "figma": ".agents/figma.meta.json",
-    "how_to_use": "Feed this file as context before executing any task. Use task_id to locate the task file in .agents/tasks/. Archived tasks are in .agents/tasks/archived/ with summaries. Use clickup.tasks map to get ClickUp task IDs and call MCP tools on status changes.",
-    "poc_phase": "phase-2",
-    "poc_phase_description": "All 7 original POC tasks implemented. Phase 2 focuses on validation, missing Figma screens, and SEO/infra polish.",
-    "task_archive": ".agents/tasks/archived/archived-record.json",
-    "task_summary": ".agents/tasks/summary.md"
-  },
-  "new_tasks": [
-    {
-      "id": "poc-08-e2e-validation",
-      "scope": "Infra",
-      "title": "E2E validation: build, lint, migrations smoke test",
-      "status": "done",
-      "priority": "P0",
-      "task_file": ".agents/tasks/archived/poc-08-e2e-validation.md"
-    },
-    {
-      "id": "poc-09-storage-cors-buckets",
-      "scope": "Infra",
-      "title": "Apply storage migrations and configure CORS for PDF buckets",
-      "status": "done",
-      "priority": "P0",
-      "task_file": ".agents/tasks/archived/poc-09-storage-cors-buckets.md"
-    },
-    {
-      "id": "poc-10-script-modal-preview",
-      "scope": "Frontend",
-      "title": "Script preview modal from home/search results",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/archived/poc-10-script-modal-preview.md"
-    },
-    {
-      "id": "poc-11-search-filter-sheet",
-      "scope": "Frontend",
-      "title": "Mobile search sheet and filter page",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/poc-11-search-filter-sheet.md"
-    },
-    {
-      "id": "poc-12-script-seo-og-meta",
-      "scope": "Frontend",
-      "title": "Dynamic OG meta and SEO for script detail pages",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/poc-12-script-seo-og-meta.md"
-    },
-    {
-      "id": "poc-13-audio-player",
-      "scope": "Frontend",
-      "title": "Audio player on script reader page",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/poc-13-audio-player.md"
-    },
-    {
-      "id": "poc-14-comment-reactions",
-      "scope": "Backend",
-      "title": "Wire ReactionBar to tRPC for comment reactions",
-      "status": "done",
-      "priority": "P2",
-      "task_file": ".agents/tasks/poc-14-comment-reactions.md"
-    },
-    {
-      "id": "poc-15-design-token-corrections",
-      "scope": "Frontend",
-      "title": "Fix design tokens and CSS vars to match Figma",
-      "status": "done",
-      "priority": "P0",
-      "task_file": ".agents/tasks/poc-15-design-token-corrections.md"
-    },
-    {
-      "id": "poc-16-header-redesign",
-      "scope": "Frontend",
-      "title": "Redesign header to match Figma",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/archived/poc-16-header-redesign.md"
-    },
-    {
-      "id": "poc-17-avatar-followbutton-components",
-      "scope": "Frontend",
-      "title": "Avatar and FollowButton components",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/poc-17-avatar-followbutton-components.md"
-    },
-    {
-      "id": "poc-18-scriptmodal-design-revision",
-      "scope": "Frontend",
-      "title": "Script modal design revision",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/poc-18-scriptmodal-design-revision.md"
-    },
-    {
-      "id": "poc-19-profile-pages",
-      "scope": "Frontend",
-      "title": "Profile pages and author dashboard",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/poc-19-profile-pages.md"
-    },
-    {
-      "id": "poc-20-upload-wizard-redesign",
-      "scope": "Frontend",
-      "title": "Upload wizard redesign",
-      "status": "done",
-      "priority": "P1",
-      "task_file": ".agents/tasks/poc-20-upload-wizard-redesign.md"
-    }
-  ]
+    "how_to_use": "Feed this file as context before executing any task. Locate the task file via phase2_tasks[].task_file. Fetch live Figma data for each screen via figma.screens[screen_name] + Framelink MCP. Design tokens in .agents/design-system.meta.json."
+  }
 }

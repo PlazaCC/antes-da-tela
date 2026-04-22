@@ -2,25 +2,16 @@
 
 import { Avatar } from '@/components/avatar'
 import { FollowButton } from '@/components/follow-button'
-import { ScriptCard } from '@/components/ui/script-card'
+import { ScriptCard } from '@/components/script-card/script-card'
 import { cn } from '@/lib/utils'
-import type { ScriptListItem } from '@/server/api/scripts'
-import type { User } from '@/server/db/schema'
+import type { ScriptListItem, ProfileStats, UserProfile } from '@/lib/types'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-interface ProfileStats {
-  followers: number
-  following: number
-  scripts: number
-  avgRating: number | null
-}
-
 interface Props {
-  user: User | null
+  user: UserProfile | null
   scripts: ScriptListItem[]
-  currentUserId: string | null
   stats: ProfileStats
 }
 
@@ -36,7 +27,7 @@ function StatItem({ value, label, accent }: { value: string; label: string; acce
   )
 }
 
-export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
+export function ProfileClient({ user, scripts, stats }: Props) {
   const trpc = useTRPC()
   const [activeTab, setActiveTab] = useState<'scripts' | 'ratings' | 'activity'>('scripts')
 
@@ -54,7 +45,6 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
     )
   }
 
-  const isOwnProfile = currentUserId === user.id
   const userName = user.name?.trim() || 'Usuário'
   const handle = `@${userName.toLowerCase().replace(/\s+/g, '')} · Roteirista`
 
@@ -87,7 +77,7 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
 
               {/* Action buttons */}
               <div className='flex items-center gap-3 pt-1 shrink-0'>
-                {!isOwnProfile && <FollowButton authorId={user.id} />}
+                <FollowButton authorId={user.id} />
                 <button className='px-4 h-9 rounded-sm border border-border-subtle text-text-secondary font-sans text-[12px] font-normal hover:border-border-default transition-colors'>
                   Mensagem
                 </button>
@@ -99,7 +89,7 @@ export function ProfileClient({ user, scripts, currentUserId, stats }: Props) {
               <StatItem value={String(stats.scripts)} label='Roteiros' />
               <StatItem value={String(stats.followers)} label='Seguidores' />
               <StatItem value={String(stats.following)} label='Seguindo' />
-              {stats.avgRating !== null && <StatItem value={`★ ${stats.avgRating}`} label='Avaliação média' accent />}
+              {stats.avgRating !== null && <StatItem value={`★ ${stats.avgRating.toFixed(1)}`} label='Avaliação média' accent />}
             </div>
           </div>
         </div>

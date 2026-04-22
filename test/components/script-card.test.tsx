@@ -1,6 +1,6 @@
 import { render, screen } from '../utils/render'
 
-import { ScriptCard } from '@/components/ui/script-card'
+import { ScriptCard } from '@/components/script-card/script-card'
 
 test('ScriptCard displays title, author and pages', () => {
   render(<ScriptCard title='My Script' author='Bob' genre='drama' rating={4.5} pages={120} />)

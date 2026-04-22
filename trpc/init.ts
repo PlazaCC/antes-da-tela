@@ -6,6 +6,10 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import { cookies } from 'next/headers'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
+import { RatingsService } from '@/server/services/ratings.service'
+import { UsersService } from '@/server/services/users.service'
+import { ScriptsService } from '@/server/services/scripts.service'
+import { CommentsService } from '@/server/services/comments.service'
 
 export type TRPCUser = {
   id: string
@@ -15,7 +19,15 @@ export type TRPCUser = {
 
 export const createTRPCContext = async (opts: {
   headers: Headers | Promise<Headers>
-}): Promise<{ headers: Headers; user: TRPCUser | null; supabase: SupabaseClient }> => {
+}): Promise<{
+  headers: Headers
+  user: TRPCUser | null
+  supabase: SupabaseClient
+  ratingsService: RatingsService
+  usersService: UsersService
+  scriptsService: ScriptsService
+  commentsService: CommentsService
+}> => {
   const headersObj = await opts.headers
   // CookieStore shape used by Supabase client
   type CookieEntry = { name: string; value: string; options?: Record<string, unknown> }
@@ -53,7 +65,15 @@ export const createTRPCContext = async (opts: {
   // getUser() is called lazily by authenticatedProcedure below.
   const supabase = await createSupabaseClient(cookieStore)
 
-  return { headers: headersObj, user: null, supabase }
+  return {
+    headers: headersObj,
+    user: null,
+    supabase,
+    ratingsService: new RatingsService(supabase),
+    usersService: new UsersService(supabase),
+    scriptsService: new ScriptsService(supabase),
+    commentsService: new CommentsService(supabase),
+  }
 }
 
 const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create({

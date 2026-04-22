@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '../utils/render'
 
-import { RadioBox } from '@/components/ui/radio-box'
+import { RadioBox } from '@/components/radio-box/radio-box'
 
 test('RadioBox renders label and toggles input', async () => {
   const user = userEvent.setup()

@@ -2,7 +2,7 @@
 
 import { Avatar } from '@/components/avatar'
 import { FollowButton } from '@/components/follow-button'
-import { RatingSummary } from '@/components/ui/rating-summary'
+import { RatingSummary } from '@/components/rating-summary/rating-summary'
 import Link from 'next/link'
 
 interface AuthorSectionProps {
@@ -17,11 +17,14 @@ interface AuthorSectionProps {
     total: number
   } | undefined
   onClose: () => void
+  className?: string
 }
 
-export function AuthorSection({ author, ratingData, onClose }: AuthorSectionProps) {
+import { cn } from '@/lib/utils'
+
+export function AuthorSection({ author, ratingData, onClose, className }: AuthorSectionProps) {
   return (
-    <div className='flex items-center justify-between gap-4'>
+    <div className={cn('flex items-center justify-between gap-4', className)}>
       <div className='flex items-center gap-3'>
         <Avatar src={author?.image} name={author?.name ?? '?'} size='md' />
         <div className='flex flex-col min-w-0'>
