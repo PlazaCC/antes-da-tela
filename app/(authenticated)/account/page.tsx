@@ -2,30 +2,24 @@
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { createClient } from '@/lib/supabase/client'
+import { useAvatarUpload } from '@/lib/hooks/use-avatar-upload'
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { profileSchema, type ProfileFormValues } from '@/lib/validators/profile'
 import { useTRPC } from '@/trpc/client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 export default function AccountPage() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const supabase = createClient()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const [userId, setUserId] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUserId(data.user?.id ?? null)
-    })
-  }, [supabase])
+  const { userId } = useCurrentUser()
+  const { upload, isUploading } = useAvatarUpload()
 
   const profileOpts = trpc.users.getProfile.queryOptions({ id: userId ?? '' })
   const { data: profile } = useQuery({ ...profileOpts, enabled: !!userId })
@@ -41,13 +35,13 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (profile) {
-      reset({ name: profile.name, bio: profile.bio ?? '' })
+      reset({ name: profile.name, bio: profile.bio ?? undefined })
     }
   }, [profile, reset])
 
   const onSubmit = (values: ProfileFormValues) => {
     updateProfile.mutate(
-      { name: values.name, bio: values.bio ?? '' },
+      { name: values.name, bio: values.bio || null },
       {
         onSuccess: () => {
           void queryClient.invalidateQueries({ queryKey: profileOpts.queryKey })
@@ -56,38 +50,6 @@ export default function AccountPage() {
         onError: (err) => toast.error(err.message),
       },
     )
-  }
-
-  const handleAvatarUpload = async (file: File) => {
-    if (!userId) return
-    setUploading(true)
-    try {
-      const ext = file.name.split('.').pop() ?? 'png'
-      const path = `${userId}/${Date.now()}_avatar.${ext}`
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
-      if (uploadError) throw uploadError
-
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
-      const publicUrl = urlData?.publicUrl
-      if (!publicUrl) {
-        throw new Error('Unable to generate avatar URL.')
-      }
-
-      updateProfile.mutate(
-        { image: publicUrl },
-        {
-          onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: profileOpts.queryKey })
-            toast.success('Avatar updated.')
-          },
-          onError: (err) => toast.error(err.message),
-        },
-      )
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Upload failed.')
-    } finally {
-      setUploading(false)
-    }
   }
 
   return (
@@ -116,9 +78,9 @@ export default function AccountPage() {
             type='button'
             variant='outline'
             size='sm'
-            disabled={uploading}
+            disabled={isUploading}
             onClick={() => fileRef.current?.click()}>
-            {uploading ? 'Uploading…' : 'Change photo'}
+            {isUploading ? 'Uploading…' : 'Change photo'}
           </Button>
           <input
             ref={fileRef}
@@ -127,7 +89,7 @@ export default function AccountPage() {
             className='hidden'
             onChange={(e) => {
               const file = e.target.files?.[0]
-              if (file) void handleAvatarUpload(file)
+              if (file) void upload(file)
             }}
           />
         </div>

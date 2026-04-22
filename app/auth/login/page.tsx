@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
-import { GoogleAuthButton } from '@/components/google-auth-button'
+import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function LoginPage() {

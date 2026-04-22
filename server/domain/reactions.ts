@@ -1,4 +1,4 @@
-import type { ReactionSummary } from '@/server/api/comments'
+import type { ReactionSummary } from '@/lib/types'
 
 export function aggregateReactions(
   rows: Array<{ comment_id: string; emoji: string; user_id: string }>,

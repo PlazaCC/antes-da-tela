@@ -1,0 +1,198 @@
+import { TRPCError } from '@trpc/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { getScriptPublishDefaults } from '@/server/domain/scripts'
+import type { ScriptCreateInput } from '@/lib/validators/scripts'
+import type { ScriptListItem, ScriptDetail, DashboardMetrics } from '@/lib/types'
+
+export class ScriptsService {
+  constructor(private supabase: SupabaseClient) {}
+
+  async create(
+    input: ScriptCreateInput,
+    userId: string,
+    userMetadata: Record<string, unknown> | null,
+    userEmail: string | null,
+  ) {
+    const { storagePath, fileSize, pageCount, ageRating, bannerPath, audioStoragePath, audioDurationSeconds, ...scriptData } = input
+
+    // Ensure the author's profile exists
+    const authorName = userMetadata?.full_name ?? (userEmail ? String(userEmail).split('@')[0] : 'User')
+    const { error: upsertError } = await this.supabase
+      .from('users')
+      .upsert({ id: userId, name: String(authorName).slice(0, 100), email: userEmail }, { onConflict: 'id' })
+
+    if (upsertError) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: `Failed to ensure author profile: ${upsertError.message}`,
+      })
+    }
+
+    // Insert script row
+    const { data: script, error: scriptError } = await this.supabase
+      .from('scripts')
+      .insert({
+        ...scriptData,
+        age_rating: ageRating ?? null,
+        banner_path: bannerPath ?? null,
+        author_id: userId,
+        ...getScriptPublishDefaults(),
+      })
+      .select('id, title')
+      .single()
+
+    if (scriptError || !script) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: scriptError?.message ?? 'Failed to create script',
+      })
+    }
+
+    // Insert associated script file
+    const { error: fileError } = await this.supabase.from('script_files').insert({
+      script_id: script.id,
+      storage_path: storagePath,
+      file_size: fileSize ?? null,
+      page_count: pageCount ?? null,
+    })
+
+    if (fileError) {
+      await this.supabase.from('scripts').delete().eq('id', script.id)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: fileError.message,
+      })
+    }
+
+    if (audioStoragePath) {
+      await this.supabase.from('audio_files').insert({
+        script_id: script.id,
+        storage_path: audioStoragePath,
+        duration_seconds: audioDurationSeconds ?? null,
+      })
+    }
+
+    return script
+  }
+
+  async addAudioFile(scriptId: string, storagePath: string, userId: string, durationSeconds?: number) {
+    const { data: script } = await this.supabase
+      .from('scripts')
+      .select('author_id')
+      .eq('id', scriptId)
+      .single()
+
+    if (!script || script.author_id !== userId) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Not the script author' })
+    }
+
+    const { error } = await this.supabase.from('audio_files').insert({
+      script_id: scriptId,
+      storage_path: storagePath,
+      duration_seconds: durationSeconds ?? null,
+    })
+
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+  }
+
+  async getById(id: string) {
+    const { data: script } = await this.supabase
+      .from('scripts')
+      .select(
+        'id, title, logline, synopsis, genre, age_rating, is_featured, published_at, banner_path,' +
+          ' script_files(id, storage_path, page_count, file_size),' +
+          ' audio_files(id, storage_path, duration_seconds),' +
+          ' author:users!author_id(id, name, image, bio)',
+      )
+      .eq('id', id)
+      .maybeSingle()
+
+    if (!script) return null
+    const scriptData = script as any
+    return {
+      ...scriptData,
+      author: Array.isArray(scriptData.author) ? scriptData.author[0] : (scriptData.author ?? null),
+    } as ScriptDetail
+  }
+
+  async listRecent(limit: number) {
+    const { data: rows } = await this.supabase
+      .from('scripts')
+      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(limit + 1)
+
+    const items = (rows ?? []).map((row: any) => ({
+      ...row,
+      author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
+    })) as ScriptListItem[]
+    const hasMore = items.length > limit
+    return { items: items.slice(0, limit), hasMore }
+  }
+  async listFeatured(): Promise<ScriptListItem[]> {
+    const { data } = await this.supabase
+      .from('scripts')
+      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
+      .eq('status', 'published')
+      .eq('is_featured', true)
+      .order('published_at', { ascending: false })
+      .limit(6)
+
+    return (data ?? []).map((row: any) => ({
+      ...row,
+      author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
+    })) as ScriptListItem[]
+  }
+
+  async listByAuthor(authorId: string): Promise<ScriptListItem[]> {
+    const { data } = await this.supabase
+      .from('scripts')
+      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
+      .eq('author_id', authorId)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+
+    return (data ?? []).map((row: any) => ({
+      ...row,
+      author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
+    })) as ScriptListItem[]
+  }
+
+  async getDashboardMetrics(authorId: string): Promise<DashboardMetrics> {
+    const { data, error } = await this.supabase.rpc('get_author_dashboard_metrics', {
+      p_author_id: authorId,
+    })
+
+    if (error) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+
+    return data as DashboardMetrics
+  }
+
+  async search(query?: string, genres?: string[], ageRatings?: string[]): Promise<ScriptListItem[]> {
+    let queryBuilder = this.supabase
+      .from('scripts')
+      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
+      .eq('status', 'published')
+
+    if (query) {
+      queryBuilder = queryBuilder.or(`title.ilike.%${query}%,logline.ilike.%${query}%`)
+    }
+
+    if (genres && genres.length > 0) {
+      queryBuilder = queryBuilder.in('genre', genres)
+    }
+
+    if (ageRatings && ageRatings.length > 0) {
+      queryBuilder = queryBuilder.in('age_rating', ageRatings)
+    }
+
+    const { data } = await queryBuilder.limit(20)
+    return (data ?? []).map((row: any) => ({
+      ...row,
+      author: Array.isArray(row.author) ? row.author[0] : (row.author ?? null),
+    })) as ScriptListItem[]
+  }
+}

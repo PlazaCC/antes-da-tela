@@ -6,12 +6,12 @@ import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 import { StarRating } from '@/components/star-rating/star-rating'
 import type { TagVariant } from '@/components/tag/tag'
 import { Tag } from '@/components/tag/tag'
+import { useScriptRating } from '@/lib/hooks/use-script-rating'
 import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+
 
 type RouterOutput = inferRouterOutputs<AppRouter>
 type ScriptDetail = RouterOutput['scripts']['getById']
@@ -31,8 +31,6 @@ interface Props {
 
 export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUserId }: Props) {
   const trpc = useTRPC()
-  const queryClient = useQueryClient()
-  const router = useRouter()
 
   const averageOpts = trpc.ratings.getAverage.queryOptions({ scriptId: script?.id ?? '' })
   const userRatingOpts = trpc.ratings.getUserRating.queryOptions({
@@ -43,7 +41,7 @@ export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUser
   const { data: ratingData } = useQuery({ ...averageOpts, enabled: !!script })
   const { data: userRating } = useQuery({ ...userRatingOpts, enabled: !!script && !!currentUserId })
 
-  const upsertRating = useMutation(trpc.ratings.upsert.mutationOptions())
+  const { rate, isPending: isRatingPending } = useScriptRating(script?.id ?? '', currentUserId)
 
   if (!script) {
     return (
@@ -101,25 +99,8 @@ export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUser
               <StarRating
                 value={userRating ?? ratingData?.average ?? 0}
                 allowHalf={!currentUserId}
-                readOnly={!currentUserId}
-                onChange={(score) => {
-                  if (!currentUserId) {
-                    router.push('/auth/login')
-                    return
-                  }
-                  upsertRating.mutate(
-                    { scriptId: script.id, score: Math.round(score) },
-                    {
-                      onSuccess: () => {
-                        void queryClient.invalidateQueries(averageOpts)
-                        void queryClient.invalidateQueries(userRatingOpts)
-                      },
-                      onError: (err) => {
-                        toast.error(err.message)
-                      },
-                    },
-                  )
-                }}
+                readOnly={!currentUserId || isRatingPending}
+                onChange={rate}
               />
               {ratingData && ratingData.total > 0 && (
                 <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
@@ -137,6 +118,7 @@ export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUser
           )}
         </div>
       </div>
+
 
       {/* Audio player */}
       {audioUrl && (

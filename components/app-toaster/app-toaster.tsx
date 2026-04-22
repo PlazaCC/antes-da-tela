@@ -9,6 +9,6 @@ import { Toaster } from '@/components/ui/sonner'
  * Do not edit `components/ui/sonner.tsx` directly — it is managed by the
  * shadcn CLI. Customise appearance here via Toaster props.
  */
-export default function AppToaster() {
+export function AppToaster() {
   return <Toaster position='bottom-right' />
 }

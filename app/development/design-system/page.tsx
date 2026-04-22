@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Info } from '@/components/info/info'
-import { NavBar } from '@/components/nav-bar/nav-bar'
+import { NavBar } from '@/components/navbar'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -146,13 +146,7 @@ export default function DevelopmentDesignSystemPage() {
             <p className='text-sm text-muted-foreground'>Live previews of the new NavBar and Info components.</p>
           </CardHeader>
           <CardContent className='grid gap-6'>
-            <NavBar
-              items={[
-                { label: 'Home', active: true, href: '/' },
-                { label: 'Scripts', href: '/scripts' },
-                { label: 'Library', href: '/library' },
-              ]}
-            />
+            <NavBar />
             <Info
               title='Design system guidance'
               description='Use dark surfaces, clear contrast, and the semantic accent color for primary actions. Keep the layout spacious and the navigation minimal.'

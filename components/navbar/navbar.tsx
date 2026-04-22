@@ -6,10 +6,11 @@ import { FileUpIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { GoogleAuthButton } from './google-auth-button'
+import { NavLinks } from './nav-links'
 import { NavBarMobileControls } from './navbar-mobile-controls'
 import { NavBarSearch } from './navbar-search'
 import { UserMenu } from './user-menu'
+import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 
 export function NavBar() {
   return (
@@ -27,7 +28,7 @@ export function NavBar() {
               priority
             />
           </Link>
-          {/* <NavLinks /> */}
+          <NavLinks />
         </div>
 
         {/* Right: Search container + Profile */}

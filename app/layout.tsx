@@ -1,4 +1,4 @@
-import AppToaster from '@/components/app-toaster/app-toaster'
+import { AppToaster } from '@/components/app-toaster/app-toaster'
 import { NavBar } from '@/components/navbar'
 import { PostHogProvider } from '@/components/posthog-provider'
 import { ThemeProvider } from '@/components/theme-provider'

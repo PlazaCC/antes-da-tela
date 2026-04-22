@@ -17,7 +17,7 @@ Purpose: short, actionable guidance for AI coding agents working in this reposit
 
 **Project-specific conventions (high-value links)**
 
-- Supabase & migrations: [.agents/rules/supabase.md](.agents/rules/supabase.md)
+- Supabase & migrations: ALWAYS via `npx supabase db push` for RPCs/Functions. See [CLAUDE.md](CLAUDE.md).
 - **shadcn/ui & Tailwind (read before any UI work):** [.agents/rules/ui.md](.agents/rules/ui.md)
 - shadcn install-and-wrap skill: [.agents/skills/new-shadcn-component/SKILL.md](.agents/skills/new-shadcn-component/SKILL.md)
 - Setup and scripts: [docs/SETUP.md](docs/SETUP.md) and [package.json](package.json)

@@ -1,5 +1,6 @@
 'use client'
 
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { useFollow } from '@/lib/hooks/use-follow'
 import { cn } from '@/lib/utils'
 
@@ -9,7 +10,10 @@ interface FollowButtonProps {
 }
 
 export function FollowButton({ authorId, className }: FollowButtonProps) {
+  const { userId, isLoading: authLoading } = useCurrentUser()
   const { following, isLoading, isPending, toggle } = useFollow(authorId)
+
+  if (userId === authorId) return null
 
   return (
     <button

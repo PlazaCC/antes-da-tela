@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils'
 import { RatingInfo, StatItem } from '@/components/rating-info'
 
 interface RatingDistribution {
@@ -10,11 +11,12 @@ interface StatsSectionProps {
   ratingData: { average: number; total: number } | undefined
   commentData: { count: number } | undefined
   distributionData: { distribution: RatingDistribution[]; total: number } | undefined
+  className?: string
 }
 
-export function StatsSection({ ratingData, commentData, distributionData }: StatsSectionProps) {
+export function StatsSection({ ratingData, commentData, distributionData, className }: StatsSectionProps) {
   return (
-    <>
+    <div className={cn('flex flex-col gap-4', className)}>
       <div className='flex gap-10'>
         <StatItem value={ratingData?.total ?? 0} label='Avaliações' />
         <StatItem
@@ -33,6 +35,6 @@ export function StatsSection({ ratingData, commentData, distributionData }: Stat
           />
         </div>
       )}
-    </>
+    </div>
   )
 }

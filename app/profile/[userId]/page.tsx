@@ -1,12 +1,10 @@
 import { appRouter } from '@/server/api/root'
-import type { ScriptListItem } from '@/server/api/scripts'
-import type { User } from '@/server/db/schema'
+import type { ScriptListItem, ProfileStats, UserProfile } from '@/lib/types'
 import { createTRPCContext } from '@/trpc/init'
 import { headers } from 'next/headers'
 import { ProfileClient } from './profile-client'
 
-type ProfileStats = { followers: number; following: number; scripts: number; avgRating: number | null }
-type PageData = { user: User | null; scripts: ScriptListItem[]; currentUserId: string | null; stats: ProfileStats }
+type PageData = { user: UserProfile | null; scripts: ScriptListItem[]; currentUserId: string | null; stats: ProfileStats }
 
 async function getPageData(userId: string): Promise<PageData> {
   const ctx = await createTRPCContext({ headers: headers() })

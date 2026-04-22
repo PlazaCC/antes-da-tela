@@ -34,11 +34,14 @@ See @package.json for available scripts.
 ## Common Commands
 
 ```bash
-yarn dev          # Start dev server (http://localhost:3000)
-yarn build        # Production build
-yarn lint         # ESLint
-yarn drizzle-kit generate  # Generate SQL migration files
-yarn drizzle-kit migrate   # Apply migrations to Supabase Postgres
+yarn dev               # Start dev server (http://localhost:3000)
+yarn build             # Production build
+yarn lint              # ESLint
+yarn db:generate       # Generate SQL migration files for schema
+yarn db:migrate        # Apply schema migrations to Supabase Postgres
+yarn supabase:new <n>  # Create new Supabase migration for RPCs/Functions
+yarn supabase:push     # Apply migrations to remote Supabase
+yarn supabase:pull     # Pull remote changes to local migrations
 ```
 
 ---
@@ -93,6 +96,17 @@ yarn drizzle-kit migrate   # Apply migrations to Supabase Postgres
 - There is no Drizzle runtime client (`server/db/index.ts` was removed). Drizzle is used only for schema management and migrations.
 - `DATABASE_URL_UNPOOLED` is only needed for running `yarn drizzle-kit migrate` locally — it is not an application runtime env var.
 - Schema lives in `server/db/schema.ts`; migrations output to `drizzle/`.
+
+### Supabase Migrations
+
+**ALWAYS use Supabase CLI for migrations involving SQL Functions, RPCs, RLS, or Triggers.**
+
+```bash
+npx supabase migration new <name>  # creates supabase/migrations/TIMESTAMP_name.sql
+npx supabase db push               # applies to remote Supabase (requires login)
+```
+- `drizzle-kit` is ONLY for table schema DDL.
+- `supabase migration` is for EVERYTHING ELSE (RPCs, Functions, etc).
 
 ### shadcn/ui — MANDATORY rules
 

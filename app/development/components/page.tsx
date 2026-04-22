@@ -29,7 +29,7 @@ import { Info } from '@/components/info/info'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { MetricCard } from '@/components/metric-card/metric-card'
-import { NavBar } from '@/components/nav-bar/nav-bar'
+import { NavBar } from '@/components/navbar'
 import { Progress } from '@/components/ui/progress'
 import { RadioBox } from '@/components/radio-box/radio-box'
 import { ReactionBar } from '@/components/comments/reaction-bar'
@@ -162,14 +162,7 @@ export default function DevelopmentComponentsPage() {
         <Card>
           <CardContent className='pt-6'>
             <p className='text-sm text-text-muted mb-4'>Resize below 1280px to see the hamburger menu.</p>
-            <NavBar
-              items={[
-                { label: 'Home', active: true, href: '/' },
-                { label: 'Scripts', href: '/scripts' },
-                { label: 'Library', href: '/library' },
-                { label: 'Profile', href: '/profile' },
-              ]}
-            />
+            <NavBar />
           </CardContent>
         </Card>
       </section>
