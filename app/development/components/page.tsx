@@ -29,7 +29,7 @@ import { Info } from '@/components/info/info'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { MetricCard } from '@/components/metric-card/metric-card'
-import { NavBar } from '@/components/navbar'
+
 import { Progress } from '@/components/ui/progress'
 import { RadioBox } from '@/components/radio-box/radio-box'
 import { ReactionBar } from '@/components/comments/reaction-bar'
@@ -156,16 +156,7 @@ export default function DevelopmentComponentsPage() {
         </Card>
       </section>
 
-      {/* NavBar */}
-      <section className='grid gap-4'>
-        <h3 className='text-lg font-semibold text-text-primary'>NavBar — desktop + mobile collapse</h3>
-        <Card>
-          <CardContent className='pt-6'>
-            <p className='text-sm text-text-muted mb-4'>Resize below 1280px to see the hamburger menu.</p>
-            <NavBar />
-          </CardContent>
-        </Card>
-      </section>
+
 
       <Tabs defaultValue='buttons' className='grid gap-4'>
         <TabsList className='grid w-full grid-cols-2 gap-2 sm:grid-cols-4'>
