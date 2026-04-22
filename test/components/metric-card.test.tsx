@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '../utils/render'
 
-import { MetricCard } from '@/components/ui/metric-card'
+import { MetricCard } from '@/components/metric-card/metric-card'
 
 test('MetricCard displays title and value', () => {
   render(<MetricCard title="Revenue" value="$1,234" />)

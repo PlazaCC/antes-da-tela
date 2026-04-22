@@ -1,7 +1,7 @@
-import { Tag } from '@/components/ui/tag'
+import { RatingSummary } from '@/components/rating-summary/rating-summary'
+import { Tag } from '@/components/tag/tag'
 import { cn } from '@/lib/utils'
 import * as React from 'react'
-import { RatingSummary } from './rating-summary'
 
 type ScriptCardElement = HTMLAnchorElement | HTMLDivElement
 

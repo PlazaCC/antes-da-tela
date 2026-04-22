@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Comment } from '@/components/ui/comment'
+import { Comment } from '@/components/comment/comment'
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { DragZone } from '@/components/ui/drag-zone'
+import { DragZone } from '@/components/drag-zone/drag-zone'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,20 +25,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Info } from '@/components/ui/info'
+import { Info } from '@/components/info/info'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { MetricCard } from '@/components/ui/metric-card'
-import { NavBar } from '@/components/ui/nav-bar'
+import { MetricCard } from '@/components/metric-card/metric-card'
+import { NavBar } from '@/components/nav-bar/nav-bar'
 import { Progress } from '@/components/ui/progress'
-import { RadioBox } from '@/components/ui/radio-box'
+import { RadioBox } from '@/components/radio-box/radio-box'
 import { ReactionBar } from '@/components/comments/reaction-bar'
-import { ScriptCard } from '@/components/ui/script-card'
+import { ScriptCard } from '@/components/script-card/script-card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { StarRating } from '@/components/ui/star-rating'
+import { StarRating } from '@/components/star-rating/star-rating'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tag } from '@/components/ui/tag'
+import { Tag } from '@/components/tag/tag'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const DEMO_SCRIPTS = [

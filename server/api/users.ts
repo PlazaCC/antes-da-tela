@@ -1,4 +1,5 @@
 import type { User } from '@/server/db/schema'
+import { calculateAverageRatingNullable } from '@/server/domain/ratings'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure, TRPCUser } from '@/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
@@ -128,8 +129,7 @@ export const usersRouter = createTRPCRouter({
     ])
 
     const scores = ((ratingsRes.data ?? []) as Array<{ score: number }>).map((r) => Number(r.score))
-    const avgRating =
-      scores.length > 0 ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : null
+    const avgRating = calculateAverageRatingNullable(scores)
 
     return {
       followers: followersRes.count ?? 0,

@@ -1,4 +1,5 @@
 import { REACTION_EMOJIS } from '@/lib/constants/reactions'
+import { aggregateReactions } from '@/server/domain/reactions'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
@@ -151,23 +152,7 @@ export const commentsRouter = createTRPCRouter({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       }
 
-      const result: Record<string, ReactionSummary[]> = {}
-      for (const row of data ?? []) {
-        if (!result[row.comment_id]) result[row.comment_id] = []
-        const existing = result[row.comment_id].find((r) => r.emoji === row.emoji)
-        if (existing) {
-          existing.count++
-          if (input.currentUserId && row.user_id === input.currentUserId) existing.userReacted = true
-        } else {
-          result[row.comment_id].push({
-            emoji: row.emoji,
-            count: 1,
-            userReacted: !!(input.currentUserId && row.user_id === input.currentUserId),
-          })
-        }
-      }
-
-      return result as Record<string, ReactionSummary[]>
+      return aggregateReactions(data ?? [], input.currentUserId)
     }),
 
   toggleReaction: authenticatedProcedure

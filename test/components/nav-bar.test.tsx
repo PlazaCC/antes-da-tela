@@ -1,6 +1,6 @@
 import { render, screen } from '../utils/render'
 
-import { NavBar } from '@/components/ui/nav-bar'
+import { NavBar } from '@/components/nav-bar/nav-bar'
 
 test('NavBar renders brand and navigation', () => {
   const items = [{ label: 'Home', href: '/' }]

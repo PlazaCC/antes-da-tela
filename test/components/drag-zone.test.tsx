@@ -1,6 +1,6 @@
 import { render, screen } from '../utils/render'
 
-import { DragZone } from '@/components/ui/drag-zone'
+import { DragZone } from '@/components/drag-zone/drag-zone'
 
 test('DragZone renders title and subtitle', () => {
   render(<DragZone title='Upload' subtitle='Click to upload' />)

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { profileSchema, type ProfileFormValues } from '@/lib/validators/profile'
 import { useTRPC } from '@/trpc/client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -12,14 +13,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod'
-
-const profileSchema = z.object({
-  name: z.string().min(2, 'Mínimo de 2 caracteres').max(100),
-  bio: z.string().max(500).optional(),
-})
-
-type FormValues = z.infer<typeof profileSchema>
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -65,7 +58,7 @@ export default function EditProfilePage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(profileSchema) })
+  } = useForm<ProfileFormValues>({ resolver: zodResolver(profileSchema) })
 
   useEffect(() => {
     if (profile) {
@@ -73,7 +66,7 @@ export default function EditProfilePage() {
     }
   }, [profile, reset])
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: ProfileFormValues) => {
     updateProfile.mutate(
       { name: values.name, bio: values.bio ?? '' },
       {

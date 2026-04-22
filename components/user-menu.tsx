@@ -8,11 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { createClient } from '@/lib/supabase/client'
+import { useLogout } from '@/lib/hooks/use-logout'
 import { FileUpIcon, LogOutIcon, SettingsIcon, UserCircle2 } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
 
 interface UserMenuProps {
   userId: string
@@ -21,18 +19,7 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
-  const router = useRouter()
-
-  const handleLogout = async () => {
-    const supabase = createClient()
-    try {
-      await supabase.auth.signOut()
-      router.replace('/')
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Logout failed')
-    }
-    router.refresh()
-  }
+  const handleLogout = useLogout()
 
   return (
     <DropdownMenu>

@@ -1,9 +1,9 @@
 'use client'
 
+import { type NavigationItem } from '@/components/navigation/navigation'
 import { cn } from '@/lib/utils'
 import * as React from 'react'
 import { useState } from 'react'
-import { type NavigationItem } from '@/components/ui/navigation'
 
 export interface NavBarProps extends React.HTMLAttributes<HTMLElement> {
   items: NavigationItem[]

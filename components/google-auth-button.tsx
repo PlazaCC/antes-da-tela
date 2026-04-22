@@ -1,11 +1,8 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { notifyError } from '@/lib/feedback'
-import { createClient } from '@/lib/supabase/client'
+import { useGoogleAuth } from '@/lib/hooks/use-google-auth'
 import { cn } from '@/lib/utils'
-import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
 
 function GoogleIcon() {
   return (
@@ -36,39 +33,11 @@ interface GoogleAuthButtonProps {
 }
 
 export function GoogleAuthButton({ label = 'Continuar com Google', className }: GoogleAuthButtonProps) {
-  const searchParams = useSearchParams()
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleGoogleAuth = async () => {
-    try {
-      setIsLoading(true)
-      const supabase = createClient()
-      const next = searchParams.get('next') ?? '/'
-      const callbackUrl = new URL('/auth/callback', window.location.origin)
-      if (next !== '/') callbackUrl.searchParams.set('next', next)
-
-      await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: callbackUrl.toString() },
-      })
-      // Page navigates away — no need to reset loading state
-    } catch (err) {
-      console.error('Google OAuth error', err)
-      try {
-        notifyError('Erro ao tentar autenticar com Google. Tente novamente.')
-      } catch {
-        try {
-          window.alert('Erro ao tentar autenticar com Google. Tente novamente.')
-        } catch {}
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const { authenticate, isLoading } = useGoogleAuth()
 
   return (
     <Button
-      onClick={handleGoogleAuth}
+      onClick={authenticate}
       disabled={isLoading}
       variant='outline'
       className={cn('w-full gap-3 border-subtle bg-elevated text-primary hover:bg-surface', className)}>

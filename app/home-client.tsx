@@ -2,7 +2,7 @@
 
 import { FilterPanel } from '@/components/filter-panel'
 import { ScriptPreviewModal } from '@/components/script-preview-modal'
-import { ScriptCard } from '@/components/ui/script-card'
+import { ScriptCard } from '@/components/script-card/script-card'
 import { GENRES } from '@/lib/constants/scripts'
 import { useFilterParams } from '@/lib/hooks/use-filter-params'
 import { cn } from '@/lib/utils'

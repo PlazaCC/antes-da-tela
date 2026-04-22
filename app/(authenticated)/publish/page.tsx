@@ -3,7 +3,7 @@
 import { Progress } from '@/components/progress'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { DragZone } from '@/components/ui/drag-zone'
+import { DragZone } from '@/components/drag-zone/drag-zone'
 import { Input } from '@/components/ui/input'
 import { useAutoFillPublishForm } from '@/lib/dev-mocks'
 import { AGE_RATINGS, GENRES, formatAgeRating } from '@/lib/constants/scripts'

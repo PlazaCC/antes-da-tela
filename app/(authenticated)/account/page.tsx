@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createClient } from '@/lib/supabase/client'
+import { profileSchema, type ProfileFormValues } from '@/lib/validators/profile'
 import { useTRPC } from '@/trpc/client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -10,14 +11,6 @@ import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod'
-
-const profileSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  bio: z.string().max(500).optional(),
-})
-
-type FormValues = z.infer<typeof profileSchema>
 
 export default function AccountPage() {
   const trpc = useTRPC()
@@ -44,7 +37,7 @@ export default function AccountPage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(profileSchema) })
+  } = useForm<ProfileFormValues>({ resolver: zodResolver(profileSchema) })
 
   useEffect(() => {
     if (profile) {
@@ -52,7 +45,7 @@ export default function AccountPage() {
     }
   }, [profile, reset])
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: ProfileFormValues) => {
     updateProfile.mutate(
       { name: values.name, bio: values.bio ?? '' },
       {

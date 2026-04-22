@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '../utils/render'
 
-import { Navigation } from '@/components/ui/navigation'
+import { Navigation } from '@/components/navigation/navigation'
 
 test('Navigation renders items and calls onSelect when clicked', async () => {
   const user = userEvent.setup()

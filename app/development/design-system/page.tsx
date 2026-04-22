@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Info } from '@/components/ui/info'
-import { NavBar } from '@/components/ui/nav-bar'
+import { Info } from '@/components/info/info'
+import { NavBar } from '@/components/nav-bar/nav-bar'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {

@@ -2,7 +2,7 @@
 
 import { Avatar } from '@/components/avatar'
 import { FollowButton } from '@/components/follow-button'
-import { ScriptCard } from '@/components/ui/script-card'
+import { ScriptCard } from '@/components/script-card/script-card'
 import { cn } from '@/lib/utils'
 import type { ScriptListItem } from '@/server/api/scripts'
 import type { User } from '@/server/db/schema'

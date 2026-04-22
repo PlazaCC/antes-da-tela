@@ -2,7 +2,7 @@
 
 import { Avatar } from '@/components/avatar'
 import { FollowButton } from '@/components/follow-button'
-import { RatingSummary } from '@/components/ui/rating-summary'
+import { RatingSummary } from '@/components/rating-summary/rating-summary'
 import Link from 'next/link'
 
 interface AuthorSectionProps {

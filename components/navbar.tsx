@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/server'
+import { getUserDisplayName } from '@/lib/utils/auth'
 import { FileUpIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -68,11 +69,7 @@ async function NavBarRightSection() {
   }
 
   const userId = user.sub as string
-  const userName =
-    (user.user_metadata?.full_name as string | undefined) ??
-    (user.user_metadata?.name as string | undefined) ??
-    user.email?.split('@')[0] ??
-    null
+  const userName = getUserDisplayName(user)
   const userImage =
     (user.user_metadata?.avatar_url as string | undefined) ??
     (user.user_metadata?.picture as string | undefined) ??

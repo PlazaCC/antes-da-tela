@@ -1,4 +1,6 @@
 import { AGE_RATINGS, GENRES } from '@/lib/constants/scripts'
+import { calculateAverageRatingNullable } from '@/server/domain/ratings'
+import { getScriptPublishDefaults } from '@/server/domain/scripts'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
@@ -77,8 +79,7 @@ export const scriptsRouter = createTRPCRouter({
         age_rating: ageRating ?? null,
         banner_path: bannerPath ?? null,
         author_id: authorId,
-        status: 'published',
-        published_at: new Date().toISOString(),
+        ...getScriptPublishDefaults(),
       })
       .select('id, title')
       .single()
@@ -238,23 +239,16 @@ export const scriptsRouter = createTRPCRouter({
       commentsByScript[c.script_id] = (commentsByScript[c.script_id] ?? 0) + 1
     }
 
-    const metrics = scripts.map((s) => {
-      const scores = ratingsByScript[s.id] ?? []
-      const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null
-      return {
-        id: s.id,
-        title: s.title,
-        status: s.status as string,
-        avgRating: avg !== null ? Math.round(avg * 10) / 10 : null,
-        commentCount: commentsByScript[s.id] ?? 0,
-      }
-    })
+    const metrics = scripts.map((s) => ({
+      id: s.id,
+      title: s.title,
+      status: s.status as string,
+      avgRating: calculateAverageRatingNullable(ratingsByScript[s.id] ?? []),
+      commentCount: commentsByScript[s.id] ?? 0,
+    }))
 
     const allScores = Object.values(ratingsByScript).flat()
-    const overallAvg =
-      allScores.length > 0
-        ? Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10
-        : null
+    const overallAvg = calculateAverageRatingNullable(allScores)
 
     return { scripts: metrics, avgRating: overallAvg, totalScripts: scripts.length }
   }),

@@ -1,4 +1,4 @@
-import { StarRating } from '@/components/ui/star-rating'
+import { StarRating } from '@/components/star-rating/star-rating'
 import { cn } from '@/lib/utils'
 import * as React from 'react'
 
