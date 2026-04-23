@@ -1,10 +1,11 @@
 'use client'
 
-import { FileUploadField } from './file-upload-field'
 import type { PublishFormState } from '@/lib/hooks/use-publish-wizard'
-import { FileIcon, Music, Image as ImageIcon } from 'lucide-react'
-import Image from 'next/image'
 import { getStorageUrl } from '@/lib/utils'
+import { FileIcon, Image as ImageIcon, Music } from 'lucide-react'
+import Image from 'next/image'
+import { useEffect, useMemo } from 'react'
+import { FileUploadField } from './file-upload-field'
 
 interface FileStepProps {
   form: PublishFormState
@@ -29,12 +30,32 @@ export function FileStep({
   validateAudio,
   validateImage,
 }: FileStepProps) {
+  const coverPreviewUrl = useMemo(() => {
+    return form.coverFile ? URL.createObjectURL(form.coverFile) : undefined
+  }, [form.coverFile])
+
+  const bannerPreviewUrl = useMemo(() => {
+    return form.bannerFile ? URL.createObjectURL(form.bannerFile) : undefined
+  }, [form.bannerFile])
+
+  useEffect(() => {
+    return () => {
+      if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl)
+    }
+  }, [coverPreviewUrl])
+
+  useEffect(() => {
+    return () => {
+      if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl)
+    }
+  }, [bannerPreviewUrl])
+
   return (
     <div className='flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-300'>
       {/* PDF Upload */}
       <FileUploadField
-        label="Arquivo do Roteiro (PDF)"
-        labelInfo="Obrigatório"
+        label='Arquivo do Roteiro (PDF)'
+        labelInfo='Obrigatório'
         accept={{ 'application/pdf': ['.pdf'] }}
         file={form.pdfFile}
         error={form.pdfError}
@@ -45,7 +66,7 @@ export function FileStep({
           else updateForm({ pdfFile: file, pdfError: '' })
         }}
         onRemove={() => updateForm({ pdfFile: null, pdfStoragePath: '' })}
-        infoText="Limite: 5MB. Apenas PDF."
+        infoText='Limite: 5MB. Apenas PDF.'
         showExisting={!form.pdfFile && !!form.pdfStoragePath}
         existingFileName={form.pdfStoragePath.split('/').pop()}
         preview={
@@ -57,8 +78,8 @@ export function FileStep({
 
       {/* Audio Upload */}
       <FileUploadField
-        label="Pilotagem / Audio Drama"
-        labelInfo="Opcional"
+        label='Pilotagem / Audio Drama'
+        labelInfo='Opcional'
         accept={{ 'audio/*': ['.mp3', '.wav', '.m4a'] }}
         file={form.audioFile}
         error={form.audioError}
@@ -69,7 +90,7 @@ export function FileStep({
           else updateForm({ audioFile: file, audioError: '' })
         }}
         onRemove={() => updateForm({ audioFile: null, audioStoragePath: '' })}
-        infoText="Limite: 20MB. MP3, WAV ou M4A."
+        infoText='Limite: 20MB. MP3, WAV ou M4A.'
         showExisting={!form.audioFile && !!form.audioStoragePath}
         existingFileName={form.audioStoragePath.split('/').pop()}
         preview={
@@ -82,8 +103,8 @@ export function FileStep({
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
         {/* Cover Upload */}
         <FileUploadField
-          label="Capa do Roteiro"
-          labelInfo="Opcional"
+          label='Capa do Roteiro'
+          labelInfo='Opcional'
           accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] }}
           file={form.coverFile}
           error={form.coverError}
@@ -94,13 +115,13 @@ export function FileStep({
             else updateForm({ coverFile: file, coverError: '' })
           }}
           onRemove={() => updateForm({ coverFile: null, coverStoragePath: '' })}
-          infoText="Recomendado: 2:3 (600x900px). Limite: 2MB."
+          infoText='Recomendado: 2:3 (600x900px). Limite: 2MB.'
           showExisting={!form.coverFile && !!form.coverStoragePath}
           existingFileName={form.coverStoragePath.split('/').pop()}
           preview={
             form.coverFile ? (
               <Image
-                src={URL.createObjectURL(form.coverFile)}
+                src={coverPreviewUrl ?? ''}
                 alt='Cover preview'
                 width={64}
                 height={96}
@@ -126,8 +147,8 @@ export function FileStep({
 
         {/* Banner Upload */}
         <FileUploadField
-          label="Banner de Destaque"
-          labelInfo="Opcional"
+          label='Banner de Destaque'
+          labelInfo='Opcional'
           accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] }}
           file={form.bannerFile}
           error={form.bannerError}
@@ -138,13 +159,13 @@ export function FileStep({
             else updateForm({ bannerFile: file, bannerError: '' })
           }}
           onRemove={() => updateForm({ bannerFile: null, bannerStoragePath: '' })}
-          infoText="Recomendado: 16:9 (1280x720px). Limite: 2MB."
+          infoText='Recomendado: 16:9 (1280x720px). Limite: 2MB.'
           showExisting={!form.bannerFile && !!form.bannerStoragePath}
           existingFileName={form.bannerStoragePath.split('/').pop()}
           preview={
             form.bannerFile ? (
               <Image
-                src={URL.createObjectURL(form.bannerFile)}
+                src={bannerPreviewUrl ?? ''}
                 alt='Banner preview'
                 width={128}
                 height={72}
@@ -171,4 +192,3 @@ export function FileStep({
     </div>
   )
 }
-
