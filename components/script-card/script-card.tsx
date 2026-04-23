@@ -46,7 +46,7 @@ function ScriptCardContent({
 }: ScriptCardBaseProps) {
   return (
     <div className='flex flex-col w-full h-full'>
-      <div className='aspect-[2/3] w-full overflow-hidden rounded-sm bg-bg-elevated relative flex items-center justify-center border-b border-border-subtle/50 group-hover:border-brand-accent/30 transition-colors'>
+      <div className='aspect-[4/5] w-full overflow-hidden rounded-sm bg-bg-elevated relative flex items-center justify-center border-b border-border-subtle/50 group-hover:border-brand-accent/30 transition-colors'>
         {coverUrl ? (
           <Image
             src={coverUrl}
@@ -73,7 +73,7 @@ function ScriptCardContent({
           </div>
         )}
       </div>
-      <div className='flex flex-col gap-2 shrink-0 px-4 pb-4'>
+      <div className='flex flex-col gap-2 shrink-0 p-4 py-2'>
         <div className='flex items-start justify-between gap-3'>
           <div className='flex flex-col gap-0.5 min-w-0'>
             {genre && (
@@ -105,8 +105,7 @@ const baseClasses =
 export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((props, ref) => {
   // Pull content-only props from the union without intersecting conflicting types.
   // Each branch then casts to the appropriate variant for element-specific spread.
-  const { title, author, genre, rating, ratingTotal, pages, status, coverUrl, onPreview } =
-    props as ScriptCardBaseProps
+  const { title, author, genre, rating, ratingTotal, pages, status, coverUrl, onPreview } = props as ScriptCardBaseProps
 
   const className = (props as { className?: string }).className
 
@@ -126,10 +125,30 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
 
   // ── Anchor variant ────────────────────────────────────────────────────────
   if ('href' in props && props.href) {
-    const { href, className: _cls, onPreview: _op, title: _t, author: _a, genre: _g,
-            rating: _r, ratingTotal: _rt, pages: _p, status: _s, coverUrl: _cv,
-            ...htmlAnchorProps } = props as ScriptCardAnchorProps
-    void _cls; void _op; void _t; void _a; void _g; void _r; void _rt; void _p; void _s; void _cv
+    const {
+      href,
+      className: _cls,
+      onPreview: _op,
+      title: _t,
+      author: _a,
+      genre: _g,
+      rating: _r,
+      ratingTotal: _rt,
+      pages: _p,
+      status: _s,
+      coverUrl: _cv,
+      ...htmlAnchorProps
+    } = props as ScriptCardAnchorProps
+    void _cls
+    void _op
+    void _t
+    void _a
+    void _g
+    void _r
+    void _rt
+    void _p
+    void _s
+    void _cv
     return (
       <a
         ref={ref as React.ForwardedRef<HTMLAnchorElement>}
@@ -142,10 +161,29 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
   }
 
   // ── Div (interactive) variant ─────────────────────────────────────────────
-  const { className: _cls, onPreview: _op, title: _t, author: _a, genre: _g,
-          rating: _r, ratingTotal: _rt, pages: _p, status: _s, coverUrl: _cv,
-          ...htmlDivProps } = props as ScriptCardDivProps
-  void _cls; void _op; void _t; void _a; void _g; void _r; void _rt; void _p; void _s; void _cv
+  const {
+    className: _cls,
+    onPreview: _op,
+    title: _t,
+    author: _a,
+    genre: _g,
+    rating: _r,
+    ratingTotal: _rt,
+    pages: _p,
+    status: _s,
+    coverUrl: _cv,
+    ...htmlDivProps
+  } = props as ScriptCardDivProps
+  void _cls
+  void _op
+  void _t
+  void _a
+  void _g
+  void _r
+  void _rt
+  void _p
+  void _s
+  void _cv
 
   return (
     <div

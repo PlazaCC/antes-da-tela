@@ -116,7 +116,7 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
       <div className={cn('max-w-6xl mx-auto w-full px-5 pb-8', !bannerUrl ? 'pt-8' : 'pt-24 relative z-10')}>
         <div className='flex flex-col md:flex-row gap-6 md:gap-8'>
           {/* Cover on Details Page */}
-          <div className='w-32 md:w-40 shrink-0 aspect-[2/3] rounded-sm bg-elevated border border-border-subtle overflow-hidden relative shadow-lg'>
+          <div className='w-32 md:w-40 shrink-0 aspect-[4/5] rounded-sm bg-elevated border border-border-subtle overflow-hidden relative shadow-lg'>
             {coverUrl ? (
               <Image src={coverUrl} alt={script.title} fill className='object-cover' />
             ) : (

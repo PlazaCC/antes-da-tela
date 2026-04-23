@@ -228,10 +228,10 @@ export function FileStep({
                 coverStoragePath,
                 64,
                 96,
-                'object-cover aspect-[2/3] w-12 rounded-sm bg-surface shrink-0',
+                'object-cover aspect-[4/5] w-12 rounded-sm bg-surface shrink-0',
               )
             ) : (
-              <div className='w-12 h-18 aspect-[2/3] rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
+              <div className='w-12 h-18 aspect-[4/5] rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
                 <ImageIcon size={20} />
               </div>
             )

@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import { Film } from 'lucide-react'
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface SidebarProps {
   script: {
@@ -21,14 +21,9 @@ export function ModalSidebar({ script, publishedAtFormatted, coverUrl, onClose }
   return (
     <aside className='hidden md:flex flex-col w-64 shrink-0 border-r border-border-subtle p-6 gap-6'>
       {/* Cover Image or Placeholder */}
-      <div className='w-full aspect-[2/3] rounded-sm bg-elevated border border-border-subtle flex flex-col items-center justify-center gap-2 overflow-hidden relative'>
+      <div className='w-full aspect-[4/5] rounded-sm bg-elevated border border-border-subtle flex flex-col items-center justify-center gap-2 overflow-hidden relative'>
         {coverUrl ? (
-          <Image
-            src={coverUrl}
-            alt={script.title}
-            fill
-            className='object-cover'
-          />
+          <Image src={coverUrl} alt={script.title} fill className='object-cover' />
         ) : (
           <>
             <Film className='w-8 h-8 text-text-muted' />
