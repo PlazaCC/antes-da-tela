@@ -22,8 +22,8 @@ poc-23 (Search/Filter)      — independente, P2
 
 | Task | Arquivo | Prioridade | Status | Escopo real |
 |---|---|---|---|---|
-| poc-26 — Dashboard + Profile | `poc-26-profile-flow-final-design.md` | **P0** | pending | **Edição/Exclusão de roteiros**, Banner upload, depar ScriptCards |
-| poc-25 — Upload: capa e banner | `poc-25-upload-wizard-final-design.md` | **P0** | pending | Schema migration + 2 novos uploads no FileStep |
+25: | poc-26 — Dashboard + Profile | `poc-26-profile-flow-final-design.md` | **P0** | pending | **Edição/Exclusão de roteiros e capas**, Depar ScriptCards |
+26: | poc-25 — Upload: capa e banner | `poc-25-upload-wizard-final-design.md` | **P0** | pending | Schema migration + upload de capa e banner no FileStep |
 | poc-21 — Home: "Em Alta" + cover | `poc-21-home-final-design.md` | **P1** | pending | Seção hot (JS/POC) + ScriptCard cover thumbnail |
 | poc-22 — Modal: cover + player | `poc-22-script-modal-final-design.md` | **P1** | pending | Cover placeholder + AudioPlayer no sidebar |
 | poc-24 — PDF Reader mobile | `poc-24-pdf-reader-final-design.md` | **P1** | pending | Breadcrumbs + player fixo mobile + comments sheet |
@@ -40,7 +40,7 @@ poc-23 (Search/Filter)      — independente, P2
 | PDF Reader | Viewer, controles, comments, reactions | Breadcrumbs, mobile player fixo, comments sheet |
 | Upload Wizard | 4 steps completos, PDF + audio | Cover image upload, banner image upload |
 | Perfil público | Banner, avatar, stats, FollowButton, grid | Cover no ScriptCard (dep poc-21) |
-| Editar Perfil | Nav sidebar, avatar upload, nome/bio | Banner image upload |
+43: | Editar Perfil | Nav sidebar, avatar upload, nome/bio | - |
 | Dashboard | Sidebar, MetricCards, tabela | **Ações de Editar e Excluir Roteiro** |
 
 ---

@@ -104,7 +104,7 @@
         "status": "pending",
         "priority": "P0 — bloqueante para poc-21 e poc-22",
         "task_file": ".agents/tasks/poc-25-upload-wizard-final-design.md",
-        "real_scope": "Schema migration (cover_path em scripts) + 2 novos campos de upload no FileStep",
+        "real_scope": "Schema migration (cover_path em scripts) + upload de capa e banner no FileStep",
         "key_files": [
           "server/db/schema.ts",
           "server/api/scripts.ts",
@@ -173,7 +173,7 @@
         "priority": "P0 — PRÓXIMA A EXECUTAR",
         "figma_nodeId": "186:1963",
         "task_file": ".agents/tasks/poc-26-profile-flow-final-design.md",
-        "real_scope": "Dashboard: Ações de Editar e Excluir na tabela de roteiros. Profile: Banner upload no Edit Profile; coverUrl nos ScriptCards do perfil (após poc-21)",
+        "real_scope": "Dashboard: Ações de Editar e Excluir na tabela de roteiros (incluindo edição de metadados e capa). Profile: visual placeholder para banner; coverUrl nos ScriptCards do perfil (após poc-21)",
         "already_done": ["perfil público completo", "edit profile com avatar + nome/bio", "dashboard com MetricCards", "tabela base do dashboard"],
         "key_files": [
           "app/(authenticated)/dashboard/page.tsx",
