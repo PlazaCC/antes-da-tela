@@ -117,8 +117,8 @@ export function HomeClient() {
               ))}
             </CarouselContent>
             <div className='absolute bottom-6 right-12 flex gap-2'>
-              <CarouselPrevious className='static translate-y-0 h-10 w-10 border-white/10 bg-black/20 text-white hover:bg-white/10 hover:text-white' />
-              <CarouselNext className='static translate-y-0 h-10 w-10 border-white/10 bg-black/20 text-white hover:bg-white/10 hover:text-white' />
+              <CarouselPrevious className='static translate-y-0 h-10 w-10 border-border-subtle bg-bg-elevated/40 text-text-primary hover:bg-bg-elevated/60 hover:text-text-primary' />
+              <CarouselNext className='static translate-y-0 h-10 w-10 border-border-subtle bg-bg-elevated/40 text-text-primary hover:bg-bg-elevated/60 hover:text-text-primary' />
             </div>
           </Carousel>
         </section>

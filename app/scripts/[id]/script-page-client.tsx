@@ -48,7 +48,7 @@ interface Props {
   currentUserId: string | null
 }
 
-export default function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl, currentUserId }: Props) {
+export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl, currentUserId }: Props) {
   const trpc = useTRPC()
   const router = useRouter()
   const queryClient = useQueryClient()

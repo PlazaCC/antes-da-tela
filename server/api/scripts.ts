@@ -54,7 +54,7 @@ export const scriptsRouter = createTRPCRouter({
         query: z
           .string()
           .max(100)
-          .regex(/^[^%,().]+$/, 'Invalid search characters')
+          .regex(/^[\w\s\-áàâãéèêíìîóòôõúùûçÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ]+$/u, 'Caracteres de busca inválidos')
           .optional(),
         genres: z.array(z.string()).optional(),
         ageRatings: z.array(z.string()).optional(),

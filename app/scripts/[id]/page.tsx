@@ -3,7 +3,7 @@ import { createTRPCContext } from '@/trpc/init'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { cache, Suspense } from 'react'
-import ScriptPageClient from './script-page-client'
+import { ScriptPageClient } from './script-page-client'
 
 type Props = { params: Promise<{ id: string }> }
 

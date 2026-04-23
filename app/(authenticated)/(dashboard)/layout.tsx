@@ -1,14 +1,15 @@
-'use client'
-
 import { AppSidebar } from '@/components/app-sidebar/app-sidebar'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { createClient } from '@/lib/supabase/server'
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { userId } = useCurrentUser()
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   return (
     <div className='min-h-screen bg-bg-base flex flex-col md:flex-row pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0'>
-      {!!userId && <AppSidebar />}
+      {!!user && <AppSidebar />}
       <main className='flex-1 min-w-0'>
         {children}
       </main>
