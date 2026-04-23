@@ -73,7 +73,7 @@ export function EditProfileForm({ profile, userId }: EditProfileFormProps) {
       <section>
         <SectionLabel>Foto e identidade</SectionLabel>
         <div className='w-full h-px bg-border-default mb-5' />
-        <div className='flex items-center gap-5 sm:gap-8'>
+        <div className='flex items-center gap-5 md:gap-8'>
           <Avatar src={profile?.image} name={profile?.name ?? '?'} size='xl' />
           <div>
             <button
@@ -126,17 +126,17 @@ export function EditProfileForm({ profile, userId }: EditProfileFormProps) {
       </section>
 
       {/* Actions */}
-      <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2'>
+      <div className='flex flex-col md:flex-row items-stretch md:items-center gap-3 pt-2'>
         <Button
           type='submit'
           disabled={isSubmitting || updateProfile.isPending}
-          className='w-full sm:w-[160px] h-11 bg-brand-accent hover:bg-brand-accent/90 text-text-primary font-sans text-[13px] font-semibold'>
+          className='w-full md:w-[160px] h-11 bg-brand-accent hover:bg-brand-accent/90 text-text-primary font-sans text-[13px] font-semibold'>
           {updateProfile.isPending ? 'Salvando…' : 'Salvar alterações'}
         </Button>
         <button
           type='button'
           onClick={() => router.back()}
-          className='w-full sm:w-auto px-4 h-11 border border-border-default rounded-sm text-text-secondary font-sans text-[13px] hover:border-border-subtle transition-colors'>
+          className='w-full md:w-auto px-4 h-11 border border-border-default rounded-sm text-text-secondary font-sans text-[13px] hover:border-border-subtle transition-colors'>
           Cancelar
         </button>
       </div>

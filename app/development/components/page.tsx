@@ -59,7 +59,7 @@ export default function DevelopmentComponentsPage() {
   return (
     <div className='grid gap-8'>
       <section className='grid gap-4'>
-        <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-end md:justify-between'>
           <div className='space-y-2'>
             <div className='flex items-center gap-3'>
               <h2 className='text-2xl font-semibold'>Component playground</h2>
@@ -159,7 +159,7 @@ export default function DevelopmentComponentsPage() {
 
 
       <Tabs defaultValue='buttons' className='grid gap-4'>
-        <TabsList className='grid w-full grid-cols-2 gap-2 sm:grid-cols-4'>
+        <TabsList className='grid w-full grid-cols-2 gap-2 md:grid-cols-4'>
           <TabsTrigger value='buttons'>Buttons</TabsTrigger>
           <TabsTrigger value='forms'>Forms</TabsTrigger>
           <TabsTrigger value='dialog'>Dialog</TabsTrigger>
@@ -167,7 +167,7 @@ export default function DevelopmentComponentsPage() {
         </TabsList>
 
         <TabsContent value='buttons'>
-          <div className='grid gap-4 sm:grid-cols-2'>
+          <div className='grid gap-4 md:grid-cols-2'>
             <Card>
               <CardHeader>
                 <CardTitle>Button variants</CardTitle>
@@ -222,7 +222,7 @@ export default function DevelopmentComponentsPage() {
                 <Checkbox id='demo-consent' checked={checked} onCheckedChange={(value) => setChecked(Boolean(value))} />
                 <Label htmlFor='demo-consent'>Agree to terms</Label>
               </div>
-              <div className='grid gap-3 sm:grid-cols-2'>
+              <div className='grid gap-3 md:grid-cols-2'>
                 <RadioBox
                   name='demo-radio'
                   label='Option one'

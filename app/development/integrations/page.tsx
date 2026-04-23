@@ -88,7 +88,7 @@ export default function DevelopmentIntegrationsPage() {
   return (
     <div className='grid gap-6'>
       <section className='grid gap-4'>
-        <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-end md:justify-between'>
           <div className='space-y-2'>
             <div className='flex items-center gap-3'>
               <h2 className='text-2xl font-semibold'>Integration Validation</h2>
@@ -104,7 +104,7 @@ export default function DevelopmentIntegrationsPage() {
         </div>
       </section>
 
-      <div className='grid gap-4 sm:grid-cols-2'>
+      <div className='grid gap-4 md:grid-cols-2'>
         <Card>
           <CardHeader>
             <CardTitle>Sentry</CardTitle>

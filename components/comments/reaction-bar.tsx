@@ -19,7 +19,7 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
             key={`${reaction.label}-${i}`}
             type='button'
             className={cn(
-              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors min-h-[44px] sm:min-h-0',
+              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors min-h-[44px] md:min-h-0',
               isActive
                 ? 'bg-brand-accent text-text-primary border-brand-accent'
                 : 'bg-elevated text-text-secondary border-border-subtle hover:border-brand-accent hover:text-text-primary',

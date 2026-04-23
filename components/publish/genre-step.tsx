@@ -16,7 +16,7 @@ export function GenreStep({ form, updateForm }: GenreStepProps) {
         <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
           Gênero Predominante
         </label>
-        <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
+        <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
           {GENRES.map((genre) => (
             <button
               key={genre}
@@ -39,7 +39,7 @@ export function GenreStep({ form, updateForm }: GenreStepProps) {
         <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
           Classificação Indicativa
         </label>
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2'>
+        <div className='grid grid-cols-2 md:grid-cols-3 md:grid-cols-6 gap-2'>
           {AGE_RATINGS.map((rating) => (
             <button
               key={rating}

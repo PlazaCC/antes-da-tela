@@ -1,12 +1,12 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import Link from 'next/link'
-import { useScriptManagement } from '@/lib/hooks/use-script-management'
-import { ScriptsTable } from '@/components/dashboard/scripts-table'
 import { DeleteScriptDialog } from '@/components/dashboard/delete-script-dialog'
 import { EmptyScriptsState } from '@/components/dashboard/empty-scripts-state'
+import { ScriptsTable } from '@/components/dashboard/scripts-table'
+import { Button } from '@/components/ui/button'
+import { useScriptManagement } from '@/lib/hooks/use-script-management'
+import { FileUpIcon } from 'lucide-react'
+import Link from 'next/link'
 
 export default function MyScriptsPage() {
   const {
@@ -29,8 +29,8 @@ export default function MyScriptsPage() {
         </div>
         <Button asChild className='bg-brand-accent text-text-primary hover:bg-brand-accent/90'>
           <Link href='/publish'>
-            <Plus className='w-4 h-4 mr-2' />
-            Novo Roteiro
+            <FileUpIcon className='w-4 h-4 mr-2' />
+            Publicar Roteiro
           </Link>
         </Button>
       </div>

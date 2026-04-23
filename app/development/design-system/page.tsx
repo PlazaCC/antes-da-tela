@@ -40,7 +40,7 @@ export default function DevelopmentDesignSystemPage() {
   return (
     <div className='grid gap-6'>
       <section className='grid gap-4'>
-        <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-end md:justify-between'>
           <div className='space-y-2'>
             <div className='flex items-center gap-3'>
               <h2 className='text-2xl font-semibold'>Design system reference</h2>
@@ -60,7 +60,7 @@ export default function DevelopmentDesignSystemPage() {
             <CardTitle>Color palette</CardTitle>
           </CardHeader>
           <CardContent className='grid gap-3'>
-            <div className='grid gap-3 sm:grid-cols-2'>
+            <div className='grid gap-3 md:grid-cols-2'>
               {colors.map((color) => (
                 <div key={color.label} className='rounded-3xl overflow-hidden border border-border'>
                   <div className='h-20' style={{ backgroundColor: color.value }} />
@@ -79,7 +79,7 @@ export default function DevelopmentDesignSystemPage() {
             <CardTitle>Typography</CardTitle>
           </CardHeader>
           <CardContent className='grid gap-4'>
-            <div className='grid gap-3 sm:grid-cols-2'>
+            <div className='grid gap-3 md:grid-cols-2'>
               {typography.map((token) => (
                 <div key={token.label} className='rounded-3xl border border-border bg-background p-4'>
                   <p className='text-sm text-muted-foreground'>{token.label}</p>
@@ -112,7 +112,7 @@ export default function DevelopmentDesignSystemPage() {
             <p className='text-sm text-muted-foreground'>Tokens + components identified from the Figma source file.</p>
           </CardHeader>
           <CardContent className='grid gap-3'>
-            <div className='grid gap-2 sm:grid-cols-2'>
+            <div className='grid gap-2 md:grid-cols-2'>
               {[
                 'Button',
                 'Tag',

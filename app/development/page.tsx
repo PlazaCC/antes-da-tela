@@ -20,7 +20,7 @@ export default function DevelopmentPage() {
         </div>
       </section>
 
-      <div className='grid gap-4 sm:grid-cols-3'>
+      <div className='grid gap-4 md:grid-cols-3'>
         <Card>
           <CardHeader>
             <CardTitle>Integration checks</CardTitle>

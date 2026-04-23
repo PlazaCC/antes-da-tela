@@ -1,11 +1,11 @@
 'use client'
 
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import type { ProfileStats, ScriptListItem, UserProfile } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import type { ScriptListItem, ProfileStats, UserProfile } from '@/lib/types'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { ProfileHeader } from './_components/profile-header'
 import { ScriptsTab } from './_components/scripts-tab'
 
@@ -39,11 +39,11 @@ export function ProfileClient({ user, scripts, stats }: Props) {
   return (
     <div className='min-h-screen bg-bg-base'>
       <ProfileHeader user={user} stats={stats} isOwnProfile={isOwnProfile} />
-      
+
       {/* Tabs Navigation */}
       <div className='bg-surface border-b border-border-default'>
-        <div className='max-w-[1280px] mx-auto px-5 sm:px-10 overflow-x-auto'>
-          <nav className='flex gap-6 sm:gap-8 min-w-max'>
+        <div className='max-w-[1280px] mx-auto px-5 md:px-10 overflow-y-hidden overflow-x-auto'>
+          <nav className='flex gap-6 md:gap-8 min-w-max'>
             {(
               [
                 { id: 'scripts', label: `Roteiros (${stats.scripts})` },
@@ -68,12 +68,12 @@ export function ProfileClient({ user, scripts, stats }: Props) {
       </div>
 
       {/* Content area */}
-      <div className='max-w-[1280px] mx-auto px-5 sm:px-10 py-6'>
+      <div className='max-w-[1280px] mx-auto px-5 md:px-10 py-6'>
         {activeTab === 'scripts' && (
-          <ScriptsTab 
-            scripts={scripts} 
-            authorName={user.name ?? ''} 
-            ratingsMap={ratingsMap} 
+          <ScriptsTab
+            scripts={scripts}
+            authorName={user.name ?? ''}
+            ratingsMap={ratingsMap}
           />
         )}
 

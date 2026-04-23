@@ -57,31 +57,31 @@ export function HomeClient() {
         }}
       />
       <FilterPanel open={filterOpen} onOpenChange={setFilterOpen} />
-      <div className='w-full px-4 flex flex-col gap-12 pt-8 pb-16'>
+      <div className='w-full px-4 flex flex-col gap-8 md:gap-12 pt-6 md:pt-8 pb-16'>
         {/* Hero headline */}
-        <div className='flex flex-col gap-3'>
-          <h1 className='font-display text-heading-1 text-text-primary'>
+        <div className='flex flex-col gap-2 md:gap-3'>
+          <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-[1.1]'>
             Roteiros que <span className='text-brand-accent italic'>merecem</span> ser lidos.
           </h1>
-          <p className='text-body-large text-text-secondary max-w-xl'>
+          <p className='text-body-default md:text-body-large text-text-secondary max-w-xl'>
             Plataforma de publicação, leitura e discussão de roteiros audiovisuais.
           </p>
         </div>
 
         {/* Genre filter pills + filter trigger */}
         <div
-          className='flex items-center gap-2 px-8 md:px-20 py-4 flex-wrap'
+          className='flex items-center gap-1.5 md:gap-2 py-2 flex-wrap overflow-hidden'
           role='group'
           aria-label='Filtrar por gênero'>
           <button
             onClick={() => setFilterOpen(true)}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 font-mono font-medium text-body-small border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
+              'flex items-center gap-1.5 px-2.5 md:px-3 py-1 md:py-1.5 font-mono font-medium text-[11px] md:text-body-small border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
               genres.length > 0 || ageRatings.length > 0
                 ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
                 : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
             )}>
-            <SlidersHorizontalIcon className='w-3.5 h-3.5' />
+            <SlidersHorizontalIcon className='w-3 h-3 md:w-3.5 md:h-3.5' />
             Filtrar
           </button>
 
@@ -89,7 +89,7 @@ export function HomeClient() {
             onClick={() => apply([], ageRatings)}
             aria-pressed={genres.length === 0}
             className={cn(
-              'px-3 py-1.5 text-body-small border font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
+              'px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-body-small border font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
               genres.length === 0
                 ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
                 : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
@@ -103,7 +103,7 @@ export function HomeClient() {
               onClick={() => toggleGenre(g)}
               aria-pressed={genres.includes(g)}
               className={cn(
-                'px-3 py-1.5 text-body-small border font-mono font-medium transition-colors capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
+                'px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-body-small border font-mono font-medium transition-colors capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
                 genres.includes(g)
                   ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
                   : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
@@ -112,6 +112,7 @@ export function HomeClient() {
             </button>
           ))}
         </div>
+
 
         {/* Em destaque */}
         {featured && featured.length > 0 && !isSearchActive && (

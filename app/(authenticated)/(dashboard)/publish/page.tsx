@@ -156,16 +156,17 @@ export default function PublishPage() {
   }
 
   return (
-    <div className='max-w-3xl mx-auto px-5 py-12'>
-      <div className='flex flex-col gap-8'>
-        <div className='flex flex-col gap-2'>
-          <h1 className='font-display text-heading-2 text-text-primary'>
+    <div className='max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-12 pb-24 md:pb-12'>
+      <div className='flex flex-col gap-6 md:gap-8'>
+        <div className='flex flex-col gap-1 md:gap-2'>
+          <h1 className='font-display text-heading-3 md:text-heading-2 text-text-primary'>
             {isEditing ? 'Editar Roteiro' : 'Publicar Roteiro'}
           </h1>
-          <p className='text-body-large text-text-secondary'>Complete as etapas abaixo para disponibilizar sua obra.</p>
+          <p className='text-body-small md:text-body-large text-text-secondary'>Complete as etapas abaixo para disponibilizar sua obra.</p>
         </div>
 
         <Progress current={step} steps={[...STEP_LABELS]} />
+
 
         {isEditing && isLoadingScript ? (
           <div className='bg-surface border border-border-default rounded-sm p-12 flex flex-col items-center justify-center gap-4'>
@@ -173,7 +174,7 @@ export default function PublishPage() {
             <p className='font-mono text-label-mono-caps text-text-muted'>Carregando roteiro...</p>
           </div>
         ) : (
-          <div className='bg-surface border border-border-default rounded-sm p-8 flex flex-col gap-8'>
+          <div className='bg-surface border border-border-default rounded-sm p-5 md:p-8 flex flex-col gap-6 md:gap-8'>
           {step === 1 && <InfoStep form={form} updateForm={updateForm} />}
           {step === 2 && (
             <FileStep

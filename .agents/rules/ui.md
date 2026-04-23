@@ -66,6 +66,11 @@ className={cn("base-styles", condition && "extra", className)}
 - Dark mode: `next-themes` via `class` strategy (already configured).
 - Animation utilities from `tailwindcss-animate` are available (e.g., `animate-accordion-down`).
 
+### Responsividade (Mobile & Tablet)
+- **Use sempre o breakpoint `md:` (768px)** como o limite superior para layouts de celular. 
+- **NÃO use `sm:` (375px) para adaptações estruturais de layout mobile**, pois muitos celulares (ex: iPhone 12 Pro com 390px) e tablets cairiam nas regras para telas maiores.
+- Como não há um design oficial focado unicamente em tablets, a regra é estender o comportamento "mobile-first" até o breakpoint `md:` (inclusive). Tudo a partir de `md:` deve ser considerado desktop ou um híbrido que suporte o layout atual.
+
 ---
 
 ## Component Conventions

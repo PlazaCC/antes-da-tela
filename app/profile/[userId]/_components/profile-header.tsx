@@ -36,52 +36,56 @@ export function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps)
 
       {/* Profile hero */}
       <div className='bg-surface border-b border-border-default'>
-        <div className='max-w-[1280px] mx-auto px-5 sm:px-10 relative pb-6 md:pb-8'>
+        <div className='max-w-[1280px] mx-auto px-5 md:px-10 relative pb-6 md:pb-8'>
           {/* Avatar overlapping banner */}
-          <div className='absolute -top-12 left-1/2 -translate-x-1/2 sm:left-10 sm:translate-x-0'>
+          <div className='absolute -top-12 left-5 md:left-10 translate-x-0'>
             <Avatar
               src={user.image}
               name={userName}
               size='xl'
-              className='border-[4px] border-bg-base w-24 h-24 sm:w-28 sm:h-28 shadow-xl'
+              className='border-[4px] border-bg-base w-24 h-24 md:w-28 md:h-28 shadow-xl'
             />
           </div>
 
           {/* Profile info — offset past avatar */}
-          <div className='flex flex-col items-center sm:items-start pt-16 sm:pt-3 sm:ml-[140px]'>
-            <div className='flex flex-col sm:flex-row sm:items-start justify-between gap-6 w-full'>
-              <div className='flex flex-col gap-1 items-center sm:items-start'>
-                <h1 className='font-display text-[24px] sm:text-[28px] leading-[1.3] text-text-primary'>{user.name}</h1>
-                <p className='font-mono text-[12px] leading-[1.3] text-text-muted'>{handle}</p>
+          <div className='flex flex-col pt-16 md:pt-3 md:ml-[140px]'>
+            <div className='flex flex-col md:flex-row md:items-start justify-between gap-4 w-full'>
+              <div className='flex flex-col gap-1'>
+                <h1 className='font-display text-[26px] md:text-[28px] leading-tight text-text-primary break-words max-w-full'>
+                  {user.name}
+                </h1>
+                <p className='font-mono text-[11px] md:text-[12px] leading-tight text-text-muted'>
+                  {handle}
+                </p>
                 {user.bio && (
-                  <p className='text-body-small text-text-secondary mt-2 max-w-[500px] text-center sm:text-left'>
+                  <p className='text-body-small text-text-secondary mt-2.5 max-w-[500px] leading-relaxed'>
                     {user.bio}
                   </p>
                 )}
               </div>
 
               {/* Action buttons */}
-              <div className='flex items-center justify-center sm:justify-start gap-3 pt-1 shrink-0'>
+              <div className='flex items-center gap-2 pt-1 shrink-0'>
                 {isOwnProfile ? (
                   <>
-                    <Button asChild className='bg-brand-accent text-text-primary hover:bg-brand-accent/90 h-9 px-4'>
+                    <Button asChild className='flex-1 md:flex-none bg-brand-accent text-text-primary hover:bg-brand-accent/90 h-9 px-4 text-xs md:text-sm font-semibold'>
                       <Link href='/profile/dashboard'>Dashboard</Link>
                     </Button>
-                    <Button asChild variant='outline' className='h-9 px-4'>
+                    <Button asChild variant='outline' className='flex-1 md:flex-none h-9 px-4 text-xs md:text-sm'>
                       <Link href='/profile/edit'>Editar Perfil</Link>
                     </Button>
                   </>
                 ) : (
                   <>
                     <FollowButton authorId={user.id} />
-                    <Button variant='outline' className='h-9 px-4'>Mensagem</Button>
+                    <Button variant='outline' className='flex-1 md:flex-none h-9 px-4 text-xs md:text-sm'>Mensagem</Button>
                   </>
                 )}
               </div>
             </div>
 
             {/* Stats row */}
-            <div className='flex flex-wrap items-start justify-center sm:justify-start gap-x-8 gap-y-4 sm:gap-14 mt-6 sm:mt-5'>
+            <div className='flex flex-wrap items-start gap-x-8 gap-y-4 md:gap-14 mt-7 md:mt-5 border-t border-border-subtle/50 pt-5 md:border-t-0 md:pt-0'>
               <StatItem value={String(stats.scripts)} label='Roteiros' />
               <StatItem value={String(stats.followers)} label='Seguidores' />
               <StatItem value={String(stats.following)} label='Seguindo' />
@@ -92,6 +96,7 @@ export function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps)
           </div>
         </div>
       </div>
+
     </>
   )
 }

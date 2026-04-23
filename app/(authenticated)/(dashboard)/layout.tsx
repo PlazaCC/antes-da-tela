@@ -7,7 +7,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { userId } = useCurrentUser()
 
   return (
-    <div className='min-h-screen bg-bg-base flex flex-col md:flex-row pb-[60px] md:pb-0'>
+    <div className='min-h-screen bg-bg-base flex flex-col md:flex-row pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0'>
       {!!userId && <AppSidebar />}
       <main className='flex-1 min-w-0'>
         {children}
