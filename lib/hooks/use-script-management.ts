@@ -1,7 +1,7 @@
 'use client'
 
 import { useTRPC } from '@/trpc/client'
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -11,7 +11,7 @@ export function useScriptManagement() {
   const [deleteScriptId, setDeleteScriptId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const { data, isLoading, refetch } = useQuery(trpc.scripts.getDashboardMetrics.queryOptions())
+  const { data, isLoading } = useQuery(trpc.scripts.getDashboardMetrics.queryOptions())
 
   const deleteMutation = useMutation(
     trpc.scripts.delete.mutationOptions({
@@ -50,6 +50,5 @@ export function useScriptManagement() {
     deleteScriptId,
     setDeleteScriptId,
     handleDelete,
-    refetch,
   }
 }

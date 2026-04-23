@@ -1,6 +1,8 @@
+'use client'
+
+import { SCRIPT_STATUS_BG_CLASSES, SCRIPT_STATUS_LABELS } from '@/lib/constants/scripts'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import { SCRIPT_STATUS_BG_CLASSES, SCRIPT_STATUS_LABELS } from '@/lib/constants/scripts'
 import { ScriptActionsDropdown } from './actions'
 
 interface ScriptMetricsRowProps {
@@ -27,15 +29,13 @@ export function ScriptMetricsRow({ script, onDeleteClick }: ScriptMetricsRowProp
       <span className='w-[100px] font-sans text-[12px] text-brand-accent font-medium'>
         {script.avgRating !== null ? `★ ${script.avgRating.toFixed(1)}` : '--'}
       </span>
-      <span className='w-[100px] font-sans text-[12px] text-text-secondary'>
-        {script.commentCount}
-      </span>
+      <span className='w-[100px] font-sans text-[12px] text-text-secondary'>{script.commentCount}</span>
 
       <div className='w-[120px]'>
         <span
           className={cn(
             'px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border',
-            SCRIPT_STATUS_BG_CLASSES[script.status] ?? 'bg-text-muted/5 border-text-muted/20 text-text-muted'
+            SCRIPT_STATUS_BG_CLASSES[script.status] ?? 'bg-text-muted/5 border-text-muted/20 text-text-muted',
           )}>
           {SCRIPT_STATUS_LABELS[script.status] ?? script.status}
         </span>

@@ -1,3 +1,5 @@
+'use client'
+
 import { ScriptMetricsRow } from './row'
 
 interface ScriptsTableProps {
@@ -35,11 +37,7 @@ export function ScriptsTable({ scripts, onDeleteClick }: ScriptsTableProps) {
 
       {/* Table rows */}
       {scripts.map((script) => (
-        <ScriptMetricsRow 
-          key={script.id} 
-          script={script} 
-          onDeleteClick={onDeleteClick} 
-        />
+        <ScriptMetricsRow key={script.id} script={script} onDeleteClick={onDeleteClick} />
       ))}
     </div>
   )

@@ -167,31 +167,81 @@ export class ScriptsService {
 
     // ── Update Associated Tables ──────────────────────────────────────────────
     if (storagePath) {
-      const { error: fileError } = await this.supabase
+      const { data: existingScriptFile, error: existingScriptFileError } = await this.supabase
         .from('script_files')
-        .upsert({
-          script_id: id,
-          storage_path: storagePath,
-          file_size: fileSize ?? null,
-          page_count: pageCount ?? null,
-        }, { onConflict: 'script_id' })
+        .select('id')
+        .eq('script_id', id)
+        .maybeSingle()
 
-      if (fileError) {
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `File update failed: ${fileError.message}` })
+      if (existingScriptFileError) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `File lookup failed: ${existingScriptFileError.message}` })
+      }
+
+      const filePayload = {
+        storage_path: storagePath,
+        file_size: fileSize ?? null,
+        page_count: pageCount ?? null,
+      }
+
+      if (existingScriptFile) {
+        const { error: fileError } = await this.supabase
+          .from('script_files')
+          .update(filePayload)
+          .eq('script_id', id)
+
+        if (fileError) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `File update failed: ${fileError.message}` })
+        }
+      } else {
+        const { error: fileError } = await this.supabase
+          .from('script_files')
+          .insert({
+            script_id: id,
+            ...filePayload,
+          })
+
+        if (fileError) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `File insert failed: ${fileError.message}` })
+        }
       }
     }
 
     if (audioStoragePath) {
-      const { error: audioError } = await this.supabase
+      const { data: existingAudioFile, error: existingAudioFileError } = await this.supabase
         .from('audio_files')
-        .upsert({
-          script_id: id,
-          storage_path: audioStoragePath,
-          duration_seconds: audioDurationSeconds ?? null,
-        }, { onConflict: 'script_id' })
+        .select('id')
+        .eq('script_id', id)
+        .maybeSingle()
 
-      if (audioError) {
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Audio update failed: ${audioError.message}` })
+      if (existingAudioFileError) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Audio lookup failed: ${existingAudioFileError.message}` })
+      }
+
+      const audioPayload = {
+        storage_path: audioStoragePath,
+        duration_seconds: audioDurationSeconds ?? null,
+      }
+
+      if (existingAudioFile) {
+        const { error: audioError } = await this.supabase
+          .from('audio_files')
+          .update(audioPayload)
+          .eq('script_id', id)
+
+        if (audioError) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Audio update failed: ${audioError.message}` })
+        }
+      } else {
+        const { error: audioError } = await this.supabase
+          .from('audio_files')
+          .insert({
+            script_id: id,
+            ...audioPayload,
+          })
+
+        if (audioError) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Audio insert failed: ${audioError.message}` })
+        }
       }
     }
 

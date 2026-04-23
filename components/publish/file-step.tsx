@@ -129,6 +129,7 @@ export function FileStep({
                 className='object-cover aspect-[2/3] w-12 rounded-sm bg-surface shrink-0'
               />
             ) : form.coverStoragePath ? (
+              // Intentional client-side preview only for public avatars bucket URLs.
               <Image
                 src={getStorageUrl('avatars', form.coverStoragePath)!}
                 alt='Cover preview'
@@ -173,6 +174,7 @@ export function FileStep({
                 className='object-cover aspect-video w-20 rounded-sm bg-surface shrink-0'
               />
             ) : form.bannerStoragePath ? (
+              // Intentional client-side preview only for public avatars bucket URLs.
               <Image
                 src={getStorageUrl('avatars', form.bannerStoragePath)!}
                 alt='Banner preview'

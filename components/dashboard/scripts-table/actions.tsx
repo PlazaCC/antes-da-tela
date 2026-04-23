@@ -1,11 +1,8 @@
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+'use client'
+
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface ScriptActionsDropdownProps {
