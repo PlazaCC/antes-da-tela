@@ -19,7 +19,7 @@ export default function DevelopmentLayout({ children }: { children: React.ReactN
   return (
     <main className='min-h-screen bg-background text-foreground'>
       <div className='w-full max-w-6xl mx-auto px-5 py-8'>
-        <div className='mb-8 flex flex-col gap-4 rounded-3xl border border-muted/50 bg-muted/40 p-6 shadow-sm sm:flex-row sm:items-end sm:justify-between'>
+        <div className='mb-8 flex flex-col gap-4 rounded-3xl border border-muted/50 bg-muted/40 p-6 shadow-sm md:flex-row md:items-end md:justify-between'>
           <div className='space-y-2'>
             <div className='flex flex-wrap items-center gap-3'>
               <h1 className='text-3xl font-semibold'>Development Dashboard</h1>

@@ -45,6 +45,19 @@ This document provides the official step-by-step instructions to set up the Ante
    - `RESEND_API_KEY`
    - `SENTRY_AUTH_TOKEN`
 
+### Sentry environment variables
+
+- `SENTRY_DSN` — server-side DSN for Sentry (set in Production/Preview environments). Required for server error collection.
+- `NEXT_PUBLIC_SENTRY_DSN` — client-side DSN (optional). Required if you want to capture browser errors and replays.
+- `SENTRY_AUTH_TOKEN` — CI token used by the Sentry build plugin to upload source maps. Keep secret and do not commit.
+- `SENTRY_TRACES_SAMPLE_RATE` / `NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE` — decimal (0.0-1.0) sampling rate for performance traces. Configure lower in production.
+- `SENTRY_SEND_DEFAULT_PII` / `NEXT_PUBLIC_SENTRY_SEND_DEFAULT_PII` — `true`/`false` to opt-in to sending PII. Default should be `false` in most projects.
+
+Notes:
+
+- Do NOT commit `.env` files containing secrets. Use `.env.example` to document required variables and add secrets to your deployment provider (Vercel, etc.).
+- The Sentry CLI/Build plugin may create a local file named `.env.sentry-build-plugin` containing an auth token; **do not commit** that file (it's ignored by `.gitignore`).
+
 ---
 
 ## 3. Database Migrations
@@ -74,7 +87,7 @@ Visit [http://localhost:3000](http://localhost:3000) to verify the app is runnin
 Test all integrations to ensure correct setup:
 
 - **Supabase:** Sign up or log in. Confirm user creation in the Supabase dashboard.
-- **Sentry:** Trigger an error (e.g., throw an error in a route) and verify it appears in Sentry.
+- **Sentry (recommended):** Use the manual validation page at `/development/integrations` (development-only) and click the test button to throw a client error, or call the example API route `/api/sentry-example-api` to trigger a server error. Verify the events appear in Sentry.
 - **PostHog:** Navigate the app and confirm pageview events in the PostHog dashboard.
 - **Resend:** Use the password recovery or any email feature and confirm delivery in the Resend dashboard.
 

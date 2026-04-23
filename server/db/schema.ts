@@ -64,6 +64,7 @@ export const scripts = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     bannerPath: text('banner_path'),
+    coverPath: text('cover_path'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     publishedAt: timestamp('published_at'),
   },
@@ -98,7 +99,8 @@ export const scriptFiles = pgTable(
     pageCount: integer('page_count'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
-  () => [
+  (table) => [
+    uniqueIndex('script_files_script_id_unique').on(table.scriptId),
     pgPolicy('Script files follow script visibility', {
       as: 'permissive',
       to: 'public',
@@ -128,7 +130,8 @@ export const audioFiles = pgTable(
     durationSeconds: integer('duration_seconds'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
-  () => [
+  (table) => [
+    uniqueIndex('audio_files_script_id_unique').on(table.scriptId),
     pgPolicy('Audio files are publicly readable', {
       as: 'permissive',
       to: 'public',

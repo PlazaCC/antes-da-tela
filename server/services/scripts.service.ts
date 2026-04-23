@@ -1,8 +1,8 @@
-import { TRPCError } from '@trpc/server'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { DashboardMetrics, ScriptDetail, ScriptListItem } from '@/lib/types'
+import type { ScriptCreateInput, ScriptUpdateInput } from '@/lib/validators/scripts'
 import { getScriptPublishDefaults } from '@/server/domain/scripts'
-import type { ScriptCreateInput } from '@/lib/validators/scripts'
-import type { ScriptListItem, ScriptDetail, DashboardMetrics } from '@/lib/types'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { TRPCError } from '@trpc/server'
 
 export class ScriptsService {
   constructor(private supabase: SupabaseClient) {}
@@ -13,7 +13,17 @@ export class ScriptsService {
     userMetadata: Record<string, unknown> | null,
     userEmail: string | null,
   ) {
-    const { storagePath, fileSize, pageCount, ageRating, bannerPath, audioStoragePath, audioDurationSeconds, ...scriptData } = input
+    const {
+      storagePath,
+      fileSize,
+      pageCount,
+      ageRating,
+      bannerPath,
+      coverPath,
+      audioStoragePath,
+      audioDurationSeconds,
+      ...scriptData
+    } = input
 
     // Ensure the author's profile exists
     const authorName = userMetadata?.full_name ?? (userEmail ? String(userEmail).split('@')[0] : 'User')
@@ -35,6 +45,7 @@ export class ScriptsService {
         ...scriptData,
         age_rating: ageRating ?? null,
         banner_path: bannerPath ?? null,
+        cover_path: coverPath ?? null,
         author_id: userId,
         ...getScriptPublishDefaults(),
       })
@@ -76,11 +87,7 @@ export class ScriptsService {
   }
 
   async addAudioFile(scriptId: string, storagePath: string, userId: string, durationSeconds?: number) {
-    const { data: script } = await this.supabase
-      .from('scripts')
-      .select('author_id')
-      .eq('id', scriptId)
-      .single()
+    const { data: script } = await this.supabase.from('scripts').select('author_id').eq('id', scriptId).single()
 
     if (!script || script.author_id !== userId) {
       throw new TRPCError({ code: 'FORBIDDEN', message: 'Not the script author' })
@@ -95,11 +102,214 @@ export class ScriptsService {
     if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
   }
 
+  async update(input: ScriptUpdateInput & { authorId: string }) {
+    const { id, authorId, storagePath, fileSize, pageCount, audioStoragePath, audioDurationSeconds, ...updateData } =
+      input
+
+    // Check ownership and get old file paths for cleanup
+    const { data: oldData, error: fetchError } = await this.supabase
+      .from('scripts')
+      .select('author_id, cover_path, banner_path, script_files(storage_path), audio_files(storage_path)')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !oldData) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Script not found' })
+    }
+
+    if (oldData.author_id !== authorId) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Not the script author' })
+    }
+
+    // Map camelCase to snake_case for Supabase
+    const mappedData: Record<string, unknown> = {}
+    if (updateData.title) mappedData.title = updateData.title
+    if (updateData.logline) mappedData.logline = updateData.logline
+    if (updateData.synopsis) mappedData.synopsis = updateData.synopsis
+    if (updateData.genre) mappedData.genre = updateData.genre
+    if (updateData.ageRating) mappedData.age_rating = updateData.ageRating
+    if (updateData.status) mappedData.status = updateData.status
+    if (updateData.bannerPath !== undefined) mappedData.banner_path = updateData.bannerPath
+    if (updateData.coverPath !== undefined) mappedData.cover_path = updateData.coverPath
+
+    const { error: updateError } = await this.supabase.from('scripts').update(mappedData).eq('id', id)
+
+    if (updateError) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Update failed: ${updateError.message}` })
+    }
+
+    // ── Storage Cleanup ───────────────────────────────────────────────────────
+    // Delete old files from storage buckets only if they were replaced by new ones
+    const cleanupPromises: Promise<unknown>[] = []
+
+    // 1. PDF File
+    const oldPdfPath = oldData.script_files?.[0]?.storage_path
+    if (storagePath && oldPdfPath && storagePath !== oldPdfPath) {
+      cleanupPromises.push(this.supabase.storage.from('scripts').remove([oldPdfPath]))
+    }
+
+    // 2. Audio File
+    const oldAudioPath = oldData.audio_files?.[0]?.storage_path
+    if (audioStoragePath && oldAudioPath && audioStoragePath !== oldAudioPath) {
+      cleanupPromises.push(this.supabase.storage.from('audio').remove([oldAudioPath]))
+    }
+
+    // 3. Cover Image
+    if (updateData.coverPath !== undefined && oldData.cover_path && updateData.coverPath !== oldData.cover_path) {
+      cleanupPromises.push(this.supabase.storage.from('avatars').remove([oldData.cover_path]))
+    }
+
+    // 4. Banner Image
+    if (updateData.bannerPath !== undefined && oldData.banner_path && updateData.bannerPath !== oldData.banner_path) {
+      cleanupPromises.push(this.supabase.storage.from('avatars').remove([oldData.banner_path]))
+    }
+
+    if (cleanupPromises.length > 0) {
+      // Run cleanup in background, don't block the response. Fail silently if storage removal fails.
+      Promise.all(cleanupPromises).catch(() => {})
+    }
+
+    // ── Update Associated Tables ──────────────────────────────────────────────
+    if (storagePath) {
+      const { data: existingScriptFile, error: existingScriptFileError } = await this.supabase
+        .from('script_files')
+        .select('id')
+        .eq('script_id', id)
+        .maybeSingle()
+
+      if (existingScriptFileError) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `File lookup failed: ${existingScriptFileError.message}`,
+        })
+      }
+
+      const filePayload = {
+        storage_path: storagePath,
+        file_size: fileSize ?? null,
+        page_count: pageCount ?? null,
+      }
+
+      if (existingScriptFile) {
+        const { error: fileError } = await this.supabase.from('script_files').update(filePayload).eq('script_id', id)
+
+        if (fileError) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `File update failed: ${fileError.message}` })
+        }
+      } else {
+        const { error: fileError } = await this.supabase.from('script_files').insert({
+          script_id: id,
+          ...filePayload,
+        })
+
+        if (fileError) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `File insert failed: ${fileError.message}` })
+        }
+      }
+    }
+
+    if (audioStoragePath) {
+      const { data: existingAudioFile, error: existingAudioFileError } = await this.supabase
+        .from('audio_files')
+        .select('id')
+        .eq('script_id', id)
+        .maybeSingle()
+
+      if (existingAudioFileError) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Audio lookup failed: ${existingAudioFileError.message}`,
+        })
+      }
+
+      const audioPayload = {
+        storage_path: audioStoragePath,
+        duration_seconds: audioDurationSeconds ?? null,
+      }
+
+      if (existingAudioFile) {
+        const { error: audioError } = await this.supabase.from('audio_files').update(audioPayload).eq('script_id', id)
+
+        if (audioError) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Audio update failed: ${audioError.message}` })
+        }
+      } else {
+        const { error: audioError } = await this.supabase.from('audio_files').insert({
+          script_id: id,
+          ...audioPayload,
+        })
+
+        if (audioError) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Audio insert failed: ${audioError.message}` })
+        }
+      }
+    }
+
+    return { id }
+  }
+
+  async delete(id: string, authorId: string) {
+    // Check ownership
+    const { data: script } = await this.supabase.from('scripts').select('author_id').eq('id', id).single()
+
+    if (!script || script.author_id !== authorId) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Not the script author' })
+    }
+
+    // Get associated files to delete them from storage buckets
+    const { data: filesToDelete } = await this.supabase
+      .from('scripts')
+      .select('cover_path, banner_path, script_files(storage_path), audio_files(storage_path)')
+      .eq('id', id)
+      .single()
+
+    if (filesToDelete) {
+      const pdfPaths = filesToDelete.script_files?.map((f) => f.storage_path).filter(Boolean) || []
+      if (pdfPaths.length > 0) {
+        await this.supabase.storage
+          .from('scripts')
+          .remove(pdfPaths)
+          .catch(() => {})
+      }
+
+      const audioPaths = filesToDelete.audio_files?.map((f) => f.storage_path).filter(Boolean) || []
+      if (audioPaths.length > 0) {
+        await this.supabase.storage
+          .from('audio')
+          .remove(audioPaths)
+          .catch(() => {})
+      }
+
+      if (filesToDelete.cover_path) {
+        await this.supabase.storage
+          .from('avatars')
+          .remove([filesToDelete.cover_path])
+          .catch(() => {})
+      }
+
+      if (filesToDelete.banner_path) {
+        await this.supabase.storage
+          .from('avatars')
+          .remove([filesToDelete.banner_path])
+          .catch(() => {})
+      }
+    }
+
+    // Now delete the database record (cascade will handle child tables)
+    const { error } = await this.supabase.from('scripts').delete().eq('id', id)
+
+    if (error) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+
+    return { success: true }
+  }
+
   async getById(id: string) {
     const { data: script } = await this.supabase
       .from('scripts')
       .select(
-        'id, title, logline, synopsis, genre, age_rating, is_featured, published_at, banner_path,' +
+        'id, title, logline, synopsis, genre, age_rating, is_featured, published_at, banner_path, cover_path,' +
           ' script_files(id, storage_path, page_count, file_size),' +
           ' audio_files(id, storage_path, duration_seconds),' +
           ' author:users!author_id(id, name, image, bio)',
@@ -116,12 +326,14 @@ export class ScriptsService {
   }
 
   async listRecent(limit: number) {
-    const { data: rows } = await this.supabase
+    const { data: rows, error } = await this.supabase
       .from('scripts')
-      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
+      .select('id, title, genre, banner_path, cover_path, script_files(page_count), author:users!author_id(id, name)')
       .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(limit + 1)
+
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
 
     const items = (rows ?? []).map((row) => {
       const r = row as Record<string, unknown> & { author?: unknown }
@@ -134,13 +346,36 @@ export class ScriptsService {
     return { items: items.slice(0, limit), hasMore }
   }
   async listFeatured(): Promise<ScriptListItem[]> {
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('scripts')
-      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
+      .select('id, title, genre, banner_path, cover_path, script_files(page_count), author:users!author_id(id, name)')
       .eq('status', 'published')
       .eq('is_featured', true)
       .order('published_at', { ascending: false })
       .limit(6)
+
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown> & { author?: unknown }
+      return {
+        ...r,
+        author: Array.isArray(r.author) ? r.author[0] : (r.author ?? null),
+      }
+    }) as ScriptListItem[]
+  }
+  async listTrendingBanners(): Promise<ScriptListItem[]> {
+    const { data, error } = await this.supabase
+      .from('scripts')
+      .select(
+        'id, title, genre, banner_path, cover_path, script_files(page_count), author:users!author_id(id, name), logline',
+      )
+      .eq('status', 'published')
+      .not('banner_path', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(3)
+
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
 
     return (data ?? []).map((row) => {
       const r = row as Record<string, unknown> & { author?: unknown }
@@ -152,12 +387,14 @@ export class ScriptsService {
   }
 
   async listByAuthor(authorId: string): Promise<ScriptListItem[]> {
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('scripts')
-      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
+      .select('id, title, genre, banner_path, cover_path, script_files(page_count), author:users!author_id(id, name)')
       .eq('author_id', authorId)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
+
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
 
     return (data ?? []).map((row) => {
       const r = row as Record<string, unknown> & { author?: unknown }
@@ -183,7 +420,7 @@ export class ScriptsService {
   async search(query?: string, genres?: string[], ageRatings?: string[]): Promise<ScriptListItem[]> {
     let queryBuilder = this.supabase
       .from('scripts')
-      .select('id, title, genre, script_files(page_count), author:users!author_id(id, name)')
+      .select('id, title, genre, banner_path, cover_path, script_files(page_count), author:users!author_id(id, name)')
       .eq('status', 'published')
 
     if (query) {

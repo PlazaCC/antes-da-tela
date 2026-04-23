@@ -1,25 +1,35 @@
 import { cn } from '@/lib/utils'
 import { Film } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface SidebarProps {
   script: {
     id: string
+    title: string
     genre: string | null
     script_files: Array<{ page_count: number | null }>
     published_at: string | null
+    cover_path?: string | null
   }
   publishedAtFormatted: string | null
+  coverUrl?: string
   onClose: () => void
 }
 
-export function ModalSidebar({ script, publishedAtFormatted, onClose }: SidebarProps) {
+export function ModalSidebar({ script, publishedAtFormatted, coverUrl, onClose }: SidebarProps) {
   return (
     <aside className='hidden md:flex flex-col w-64 shrink-0 border-r border-border-subtle p-6 gap-6'>
-      {/* Cover placeholder */}
-      <div className='w-full aspect-[2/3] rounded-sm bg-elevated border border-border-subtle flex flex-col items-center justify-center gap-2'>
-        <Film className='w-8 h-8 text-text-muted' />
-        <span className='font-mono text-[10px] text-text-muted uppercase tracking-wider'>Sem Capa</span>
+      {/* Cover Image or Placeholder */}
+      <div className='w-full aspect-[4/5] rounded-sm bg-elevated border border-border-subtle flex flex-col items-center justify-center gap-2 overflow-hidden relative'>
+        {coverUrl ? (
+          <Image src={coverUrl} alt={script.title} fill className='object-cover' />
+        ) : (
+          <>
+            <Film className='w-8 h-8 text-text-muted' />
+            <span className='font-mono text-[10px] text-text-muted uppercase tracking-wider'>Sem Capa</span>
+          </>
+        )}
       </div>
 
       {/* Metadata */}

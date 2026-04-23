@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "audio_files_script_id_unique" ON "audio_files" USING btree ("script_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "script_files_script_id_unique" ON "script_files" USING btree ("script_id");

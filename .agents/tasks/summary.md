@@ -9,25 +9,25 @@
 ### Prioridades e dependências
 
 ```
-poc-25 (cover/banner upload — schema + wizard)
+poc-26 (Dashboard: Edição e Exclusão de Roteiros) — P0, PRÓXIMA A EXECUTAR
+poc-25 (Upload/Edit: cover + banner) — CONCLUÍDO ✓
   └── poc-21 (Home: cover thumbnail + "Em Alta")
         └── poc-22 (Modal: cover + audio no sidebar)
 
 poc-24 (PDF Reader mobile)  — independente
 poc-23 (Search/Filter)      — independente, P2
-poc-26 (Profile)            — depende de poc-21 para ScriptCard cover
 ```
 
 ### Status das tasks
 
 | Task | Arquivo | Prioridade | Status | Escopo real |
 |---|---|---|---|---|
-| poc-25 — Upload: capa e banner | `poc-25-upload-wizard-final-design.md` | **P0** | pending | Schema migration + 2 novos uploads no FileStep |
+25: | poc-26 — Dashboard + Profile | `poc-26-profile-flow-final-design.md` | **P0** | pending | **Edição/Exclusão de roteiros e capas**, Depar ScriptCards |
+26: | poc-25 — Upload: capa e banner | `poc-25-upload-wizard-final-design.md` | **P0** | done | Schema migration + upload de capa e banner no FileStep |
 | poc-21 — Home: "Em Alta" + cover | `poc-21-home-final-design.md` | **P1** | pending | Seção hot (JS/POC) + ScriptCard cover thumbnail |
 | poc-22 — Modal: cover + player | `poc-22-script-modal-final-design.md` | **P1** | pending | Cover placeholder + AudioPlayer no sidebar |
 | poc-24 — PDF Reader mobile | `poc-24-pdf-reader-final-design.md` | **P1** | pending | Breadcrumbs + player fixo mobile + comments sheet |
 | poc-23 — Search/Filter depar | `poc-23-search-filter-final-design.md` | **P2** | pending | 2 ajustes menores (link resultados + apply fix) |
-| poc-26 — Profile: banner upload | `poc-26-profile-flow-final-design.md` | **P2** | pending | Banner upload no edit profile + depar ScriptCards |
 
 ### O que já está feito em cada tela
 
@@ -38,10 +38,10 @@ poc-26 (Profile)            — depende de poc-21 para ScriptCard cover
 | Search Sheet | Bottom sheet com busca + resultados | Link "ver todos os resultados" |
 | Filter Panel | Gênero + classificação + checkboxes | Apply antes de fechar |
 | PDF Reader | Viewer, controles, comments, reactions | Breadcrumbs, mobile player fixo, comments sheet |
-| Upload Wizard | 4 steps completos, PDF + audio | Cover image upload, banner image upload |
+| Upload Wizard | 4 steps completos, PDF + audio, cover + banner | - |
 | Perfil público | Banner, avatar, stats, FollowButton, grid | Cover no ScriptCard (dep poc-21) |
-| Editar Perfil | Nav sidebar, avatar upload, nome/bio | Banner image upload |
-| Dashboard | Sidebar, MetricCards, tabela | Leituras únicas (POC: mostra "--") |
+43: | Editar Perfil | Nav sidebar, avatar upload, nome/bio | - |
+| Dashboard | Sidebar, MetricCards, tabela | **Ações de Editar e Excluir Roteiro** |
 
 ---
 

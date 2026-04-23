@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 
+import { Comment } from '@/components/comment/comment'
+import { DragZone } from '@/components/drag-zone/drag-zone'
+import { Info } from '@/components/info/info'
+import { MetricCard } from '@/components/metric-card/metric-card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Comment } from '@/components/comment/comment'
 import {
   Dialog,
   DialogContent,
@@ -17,7 +20,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { DragZone } from '@/components/drag-zone/drag-zone'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,25 +27,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Info } from '@/components/info/info'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { MetricCard } from '@/components/metric-card/metric-card'
 
-import { Progress } from '@/components/ui/progress'
-import { RadioBox } from '@/components/radio-box/radio-box'
 import { ReactionBar } from '@/components/comments/reaction-bar'
+import { RadioBox } from '@/components/radio-box/radio-box'
 import { ScriptCard } from '@/components/script-card/script-card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { StarRating } from '@/components/star-rating/star-rating'
+import { Tag } from '@/components/tag/tag'
+import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tag } from '@/components/tag/tag'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const DEMO_SCRIPTS = [
-  { title: 'The Last Draft', author: 'Mariana Ramos', genre: 'Drama', rating: 4.5, pages: 128, status: 'publicado' as const },
-  { title: 'Silêncio no Terceiro Ato', author: 'Pedro Alves', genre: 'Thriller', rating: 3.5, pages: 95, status: 'rascunho' as const },
+  {
+    title: 'The Last Draft',
+    author: 'Mariana Ramos',
+    genre: 'Drama',
+    rating: 4.5,
+    pages: 128,
+    status: 'publicado' as const,
+  },
+  {
+    title: 'Silêncio no Terceiro Ato',
+    author: 'Pedro Alves',
+    genre: 'Thriller',
+    rating: 3.5,
+    pages: 95,
+    status: 'rascunho' as const,
+  },
   { title: 'Entre Cenas', author: 'Clara Vaz', genre: 'Comédia', rating: 5, pages: 112, status: 'publicado' as const },
 ]
 
@@ -59,7 +73,7 @@ export default function DevelopmentComponentsPage() {
   return (
     <div className='grid gap-8'>
       <section className='grid gap-4'>
-        <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-end md:justify-between'>
           <div className='space-y-2'>
             <div className='flex items-center gap-3'>
               <h2 className='text-2xl font-semibold'>Component playground</h2>
@@ -148,18 +162,14 @@ export default function DevelopmentComponentsPage() {
               ]}
             />
             {reactionSelected !== undefined && (
-              <p className='text-sm text-text-muted font-mono'>
-                Selected: reaction #{reactionSelected}
-              </p>
+              <p className='text-sm text-text-muted font-mono'>Selected: reaction #{reactionSelected}</p>
             )}
           </CardContent>
         </Card>
       </section>
 
-
-
       <Tabs defaultValue='buttons' className='grid gap-4'>
-        <TabsList className='grid w-full grid-cols-2 gap-2 sm:grid-cols-4'>
+        <TabsList className='grid w-full grid-cols-2 gap-2 md:grid-cols-4'>
           <TabsTrigger value='buttons'>Buttons</TabsTrigger>
           <TabsTrigger value='forms'>Forms</TabsTrigger>
           <TabsTrigger value='dialog'>Dialog</TabsTrigger>
@@ -167,7 +177,7 @@ export default function DevelopmentComponentsPage() {
         </TabsList>
 
         <TabsContent value='buttons'>
-          <div className='grid gap-4 sm:grid-cols-2'>
+          <div className='grid gap-4 md:grid-cols-2'>
             <Card>
               <CardHeader>
                 <CardTitle>Button variants</CardTitle>
@@ -210,19 +220,19 @@ export default function DevelopmentComponentsPage() {
             </CardHeader>
             <CardContent className='grid gap-4'>
               <div className='grid gap-2'>
-                <Label htmlFor='demo-name'>Name</Label>
+                <Label htmlFor='demo-name'>Nome</Label>
                 <Input
                   id='demo-name'
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder='Enter your name'
+                  placeholder='Digite seu nome'
                 />
               </div>
               <div className='flex items-center gap-2'>
                 <Checkbox id='demo-consent' checked={checked} onCheckedChange={(value) => setChecked(Boolean(value))} />
                 <Label htmlFor='demo-consent'>Agree to terms</Label>
               </div>
-              <div className='grid gap-3 sm:grid-cols-2'>
+              <div className='grid gap-3 md:grid-cols-2'>
                 <RadioBox
                   name='demo-radio'
                   label='Option one'

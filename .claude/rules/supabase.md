@@ -23,6 +23,23 @@ For **writes** (UPDATE, INSERT, DDL, migrations), always use the CLI.
 
 ---
 
+## Safety and Error Handling (STRICT)
+
+**If any database operation, migration, or connection attempt fails, STOP immediately.**
+
+1.  **Do NOT attempt alternative workarounds** (e.g., creating scratch scripts to bypass the CLI, trying to run SQL via RPC if not already established, or manual schema edits).
+2.  **Do NOT "guess" fixes** for migration history mismatches or connection errors.
+3.  **Mandatory Manual Verification:** Immediately report the error to the user and ask for manual verification or intervention.
+4.  **No Loops:** If a command fails twice with the same error, do not retry a third time.
+
+Common failure points that require immediate stop:
+- `yarn db:migrate` or `yarn supabase:push` failures.
+- "migration history does not match local files" errors.
+- Connection timeouts or "project not linked" errors.
+- Docker-related failures if attempting local development commands.
+
+---
+
 ## Auth patterns
 
 - Use `createServerClient` from `@supabase/ssr` in Server Components and API routes.
@@ -82,8 +99,19 @@ createComment.mutate(data, {
 })
 ```
 
-## Migrations
+## Migrations and Schema Updates
 
-- **User-defined tables** → Drizzle schema in `server/db/schema.ts` + `yarn drizzle:generate` + `yarn drizzle:migrate`.
-- **Supabase-specific config** (storage buckets, RLS policies, extensions) → raw SQL files in `drizzle/` named `XXXX_description.sql`, applied via `npx supabase@latest db query --linked --file`.
-- Never edit generated migration files retroactively; create a new migration instead.
+Always use the scripts defined in `package.json` to ensure consistency:
+
+- **Generate Table Migrations:** `yarn db:generate` (Drizzle Kit).
+- **Apply Table Migrations:** `yarn db:migrate` (Drizzle Kit).
+- **Create Supabase Migration:** `yarn supabase:new <name>` (Supabase CLI).
+- **Push to Remote:** `yarn supabase:push` (Supabase CLI).
+- **Pull from Remote:** `yarn supabase:pull` (Supabase CLI).
+
+**Rules for Migrations:**
+1.  **Never bypass the CLI/Package scripts.**
+2.  **User-defined tables** live in `server/db/schema.ts`.
+3.  **Supabase-specific config** (Storage, RLS, Functions) live in `supabase/migrations/`.
+4.  If `yarn supabase:pull` reports a migration history mismatch, **stop and ask the user to repair the history manually** using `supabase migration repair`. Do not attempt to repair it yourself unless explicitly instructed with a verified command.
+5.  Never edit generated migration files retroactively; always create a new migration.

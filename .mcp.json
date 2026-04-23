@@ -3,6 +3,9 @@
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=rbesxenumiuijosbntzp&read_only=true"
+    },
+    "Sentry": {
+      "url": "https://mcp.sentry.dev/mcp/plaza-ri/antes-da-tela"
     }
   }
 }

@@ -4,61 +4,44 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAvatarUpload } from '@/lib/hooks/use-avatar-upload'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
-import { profileSchema, type ProfileFormValues } from '@/lib/validators/profile'
-import { useTRPC } from '@/trpc/client'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useProfileForm } from '@/lib/hooks/use-profile-form'
 import Image from 'next/image'
-import { useEffect, useRef } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
+import { useRef } from 'react'
 
 export default function AccountPage() {
-  const trpc = useTRPC()
-  const queryClient = useQueryClient()
   const fileRef = useRef<HTMLInputElement>(null)
-
   const { userId } = useCurrentUser()
   const { upload, isUploading } = useAvatarUpload()
-
-  const profileOpts = trpc.users.getProfile.queryOptions({ id: userId ?? '' })
-  const { data: profile } = useQuery({ ...profileOpts, enabled: !!userId })
-
-  const updateProfile = useMutation(trpc.users.updateProfile.mutationOptions())
-
   const {
+    profile,
+    isLoadingProfile,
     register,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
-  } = useForm<ProfileFormValues>({ resolver: zodResolver(profileSchema) })
+    isPending,
+    submitProfile,
+  } = useProfileForm(userId ?? '')
 
-  useEffect(() => {
-    if (profile) {
-      reset({ name: profile.name, bio: profile.bio ?? undefined })
-    }
-  }, [profile, reset])
+  const onSubmit = submitProfile
 
-  const onSubmit = (values: ProfileFormValues) => {
-    updateProfile.mutate(
-      { name: values.name, bio: values.bio || null },
-      {
-        onSuccess: () => {
-          void queryClient.invalidateQueries({ queryKey: profileOpts.queryKey })
-          toast.success('Profile updated.')
-        },
-        onError: (err) => toast.error(err.message),
-      },
+  if (isLoadingProfile) {
+    return (
+      <main className='max-w-sm mx-auto px-5 py-12'>
+        <div className='bg-surface border border-border-default rounded-sm p-12 flex flex-col items-center justify-center gap-4'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-accent'></div>
+          <p className='font-mono text-label-mono-caps text-text-muted'>Carregando perfil...</p>
+        </div>
+      </main>
     )
   }
 
   return (
     <main className='max-w-sm mx-auto px-5 py-12 flex flex-col gap-8'>
-      <h1 className='font-display text-heading-2 text-primary'>My Account</h1>
+      <h1 className='font-display text-heading-2 text-primary'>Minha Conta</h1>
 
       {/* Avatar */}
       <section className='flex flex-col gap-3'>
-        <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>Avatar</label>
+        <label className='font-mono text-secondary uppercase tracking-wider text-xs'>Avatar</label>
         <div className='flex items-center gap-4'>
           {profile?.image ? (
             <Image
@@ -80,7 +63,7 @@ export default function AccountPage() {
             size='sm'
             disabled={isUploading}
             onClick={() => fileRef.current?.click()}>
-            {isUploading ? 'Uploading…' : 'Change photo'}
+            {isUploading ? 'Enviando…' : 'Trocar foto'}
           </Button>
           <input
             ref={fileRef}
@@ -98,19 +81,19 @@ export default function AccountPage() {
       {/* Profile form */}
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-6'>
         <div className='flex flex-col gap-2'>
-          <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>Name</label>
-          <Input {...register('name')} placeholder='Your name' />
+          <label className='font-mono text-secondary uppercase tracking-wider text-xs'>Nome</label>
+          <Input {...register('name')} placeholder='Seu nome' />
           {errors.name && <p className='text-state-error text-xs font-mono'>{errors.name.message}</p>}
         </div>
 
         <div className='flex flex-col gap-2'>
-          <label className='font-mono text-label-mono-caps text-secondary uppercase tracking-wider text-xs'>Bio</label>
-          <Input {...register('bio')} placeholder='A short bio (optional)' />
+          <label className='font-mono text-secondary uppercase tracking-wider text-xs'>Bio</label>
+          <Input {...register('bio')} placeholder='Uma bio curta (opcional)' />
           {errors.bio && <p className='text-state-error text-xs font-mono'>{errors.bio.message}</p>}
         </div>
 
-        <Button type='submit' disabled={isSubmitting || updateProfile.isPending}>
-          {updateProfile.isPending ? 'Saving…' : 'Save changes'}
+        <Button type='submit' disabled={isSubmitting || isPending}>
+          {isPending ? 'Salvando…' : 'Salvar alterações'}
         </Button>
       </form>
     </main>

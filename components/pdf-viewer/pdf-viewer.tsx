@@ -1,8 +1,10 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { loadPdfjsLib } from '@/lib/utils/pdf'
 import type { PDFDocumentProxy, PDFPageProxy, PageViewport } from 'pdfjs-dist'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { PDFViewerError } from './pdf-viewer-error'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
 type PdfjsLib = typeof import('pdfjs-dist')
@@ -23,6 +25,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
   const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { currentPage, totalPages, zoom, isLoading, setTotalPages, setLoading, setCurrentPage } = usePDFViewerStore()
+  const [pdfError, setPdfError] = useState<string | null>(null)
 
   const renderPage = useCallback(async (pageNum: number, userZoom: number) => {
     if (!canvasRef.current || !canvasWrapperRef.current || !pdfDocRef.current || !pdfjsRef.current) return
@@ -69,7 +72,13 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
 
     try {
       await renderTask.promise
-    } catch {
+    } catch (error) {
+      if (error instanceof Error) {
+        setPdfError(error.message)
+      } else {
+        setPdfError('Falha ao renderizar o PDF.')
+      }
+      pdfDocRef.current = null
       return
     } finally {
       renderTaskRef.current = null
@@ -104,16 +113,18 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
 
     async function loadPDF() {
       setLoading(true)
+      setPdfError(null)
       setCurrentPage(1)
-      const pdfjsLib = await import('pdfjs-dist')
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-        'pdfjs-dist/build/pdf.worker.min.mjs',
-        import.meta.url,
-      ).toString()
+      setTotalPages(0)
+
+      const pdfjsLib = await loadPdfjsLib()
       pdfjsRef.current = pdfjsLib
 
       const pdf = await pdfjsLib.getDocument(url).promise
-      if (cancelled) return
+      if (cancelled) {
+        pdf.destroy?.()
+        return
+      }
 
       pdfDocRef.current = pdf
       setTotalPages(pdf.numPages)
@@ -121,7 +132,15 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
       await renderPage(1, usePDFViewerStore.getState().zoom)
     }
 
-    loadPDF().catch(console.error)
+    loadPDF().catch((error) => {
+      console.error(error)
+      if (!cancelled) {
+        setPdfError(error instanceof Error ? error.message : 'Falha ao carregar o PDF.')
+        setLoading(false)
+        pdfDocRef.current = null
+        setTotalPages(0)
+      }
+    })
     return () => {
       cancelled = true
     }
@@ -172,6 +191,10 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     usePDFViewerStore.getState().setZoom(Math.min(3.0, Math.round((z + 0.25) * 4) / 4))
   }
 
+  if (pdfError) {
+    return <PDFViewerError message={pdfError} />
+  }
+
   return (
     <div className='flex flex-col w-full'>
       {/* Controls bar — sticks to the top of the parent scroll container */}
@@ -187,7 +210,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             type='button'
             onClick={goToPrev}
             disabled={currentPage <= 1}
-            aria-label='Previous page'
+            aria-label='Página anterior'
             className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
             ←
           </button>
@@ -198,7 +221,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             type='button'
             onClick={goToNext}
             disabled={currentPage >= totalPages}
-            aria-label='Next page'
+            aria-label='Próxima página'
             className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
             →
           </button>
@@ -209,7 +232,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
           <button
             type='button'
             onClick={decreaseZoom}
-            aria-label='Zoom out'
+            aria-label='Reduzir zoom'
             className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
             −
           </button>
@@ -219,7 +242,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
           <button
             type='button'
             onClick={increaseZoom}
-            aria-label='Zoom in'
+            aria-label='Aumentar zoom'
             className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
             +
           </button>
@@ -232,14 +255,16 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
           <div className='absolute inset-0 z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm min-h-[400px]'>
             <div className='flex flex-col items-center gap-3'>
               <div className='w-8 h-8 rounded-full border-2 border-border-subtle border-t-brand-accent animate-spin' />
-              <span className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>Loading…</span>
+              <span className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>
+                Carregando…
+              </span>
             </div>
           </div>
         )}
         <canvas
           ref={canvasRef}
           className='block rounded-sm border border-border-subtle shadow-elevation-1'
-          aria-label={`PDF page ${currentPage} of ${totalPages}`}
+          aria-label={`Página ${currentPage} de ${totalPages}`}
         />
         <div ref={textLayerRef} className='pdf-text-layer' aria-hidden='true' />
       </div>

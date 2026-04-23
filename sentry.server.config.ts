@@ -4,17 +4,21 @@
 
 import * as Sentry from '@sentry/nextjs'
 
-Sentry.init({
-  // Use environment variable so DSN is not hard-coded in the repository.
-  dsn: process.env.SENTRY_DSN,
+const dsn = process.env.SENTRY_DSN
 
-  // Sampling rate for traces. Prefer setting via env in production.
+Sentry.init({
+  // Use server-side DSN; keep secrets out of the repository and in environment variables.
+  dsn,
+
+  // Sampling rate for server-side traces. Tune in production.
   tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? 0.1),
 
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+  // Enable logs if requested via env
+  enableLogs: process.env.SENTRY_ENABLE_LOGS === 'true',
 
-  // Enable sending user PII (Personally Identifiable Information)
-  // Keep configurable via env in case project needs to disable it.
-  sendDefaultPii: process.env.SENTRY_SEND_DEFAULT_PII === 'true' || false,
+  // Send PII only if explicitly enabled via env var
+  sendDefaultPii: process.env.SENTRY_SEND_DEFAULT_PII === 'true',
+
+  // Debug when requested or in non-production for easier troubleshooting
+  debug: process.env.SENTRY_DEBUG === 'true' || process.env.NODE_ENV !== 'production',
 })

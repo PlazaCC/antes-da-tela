@@ -13,11 +13,17 @@ Purpose: short, actionable guidance for AI coding agents working in this reposit
 - Preserve repository style and minimal scope of changes.
 - Use `apply_patch` (or equivalent) for edits; avoid manual large-file copy/pastes.
 - For any multi-step task, create a tracked TODO via the `manage_todo_list` tool.
+- **Mandatory Verification Order:** After finishing any activity or task, ALWAYS run:
+  1. `yarn lint`
+  2. `yarn test:run`
+  3. `yarn type-check`
+  4. `yarn build` (Only as the final step)
+- **Database Safety:** If any migration or database command fails, STOP and ask for manual verification. Do NOT attempt alternative workarounds. See `.claude/rules/supabase.md`.
 - Read relevant SKILL.md files before acting. Example: [.agents/skills/writing-skills/SKILL.md](.agents/skills/writing-skills/SKILL.md).
 
 **Project-specific conventions (high-value links)**
 
-- Supabase & migrations: ALWAYS via `npx supabase db push` for RPCs/Functions. See [CLAUDE.md](CLAUDE.md).
+- **Migrations:** ALWAYS via Drizzle (`yarn db:generate`, `yarn db:migrate`). NEVER use Supabase CLI for migrations. See [CLAUDE.md](CLAUDE.md).
 - **shadcn/ui & Tailwind (read before any UI work):** [.agents/rules/ui.md](.agents/rules/ui.md)
 - shadcn install-and-wrap skill: [.agents/skills/new-shadcn-component/SKILL.md](.agents/skills/new-shadcn-component/SKILL.md)
 - Setup and scripts: [docs/SETUP.md](docs/SETUP.md) and [package.json](package.json)
@@ -28,6 +34,7 @@ Purpose: short, actionable guidance for AI coding agents working in this reposit
 - `yarn build` — production build
 - `yarn lint` — ESLint
 - `yarn test` / `yarn test:run` — run Vitest
+- `yarn type-check` — Type check (tsc)
 - `yarn drizzle-kit generate` — generate Drizzle SQL migrations
 - `yarn drizzle-kit migrate` — apply migrations to Supabase
 - `yarn dlx shadcn@latest add <component>` — install new shadcn/ui components
@@ -50,7 +57,8 @@ Purpose: short, actionable guidance for AI coding agents working in this reposit
 1. Read `CLAUDE.md` and the relevant `.claude/rules/*` file.
 2. Run linters/tests locally if available (`yarn lint`, `yarn test`).
 3. Make minimal edits; use `apply_patch` to change files.
-4. Update TODOs via `manage_todo_list` and report changed files.
+4. **After finishing:** Run `yarn lint`, `yarn test:run`, and `yarn type-check`. Only if these pass, run `yarn build`.
+5. Update TODOs via `manage_todo_list` and report changed files.
 
 **If unsure**: leave a concise inline comment in the code/PR and ask for clarification.
 

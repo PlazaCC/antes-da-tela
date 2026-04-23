@@ -1,4 +1,4 @@
-import { scriptCreateSchema } from '@/lib/validators/scripts'
+import { scriptCreateSchema, scriptUpdateSchema } from '@/lib/validators/scripts'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { z } from 'zod'
 
@@ -36,6 +36,9 @@ export const scriptsRouter = createTRPCRouter({
   listFeatured: publicProcedure.query(async ({ ctx }) => {
     return ctx.scriptsService.listFeatured()
   }),
+  listTrendingBanners: publicProcedure.query(async ({ ctx }) => {
+    return ctx.scriptsService.listTrendingBanners()
+  }),
 
   listByAuthor: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input, ctx }) => {
     return ctx.scriptsService.listByAuthor(input.authorId)
@@ -51,7 +54,7 @@ export const scriptsRouter = createTRPCRouter({
         query: z
           .string()
           .max(100)
-          .regex(/^[^%,().]+$/, 'Invalid search characters')
+          .regex(/^[\w\s\-áàâãéèêíìîóòôõúùûçÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ]+$/u, 'Caracteres de busca inválidos')
           .optional(),
         genres: z.array(z.string()).optional(),
         ageRatings: z.array(z.string()).optional(),
@@ -59,5 +62,14 @@ export const scriptsRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       return ctx.scriptsService.search(input.query, input.genres, input.ageRatings)
+    }),
+  update: authenticatedProcedure.input(scriptUpdateSchema).mutation(async ({ input, ctx }) => {
+    return ctx.scriptsService.update({ ...input, authorId: ctx.user!.id })
+  }),
+
+  delete: authenticatedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      return ctx.scriptsService.delete(input.id, ctx.user!.id)
     }),
 })

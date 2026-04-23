@@ -29,3 +29,18 @@ export type AgeRating = (typeof AGE_RATINGS)[number]
 export function formatAgeRating(r: AgeRating): string {
   return r === 'livre' ? 'Livre' : `${r} anos`
 }
+
+export const SCRIPT_STATUS_LABELS: Record<string, string> = {
+  published: 'Publicado',
+  draft: 'Rascunho',
+}
+
+export const SCRIPT_STATUS_COLORS: Record<string, string> = {
+  published: 'text-state-success',
+  draft: 'text-text-muted',
+}
+
+export const SCRIPT_STATUS_BG_CLASSES: Record<string, string> = {
+  published: 'bg-state-success/5 border-state-success/20 text-state-success',
+  draft: 'bg-text-muted/5 border-text-muted/20 text-text-muted',
+}

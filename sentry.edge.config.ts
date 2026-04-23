@@ -5,17 +5,16 @@
 
 import * as Sentry from '@sentry/nextjs'
 
-Sentry.init({
-  // Use environment variable so DSN is not hard-coded in the repository.
-  dsn: process.env.SENTRY_DSN,
+const dsn = process.env.SENTRY_DSN
 
-  // Sampling rate for traces. Prefer setting via env in production.
+Sentry.init({
+  // Edge runtime uses the same server DSN
+  dsn,
+
+  // Sampling rate for edge traces
   tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? 0.1),
 
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
-
-  // Enable sending user PII (Personally Identifiable Information)
-  // Keep configurable via env in case project needs to disable it.
-  sendDefaultPii: process.env.SENTRY_SEND_DEFAULT_PII === 'true' || false,
+  enableLogs: process.env.SENTRY_ENABLE_LOGS === 'true',
+  sendDefaultPii: process.env.SENTRY_SEND_DEFAULT_PII === 'true',
+  debug: process.env.SENTRY_DEBUG === 'true' || process.env.NODE_ENV !== 'production',
 })

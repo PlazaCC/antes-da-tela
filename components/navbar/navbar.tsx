@@ -1,8 +1,6 @@
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/server'
 import { getUserDisplayName } from '@/lib/utils/auth'
-import { FileUpIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -14,10 +12,10 @@ import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 
 export function NavBar() {
   return (
-    <header aria-label='Principal' className='sticky top-0 z-50 bg-surface border-b border-border-default md:h-14'>
-      <div className='px-4 py-2 md:py-0 h-full flex  justify-between gap-1'>
+    <header aria-label='Principal' className='sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-border-default md:h-14 transition-all duration-300'>
+      <div className='px-3 md:px-4 py-2 md:py-0 h-full flex items-center justify-between gap-1'>
         {/* Left: Logo + Nav links */}
-        <div className='flex items-center gap-10'>
+        <div className='flex items-center gap-4 md:gap-10'>
           <Link href='/' className='shrink-0'>
             <Image
               src='/assets/logo.svg'
@@ -77,7 +75,7 @@ async function NavBarRightSection() {
     null
 
   return (
-    <div className='flex items-center gap-8 justify-between'>
+    <div className='flex items-center gap-4 md:gap-8 justify-between'>
       {/* Desktop: search input + CTA */}
       <div className='hidden md:flex items-center gap-2.5 w-full'>
         <div className='w-full max-w-[352px]'>
@@ -85,12 +83,6 @@ async function NavBarRightSection() {
             <NavBarSearch />
           </Suspense>
         </div>
-        <Button asChild size='sm' className='h-8 text-sm w-[124px] rounded-[2px] shrink-0'>
-          <Link href='/publish'>
-            <FileUpIcon />
-            Publicar
-          </Link>
-        </Button>
       </div>
 
       {/* Mobile: search icon */}

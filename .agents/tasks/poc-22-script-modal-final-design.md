@@ -1,9 +1,9 @@
 # poc-22 — Script Preview Modal: design final
 
-**Scope:** Frontend  
-**Priority:** P1  
-**Status:** pending  
-**Figma:** Modal/Roteiro `51:718`  
+**Scope:** Frontend
+**Priority:** P1
+**Status:** pending
+**Figma:** Modal/Roteiro `51:718`
 **Depends on:** poc-21 (precisa de `cover_path` no schema)
 
 ---
@@ -29,7 +29,7 @@
 **Arquivo:** `components/script-preview-modal/sidebar.tsx`
 
 - Adicionar prop `coverUrl?: string | null`
-- No topo do sidebar: bloco `aspect-[2/3]` com cover image ou placeholder cinza
+- No topo do sidebar: bloco `aspect-[4/5]` com cover image ou placeholder cinza
 - Se `coverUrl` null: retângulo bg `bg-elevated` com label "Thumbnail 2:3" em text-muted
 
 ### 2. Audio player no sidebar do modal
@@ -47,6 +47,7 @@ O audio player existe no leitor (`script-page-client.tsx`) mas **não aparece no
 `ScriptPreviewModal` busca o script via `scripts.getById`. Verificar se o endpoint retorna `cover_path` e `audio_files[0].storage_path`.
 
 **Arquivo:** `server/api/scripts.ts`
+
 - Garantir que `getById` inclui `cover_path` e `audio_files(storage_path)` no select
 - No client: resolver URL pública do Storage para `cover_path` e `audio_files[0].storage_path` antes de passar como props
 
@@ -56,11 +57,11 @@ O audio player existe no leitor (`script-page-client.tsx`) mas **não aparece no
 
 ## Arquivos a modificar
 
-| Arquivo | Mudança |
-|---|---|
-| `server/api/scripts.ts` | `getById` retorna `cover_url` e `audio_url` (URLs públicas já resolvidas) |
-| `components/script-preview-modal/sidebar.tsx` | Cover placeholder + AudioPlayer se `audioUrl` presente |
-| `components/script-preview-modal/script-preview-modal.tsx` | Passar `coverUrl` e `audioUrl` para `ModalSidebar` |
+| Arquivo                                                    | Mudança                                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `server/api/scripts.ts`                                    | `getById` retorna `cover_url` e `audio_url` (URLs públicas já resolvidas) |
+| `components/script-preview-modal/sidebar.tsx`              | Cover placeholder + AudioPlayer se `audioUrl` presente                    |
+| `components/script-preview-modal/script-preview-modal.tsx` | Passar `coverUrl` e `audioUrl` para `ModalSidebar`                        |
 
 ---
 
