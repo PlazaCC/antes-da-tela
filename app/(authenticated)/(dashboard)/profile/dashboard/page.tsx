@@ -2,8 +2,28 @@
 
 import { cn } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import Link from 'next/link'
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 
 function MetricCard({
   value,
@@ -32,14 +52,6 @@ function MetricCard({
   )
 }
 
-const NAV_ITEMS = [
-  { id: 'dashboard', label: '📊  Dashboard', href: '/dashboard' },
-  { id: 'scripts', label: '📖  Meus roteiros', href: '/publish' },
-  { id: 'ratings', label: '⭐  Avaliações', href: '#' },
-  { id: 'notifications', label: '🔔  Notificações', href: '#' },
-  { id: 'settings', label: '⚙  Configurações', href: '/profile/edit' },
-] as const
-
 const STATUS_LABELS: Record<string, string> = {
   published: 'Publicado',
   draft: 'Rascunho',
@@ -52,36 +64,41 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function DashboardPage() {
   const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  const [deleteScriptId, setDeleteScriptId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const { data, isLoading } = useQuery(trpc.scripts.getDashboardMetrics.queryOptions())
+
+  const deleteMutation = useMutation(
+    trpc.scripts.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success('Roteiro excluído com sucesso')
+        queryClient.invalidateQueries(trpc.scripts.getDashboardMetrics.queryFilter())
+        setDeleteScriptId(null)
+      },
+      onError: (error) => {
+        toast.error('Erro ao excluir roteiro: ' + error.message)
+      },
+      onSettled: () => {
+        setIsDeleting(false)
+      },
+    }),
+  )
+
+  const handleDelete = async () => {
+    if (!deleteScriptId) return
+    setIsDeleting(true)
+    deleteMutation.mutate({ id: deleteScriptId })
+  }
 
   const totalScripts = data?.totalScripts ?? 0
   const avgRating = data?.avgRating
   const totalComments = (data?.scripts ?? []).reduce((sum, s) => sum + s.commentCount, 0)
 
   return (
-    <div className='min-h-screen bg-bg-base flex'>
-      {/* Sidebar */}
-      <aside className='w-[220px] shrink-0 bg-surface border-r border-border-default min-h-screen'>
-        <nav className='py-6'>
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={cn(
-                'flex items-center px-5 h-9 font-sans text-[12px] font-medium transition-colors',
-                item.id === 'dashboard'
-                  ? 'text-text-primary bg-elevated border-l-[3px] border-brand-accent'
-                  : 'text-text-muted hover:text-text-secondary',
-              )}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <main className='flex-1 px-8 py-7'>
-        <div className='mb-6'>
+    <div className='px-5 md:px-8 py-7'>
+      <div className='mb-6'>
           <h1 className='font-display text-[24px] leading-[1.37] text-text-primary'>Dashboard</h1>
           <p className='text-body-small text-text-muted mt-1'>
             Visão geral de todos os seus roteiros · Últimos 30 dias
@@ -89,7 +106,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Metric cards */}
-        <div className='flex gap-6 mb-8'>
+        <div className='grid grid-cols-2 md:flex md:flex-row gap-4 md:gap-6 mb-8'>
           <MetricCard value={String(totalScripts)} label='Roteiros publicados' />
           <MetricCard
             value={avgRating !== null && avgRating !== undefined ? `${avgRating.toFixed(1)} ★` : '--'}
@@ -116,9 +133,9 @@ export default function DashboardPage() {
               </p>
             </div>
           ) : (
-            <div className='bg-surface border border-border-default rounded-sm overflow-hidden'>
+            <div className='bg-surface border border-border-default rounded-sm overflow-x-auto'>
               {/* Table header */}
-              <div className='flex items-center px-5 h-9 border-b border-border-default'>
+              <div className='flex items-center px-5 h-9 border-b border-border-default min-w-[700px]'>
                 <span className='flex-1 font-mono text-[10px] font-medium text-text-muted uppercase tracking-[0.04em]'>
                   Roteiro
                 </span>
@@ -131,13 +148,16 @@ export default function DashboardPage() {
                 <span className='w-[120px] font-mono text-[10px] font-medium text-text-muted uppercase tracking-[0.04em]'>
                   Status
                 </span>
+                <span className='w-[40px] font-mono text-[10px] font-medium text-text-muted uppercase tracking-[0.04em]'>
+                  Ações
+                </span>
               </div>
 
               {/* Table rows */}
               {data.scripts.map((script) => (
                 <div
                   key={script.id}
-                  className='flex items-center px-5 h-11 border-b border-border-default last:border-0 hover:bg-elevated transition-colors'>
+                  className='flex items-center px-5 h-11 border-b border-border-default last:border-0 hover:bg-elevated transition-colors min-w-[700px]'>
                   <Link
                     href={`/scripts/${script.id}`}
                     className='flex-1 font-sans text-[12px] text-text-secondary hover:text-text-primary transition-colors truncate pr-4'>
@@ -156,12 +176,59 @@ export default function DashboardPage() {
                     )}>
                     {STATUS_LABELS[script.status] ?? script.status}
                   </span>
+
+                  <div className='w-[40px] flex justify-end'>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant='ghost' className='h-8 w-8 p-0'>
+                          <span className='sr-only'>Abrir menu</span>
+                          <MoreHorizontal className='h-4 w-4' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end' className='bg-surface border-border-default'>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/publish?id=${script.id}`} className='flex items-center cursor-pointer'>
+                            <Pencil className='mr-2 h-4 w-4' />
+                            <span>Editar</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className='text-state-error focus:text-state-error cursor-pointer'
+                          onClick={() => setDeleteScriptId(script.id)}>
+                          <Trash2 className='mr-2 h-4 w-4' />
+                          <span>Excluir</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </section>
-      </main>
-    </div>
+
+        <AlertDialog open={!!deleteScriptId} onOpenChange={(open) => !open && setDeleteScriptId(null)}>
+          <AlertDialogContent className='bg-surface border-border-default'>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. Isso excluirá permanentemente o roteiro e todos os seus dados.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleDelete()
+                }}
+                disabled={isDeleting}
+                className='bg-state-error text-white hover:bg-state-error/90'>
+                {isDeleting ? 'Excluindo...' : 'Excluir'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
   )
 }

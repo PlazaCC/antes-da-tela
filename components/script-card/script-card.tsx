@@ -14,6 +14,7 @@ interface ScriptCardBaseProps {
   pages: number | null
   status?: 'publicado' | 'rascunho' | 'privado'
   onPreview?: () => void
+  coverUrl?: string
 }
 
 type ScriptCardAnchorProps = ScriptCardBaseProps &
@@ -31,8 +32,17 @@ export type ScriptCardProps = ScriptCardAnchorProps | ScriptCardDivProps
 const baseClasses =
   'group flex flex-col gap-3 rounded-sm border border-border-subtle bg-surface p-5 transition-all duration-150 hover:border-brand-accent hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base'
 
-const renderContent = ({ title, author, genre, rating, ratingTotal, pages, status }: ScriptCardBaseProps) => (
+const renderContent = ({ title, author, genre, rating, ratingTotal, pages, status, coverUrl }: ScriptCardBaseProps) => (
   <>
+    {coverUrl && (
+      <div className='aspect-[2/3] w-full mb-3 overflow-hidden rounded-sm bg-bg-base/50'>
+        <img
+          src={coverUrl}
+          alt={title}
+          className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+        />
+      </div>
+    )}
     <div className='flex items-start justify-between gap-3'>
       <div className='flex flex-col gap-1 min-w-0'>
         {genre && (
@@ -59,9 +69,9 @@ const renderContent = ({ title, author, genre, rating, ratingTotal, pages, statu
 )
 
 export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((props, ref) => {
-  const { title, author, genre, rating, ratingTotal, pages, status, className, onPreview } = props
+  const { title, author, genre, rating, ratingTotal, pages, status, coverUrl, className, onPreview } = props
 
-  const content = renderContent({ title, author, genre, rating, ratingTotal, pages, status })
+  const content = renderContent({ title, author, genre, rating, ratingTotal, pages, status, coverUrl })
   const anchorClasses = cn(baseClasses, 'cursor-pointer', className)
   const divClasses = cn(baseClasses, onPreview && 'cursor-pointer', className)
 
@@ -75,6 +85,7 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
       ratingTotal: _ratingTotal,
       pages: _pages,
       status: _status,
+      coverUrl: _coverUrl,
       className: _className,
       onPreview: _onPreview,
       ...anchorProps
@@ -86,6 +97,7 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
     void _ratingTotal
     void _pages
     void _status
+    void _coverUrl
     void _className
     void _onPreview
 
@@ -104,6 +116,7 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
     ratingTotal: _ratingTotal,
     pages: _pages,
     status: _status,
+    coverUrl: _coverUrl,
     className: _className,
     onPreview: _onPreview,
     ...divProps
@@ -115,6 +128,7 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
   void _ratingTotal
   void _pages
   void _status
+  void _coverUrl
   void _className
   void _onPreview
   return (

@@ -1,0 +1,1 @@
+ALTER TABLE "scripts" ADD COLUMN "cover_path" text;

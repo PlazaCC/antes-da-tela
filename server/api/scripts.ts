@@ -1,4 +1,4 @@
-import { scriptCreateSchema } from '@/lib/validators/scripts'
+import { scriptCreateSchema, scriptUpdateSchema } from '@/lib/validators/scripts'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { z } from 'zod'
 
@@ -59,5 +59,14 @@ export const scriptsRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       return ctx.scriptsService.search(input.query, input.genres, input.ageRatings)
+    }),
+  update: authenticatedProcedure.input(scriptUpdateSchema).mutation(async ({ input, ctx }) => {
+    return ctx.scriptsService.update({ ...input, authorId: ctx.user!.id })
+  }),
+
+  delete: authenticatedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      return ctx.scriptsService.delete(input.id, ctx.user!.id)
     }),
 })

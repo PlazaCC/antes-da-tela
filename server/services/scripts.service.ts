@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getScriptPublishDefaults } from '@/server/domain/scripts'
-import type { ScriptCreateInput } from '@/lib/validators/scripts'
+import type { ScriptCreateInput, ScriptUpdateInput } from '@/lib/validators/scripts'
 import type { ScriptListItem, ScriptDetail, DashboardMetrics } from '@/lib/types'
 
 export class ScriptsService {
@@ -93,6 +93,132 @@ export class ScriptsService {
     })
 
     if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+  }
+
+  async update(input: ScriptUpdateInput & { authorId: string }) {
+    const { id, authorId, storagePath, fileSize, pageCount, audioStoragePath, audioDurationSeconds, ...updateData } = input
+
+    // Check ownership
+    const { data: script } = await this.supabase
+      .from('scripts')
+      .select('author_id')
+      .eq('id', id)
+      .single()
+
+    if (!script || script.author_id !== authorId) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Not the script author' })
+    }
+
+    // Map camelCase to snake_case for Supabase
+    const mappedData: any = {}
+    if (updateData.title) mappedData.title = updateData.title
+    if (updateData.logline) mappedData.logline = updateData.logline
+    if (updateData.synopsis) mappedData.synopsis = updateData.synopsis
+    if (updateData.genre) mappedData.genre = updateData.genre
+    if (updateData.ageRating) mappedData.age_rating = updateData.ageRating
+    if (updateData.status) mappedData.status = updateData.status
+    if (updateData.bannerPath) mappedData.banner_path = updateData.bannerPath
+
+    const { error: updateError } = await this.supabase
+      .from('scripts')
+      .update(mappedData)
+      .eq('id', id)
+
+    if (updateError) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: updateError.message })
+    }
+
+    // Check if new files are being uploaded to delete the old ones from storage
+    if (storagePath || audioStoragePath) {
+      const { data: oldFiles } = await this.supabase
+        .from('scripts')
+        .select('script_files(storage_path), audio_files(storage_path)')
+        .eq('id', id)
+        .single()
+
+      if (storagePath && oldFiles?.script_files?.[0]?.storage_path && storagePath !== oldFiles.script_files[0].storage_path) {
+        // New PDF provided, delete old one
+        await this.supabase.storage.from('scripts').remove([oldFiles.script_files[0].storage_path])
+      }
+
+      if (audioStoragePath && oldFiles?.audio_files?.[0]?.storage_path && audioStoragePath !== oldFiles.audio_files[0].storage_path) {
+        // New Audio provided, delete old one
+        await this.supabase.storage.from('audio').remove([oldFiles.audio_files[0].storage_path])
+      }
+    }
+
+    // Update file if provided
+    if (storagePath) {
+      const { error: fileError } = await this.supabase
+        .from('script_files')
+        .upsert({
+          script_id: id,
+          storage_path: storagePath,
+          file_size: fileSize ?? null,
+          page_count: pageCount ?? null,
+        }, { onConflict: 'script_id' })
+
+      if (fileError) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: fileError.message })
+      }
+    }
+
+    if (audioStoragePath) {
+      const { error: audioError } = await this.supabase
+        .from('audio_files')
+        .upsert({
+          script_id: id,
+          storage_path: audioStoragePath,
+          duration_seconds: audioDurationSeconds ?? null,
+        }, { onConflict: 'script_id' })
+
+      if (audioError) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: audioError.message })
+      }
+    }
+
+    return { id }
+  }
+
+  async delete(id: string, authorId: string) {
+    // Check ownership
+    const { data: script } = await this.supabase
+      .from('scripts')
+      .select('author_id')
+      .eq('id', id)
+      .single()
+
+    if (!script || script.author_id !== authorId) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Not the script author' })
+    }
+
+    // Get associated files to delete them from storage buckets
+    const { data: filesToDelete } = await this.supabase
+      .from('scripts')
+      .select('script_files(storage_path), audio_files(storage_path)')
+      .eq('id', id)
+      .single()
+
+    if (filesToDelete) {
+      const pdfPaths = filesToDelete.script_files?.map(f => f.storage_path).filter(Boolean) || []
+      if (pdfPaths.length > 0) {
+        await this.supabase.storage.from('scripts').remove(pdfPaths)
+      }
+
+      const audioPaths = filesToDelete.audio_files?.map(f => f.storage_path).filter(Boolean) || []
+      if (audioPaths.length > 0) {
+        await this.supabase.storage.from('audio').remove(audioPaths)
+      }
+    }
+
+    // Now delete the database record (cascade will handle child tables)
+    const { error } = await this.supabase.from('scripts').delete().eq('id', id)
+
+    if (error) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+
+    return { success: true }
   }
 
   async getById(id: string) {

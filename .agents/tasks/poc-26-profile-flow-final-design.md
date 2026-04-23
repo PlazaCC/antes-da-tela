@@ -91,9 +91,9 @@ O layout de sidebar + content não colapsa em mobile. Para POC, aceitar scroll h
 
 ## Acceptance criteria
 
-- [ ] Dashboard: Dropdown de ações na tabela implementado
-- [ ] Ação de Excluir roteiro funcional (tRPC mutation, AlertDialog, verificação de autorização)
-- [ ] Ação de Editar roteiro funcional (permite alterar metadados e PDF)
-116: - [ ] Perfil público: banner exibido como elemento visual (mockado)
-- [ ] ScriptCards no perfil exibem cover (após poc-21)
-- [ ] `yarn build` sem erros de tipo
+- [x] Dashboard: Dropdown de ações na tabela implementado
+- [x] Ação de Excluir roteiro funcional (tRPC mutation, AlertDialog, verificação de autorização)
+- [x] Ação de Editar roteiro funcional (permite alterar metadados e PDF)
+- [x] Perfil público: banner exibido como elemento visual (mockado)
+- [x] ScriptCards no perfil exibem cover (após poc-21)
+- [x] `yarn build` sem erros de tipo

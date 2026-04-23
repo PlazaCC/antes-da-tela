@@ -9,8 +9,23 @@ import { Tag } from '@/components/tag/tag'
 import { useScriptRating } from '@/lib/hooks/use-script-rating'
 import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
+import { Pencil, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 
 type RouterOutput = inferRouterOutputs<AppRouter>
@@ -31,6 +46,10 @@ interface Props {
 
 export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUserId }: Props) {
   const trpc = useTRPC()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
   const averageOpts = trpc.ratings.getAverage.queryOptions({ scriptId: script?.id ?? '' })
   const userRatingOpts = trpc.ratings.getUserRating.queryOptions({
@@ -42,6 +61,32 @@ export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUser
   const { data: userRating } = useQuery({ ...userRatingOpts, enabled: !!script && !!currentUserId })
 
   const { rate, isPending: isRatingPending } = useScriptRating(script?.id ?? '', currentUserId)
+
+  const deleteMutation = useMutation(
+    trpc.scripts.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success('Roteiro excluído com sucesso')
+        // Invalidate lists where this script might appear
+        queryClient.invalidateQueries(trpc.scripts.listFeatured.queryFilter())
+        queryClient.invalidateQueries(trpc.scripts.listRecent.queryFilter())
+        queryClient.invalidateQueries(trpc.scripts.listByAuthor.queryFilter({ authorId: currentUserId ?? '' }))
+        router.push('/profile/dashboard')
+      },
+      onError: (error) => {
+        toast.error('Erro ao excluir roteiro: ' + error.message)
+      },
+      onSettled: () => {
+        setIsDeleting(false)
+        setDeleteModalOpen(false)
+      },
+    }),
+  )
+
+  const handleDelete = () => {
+    if (!script) return
+    setIsDeleting(true)
+    deleteMutation.mutate({ id: script.id })
+  }
 
   if (!script) {
     return (
@@ -64,7 +109,28 @@ export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUser
             {script.age_rating && <Tag variant='default'>{script.age_rating}</Tag>}
           </div>
 
-          <h1 className='font-display text-heading-1 text-text-primary'>{script.title}</h1>
+          <div className='flex items-start justify-between gap-4'>
+            <h1 className='font-display text-heading-1 text-text-primary'>{script.title}</h1>
+            
+            {isOwner && (
+              <div className='flex items-center gap-2 mt-1 shrink-0'>
+                <Link
+                  href={`/publish?id=${script.id}`}
+                  className='flex items-center gap-1.5 px-3 h-8 rounded-sm border border-border-subtle text-text-secondary font-sans text-[12px] hover:border-border-default transition-colors'
+                >
+                  <Pencil className='w-3.5 h-3.5' />
+                  Editar
+                </Link>
+                <button
+                  onClick={() => setDeleteModalOpen(true)}
+                  className='flex items-center gap-1.5 px-3 h-8 rounded-sm border border-state-error/20 text-state-error font-sans text-[12px] hover:bg-state-error/10 transition-colors'
+                >
+                  <Trash2 className='w-3.5 h-3.5' />
+                  Excluir
+                </button>
+              </div>
+            )}
+          </div>
 
           {script.logline && <p className='text-body-large text-text-secondary max-w-3xl'>{script.logline}</p>}
 
@@ -174,6 +240,32 @@ export default function ScriptPageClient({ script, pdfUrl, audioUrl, currentUser
             </div>
           )}
         </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isOwner && (
+        <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir roteiro</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir o roteiro <strong>{script.title}</strong>? Esta ação não pode ser desfeita e todos os arquivos associados serão removidos.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className='bg-state-error hover:bg-state-error/90 text-white'
+                disabled={isDeleting}
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleDelete()
+                }}>
+                {isDeleting ? 'Excluindo...' : 'Excluir Roteiro'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   )

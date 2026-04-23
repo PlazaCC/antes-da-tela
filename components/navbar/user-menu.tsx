@@ -9,8 +9,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useLogout } from '@/lib/hooks/use-logout'
-import { FileUpIcon, LogOutIcon, SettingsIcon, UserCircle2 } from 'lucide-react'
+import { LogOutIcon } from 'lucide-react'
 import Link from 'next/link'
+import { USER_MENU_ITEMS } from '@/lib/constants/navigation'
 
 interface UserMenuProps {
   userId: string
@@ -22,7 +23,7 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
   const handleLogout = useLogout()
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           className='rounded-full hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base'
@@ -30,29 +31,29 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
           <Avatar src={userImage} name={userName ?? '?'} size='sm' />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='w-44'>
-        <DropdownMenuItem asChild>
-          <Link href='/publish' className='cursor-pointer'>
-            <FileUpIcon />
-            Publicar Roteiro
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={`/profile/${userId}`} className='cursor-pointer'>
-            <UserCircle2 />
-            Ver perfil
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href='/account' className='cursor-pointer'>
-            <SettingsIcon />
-            Editar conta
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className='cursor-pointer text-state-error focus:text-text-secondary' onSelect={handleLogout}>
-          <LogOutIcon />
+      <DropdownMenuContent align='end' className='w-56 p-1 bg-surface border border-border-default shadow-xl rounded-md'>
+        <div className='px-2 py-1.5 mb-1'>
+          <p className='text-xs font-medium text-text-primary truncate'>{userName}</p>
+        </div>
+        <DropdownMenuSeparator className='bg-border-default mx-1' />
+        {USER_MENU_ITEMS(userId).map((item) => {
+          const Icon = item.icon
+          return (
+            <DropdownMenuItem key={item.id} asChild>
+              <Link
+                href={item.href}
+                className='flex items-center gap-2.5 px-2 py-2 cursor-pointer text-sm text-text-secondary hover:text-text-primary hover:bg-elevated rounded-sm transition-colors focus:bg-elevated outline-none'>
+                <Icon className='w-4 h-4 text-text-muted' />
+                {item.label}
+              </Link>
+            </DropdownMenuItem>
+          )
+        })}
+        <DropdownMenuSeparator className='bg-border-default mx-1' />
+        <DropdownMenuItem
+          className='flex items-center gap-2.5 px-2 py-2 cursor-pointer text-sm text-state-error hover:bg-state-error/10 rounded-sm transition-colors focus:bg-state-error/10 outline-none'
+          onSelect={handleLogout}>
+          <LogOutIcon className='w-4 h-4' />
           Sair
         </DropdownMenuItem>
       </DropdownMenuContent>
