@@ -4,15 +4,9 @@ import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAvatarUpload } from '@/lib/hooks/use-avatar-upload'
-import { profileSchema, type ProfileFormValues } from '@/lib/validators/profile'
-import { useTRPC } from '@/trpc/client'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useProfileForm } from '@/lib/hooks/use-profile-form'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import type { UserProfile } from '@/lib/types'
+import { useRef } from 'react'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -25,43 +19,31 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 }
 
 interface EditProfileFormProps {
-  profile: UserProfile | null
   userId: string
 }
 
-export function EditProfileForm({ profile, userId }: EditProfileFormProps) {
-  const trpc = useTRPC()
-  const queryClient = useQueryClient()
+export function EditProfileForm({ userId }: EditProfileFormProps) {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const { upload, isUploading } = useAvatarUpload()
-
-  const profileQueryKey = trpc.users.getProfile.queryFilter({ id: userId })
-  const updateProfile = useMutation(trpc.users.updateProfile.mutationOptions())
-
   const {
+    profile,
+    isLoadingProfile,
     register,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
-  } = useForm<ProfileFormValues>({ resolver: zodResolver(profileSchema) })
+    isPending,
+    submitProfile,
+  } = useProfileForm(userId)
 
-  useEffect(() => {
-    if (profile) {
-      reset({ name: profile.name, bio: profile.bio ?? undefined })
-    }
-  }, [profile, reset])
+  const onSubmit = submitProfile
 
-  const onSubmit = (values: ProfileFormValues) => {
-    updateProfile.mutate(
-      { name: values.name, bio: values.bio || null },
-      {
-        onSuccess: () => {
-          void queryClient.invalidateQueries(profileQueryKey)
-          toast.success('Perfil atualizado.')
-        },
-        onError: (err) => toast.error(err.message),
-      },
+  if (isLoadingProfile) {
+    return (
+      <div className='bg-surface border border-border-default rounded-sm p-12 flex flex-col items-center justify-center gap-4'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-accent'></div>
+        <p className='font-mono text-label-mono-caps text-text-muted'>Carregando perfil...</p>
+      </div>
     )
   }
 
@@ -104,7 +86,11 @@ export function EditProfileForm({ profile, userId }: EditProfileFormProps) {
         <div className='flex flex-col gap-5 max-w-[440px]'>
           <div>
             <FieldLabel>Nome de exibição</FieldLabel>
-            <Input {...register('name')} placeholder='Seu nome' className='bg-elevated border-border-subtle focus:border-brand-accent transition-colors' />
+            <Input
+              {...register('name')}
+              placeholder='Seu nome'
+              className='bg-elevated border-border-subtle focus:border-brand-accent transition-colors'
+            />
             {errors.name && (
               <p className='mt-1 text-state-error font-mono text-label-mono-small'>{errors.name.message}</p>
             )}
@@ -129,9 +115,9 @@ export function EditProfileForm({ profile, userId }: EditProfileFormProps) {
       <div className='flex flex-col md:flex-row items-stretch md:items-center gap-3 pt-2'>
         <Button
           type='submit'
-          disabled={isSubmitting || updateProfile.isPending}
+          disabled={isSubmitting || isPending}
           className='w-full md:w-[160px] h-11 bg-brand-accent hover:bg-brand-accent/90 text-text-primary font-sans text-[13px] font-semibold'>
-          {updateProfile.isPending ? 'Salvando…' : 'Salvar alterações'}
+          {isPending ? 'Salvando…' : 'Salvar alterações'}
         </Button>
         <button
           type='button'

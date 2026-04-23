@@ -1,14 +1,16 @@
 'use client'
 
 import { formatAgeRating } from '@/lib/constants/scripts'
-import type { PublishFormState } from '@/lib/hooks/use-publish-wizard'
-import { FileIcon, Music, Info, Tag } from 'lucide-react'
+import type { PublishFormValues } from '@/lib/validators/publish'
+import { FileIcon, Info, Music, Tag } from 'lucide-react'
 
 interface ReviewStepProps {
-  form: PublishFormState
+  values: PublishFormValues
+  pdfFile: File | null
+  audioFile: File | null
 }
 
-export function ReviewStep({ form }: ReviewStepProps) {
+export function ReviewStep({ values, pdfFile, audioFile }: ReviewStepProps) {
   return (
     <div className='flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300'>
       <div className='bg-elevated border border-border-subtle rounded-sm p-6 flex flex-col gap-8'>
@@ -19,8 +21,8 @@ export function ReviewStep({ form }: ReviewStepProps) {
           </div>
           <div className='flex flex-col gap-1 min-w-0'>
             <span className='text-xs font-mono text-text-muted uppercase tracking-wider'>Informações</span>
-            <h3 className='text-heading-3 text-text-primary truncate'>{form.title || 'Sem título'}</h3>
-            {form.logline && <p className='text-body-small text-text-secondary line-clamp-2'>{form.logline}</p>}
+            <h3 className='text-heading-3 text-text-primary truncate'>{values.title || 'Sem título'}</h3>
+            {values.logline && <p className='text-body-small text-text-secondary line-clamp-2'>{values.logline}</p>}
           </div>
         </div>
 
@@ -34,13 +36,13 @@ export function ReviewStep({ form }: ReviewStepProps) {
             <div className='flex flex-col gap-2'>
               <div className='flex items-center gap-2 text-body-small text-text-secondary'>
                 <span className='font-medium text-text-primary'>PDF:</span>
-                <span>{form.pdfFile?.name || 'Não selecionado'}</span>
+                <span>{pdfFile?.name || values.pdfStoragePath?.split('/').pop() || 'Não selecionado'}</span>
               </div>
-              {form.audioFile && (
+              {audioFile && (
                 <div className='flex items-center gap-2 text-body-small text-text-secondary'>
                   <Music size={14} className='text-brand-accent' />
                   <span className='font-medium text-text-primary'>Áudio:</span>
-                  <span>{form.audioFile.name}</span>
+                  <span>{audioFile.name}</span>
                 </div>
               )}
             </div>
@@ -57,12 +59,12 @@ export function ReviewStep({ form }: ReviewStepProps) {
             <div className='flex gap-3 flex-wrap'>
               <div className='flex items-center gap-1.5 text-body-small'>
                 <span className='text-text-muted'>Gênero:</span>
-                <span className='text-text-primary font-medium'>{form.genre || 'Não definido'}</span>
+                <span className='text-text-primary font-medium'>{values.genre || 'Não definido'}</span>
               </div>
               <div className='flex items-center gap-1.5 text-body-small'>
                 <span className='text-text-muted'>Classificação:</span>
                 <span className='text-text-primary font-medium'>
-                  {form.ageRating ? formatAgeRating(form.ageRating) : 'Não definido'}
+                  {values.ageRating ? formatAgeRating(values.ageRating) : 'Não definido'}
                 </span>
               </div>
             </div>

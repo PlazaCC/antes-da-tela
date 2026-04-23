@@ -1,8 +1,10 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { loadPdfjsLib } from '@/lib/utils/pdf'
 import type { PDFDocumentProxy, PDFPageProxy, PageViewport } from 'pdfjs-dist'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { PDFViewerError } from './pdf-viewer-error'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
 type PdfjsLib = typeof import('pdfjs-dist')
@@ -23,6 +25,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
   const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { currentPage, totalPages, zoom, isLoading, setTotalPages, setLoading, setCurrentPage } = usePDFViewerStore()
+  const [pdfError, setPdfError] = useState<string | null>(null)
 
   const renderPage = useCallback(async (pageNum: number, userZoom: number) => {
     if (!canvasRef.current || !canvasWrapperRef.current || !pdfDocRef.current || !pdfjsRef.current) return
@@ -69,7 +72,13 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
 
     try {
       await renderTask.promise
-    } catch {
+    } catch (error) {
+      if (error instanceof Error) {
+        setPdfError(error.message)
+      } else {
+        setPdfError('Falha ao renderizar o PDF.')
+      }
+      pdfDocRef.current = null
       return
     } finally {
       renderTaskRef.current = null
@@ -104,16 +113,18 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
 
     async function loadPDF() {
       setLoading(true)
+      setPdfError(null)
       setCurrentPage(1)
-      const pdfjsLib = await import('pdfjs-dist')
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-        'pdfjs-dist/build/pdf.worker.min.mjs',
-        import.meta.url,
-      ).toString()
+      setTotalPages(0)
+
+      const pdfjsLib = await loadPdfjsLib()
       pdfjsRef.current = pdfjsLib
 
       const pdf = await pdfjsLib.getDocument(url).promise
-      if (cancelled) return
+      if (cancelled) {
+        pdf.destroy?.()
+        return
+      }
 
       pdfDocRef.current = pdf
       setTotalPages(pdf.numPages)
@@ -121,7 +132,15 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
       await renderPage(1, usePDFViewerStore.getState().zoom)
     }
 
-    loadPDF().catch(console.error)
+    loadPDF().catch((error) => {
+      console.error(error)
+      if (!cancelled) {
+        setPdfError(error instanceof Error ? error.message : 'Falha ao carregar o PDF.')
+        setLoading(false)
+        pdfDocRef.current = null
+        setTotalPages(0)
+      }
+    })
     return () => {
       cancelled = true
     }
@@ -170,6 +189,10 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
   const increaseZoom = () => {
     const z = usePDFViewerStore.getState().zoom
     usePDFViewerStore.getState().setZoom(Math.min(3.0, Math.round((z + 0.25) * 4) / 4))
+  }
+
+  if (pdfError) {
+    return <PDFViewerError message={pdfError} />
   }
 
   return (
