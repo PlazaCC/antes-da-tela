@@ -18,18 +18,25 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 const STEP_LABELS = ['Informações', 'Arquivos', 'Categorias', 'Revisão'] as const
-const MAX_PDF_BYTES = 50 * 1024 * 1024
-const MAX_AUDIO_BYTES = 100 * 1024 * 1024
+const MAX_PDF_BYTES = 5 * 1024 * 1024
+const MAX_AUDIO_BYTES = 20 * 1024 * 1024
 
 function validatePDF(file: File): string | null {
   if (file.type !== 'application/pdf') return 'Apenas arquivos PDF são aceitos'
-  if (file.size > MAX_PDF_BYTES) return 'O arquivo deve ter no máximo 50 MB'
+  if (file.size > MAX_PDF_BYTES) return 'O arquivo deve ter no máximo 5 MB'
   return null
 }
 
 function validateAudio(file: File): string | null {
   if (!file.type.startsWith('audio/')) return 'Apenas arquivos de áudio são aceitos'
-  if (file.size > MAX_AUDIO_BYTES) return 'O arquivo deve ter no máximo 100 MB'
+  if (file.size > MAX_AUDIO_BYTES) return 'O arquivo deve ter no máximo 20 MB'
+  return null
+}
+
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024
+function validateImage(file: File): string | null {
+  if (!file.type.startsWith('image/')) return 'Apenas imagens são aceitas'
+  if (file.size > MAX_IMAGE_BYTES) return 'A imagem deve ter no máximo 2 MB'
   return null
 }
 
@@ -53,6 +60,8 @@ export default function PublishPage() {
 
   const [pdfProgress, setPdfProgress] = useState(0)
   const [audioProgress, setAudioProgress] = useState(0)
+  const [coverProgress, setCoverProgress] = useState(0)
+  const [bannerProgress, setBannerProgress] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
 
@@ -62,14 +71,20 @@ export default function PublishPage() {
         title: existingScript.title,
         logline: existingScript.logline || '',
         synopsis: existingScript.synopsis || '',
-        genre: (existingScript.genre as string) || '',
-        ageRating: (existingScript.age_rating as string) || '',
+        genre: (existingScript.genre as (typeof form)['genre']) || '',
+        ageRating: (existingScript.age_rating as (typeof form)['ageRating']) || '',
         pdfFile: null,
         pdfStoragePath: existingScript.script_files[0]?.storage_path || '',
         pdfError: '',
         audioFile: null,
         audioStoragePath: existingScript.audio_files[0]?.storage_path || '',
         audioError: '',
+        coverFile: null,
+        coverStoragePath: (existingScript.cover_path as string) || '',
+        coverError: '',
+        bannerFile: null,
+        bannerStoragePath: (existingScript.banner_path as string) || '',
+        bannerError: '',
       })
     }
   }, [existingScript, isEditing, setForm, userId])
@@ -98,6 +113,8 @@ export default function PublishPage() {
 
     let pdfPath = form.pdfStoragePath
     let audioPath = form.audioStoragePath
+    let coverPath = form.coverStoragePath
+    let bannerPath = form.bannerStoragePath
 
     try {
       setUploading(true)
@@ -116,6 +133,19 @@ export default function PublishPage() {
         updateForm({ audioStoragePath: audioPath })
       }
 
+      if (!coverPath && form.coverFile) {
+        coverPath = `${uid}/${Date.now()}_${form.coverFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+        // Uses the avatars bucket for covers as per existing infrastructure
+        await uploadFile('avatars', coverPath, form.coverFile, accessToken, setCoverProgress)
+        updateForm({ coverStoragePath: coverPath })
+      }
+
+      if (!bannerPath && form.bannerFile) {
+        bannerPath = `${uid}/${Date.now()}_${form.bannerFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+        await uploadFile('avatars', bannerPath, form.bannerFile, accessToken, setBannerProgress)
+        updateForm({ bannerStoragePath: bannerPath })
+      }
+
       setUploading(false)
 
       if (isEditing) {
@@ -128,6 +158,8 @@ export default function PublishPage() {
           ageRating: form.ageRating || undefined,
           storagePath: pdfPath || undefined,
           fileSize: form.pdfFile?.size,
+          coverPath: coverPath || undefined,
+          bannerPath: bannerPath || undefined,
         })
       } else {
         await createMutation.mutateAsync({
@@ -139,6 +171,8 @@ export default function PublishPage() {
           storagePath: pdfPath!,
           fileSize: form.pdfFile?.size,
           audioStoragePath: audioPath || undefined,
+          coverPath: coverPath || undefined,
+          bannerPath: bannerPath || undefined,
         })
       }
     } catch (err) {
@@ -182,8 +216,11 @@ export default function PublishPage() {
               updateForm={updateForm}
               pdfProgress={pdfProgress}
               audioProgress={audioProgress}
+              coverProgress={coverProgress}
+              bannerProgress={bannerProgress}
               validatePDF={validatePDF}
               validateAudio={validateAudio}
+              validateImage={validateImage}
             />
           )}
           {step === 3 && <GenreStep form={form} updateForm={updateForm} />}

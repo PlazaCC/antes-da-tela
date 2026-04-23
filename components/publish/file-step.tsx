@@ -1,18 +1,21 @@
 'use client'
 
-import { DragZone } from '@/components/drag-zone/drag-zone'
-import { Progress } from '@/components/ui/progress'
-import { cn } from '@/lib/utils'
+import { FileUploadField } from './file-upload-field'
 import type { PublishFormState } from '@/lib/hooks/use-publish-wizard'
-import { FileIcon, Music, Trash2 } from 'lucide-react'
+import { FileIcon, Music, Image as ImageIcon } from 'lucide-react'
+import Image from 'next/image'
+import { getStorageUrl } from '@/lib/utils'
 
 interface FileStepProps {
   form: PublishFormState
   updateForm: (updates: Partial<PublishFormState>) => void
   pdfProgress: number
   audioProgress: number
+  coverProgress: number
+  bannerProgress: number
   validatePDF: (file: File) => string | null
   validateAudio: (file: File) => string | null
+  validateImage: (file: File) => string | null
 }
 
 export function FileStep({
@@ -20,111 +23,152 @@ export function FileStep({
   updateForm,
   pdfProgress,
   audioProgress,
+  coverProgress,
+  bannerProgress,
   validatePDF,
   validateAudio,
+  validateImage,
 }: FileStepProps) {
   return (
-    <div className='flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300'>
+    <div className='flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-300'>
       {/* PDF Upload */}
-      <div className='flex flex-col gap-3'>
-        <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
-          Arquivo do Roteiro (PDF)
-        </label>
-        {!form.pdfFile ? (
-          <DragZone
-            accept={{ 'application/pdf': ['.pdf'] }}
-            maxFiles={1}
-            onFilesDrop={(files) => {
-              const file = files[0]
-              if (!file) return
-              const error = validatePDF(file)
-              if (error) updateForm({ pdfError: error })
-              else updateForm({ pdfFile: file, pdfError: '' })
-            }}
-            className={cn(form.pdfError && 'border-state-error/50 bg-state-error/5')}
-          />
-        ) : (
-          <div className='bg-elevated border border-border-subtle rounded-sm p-4 flex items-center justify-between'>
-            <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent'>
-                <FileIcon size={20} />
-              </div>
-              <div className='flex flex-col'>
-                <span className='text-body-small font-medium text-text-primary'>{form.pdfFile.name}</span>
-                <span className='text-xs text-text-muted'>{(form.pdfFile.size / 1024 / 1024).toFixed(2)} MB</span>
-              </div>
-            </div>
-            <button
-              onClick={() => updateForm({ pdfFile: null, pdfStoragePath: '' })}
-              className='p-2 hover:bg-surface-hover text-text-muted hover:text-state-error transition-colors rounded-sm'
-            >
-              <Trash2 size={18} />
-            </button>
+      <FileUploadField
+        label="Arquivo do Roteiro (PDF)"
+        labelInfo="Obrigatório"
+        accept={{ 'application/pdf': ['.pdf'] }}
+        file={form.pdfFile}
+        error={form.pdfError}
+        progress={pdfProgress}
+        onFileDrop={(file) => {
+          const error = validatePDF(file)
+          if (error) updateForm({ pdfError: error })
+          else updateForm({ pdfFile: file, pdfError: '' })
+        }}
+        onRemove={() => updateForm({ pdfFile: null, pdfStoragePath: '' })}
+        infoText="Limite: 5MB. Apenas PDF."
+        showExisting={!form.pdfFile && !!form.pdfStoragePath}
+        existingFileName={form.pdfStoragePath.split('/').pop()}
+        preview={
+          <div className='w-10 h-10 rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
+            <FileIcon size={20} />
           </div>
-        )}
-        {form.pdfError && <p className='text-state-error text-xs font-mono'>{form.pdfError}</p>}
-        {pdfProgress > 0 && pdfProgress < 100 && (
-          <div className='flex flex-col gap-1.5'>
-            <div className='flex justify-between text-[10px] font-mono text-text-muted uppercase'>
-              <span>Enviando PDF...</span>
-              <span>{pdfProgress}%</span>
-            </div>
-            <Progress value={pdfProgress} className='h-1' />
-          </div>
-        )}
-      </div>
+        }
+      />
 
       {/* Audio Upload */}
-      <div className='flex flex-col gap-3'>
-        <div className='flex justify-between items-end'>
-          <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
-            Pilotagem / Audio Drama (Opcional)
-          </label>
-          <span className='text-[10px] font-mono text-text-muted uppercase tracking-widest'>MP3, WAV, M4A</span>
-        </div>
-        {!form.audioFile ? (
-          <DragZone
-            accept={{ 'audio/*': ['.mp3', '.wav', '.m4a'] }}
-            maxFiles={1}
-            onFilesDrop={(files) => {
-              const file = files[0]
-              if (!file) return
-              const error = validateAudio(file)
-              if (error) updateForm({ audioError: error })
-              else updateForm({ audioFile: file, audioError: '' })
-            }}
-            className={cn(form.audioError && 'border-state-error/50 bg-state-error/5')}
-          />
-        ) : (
-          <div className='bg-elevated border border-border-subtle rounded-sm p-4 flex items-center justify-between'>
-            <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent'>
-                <Music size={20} />
-              </div>
-              <div className='flex flex-col'>
-                <span className='text-body-small font-medium text-text-primary'>{form.audioFile.name}</span>
-                <span className='text-xs text-text-muted'>{(form.audioFile.size / 1024 / 1024).toFixed(2)} MB</span>
-              </div>
-            </div>
-            <button
-              onClick={() => updateForm({ audioFile: null, audioStoragePath: '' })}
-              className='p-2 hover:bg-surface-hover text-text-muted hover:text-state-error transition-colors rounded-sm'
-            >
-              <Trash2 size={18} />
-            </button>
+      <FileUploadField
+        label="Pilotagem / Audio Drama"
+        labelInfo="Opcional"
+        accept={{ 'audio/*': ['.mp3', '.wav', '.m4a'] }}
+        file={form.audioFile}
+        error={form.audioError}
+        progress={audioProgress}
+        onFileDrop={(file) => {
+          const error = validateAudio(file)
+          if (error) updateForm({ audioError: error })
+          else updateForm({ audioFile: file, audioError: '' })
+        }}
+        onRemove={() => updateForm({ audioFile: null, audioStoragePath: '' })}
+        infoText="Limite: 20MB. MP3, WAV ou M4A."
+        showExisting={!form.audioFile && !!form.audioStoragePath}
+        existingFileName={form.audioStoragePath.split('/').pop()}
+        preview={
+          <div className='w-10 h-10 rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
+            <Music size={20} />
           </div>
-        )}
-        {form.audioError && <p className='text-state-error text-xs font-mono'>{form.audioError}</p>}
-        {audioProgress > 0 && audioProgress < 100 && (
-          <div className='flex flex-col gap-1.5'>
-            <div className='flex justify-between text-[10px] font-mono text-text-muted uppercase'>
-              <span>Enviando Áudio...</span>
-              <span>{audioProgress}%</span>
-            </div>
-            <Progress value={audioProgress} className='h-1' />
-          </div>
-        )}
+        }
+      />
+
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+        {/* Cover Upload */}
+        <FileUploadField
+          label="Capa do Roteiro"
+          labelInfo="Opcional"
+          accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] }}
+          file={form.coverFile}
+          error={form.coverError}
+          progress={coverProgress}
+          onFileDrop={(file) => {
+            const error = validateImage(file)
+            if (error) updateForm({ coverError: error })
+            else updateForm({ coverFile: file, coverError: '' })
+          }}
+          onRemove={() => updateForm({ coverFile: null, coverStoragePath: '' })}
+          infoText="Recomendado: 2:3 (600x900px). Limite: 2MB."
+          showExisting={!form.coverFile && !!form.coverStoragePath}
+          existingFileName={form.coverStoragePath.split('/').pop()}
+          preview={
+            form.coverFile ? (
+              <Image
+                src={URL.createObjectURL(form.coverFile)}
+                alt='Cover preview'
+                width={64}
+                height={96}
+                unoptimized
+                className='object-cover aspect-[2/3] w-12 rounded-sm bg-surface shrink-0'
+              />
+            ) : form.coverStoragePath ? (
+              <Image
+                src={getStorageUrl('avatars', form.coverStoragePath)!}
+                alt='Cover preview'
+                width={64}
+                height={96}
+                unoptimized
+                className='object-cover aspect-[2/3] w-12 rounded-sm bg-surface shrink-0'
+              />
+            ) : (
+              <div className='w-12 h-18 aspect-[2/3] rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
+                <ImageIcon size={20} />
+              </div>
+            )
+          }
+        />
+
+        {/* Banner Upload */}
+        <FileUploadField
+          label="Banner de Destaque"
+          labelInfo="Opcional"
+          accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] }}
+          file={form.bannerFile}
+          error={form.bannerError}
+          progress={bannerProgress}
+          onFileDrop={(file) => {
+            const error = validateImage(file)
+            if (error) updateForm({ bannerError: error })
+            else updateForm({ bannerFile: file, bannerError: '' })
+          }}
+          onRemove={() => updateForm({ bannerFile: null, bannerStoragePath: '' })}
+          infoText="Recomendado: 16:9 (1280x720px). Limite: 2MB."
+          showExisting={!form.bannerFile && !!form.bannerStoragePath}
+          existingFileName={form.bannerStoragePath.split('/').pop()}
+          preview={
+            form.bannerFile ? (
+              <Image
+                src={URL.createObjectURL(form.bannerFile)}
+                alt='Banner preview'
+                width={128}
+                height={72}
+                unoptimized
+                className='object-cover aspect-video w-20 rounded-sm bg-surface shrink-0'
+              />
+            ) : form.bannerStoragePath ? (
+              <Image
+                src={getStorageUrl('avatars', form.bannerStoragePath)!}
+                alt='Banner preview'
+                width={128}
+                height={72}
+                unoptimized
+                className='object-cover aspect-video w-20 rounded-sm bg-surface shrink-0'
+              />
+            ) : (
+              <div className='w-20 aspect-video rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
+                <ImageIcon size={20} />
+              </div>
+            )
+          }
+        />
       </div>
     </div>
   )
 }
+

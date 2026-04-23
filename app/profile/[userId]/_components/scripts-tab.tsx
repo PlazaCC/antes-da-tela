@@ -2,6 +2,7 @@
 
 import { ScriptCard } from '@/components/script-card/script-card'
 import type { ScriptListItem } from '@/lib/types'
+import { getStorageUrl } from '@/lib/utils'
 
 interface ScriptsTabProps {
   scripts: ScriptListItem[]
@@ -35,6 +36,7 @@ export function ScriptsTab({ scripts, authorName, ratingsMap }: ScriptsTabProps)
             rating={ratingsMap?.[script.id]?.average ?? null}
             ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
             pages={script.script_files?.[0]?.page_count ?? null}
+            coverUrl={getStorageUrl('avatars', script.cover_path)}
           />
         ))}
       </div>

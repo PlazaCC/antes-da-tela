@@ -39,9 +39,6 @@ yarn build             # Production build
 yarn lint              # ESLint
 yarn db:generate       # Generate SQL migration files for schema
 yarn db:migrate        # Apply schema migrations to Supabase Postgres
-yarn supabase:new <n>  # Create new Supabase migration for RPCs/Functions
-yarn supabase:push     # Apply migrations to remote Supabase
-yarn supabase:pull     # Pull remote changes to local migrations
 ```
 
 ---
@@ -59,7 +56,7 @@ yarn supabase:pull     # Pull remote changes to local migrations
 ├── server/
 │   ├── api/root.ts       # appRouter + AppRouter type
 │   └── db/
-│       └── schema.ts     # Table definitions + Drizzle migration source (no runtime db client)
+│       └── schema.ts     # Table definitions + RLS policies (Drizzle)
 ├── trpc/
 │   ├── init.ts           # createTRPCContext, createTRPCRouter, publicProcedure
 │   ├── client.tsx        # TRPCReactProvider, useTRPC (client-side)
@@ -97,16 +94,19 @@ yarn supabase:pull     # Pull remote changes to local migrations
 - `DATABASE_URL_UNPOOLED` is only needed for running `yarn drizzle-kit migrate` locally — it is not an application runtime env var.
 - Schema lives in `server/db/schema.ts`; migrations output to `drizzle/`.
 
-### Supabase Migrations
+### Database Migrations
 
-**ALWAYS use Supabase CLI for migrations involving SQL Functions, RPCs, RLS, or Triggers.**
+**Centralize EVERYTHING in Drizzle.**
 
-```bash
-npx supabase migration new <name>  # creates supabase/migrations/TIMESTAMP_name.sql
-npx supabase db push               # applies to remote Supabase (requires login)
-```
-- `drizzle-kit` is ONLY for table schema DDL.
-- `supabase migration` is for EVERYTHING ELSE (RPCs, Functions, etc).
+1.  **Tables/Indexes**: Define in `server/db/schema.ts` and run `yarn db:generate`.
+2.  **RPCs/Functions/RLS/Storage**: For features not supported by Drizzle DSL, create a custom migration:
+    ```bash
+    yarn db:generate --custom <name>
+    ```
+    Then edit the generated SQL file in `drizzle/` to add your custom logic.
+3.  Apply with `yarn db:migrate`.
+
+**NEVER use Supabase CLI migrations (`supabase/migrations`)** to avoid history drift.
 
 ### shadcn/ui — MANDATORY rules
 

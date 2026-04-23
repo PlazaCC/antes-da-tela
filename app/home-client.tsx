@@ -1,14 +1,22 @@
 'use client'
 
 import { FilterPanel } from '@/components/filter-panel'
-import { ScriptPreviewModal } from '@/components/script-preview-modal'
 import { ScriptCard } from '@/components/script-card/script-card'
+import { ScriptPreviewModal } from '@/components/script-preview-modal'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 import { GENRES } from '@/lib/constants/scripts'
 import { useFilterParams } from '@/lib/hooks/use-filter-params'
-import { cn } from '@/lib/utils'
+import { cn, getStorageUrl } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
 import { SlidersHorizontalIcon } from 'lucide-react'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
@@ -47,6 +55,8 @@ export function HomeClient() {
     enabled: scriptIds.length > 0,
   })
 
+  const { data: trendingBanners } = useQuery(trpc.scripts.listTrendingBanners.queryOptions())
+
   return (
     <main className='w-full mx-auto'>
       <ScriptPreviewModal
@@ -57,8 +67,66 @@ export function HomeClient() {
         }}
       />
       <FilterPanel open={filterOpen} onOpenChange={setFilterOpen} />
-      <div className='w-full px-4 flex flex-col gap-8 md:gap-12 pt-6 md:pt-8 pb-16'>
-        {/* Hero headline */}
+      {/* Banners em Alta Carousel */}
+      {trendingBanners && trendingBanners.length > 0 && (
+        <section className='w-full'>
+          <Carousel
+            opts={{
+              align: 'start',
+              loop: true,
+            }}
+            className='w-full'>
+            <CarouselContent>
+              {trendingBanners.map((script) => (
+                <CarouselItem key={script.id}>
+                  <button
+                    onClick={() => setPreviewId(script.id)}
+                    className='group relative w-full h-[300px] md:h-[552px] overflow-hidden bg-bg-elevated transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent'>
+                    {script.banner_path ? (
+                      <Image
+                        src={getStorageUrl('avatars', script.banner_path)!}
+                        alt={script.title}
+                        fill
+                        priority
+                        className='object-cover transition-transform duration-700 group-hover:scale-105'
+                      />
+                    ) : (
+                      <div className='flex items-center justify-center h-full opacity-10'>
+                        <span className='font-mono text-heading-1 uppercase tracking-[0.3em] rotate-[-2deg]'>
+                          {script.title}
+                        </span>
+                      </div>
+                    )}
+                    {/* Gradient Overlay */}
+                    <div className='absolute inset-0 bg-gradient-to-t from-bg-base via-bg-base/20 to-transparent' />
+
+                    {/* Content */}
+                    <div className='absolute bottom-0 left-0 right-0 p-6 md:p-12 flex flex-col items-start text-left max-w-screen-xl mx-auto w-full'>
+                      <span className='font-mono text-body-small md:text-body-default text-brand-accent uppercase tracking-[0.2em] mb-2 md:mb-4'>
+                        {script.genre}
+                      </span>
+                      <h2 className='font-display text-heading-2 md:text-[64px] text-text-primary leading-[1.1] mb-2 md:mb-4 max-w-3xl'>
+                        {script.title}
+                      </h2>
+                      <p className='text-body-small md:text-body-large text-text-secondary line-clamp-2 max-w-xl'>
+                        {script.logline || 'Um roteiro original em destaque na plataforma.'}
+                      </p>
+                    </div>
+                  </button>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className='absolute bottom-6 right-12 flex gap-2'>
+              <CarouselPrevious className='static translate-y-0 h-10 w-10 border-white/10 bg-black/20 text-white hover:bg-white/10 hover:text-white' />
+              <CarouselNext className='static translate-y-0 h-10 w-10 border-white/10 bg-black/20 text-white hover:bg-white/10 hover:text-white' />
+            </div>
+          </Carousel>
+        </section>
+      )}
+
+      <div className='w-full px-4 flex flex-col gap-8 md:gap-12 pb-16 pt-8'>
+        {/* Hero headline (Commented out as requested) */}
+        {/*
         <div className='flex flex-col gap-2 md:gap-3'>
           <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-[1.1]'>
             Roteiros que <span className='text-brand-accent italic'>merecem</span> ser lidos.
@@ -67,6 +135,7 @@ export function HomeClient() {
             Plataforma de publicação, leitura e discussão de roteiros audiovisuais.
           </p>
         </div>
+        */}
 
         {/* Genre filter pills + filter trigger */}
         <div
@@ -118,7 +187,7 @@ export function HomeClient() {
         {featured && featured.length > 0 && !isSearchActive && (
           <section className='flex flex-col gap-5'>
             <h2 className='font-display text-heading-2 text-text-primary'>Em destaque</h2>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8'>
               {featured.map((script) => (
                 <ScriptCard
                   key={script.id}
@@ -128,6 +197,7 @@ export function HomeClient() {
                   rating={ratingsMap?.[script.id]?.average ?? null}
                   ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                   pages={script.script_files?.[0]?.page_count ?? null}
+                  coverUrl={getStorageUrl('avatars', script.cover_path)}
                   onPreview={() => setPreviewId(script.id)}
                 />
               ))}
@@ -141,7 +211,7 @@ export function HomeClient() {
             {isSearchActive ? 'Resultados' : 'Roteiros recentes'}
           </h2>
           {displayedScripts.length > 0 ? (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8'>
               {displayedScripts.map((script) => (
                 <ScriptCard
                   key={script.id}
@@ -151,6 +221,7 @@ export function HomeClient() {
                   rating={ratingsMap?.[script.id]?.average ?? null}
                   ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                   pages={script.script_files?.[0]?.page_count ?? null}
+                  coverUrl={getStorageUrl('avatars', script.cover_path)}
                   onPreview={() => setPreviewId(script.id)}
                 />
               ))}

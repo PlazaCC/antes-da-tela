@@ -18,6 +18,12 @@ export interface PublishFormState {
   audioFile: File | null
   audioStoragePath: string
   audioError: string
+  coverFile: File | null
+  coverStoragePath: string
+  coverError: string
+  bannerFile: File | null
+  bannerStoragePath: string
+  bannerError: string
 }
 
 export const INITIAL_FORM_STATE: PublishFormState = {
@@ -32,6 +38,12 @@ export const INITIAL_FORM_STATE: PublishFormState = {
   audioFile: null,
   audioStoragePath: '',
   audioError: '',
+  coverFile: null,
+  coverStoragePath: '',
+  coverError: '',
+  bannerFile: null,
+  bannerStoragePath: '',
+  bannerError: '',
 }
 
 export function usePublishWizard() {

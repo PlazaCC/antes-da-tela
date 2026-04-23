@@ -34,9 +34,17 @@ const getPageData = cache(async (id: string) => {
   let bannerUrl: string | null = null
   if (script?.banner_path) {
     const { data } = ctx.supabase.storage
-      .from('scripts')
+      .from('avatars')
       .getPublicUrl(script.banner_path)
     bannerUrl = data.publicUrl
+  }
+
+  let coverUrl: string | null = null
+  if (script?.cover_path) {
+    const { data } = ctx.supabase.storage
+      .from('avatars')
+      .getPublicUrl(script.cover_path)
+    coverUrl = data.publicUrl
   }
 
   return {
@@ -44,6 +52,7 @@ const getPageData = cache(async (id: string) => {
     pdfUrl,
     audioUrl,
     bannerUrl,
+    coverUrl,
     currentUserId: authData.user?.id ?? null,
   }
 })
@@ -73,7 +82,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ScriptPage({ params }: Props) {
   const { id } = await params
-  const { script, pdfUrl, audioUrl, currentUserId } = await getPageData(id)
+  const { script, pdfUrl, audioUrl, bannerUrl, coverUrl, currentUserId } = await getPageData(id)
 
   return (
     <Suspense
@@ -83,7 +92,14 @@ export default async function ScriptPage({ params }: Props) {
         </div>
       }
     >
-      <ScriptPageClient script={script} pdfUrl={pdfUrl} audioUrl={audioUrl} currentUserId={currentUserId} />
+      <ScriptPageClient 
+        script={script} 
+        pdfUrl={pdfUrl} 
+        audioUrl={audioUrl} 
+        bannerUrl={bannerUrl}
+        coverUrl={coverUrl}
+        currentUserId={currentUserId} 
+      />
     </Suspense>
   )
 }

@@ -101,7 +101,7 @@
       {
         "id": "poc-25",
         "title": "Upload Wizard: cover + banner image uploads",
-        "status": "pending",
+        "status": "done",
         "priority": "P0 — bloqueante para poc-21 e poc-22",
         "task_file": ".agents/tasks/poc-25-upload-wizard-final-design.md",
         "real_scope": "Schema migration (cover_path em scripts) + upload de capa e banner no FileStep",

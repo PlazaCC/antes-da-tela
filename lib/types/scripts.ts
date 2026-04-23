@@ -4,8 +4,11 @@ export interface ScriptListItem {
   id: string
   title: string
   genre: string | null
+  cover_path: string | null
+  banner_path: string | null
   script_files: { page_count: number | null }[]
   author: { id: string; name: string | null } | null
+  logline: string | null
 }
 
 export interface ScriptFile {
@@ -31,6 +34,7 @@ export interface ScriptDetail {
   is_featured: boolean
   published_at: string | null
   banner_path: string | null
+  cover_path: string | null
   script_files: ScriptFile[]
   audio_files: AudioFile[]
   author: { id: string; name: string | null; image: string | null; bio: string | null } | null

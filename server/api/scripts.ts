@@ -36,6 +36,9 @@ export const scriptsRouter = createTRPCRouter({
   listFeatured: publicProcedure.query(async ({ ctx }) => {
     return ctx.scriptsService.listFeatured()
   }),
+  listTrendingBanners: publicProcedure.query(async ({ ctx }) => {
+    return ctx.scriptsService.listTrendingBanners()
+  }),
 
   listByAuthor: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input, ctx }) => {
     return ctx.scriptsService.listByAuthor(input.authorId)

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tag } from '@/components/tag/tag'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
-import { cn } from '@/lib/utils'
+import { cn, getStorageUrl } from '@/lib/utils'
 import { formatPublishedDate } from '@/lib/utils/format-date'
 import { useTRPC } from '@/trpc/client'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
@@ -12,8 +12,6 @@ import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useMemo } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { AuthorSection } from './author-section'
 import { ModalSidebar } from './sidebar'
 import { StatsSection } from './stats-section'
@@ -47,12 +45,8 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
 
   const publishedAt = script?.published_at ? formatPublishedDate(script.published_at) : null
 
-  const supabase = useMemo(() => createClient(), [])
-  const coverUrl = useMemo(() => {
-    return script?.banner_path 
-      ? supabase.storage.from('scripts').getPublicUrl(script.banner_path).data.publicUrl 
-      : null
-  }, [script?.banner_path, supabase])
+  const coverUrl = getStorageUrl('avatars', script?.cover_path)
+  const bannerUrl = getStorageUrl('avatars', script?.banner_path)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -83,10 +77,10 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
         ) : (
           <div className='relative flex flex-col md:flex-row overflow-hidden max-h-[90vh]'>
             {/* Background Cover with Gradient Overlay (Mobile Only) */}
-            {coverUrl && (
+            {bannerUrl && (
               <div className='absolute inset-0 md:hidden z-0'>
                 <Image
-                  src={coverUrl}
+                  src={bannerUrl}
                   alt={script.title}
                   fill
                   className='object-cover opacity-20'
@@ -95,7 +89,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
               </div>
             )}
 
-            <ModalSidebar script={script} publishedAtFormatted={publishedAt} onClose={onClose} />
+            <ModalSidebar script={script} publishedAtFormatted={publishedAt} coverUrl={coverUrl} onClose={onClose} />
 
             <div className='flex-1 overflow-y-auto p-5 md:p-8 flex flex-col gap-5 md:gap-8 min-w-0 z-10 pb-28 md:pb-8'>
               {script.title && (
