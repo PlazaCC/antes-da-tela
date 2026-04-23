@@ -1,9 +1,9 @@
 # poc-21 — Home: design final
 
-**Scope:** Frontend + Backend  
-**Priority:** P1  
-**Status:** pending  
-**Figma:** Home `51:562` — seção `186:1388`  
+**Scope:** Frontend + Backend
+**Priority:** P1
+**Status:** pending
+**Figma:** Home `51:562` — seção `186:1388`
 **Depends on:** poc-25 (precisa de `cover_path` e `banner_path` no schema)
 
 ---
@@ -29,8 +29,9 @@ A tabela `scripts` tem `banner_path` (para o banner visual da Home) mas **não t
 ### 2. ScriptCard — cover thumbnail
 
 `ScriptCard` não exibe imagem de capa. Adicionar:
+
 - Prop `coverUrl?: string | null`
-- Placeholder visual `aspect-[2/3]` com bg `bg-elevated` quando `coverUrl` é null
+- Placeholder visual `aspect-[4/5]` com bg `bg-elevated` quando `coverUrl` é null
 - Se `coverUrl` existe: `<img>` com `object-cover w-full h-full`
 
 **Arquivo:** `components/script-card/script-card.tsx`
@@ -69,17 +70,17 @@ async function getFeaturedWithBanners(supabase) {
 
 ## Arquivos a modificar
 
-| Arquivo | Mudança |
-|---|---|
-| `server/api/scripts.ts` | Endpoint `listFeaturedWithBanners`; incluir `cover_path` e `banner_path` nos selects existentes (`getById`, `listRecent`, `listFeatured`, `listByAuthor`) |
-| `components/script-card/script-card.tsx` | Prop `coverUrl` + placeholder 2:3 |
-| `app/home-client.tsx` | Seção "Em Destaque" com banners (fallback para ScriptCards se sem banner) |
+| Arquivo                                  | Mudança                                                                                                                                                   |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server/api/scripts.ts`                  | Endpoint `listFeaturedWithBanners`; incluir `cover_path` e `banner_path` nos selects existentes (`getById`, `listRecent`, `listFeatured`, `listByAuthor`) |
+| `components/script-card/script-card.tsx` | Prop `coverUrl` + placeholder 2:3                                                                                                                         |
+| `app/home-client.tsx`                    | Seção "Em Destaque" com banners (fallback para ScriptCards se sem banner)                                                                                 |
 
 ---
 
 ## Acceptance criteria
 
-- [ ] `ScriptCard` exibe placeholder `aspect-[2/3]` quando sem capa; imagem `cover_url` quando presente
+- [ ] `ScriptCard` exibe placeholder `aspect-[4/5]` quando sem capa; imagem `cover_url` quando presente
 - [ ] Seção "Em Destaque" exibe banner visual quando scripts com `banner_path` existem
 - [ ] Fallback: se nenhum script tiver `banner_path`, exibe ScriptCards (comportamento atual)
 - [ ] `listFeaturedWithBanners` tem comentário `// POC` explicando o join manual em JS
