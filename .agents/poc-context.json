@@ -96,7 +96,7 @@
       "poc-19 — profile pages",
       "poc-20 — upload wizard redesign"
     ],
-    "execution_order": "poc-25 → poc-21 → poc-22 (parallel: poc-24, poc-23, poc-26)",
+    "execution_order": "poc-26 (Edição/Exclusão) → poc-25 → poc-21 → poc-22 (parallel: poc-24, poc-23)",
     "phase2_tasks": [
       {
         "id": "poc-25",
@@ -105,7 +105,13 @@
         "priority": "P0 — bloqueante para poc-21 e poc-22",
         "task_file": ".agents/tasks/poc-25-upload-wizard-final-design.md",
         "real_scope": "Schema migration (cover_path em scripts) + 2 novos campos de upload no FileStep",
-        "key_files": ["server/db/schema.ts", "server/api/scripts.ts", "lib/hooks/use-publish-wizard.ts", "components/publish/file-step.tsx", "app/(authenticated)/publish/page.tsx"]
+        "key_files": [
+          "server/db/schema.ts",
+          "server/api/scripts.ts",
+          "lib/hooks/use-publish-wizard.ts",
+          "components/publish/file-step.tsx",
+          "app/(authenticated)/publish/page.tsx"
+        ]
       },
       {
         "id": "poc-21",
@@ -116,7 +122,12 @@
         "task_file": ".agents/tasks/poc-21-home-final-design.md",
         "real_scope": "cover_path no schema (via poc-25), prop coverUrl no ScriptCard, seção 'Em Destaque' com banners via banner_path (função JS/POC com fallback para ScriptCards)",
         "already_done": ["genre chips com active state", "grid 3 cols", "featured section", "filter/search"],
-        "key_files": ["server/db/schema.ts", "server/api/scripts.ts", "components/script-card/script-card.tsx", "app/home-client.tsx"]
+        "key_files": [
+          "server/db/schema.ts",
+          "server/api/scripts.ts",
+          "components/script-card/script-card.tsx",
+          "app/home-client.tsx"
+        ]
       },
       {
         "id": "poc-22",
@@ -127,7 +138,11 @@
         "task_file": ".agents/tasks/poc-22-script-modal-final-design.md",
         "real_scope": "Cover placeholder 2:3 no ModalSidebar; AudioPlayer no sidebar se audioUrl presente",
         "already_done": ["dois painéis", "título", "author section", "stats", "tags", "logline/synopsis"],
-        "key_files": ["server/api/scripts.ts", "components/script-preview-modal/sidebar.tsx", "components/script-preview-modal/script-preview-modal.tsx"]
+        "key_files": [
+          "server/api/scripts.ts",
+          "components/script-preview-modal/sidebar.tsx",
+          "components/script-preview-modal/script-preview-modal.tsx"
+        ]
       },
       {
         "id": "poc-24",
@@ -153,14 +168,20 @@
       },
       {
         "id": "poc-26",
-        "title": "Profile: banner upload + depar ScriptCards",
+        "title": "Dashboard: Edição e Exclusão de Roteiros + Profile Flow",
         "status": "pending",
-        "priority": "P2",
-        "figma_nodeId": "186:2075",
+        "priority": "P0 — PRÓXIMA A EXECUTAR",
+        "figma_nodeId": "186:1963",
         "task_file": ".agents/tasks/poc-26-profile-flow-final-design.md",
-        "real_scope": "Banner upload no Edit Profile; coverUrl nos ScriptCards do perfil (após poc-21)",
-        "already_done": ["perfil público completo", "edit profile com avatar + nome/bio", "dashboard com MetricCards"],
-        "key_files": ["server/db/schema.ts", "app/(authenticated)/profile/edit/page.tsx", "app/profile/[userId]/profile-client.tsx"]
+        "real_scope": "Dashboard: Ações de Editar e Excluir na tabela de roteiros. Profile: Banner upload no Edit Profile; coverUrl nos ScriptCards do perfil (após poc-21)",
+        "already_done": ["perfil público completo", "edit profile com avatar + nome/bio", "dashboard com MetricCards", "tabela base do dashboard"],
+        "key_files": [
+          "app/(authenticated)/dashboard/page.tsx",
+          "server/api/scripts.ts",
+          "server/db/schema.ts",
+          "app/(authenticated)/profile/edit/page.tsx",
+          "app/profile/[userId]/profile-client.tsx"
+        ]
       }
     ]
   },
