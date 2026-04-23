@@ -6,7 +6,7 @@ import { FileStep } from '@/components/publish/file-step'
 import { GenreStep } from '@/components/publish/genre-step'
 import { InfoStep } from '@/components/publish/info-step'
 import { ReviewStep } from '@/components/publish/review-step'
-import { useAutoFillPublishForm } from '@/lib/dev-mocks'
+// import { useAutoFillPublishForm } from '@/lib/dev-mocks'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { usePublishUpload } from '@/lib/hooks/use-publish-upload'
 import { usePublishWizard } from '@/lib/hooks/use-publish-wizard'
@@ -15,7 +15,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useState } from 'react'
 
 const STEP_LABELS = ['Informações', 'Arquivos', 'Categorias', 'Revisão'] as const
 const MAX_PDF_BYTES = 50 * 1024 * 1024
@@ -62,8 +62,8 @@ export default function PublishPage() {
         title: existingScript.title,
         logline: existingScript.logline || '',
         synopsis: existingScript.synopsis || '',
-        genre: (existingScript.genre as any) || '',
-        ageRating: (existingScript.age_rating as any) || '',
+        genre: (existingScript.genre as string) || '',
+        ageRating: (existingScript.age_rating as string) || '',
         pdfFile: null,
         pdfStoragePath: existingScript.script_files[0]?.storage_path || '',
         pdfError: '',

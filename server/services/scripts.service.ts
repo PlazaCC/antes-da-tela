@@ -110,7 +110,7 @@ export class ScriptsService {
     }
 
     // Map camelCase to snake_case for Supabase
-    const mappedData: any = {}
+    const mappedData: Record<string, unknown> = {}
     if (updateData.title) mappedData.title = updateData.title
     if (updateData.logline) mappedData.logline = updateData.logline
     if (updateData.synopsis) mappedData.synopsis = updateData.synopsis

@@ -12,6 +12,7 @@ import { useLogout } from '@/lib/hooks/use-logout'
 import { LogOutIcon } from 'lucide-react'
 import Link from 'next/link'
 import { USER_MENU_ITEMS } from '@/lib/constants/navigation'
+import { cn } from '@/lib/utils'
 
 interface UserMenuProps {
   userId: string
@@ -38,12 +39,19 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
         <DropdownMenuSeparator className='bg-border-default mx-1' />
         {USER_MENU_ITEMS(userId).map((item) => {
           const Icon = item.icon
+          const isHighlighted = 'highlighted' in item && item.highlighted
+
           return (
             <DropdownMenuItem key={item.id} asChild>
               <Link
                 href={item.href}
-                className='flex items-center gap-2.5 px-2 py-2 cursor-pointer text-sm text-text-secondary hover:text-text-primary hover:bg-elevated rounded-sm transition-colors focus:bg-elevated outline-none'>
-                <Icon className='w-4 h-4 text-text-muted' />
+                className={cn(
+                  'flex items-center gap-2.5 px-2 py-2 cursor-pointer text-sm rounded-sm transition-colors outline-none',
+                  isHighlighted 
+                    ? 'text-brand-accent bg-brand-accent/5 hover:bg-brand-accent/10' 
+                    : 'text-text-secondary hover:text-text-primary hover:bg-elevated'
+                )}>
+                <Icon className={cn('w-4 h-4', isHighlighted ? 'text-brand-accent' : 'text-text-muted')} />
                 {item.label}
               </Link>
             </DropdownMenuItem>

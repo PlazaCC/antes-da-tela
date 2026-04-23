@@ -2,6 +2,7 @@ import { RatingSummary } from '@/components/rating-summary/rating-summary'
 import { Tag } from '@/components/tag/tag'
 import { cn } from '@/lib/utils'
 import * as React from 'react'
+import Image from 'next/image'
 
 type ScriptCardElement = HTMLAnchorElement | HTMLDivElement
 
@@ -36,9 +37,11 @@ const renderContent = ({ title, author, genre, rating, ratingTotal, pages, statu
   <>
     {coverUrl && (
       <div className='aspect-[2/3] w-full mb-3 overflow-hidden rounded-sm bg-bg-base/50'>
-        <img
+        <Image
           src={coverUrl}
           alt={title}
+          width={400}
+          height={600}
           className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
         />
       </div>

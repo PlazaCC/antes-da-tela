@@ -1,8 +1,6 @@
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/server'
 import { getUserDisplayName } from '@/lib/utils/auth'
-import { FileUpIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -85,12 +83,6 @@ async function NavBarRightSection() {
             <NavBarSearch />
           </Suspense>
         </div>
-        <Button asChild size='sm' className='h-8 text-sm w-[124px] rounded-[2px] shrink-0'>
-          <Link href='/publish'>
-            <FileUpIcon />
-            Publicar
-          </Link>
-        </Button>
       </div>
 
       {/* Mobile: search icon */}
