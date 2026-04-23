@@ -100,14 +100,23 @@ export function FileStep({
     className: string,
   ) => {
     if (previewUrl) {
-      return <Image src={previewUrl} alt='Preview' width={width} height={height} unoptimized className={className} />
+      return (
+        <Image
+          src={previewUrl}
+          alt='Pré-visualização'
+          width={width}
+          height={height}
+          unoptimized
+          className={className}
+        />
+      )
     }
 
     if (storagePath) {
       return (
         <Image
           src={getStorageUrl('avatars', storagePath)!}
-          alt='Preview'
+          alt='Pré-visualização'
           width={width}
           height={height}
           unoptimized

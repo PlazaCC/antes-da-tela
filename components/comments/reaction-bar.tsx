@@ -11,7 +11,7 @@ export interface ReactionBarProps extends Omit<React.HTMLAttributes<HTMLDivEleme
 
 export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
   ({ className, reactions, onSelect, selected, disabled, loading, ...props }, ref) => (
-    <div ref={ref} className={cn('flex flex-wrap gap-2', className)} role='group' aria-label='Reactions' {...props}>
+    <div ref={ref} className={cn('flex flex-wrap gap-2', className)} role='group' aria-label='Reações' {...props}>
       {reactions.map((reaction, i) => {
         const isActive = reaction.active || selected === i
         return (
@@ -28,7 +28,7 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
             )}
             onClick={() => onSelect?.(i)}
             aria-pressed={isActive}
-            aria-label={`${reaction.label}: ${reaction.count} reaction${reaction.count !== 1 ? 's' : ''}${isActive ? ', active' : ''}`}
+            aria-label={`${reaction.label}: ${reaction.count} reação${reaction.count !== 1 ? 's' : ''}${isActive ? ', ativo' : ''}`}
             disabled={disabled || loading}>
             <span aria-hidden='true'>{reaction.icon}</span>
             <span>{reaction.count}</span>

@@ -37,7 +37,7 @@ export default function AccountPage() {
 
   return (
     <main className='max-w-sm mx-auto px-5 py-12 flex flex-col gap-8'>
-      <h1 className='font-display text-heading-2 text-primary'>My Account</h1>
+      <h1 className='font-display text-heading-2 text-primary'>Minha Conta</h1>
 
       {/* Avatar */}
       <section className='flex flex-col gap-3'>
@@ -63,7 +63,7 @@ export default function AccountPage() {
             size='sm'
             disabled={isUploading}
             onClick={() => fileRef.current?.click()}>
-            {isUploading ? 'Uploading…' : 'Change photo'}
+            {isUploading ? 'Enviando…' : 'Trocar foto'}
           </Button>
           <input
             ref={fileRef}
@@ -81,19 +81,19 @@ export default function AccountPage() {
       {/* Profile form */}
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-6'>
         <div className='flex flex-col gap-2'>
-          <label className='font-mono text-secondary uppercase tracking-wider text-xs'>Name</label>
-          <Input {...register('name')} placeholder='Your name' />
+          <label className='font-mono text-secondary uppercase tracking-wider text-xs'>Nome</label>
+          <Input {...register('name')} placeholder='Seu nome' />
           {errors.name && <p className='text-state-error text-xs font-mono'>{errors.name.message}</p>}
         </div>
 
         <div className='flex flex-col gap-2'>
           <label className='font-mono text-secondary uppercase tracking-wider text-xs'>Bio</label>
-          <Input {...register('bio')} placeholder='A short bio (optional)' />
+          <Input {...register('bio')} placeholder='Uma bio curta (opcional)' />
           {errors.bio && <p className='text-state-error text-xs font-mono'>{errors.bio.message}</p>}
         </div>
 
         <Button type='submit' disabled={isSubmitting || isPending}>
-          {isPending ? 'Saving…' : 'Save changes'}
+          {isPending ? 'Salvando…' : 'Salvar alterações'}
         </Button>
       </form>
     </main>

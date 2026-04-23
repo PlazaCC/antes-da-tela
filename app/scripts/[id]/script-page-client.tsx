@@ -29,7 +29,6 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-
 type RouterOutput = inferRouterOutputs<AppRouter>
 type ScriptDetail = RouterOutput['scripts']['getById']
 
@@ -95,7 +94,7 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
   if (!script) {
     return (
       <div className='min-h-screen bg-bg-base flex items-center justify-center'>
-        <p className='text-state-error font-mono text-label-mono-default'>Script not found.</p>
+        <p className='text-state-error font-mono text-label-mono-default'>Roteiro não encontrado.</p>
       </div>
     )
   }
@@ -108,13 +107,7 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
       {/* Banner */}
       {bannerUrl && (
         <div className='w-full h-48 md:h-64 absolute overflow-hidden'>
-          <Image
-            src={bannerUrl}
-            alt={script.title}
-            fill
-            priority
-            className='object-cover object-center opacity-20'
-          />
+          <Image src={bannerUrl} alt={script.title} fill priority className='object-cover object-center opacity-20' />
           <div className='absolute inset-0 bg-gradient-to-t from-bg-base to-transparent' />
         </div>
       )}
@@ -125,12 +118,7 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
           {/* Cover on Details Page */}
           <div className='w-32 md:w-40 shrink-0 aspect-[2/3] rounded-sm bg-elevated border border-border-subtle overflow-hidden relative shadow-lg'>
             {coverUrl ? (
-              <Image
-                src={coverUrl}
-                alt={script.title}
-                fill
-                className='object-cover'
-              />
+              <Image src={coverUrl} alt={script.title} fill className='object-cover' />
             ) : (
               <div className='flex flex-col items-center justify-center h-full gap-2'>
                 <Film className='w-8 h-8 text-text-muted' />
@@ -146,21 +134,21 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
             </div>
 
             <div className='flex items-start justify-between gap-4'>
-              <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-tight'>{script.title}</h1>
+              <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-tight'>
+                {script.title}
+              </h1>
 
               {isOwner && (
                 <div className='flex items-center gap-2 mt-1 shrink-0'>
                   <Link
                     href={`/publish?id=${script.id}`}
-                    className='flex items-center gap-1.5 px-3 h-8 rounded-sm border border-border-subtle text-text-secondary font-sans text-[12px] hover:border-border-default transition-colors'
-                  >
+                    className='flex items-center gap-1.5 px-3 h-8 rounded-sm border border-border-subtle text-text-secondary font-sans text-[12px] hover:border-border-default transition-colors'>
                     <Pencil className='w-3.5 h-3.5' />
                     Editar
                   </Link>
                   <button
                     onClick={() => setDeleteModalOpen(true)}
-                    className='flex items-center gap-1.5 px-3 h-8 rounded-sm border border-state-error/20 text-state-error font-sans text-[12px] hover:bg-state-error/10 transition-colors'
-                  >
+                    className='flex items-center gap-1.5 px-3 h-8 rounded-sm border border-state-error/20 text-state-error font-sans text-[12px] hover:bg-state-error/10 transition-colors'>
                     <Trash2 className='w-3.5 h-3.5' />
                     Excluir
                   </button>
@@ -221,7 +209,6 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
           </div>
         </div>
       </div>
-
 
       {/* Audio player */}
       {audioUrl && (
@@ -286,7 +273,8 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
             <AlertDialogHeader>
               <AlertDialogTitle>Excluir roteiro</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja excluir o roteiro <strong>{script.title}</strong>? Esta ação não pode ser desfeita e todos os arquivos associados serão removidos.
+                Tem certeza que deseja excluir o roteiro <strong>{script.title}</strong>? Esta ação não pode ser
+                desfeita e todos os arquivos associados serão removidos.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

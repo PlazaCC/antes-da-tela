@@ -210,7 +210,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             type='button'
             onClick={goToPrev}
             disabled={currentPage <= 1}
-            aria-label='Previous page'
+            aria-label='Página anterior'
             className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
             ←
           </button>
@@ -221,7 +221,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             type='button'
             onClick={goToNext}
             disabled={currentPage >= totalPages}
-            aria-label='Next page'
+            aria-label='Próxima página'
             className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
             →
           </button>
@@ -232,7 +232,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
           <button
             type='button'
             onClick={decreaseZoom}
-            aria-label='Zoom out'
+            aria-label='Reduzir zoom'
             className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
             −
           </button>
@@ -242,7 +242,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
           <button
             type='button'
             onClick={increaseZoom}
-            aria-label='Zoom in'
+            aria-label='Aumentar zoom'
             className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
             +
           </button>
@@ -255,14 +255,16 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
           <div className='absolute inset-0 z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm min-h-[400px]'>
             <div className='flex flex-col items-center gap-3'>
               <div className='w-8 h-8 rounded-full border-2 border-border-subtle border-t-brand-accent animate-spin' />
-              <span className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>Loading…</span>
+              <span className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>
+                Carregando…
+              </span>
             </div>
           </div>
         )}
         <canvas
           ref={canvasRef}
           className='block rounded-sm border border-border-subtle shadow-elevation-1'
-          aria-label={`PDF page ${currentPage} of ${totalPages}`}
+          aria-label={`Página ${currentPage} de ${totalPages}`}
         />
         <div ref={textLayerRef} className='pdf-text-layer' aria-hidden='true' />
       </div>

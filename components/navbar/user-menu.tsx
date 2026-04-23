@@ -8,11 +8,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { USER_MENU_ITEMS } from '@/lib/constants/navigation'
 import { useLogout } from '@/lib/hooks/use-logout'
+import { cn } from '@/lib/utils'
 import { LogOutIcon } from 'lucide-react'
 import Link from 'next/link'
-import { USER_MENU_ITEMS } from '@/lib/constants/navigation'
-import { cn } from '@/lib/utils'
 
 interface UserMenuProps {
   userId: string
@@ -28,11 +28,13 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <button
           className='rounded-full hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base'
-          aria-label='User menu'>
+          aria-label='Menu do usuário'>
           <Avatar src={userImage} name={userName ?? '?'} size='sm' />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='w-56 p-1 bg-surface border border-border-default shadow-xl rounded-md'>
+      <DropdownMenuContent
+        align='end'
+        className='w-56 p-1 bg-surface border border-border-default shadow-xl rounded-md'>
         <div className='px-2 py-1.5 mb-1'>
           <p className='text-xs font-medium text-text-primary truncate'>{userName}</p>
         </div>
@@ -47,9 +49,9 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
                 href={item.href}
                 className={cn(
                   'flex items-center gap-2.5 px-2 py-2 cursor-pointer text-sm rounded-sm transition-colors outline-none',
-                  isHighlighted 
-                    ? 'text-brand-accent bg-brand-accent/5 hover:bg-brand-accent/10' 
-                    : 'text-text-secondary hover:text-text-primary hover:bg-elevated'
+                  isHighlighted
+                    ? 'text-brand-accent bg-brand-accent/5 hover:bg-brand-accent/10'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-elevated',
                 )}>
                 <Icon className={cn('w-4 h-4', isHighlighted ? 'text-brand-accent' : 'text-text-muted')} />
                 {item.label}
