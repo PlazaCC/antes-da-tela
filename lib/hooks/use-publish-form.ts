@@ -238,29 +238,27 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
       const accessToken = await getAccessToken()
       const uid = await getUserId()
 
-      if (!pdfPath && pdfFile) {
-        pdfPath = `${uid}/${Date.now()}_${pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-        await uploadFile('scripts', pdfPath, pdfFile, accessToken, setPdfProgress)
-        setValue('pdfStoragePath', pdfPath)
+      const uploadAsset = async (
+        file: File | null,
+        currentPath: string,
+        bucket: 'scripts' | 'audio' | 'avatars',
+        onProgress: (pct: number) => void,
+        fieldName: keyof PublishFormValues,
+      ) => {
+        if (!file) return currentPath
+
+        const path = currentPath || `${uid}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+        const shouldUpsert = Boolean(currentPath)
+
+        await uploadFile(bucket, path, file, accessToken, onProgress, shouldUpsert)
+        setValue(fieldName, path)
+        return path
       }
 
-      if (!audioPath && audioFile) {
-        audioPath = `${uid}/${Date.now()}_${audioFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-        await uploadFile('audio', audioPath, audioFile, accessToken, setAudioProgress)
-        setValue('audioStoragePath', audioPath)
-      }
-
-      if (!coverPath && coverFile) {
-        coverPath = `${uid}/${Date.now()}_${coverFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-        await uploadFile('avatars', coverPath, coverFile, accessToken, setCoverProgress)
-        setValue('coverStoragePath', coverPath)
-      }
-
-      if (!bannerPath && bannerFile) {
-        bannerPath = `${uid}/${Date.now()}_${bannerFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-        await uploadFile('avatars', bannerPath, bannerFile, accessToken, setBannerProgress)
-        setValue('bannerStoragePath', bannerPath)
-      }
+      pdfPath = await uploadAsset(pdfFile, pdfPath, 'scripts', setPdfProgress, 'pdfStoragePath')
+      audioPath = await uploadAsset(audioFile, audioPath, 'audio', setAudioProgress, 'audioStoragePath')
+      coverPath = await uploadAsset(coverFile, coverPath, 'avatars', setCoverProgress, 'coverStoragePath')
+      bannerPath = await uploadAsset(bannerFile, bannerPath, 'avatars', setBannerProgress, 'bannerStoragePath')
 
       setUploading(false)
 
@@ -276,6 +274,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
           fileSize: pdfFile?.size,
           coverPath: coverPath === '' ? null : coverPath,
           bannerPath: bannerPath === '' ? null : bannerPath,
+          audioStoragePath: audioPath || undefined,
         })
       } else {
         createMutation.mutate({

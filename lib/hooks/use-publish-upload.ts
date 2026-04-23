@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useMemo } from 'react'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 
@@ -36,13 +36,14 @@ export function usePublishUpload() {
     file: File,
     accessToken: string,
     onProgress: (pct: number) => void,
+    upsert = false,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/${bucket}/${storagePath}`)
       xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
       xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
-      xhr.setRequestHeader('x-upsert', 'false')
+      xhr.setRequestHeader('x-upsert', upsert ? 'true' : 'false')
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
       }
