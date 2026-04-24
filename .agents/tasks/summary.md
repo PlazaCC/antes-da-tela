@@ -43,10 +43,10 @@ As seguintes telas foram implementadas além do wireframe do Figma e definem o p
 ### Prioridades — tarefas pendentes
 
 ```
-P0 — poc-24: Tela do Roteiro (redesign completo + mobile layout)
+P0 — poc-27: PDF Viewer: migrate to react-pdf (zoom overflow bug + fundação áudio-texto)
 P1 — poc-21: Home (infinite scroll + remover título "Roteiros recentes" + mobile grid)
+P1 — poc-22: Modal Preview (audio player no sidebar + mobile layout)
 P2 — poc-23: Busca (alinhamento ao Figma + touch targets + mobile sheet)
-P3 — poc-22: Modal Preview (audio player no sidebar + mobile layout)
 P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA + UX)
 ```
 
@@ -54,10 +54,11 @@ P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA
 
 | Task | Arquivo | Prioridade | Status | Escopo |
 |---|---|---|---|---|
+| poc-27 — PDF Viewer: react-pdf | `poc-27-pdf-viewer-react-pdf.md` | **P0** | pending | Migração de pdfjs-dist manual para react-pdf; resolve zoom overflow; preserva text layer e Zustand store |
 | poc-24 — Tela do Roteiro | `poc-24-pdf-reader-final-design.md` | **P0** | **done** | Hero banner condicional, breadcrumbs, sinopse visível, tabs sidebar, sticky desktop, mobile sheet + FAB, no-PDF redesenhado |
 | poc-21 — Home: infinite scroll | `poc-21-home-final-design.md` | **P1** | pending | Infinite scroll + remover "Roteiros recentes" + grid mobile 2/3/4/5 cols |
+| poc-22 — Modal: audio | `poc-22-script-modal-final-design.md` | **P1** | pending | AudioPlayer no sidebar + mobile full-screen + touch targets |
 | poc-23 — Busca: Figma align | `poc-23-search-filter-final-design.md` | **P2** | pending | Cards com cover, link "ver todos", fix apply filter, touch targets, dvh |
-| poc-22 — Modal: audio | `poc-22-script-modal-final-design.md` | **P3** | pending | AudioPlayer no sidebar + mobile full-screen + touch targets |
 | poc-25 — Upload Wizard | `poc-25-upload-wizard-figma-align.md` | **P4** | pending | PreviewPanel ao vivo, heading por step, logline counter, cover na revisão, mobile sticky CTA |
 
 ### Completo
@@ -65,6 +66,7 @@ P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA
 | Task | Descrição | Status |
 |---|---|---|
 | poc-26 | Dashboard + Profile flow | ✓ DONE |
+| poc-25 | Upload Wizard — cover + banner uploads | ✓ DONE |
 | poc-24 | PDF Reader — hero condicional, tabs sidebar, sticky desktop, synopsis, mobile sheet | ✓ DONE |
 
 ---
@@ -74,7 +76,7 @@ P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA
 | Tela | Implementado | Falta |
 |---|---|---|
 | Home | Carousel banners, genre chips, grid, featured, filtros, cover nos cards | Infinite scroll, remover título "Roteiros recentes" |
-| Tela do Roteiro | Banner (sutil), cover, título, logline, autor, rating, PDF viewer, comments, audio, ações | Hero banner cinematic, breadcrumbs, sinopse visível, mobile layout |
+| Tela do Roteiro | Banner (sutil), cover, título, logline, autor, rating, PDF viewer, comments, audio, ações | Zoom do PDF vaza container (poc-27 — migrar react-pdf) |
 | Modal Preview | 2 painéis, cover, author, stats, tags, sidebar metadata | AudioPlayer no sidebar |
 | Search Sheet | Bottom sheet, input, resultados texto | Cards com cover, link "ver todos" |
 | Filter Panel | Checkboxes gênero + classificação | Fix: apply antes de fechar |

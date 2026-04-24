@@ -96,8 +96,33 @@
       "poc-19 — profile pages",
       "poc-20 — upload wizard redesign"
     ],
-    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-21 → poc-22 (parallel: poc-23)",
+    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-27 → poc-21 → poc-22 (parallel: poc-23)",
     "phase2_tasks": [
+      {
+        "id": "poc-27",
+        "title": "PDF Viewer: migrate to react-pdf",
+        "status": "pending",
+        "priority": "P0 — bug fix (zoom overflow) + fundação para sincronização áudio-texto futura",
+        "task_file": ".agents/tasks/poc-27-pdf-viewer-react-pdf.md",
+        "real_scope": "Substituir implementação manual de canvas/pdfjs-dist por react-pdf (Document + Page). Resolve overflow de zoom. Preserva text layer, Zustand store e CommentsSidebar. Cria hook useContainerWidth.",
+        "already_done": [
+          "PDF viewer funcional com canvas rendering",
+          "text layer com seleção de texto",
+          "zoom +/- com debounce",
+          "paginação prev/next",
+          "Zustand store (currentPage, totalPages, zoom, isLoading)",
+          "CommentsSidebar consome currentPage do store"
+        ],
+        "key_files": [
+          "components/pdf-viewer/pdf-viewer.tsx",
+          "components/pdf-viewer/pdf-viewer-store.ts",
+          "components/pdf-viewer/index.tsx",
+          "lib/utils/pdf.ts",
+          "lib/hooks/use-container-width.ts",
+          "package.json",
+          "app/globals.css"
+        ]
+      },
       {
         "id": "poc-25",
         "title": "Upload Wizard: cover + banner image uploads",
