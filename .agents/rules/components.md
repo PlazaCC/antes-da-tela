@@ -9,6 +9,7 @@
 ## When to extract a sub-component
 
 Extract when any of these conditions hold:
+
 - A JSX block repeats more than once with different props.
 - A logical section owns its own state or side-effects.
 - A named UI concept is emerging (e.g. `RatingBox`, `PdfControls`, `OwnerActions`).
@@ -20,18 +21,19 @@ Extract when any of these conditions hold:
 - The same stateful logic is needed by two or more components.
 
 Examples already in the codebase:
+
 - `useAudio` — audio playback state + event listeners
 - `useProgressScrubber` — scrubber drag/touch → seek ratio
 
 ## File naming and placement
 
-| Type | Location | Convention |
-|---|---|---|
-| Page-level component | `app/<route>/` | `PascalCase` named export |
-| Feature component | `components/<domain>/<name>.tsx` | kebab-case filename |
-| Custom hook | `lib/hooks/use-<name>.ts` | `camelCase` named export |
-| Sub-component (single parent) | same directory as parent | same naming |
-| shadcn primitive | `components/ui/` — **CLI only** | never create manually |
+| Type                          | Location                         | Convention                |
+| ----------------------------- | -------------------------------- | ------------------------- |
+| Page-level component          | `app/<route>/`                   | `PascalCase` named export |
+| Feature component             | `components/<domain>/<name>.tsx` | kebab-case filename       |
+| Custom hook                   | `lib/hooks/use-<name>.ts`        | `camelCase` named export  |
+| Sub-component (single parent) | same directory as parent         | same naming               |
+| shadcn primitive              | `components/ui/` — **CLI only**  | never create manually     |
 
 ## Naming conventions
 
@@ -52,6 +54,31 @@ Examples already in the codebase:
 - Zero comments by default.
 - Add one **only** when the WHY is non-obvious: browser quirk, hidden constraint, workaround for a specific bug.
 - Never describe WHAT the code does.
+
+## Modularização, Clean Architecture e DRY
+
+- Separe responsabilidades claramente: `components/` (apresentação), `lib/hooks` (comportamento reutilizável), `server/services` (regras de negócio), `server/api`/`trpc` (contratos de API).
+- Use composição: componentes pequenos e previsíveis, orquestradores (containers) que ligam hooks/serviços.
+- Evite duplicação:
+  - Centralize constantes e tokens em `lib/constants`.
+  - Centralize chamadas a APIs e queries em `server/services/*` ou `lib/api/*` com testes.
+  - Se um trecho de JSX aparece mais de 1 vez, extraia componente/Hook.
+- Extraia Side-effects para hooks (`use*`) e teste os pure helpers separadamente.
+
+## Guia rápido de refatoração
+
+- Favor PRs pequenos: uma mudança de responsabilidade por PR.
+- Ao extrair código, escreva testes unitários para a função/hook/serviço.
+- Garanta compatibilidade com RSC: mova chamadas que retornam dados para componentes servidor (Server Components) e mantenha a interação no cliente.
+
+## PR Checklist (componentes)
+
+- [ ] Arquivo ≤ 150 linhas
+- [ ] Reutilização via hook/componente extraído quando aplicável
+- [ ] `className` recebido e repassado
+- [ ] `cn()` usado para classes
+- [ ] Lógica de serviço movida para `server/services` ou `lib/`
+- [ ] Testes e lint passing localmente
 
 ## Checklist before committing a component
 

@@ -9,12 +9,14 @@
 ## When to extract
 
 Extract a sub-component when any of these are true:
+
 - A JSX block repeats more than once (even with different props).
 - A logical section has its own state or side-effects.
 - A named concept is emerging (e.g. `RatingBox`, `PdfControls`, `OwnerActions`).
 - A render branch (if/else) produces > 15 lines each side.
 
 Extract a custom hook when:
+
 - Multiple `useState` + `useEffect` blocks serve a single concern (e.g. `useAudio`, `useProgressScrubber`).
 - The same stateful logic is needed in two or more components.
 
@@ -44,3 +46,30 @@ Extract a custom hook when:
 - Write zero comments by default.
 - A comment is warranted only for non-obvious WHY: hidden constraint, browser quirk, workaround.
 - Never describe WHAT the code does — names already do that.
+
+## Modularização, Arquitetura e DRY
+
+- Priorize separação de responsabilidades: UI, lógica de domínio, e integrações externas (Supabase, storage, APIs) devem viver em camadas distintas.
+- Extraia lógica reutilizável para `lib/` ou `server/services/` (não em componentes) — componentes apenas orquestram UI e chamam hooks/serviços.
+- Regras para evitar repetição (DRY):
+  - Constantes e tokens visuais → `lib/constants` ou `design-tokens.ts`.
+  - Queries e transformações de dados → `server/services/*` ou `lib/api/*` com testes unitários.
+  - Reutilize hooks (`lib/hooks`) para comportamento que aparece em ≥2 componentes.
+- Prefira composição sobre duplicação: pequenos componentes simples, combinados no nível do pai.
+- Quando refatorar: busque trechos de JSX duplicados e crie componentes de apresentação (pure) + container hooks para comportamento.
+- Evite lógica de negócios em componentes; mova validação, mapeamento e transformações para funções puras testáveis.
+
+## Refatoração segura
+
+- Faça pequenas PRs focadas (1-2 responsabilidades por PR).
+- Inclua testes de unidade para funções extraídas e snapshots/teses para componentes críticos.
+- Valide que nenhum comportamento visível mudou: compare capturas rápidas (screenshots) ou storybook stories quando aplicável.
+
+## Checklist de revisão (componentes)
+
+- [ ] Arquivo ≤ 150 linhas (meta ≤100 linhas)
+- [ ] Reutilização via hook ou componente extraído onde aplicável
+- [ ] `className` aceito e repassado ao wrapper
+- [ ] `cn()` usado para merge de classes
+- [ ] Lógica de negócio e queries movidas para `lib/` ou `server/services/`
+- [ ] Testes para funções extraídas
