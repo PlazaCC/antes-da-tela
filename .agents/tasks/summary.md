@@ -54,7 +54,7 @@ P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA
 
 | Task | Arquivo | Prioridade | Status | Escopo |
 |---|---|---|---|---|
-| poc-24 — Tela do Roteiro | `poc-24-pdf-reader-final-design.md` | **P0** | pending | Hero banner, breadcrumbs, sinopse sempre visível, mobile layout completo |
+| poc-24 — Tela do Roteiro | `poc-24-pdf-reader-final-design.md` | **P0** | **done** | Hero banner condicional, breadcrumbs, sinopse visível, tabs sidebar, sticky desktop, mobile sheet + FAB, no-PDF redesenhado |
 | poc-21 — Home: infinite scroll | `poc-21-home-final-design.md` | **P1** | pending | Infinite scroll + remover "Roteiros recentes" + grid mobile 2/3/4/5 cols |
 | poc-23 — Busca: Figma align | `poc-23-search-filter-final-design.md` | **P2** | pending | Cards com cover, link "ver todos", fix apply filter, touch targets, dvh |
 | poc-22 — Modal: audio | `poc-22-script-modal-final-design.md` | **P3** | pending | AudioPlayer no sidebar + mobile full-screen + touch targets |
@@ -65,6 +65,7 @@ P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA
 | Task | Descrição | Status |
 |---|---|---|
 | poc-26 | Dashboard + Profile flow | ✓ DONE |
+| poc-24 | PDF Reader — hero condicional, tabs sidebar, sticky desktop, synopsis, mobile sheet | ✓ DONE |
 
 ---
 

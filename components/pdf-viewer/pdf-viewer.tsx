@@ -1,9 +1,9 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import { loadPdfjsLib } from '@/lib/utils/pdf'
 import type { PDFDocumentProxy, PDFPageProxy, PageViewport } from 'pdfjs-dist'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { PdfControls } from './pdf-controls'
 import { PDFViewerError } from './pdf-viewer-error'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
@@ -179,75 +179,13 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     return () => observer.disconnect()
   }, [renderPage])
 
-  const goToPrev = () => currentPage > 1 && setCurrentPage(currentPage - 1)
-  const goToNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1)
-
-  const decreaseZoom = () => {
-    const z = usePDFViewerStore.getState().zoom
-    usePDFViewerStore.getState().setZoom(Math.max(0.5, Math.round((z - 0.25) * 4) / 4))
-  }
-  const increaseZoom = () => {
-    const z = usePDFViewerStore.getState().zoom
-    usePDFViewerStore.getState().setZoom(Math.min(3.0, Math.round((z + 0.25) * 4) / 4))
-  }
-
   if (pdfError) {
     return <PDFViewerError message={pdfError} />
   }
 
   return (
-    <div className='flex flex-col w-full'>
-      {/* Controls bar — sticks to the top of the parent scroll container */}
-      <div
-        className={cn(
-          'sticky top-0 left-2 z-10 p-2 max-w-fit rounded-lg',
-          'bg-bg-base/20 backdrop-blur-sm',
-          'flex items-center gap-3',
-        )}>
-        {/* PageController (ref: Figma 50:1837) */}
-        <div className='bg-elevated border border-border-subtle rounded-sm flex items-center gap-2 px-3 py-1.5'>
-          <button
-            type='button'
-            onClick={goToPrev}
-            disabled={currentPage <= 1}
-            aria-label='Página anterior'
-            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
-            ←
-          </button>
-          <span className='font-mono text-label-mono-default text-text-secondary tabular-nums'>
-            {currentPage} / {totalPages || '—'}
-          </span>
-          <button
-            type='button'
-            onClick={goToNext}
-            disabled={currentPage >= totalPages}
-            aria-label='Próxima página'
-            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
-            →
-          </button>
-        </div>
-
-        {/* ZoomController (ref: Figma 50:1836) */}
-        <div className='bg-elevated border border-border-subtle rounded-sm flex items-center gap-1 px-2 py-1.5'>
-          <button
-            type='button'
-            onClick={decreaseZoom}
-            aria-label='Reduzir zoom'
-            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
-            −
-          </button>
-          <span className='font-mono text-label-mono-small text-text-muted w-10 text-center tabular-nums'>
-            {Math.round(zoom * 100)}%
-          </span>
-          <button
-            type='button'
-            onClick={increaseZoom}
-            aria-label='Aumentar zoom'
-            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
-            +
-          </button>
-        </div>
-      </div>
+    <div className='flex flex-col'>
+      <PdfControls />
 
       {/* Canvas wrapper — fills container width, measured for fit-to-width scale */}
       <div ref={canvasWrapperRef} className='relative w-full'>

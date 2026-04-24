@@ -26,11 +26,12 @@ export const scriptsRouter = createTRPCRouter({
   listRecent: publicProcedure
     .input(
       z.object({
-        limit: z.number().int().min(1).max(50).default(12),
+        limit: z.number().int().min(1).max(50).default(20),
+        cursor: z.string().datetime().optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      return ctx.scriptsService.listRecent(input.limit)
+      return ctx.scriptsService.listRecent(input.limit, input.cursor)
     }),
 
   listFeatured: publicProcedure.query(async ({ ctx }) => {
@@ -67,9 +68,7 @@ export const scriptsRouter = createTRPCRouter({
     return ctx.scriptsService.update({ ...input, authorId: ctx.user!.id })
   }),
 
-  delete: authenticatedProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .mutation(async ({ input, ctx }) => {
-      return ctx.scriptsService.delete(input.id, ctx.user!.id)
-    }),
+  delete: authenticatedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ input, ctx }) => {
+    return ctx.scriptsService.delete(input.id, ctx.user!.id)
+  }),
 })

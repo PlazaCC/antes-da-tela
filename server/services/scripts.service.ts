@@ -325,25 +325,56 @@ export class ScriptsService {
     } as ScriptDetail
   }
 
-  async listRecent(limit: number) {
-    const { data: rows, error } = await this.supabase
+  async listRecent(limit: number, cursor?: string) {
+    const cursorDate = cursor ? new Date(cursor) : null
+
+    let query = this.supabase
       .from('scripts')
-      .select('id, title, genre, banner_path, cover_path, script_files(page_count), author:users!author_id(id, name)')
+      .select(
+        'id, title, genre, banner_path, cover_path, published_at, script_files(page_count), author:users!author_id(id, name)',
+      )
       .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(limit + 1)
 
-    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    // Apply cursor filter if provided
+    if (cursorDate) {
+      query = query.lt('published_at', cursorDate.toISOString())
+    }
+
+    const { data: rows, error } = await query
+
+    if (error)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: error.message,
+      })
 
     const items = (rows ?? []).map((row) => {
-      const r = row as Record<string, unknown> & { author?: unknown }
+      const r = row as Record<string, unknown> & { author?: unknown; published_at?: string }
       return {
-        ...r,
+        id: r.id,
+        title: r.title,
+        genre: r.genre,
+        banner_path: r.banner_path,
+        cover_path: r.cover_path,
+        script_files: r.script_files,
         author: Array.isArray(r.author) ? r.author[0] : (r.author ?? null),
+        published_at: r.published_at,
       }
-    }) as ScriptListItem[]
+    }) as (ScriptListItem & { published_at?: string })[]
+
     const hasMore = items.length > limit
-    return { items: items.slice(0, limit), hasMore }
+    const returnedItems = items.slice(0, limit)
+
+    // Get the last item's published_at as nextCursor
+    const nextCursor =
+      hasMore && returnedItems.length > 0 ? (returnedItems[returnedItems.length - 1]?.published_at ?? null) : null
+
+    return {
+      items: returnedItems,
+      nextCursor,
+    }
   }
   async listFeatured(): Promise<ScriptListItem[]> {
     const { data, error } = await this.supabase

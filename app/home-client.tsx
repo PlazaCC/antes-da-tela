@@ -3,22 +3,17 @@
 import { FilterPanel } from '@/components/filter-panel'
 import { ScriptCard } from '@/components/script-card/script-card'
 import { ScriptPreviewModal } from '@/components/script-preview-modal'
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import { Skeleton } from '@/components/ui/skeleton'
 import { GENRES } from '@/lib/constants/scripts'
 import { useFilterParams } from '@/lib/hooks/use-filter-params'
 import { cn, getStorageUrl } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { SlidersHorizontalIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export function HomeClient() {
   const trpc = useTRPC()
@@ -33,8 +28,16 @@ export function HomeClient() {
 
   const { data: featured } = useQuery(trpc.scripts.listFeatured.queryOptions())
 
-  const { data: recentData } = useQuery({
-    ...trpc.scripts.listRecent.queryOptions({ limit: 12 }),
+  const {
+    data: recentData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    ...trpc.scripts.listRecent.infiniteQueryOptions(
+      { limit: 20 },
+      { getNextPageParam: (last) => last.nextCursor ?? undefined },
+    ),
     enabled: !isSearchActive,
   })
 
@@ -47,7 +50,27 @@ export function HomeClient() {
     enabled: isSearchActive,
   })
 
-  const displayedScripts = isSearchActive ? (searchData ?? []) : (recentData?.items ?? [])
+  const displayedScripts = isSearchActive ? (searchData ?? []) : (recentData?.pages.flatMap((p) => p.items) ?? [])
+
+  // Infinite scroll sentinel
+  const loaderRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = loaderRef.current
+    if (!el || !hasNextPage || isSearchActive) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasNextPage, fetchNextPage, isSearchActive])
 
   const scriptIds = displayedScripts.map((s) => s.id)
   const { data: ratingsMap } = useQuery({
@@ -116,7 +139,7 @@ export function HomeClient() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className='absolute bottom-6 right-12 flex gap-2'>
+            <div className='absolute bottom-6 right-12 hidden md:flex gap-2'>
               <CarouselPrevious className='static translate-y-0 h-10 w-10 border-border-subtle bg-bg-elevated/40 text-text-primary hover:bg-bg-elevated/60 hover:text-text-primary' />
               <CarouselNext className='static translate-y-0 h-10 w-10 border-border-subtle bg-bg-elevated/40 text-text-primary hover:bg-bg-elevated/60 hover:text-text-primary' />
             </div>
@@ -139,13 +162,13 @@ export function HomeClient() {
 
         {/* Genre filter pills + filter trigger */}
         <div
-          className='flex items-center gap-1.5 md:gap-2 py-2 flex-wrap overflow-hidden'
+          className='flex items-center gap-1.5 md:gap-2 py-2 overflow-x-auto md:flex-wrap md:overflow-hidden pb-1 md:pb-0 snap-x snap-mandatory'
           role='group'
           aria-label='Filtrar por gênero'>
           <button
             onClick={() => setFilterOpen(true)}
             className={cn(
-              'flex items-center gap-1.5 px-2.5 md:px-3 py-1 md:py-1.5 font-mono font-medium text-[11px] md:text-body-small border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
+              'flex items-center gap-1.5 px-2.5 md:px-3 py-1 md:py-1.5 font-mono font-medium text-[11px] md:text-body-small border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base shrink-0 snap-start',
               genres.length > 0 || ageRatings.length > 0
                 ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
                 : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
@@ -158,7 +181,7 @@ export function HomeClient() {
             onClick={() => apply([], ageRatings)}
             aria-pressed={genres.length === 0}
             className={cn(
-              'px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-body-small border font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
+              'px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-body-small border font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base shrink-0 snap-start',
               genres.length === 0
                 ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
                 : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
@@ -172,7 +195,7 @@ export function HomeClient() {
               onClick={() => toggleGenre(g)}
               aria-pressed={genres.includes(g)}
               className={cn(
-                'px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-body-small border font-mono font-medium transition-colors capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
+                'px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-body-small border font-mono font-medium transition-colors capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base shrink-0 snap-start',
                 genres.includes(g)
                   ? 'bg-brand-accent/10 border-brand-accent text-brand-accent'
                   : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary',
@@ -181,7 +204,6 @@ export function HomeClient() {
             </button>
           ))}
         </div>
-
 
         {/* Em destaque */}
         {featured && featured.length > 0 && !isSearchActive && (
@@ -205,11 +227,9 @@ export function HomeClient() {
           </section>
         )}
 
-        {/* Roteiros recentes / resultados */}
+        {/* Resultados - only show title when search is active */}
         <section className='flex flex-col gap-5'>
-          <h2 className='font-display text-heading-2 text-text-primary'>
-            {isSearchActive ? 'Resultados' : 'Roteiros recentes'}
-          </h2>
+          {isSearchActive && <h2 className='font-display text-heading-2 text-text-primary'>Resultados</h2>}
           {displayedScripts.length > 0 ? (
             <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8'>
               {displayedScripts.map((script) => (
@@ -241,6 +261,17 @@ export function HomeClient() {
             </div>
           )}
         </section>
+
+        {/* Infinite scroll sentinel */}
+        <div ref={loaderRef} className='py-6 flex justify-center'>
+          {isFetchingNextPage && (
+            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 lg:gap-8 w-full'>
+              {Array.from({ length: 10 }).map((_, i) => (
+                <Skeleton key={i} className='aspect-[4/5] bg-elevated rounded-sm' />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   )
