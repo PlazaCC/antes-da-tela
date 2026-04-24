@@ -1,74 +1,111 @@
-# poc-22 — Script Preview Modal: design final
+# poc-22 — Modal Preview: audio player no sidebar
 
-**Scope:** Frontend
-**Priority:** P1
-**Status:** pending
+**Scope:** Frontend  
+**Priority:** P3  
+**Status:** pending  
 **Figma:** Modal/Roteiro `51:718`
-**Depends on:** poc-21 (precisa de `cover_path` no schema)
 
 ---
 
-## O que já está feito
+## O que já está feito ✓
 
 - Layout dois painéis (sidebar + main content) ✓
+- Sidebar com cover placeholder `aspect-[4/5]` ou imagem ✓
 - CloseButton, título DM Serif Display ✓
 - AuthorSection com Avatar + FollowButton ✓
-- Tags (gênero, age rating) ✓
-- StatsSection com RatingInfo e distribuição ✓
-- Logline e sinopse ✓
-- Botão "Ler Roteiro" mobile ✓
+- Tags (gênero, age rating), StatsSection, Logline, Sinopse ✓
+- Botão "Ler Roteiro" na sidebar ✓
 
 ---
 
-## Gaps
+## Único gap restante
 
-### 1. Cover image no sidebar do modal
+### Audio player no sidebar do modal
 
-`ModalSidebar` não exibe imagem de capa. O script agora terá `cover_path` (poc-21).
+O Figma mostra o `AudioPlayer` abaixo da capa no sidebar. Atualmente o sidebar (`components/script-preview-modal/sidebar.tsx`) não exibe o player.
 
-**Arquivo:** `components/script-preview-modal/sidebar.tsx`
+**`components/script-preview-modal/sidebar.tsx`:**
 
-- Adicionar prop `coverUrl?: string | null`
-- No topo do sidebar: bloco `aspect-[4/5]` com cover image ou placeholder cinza
-- Se `coverUrl` null: retângulo bg `bg-elevated` com label "Thumbnail 2:3" em text-muted
+1. Adicionar prop `audioUrl?: string | null`
+2. Após o bloco da capa e antes dos metadados, renderizar o player:
 
-### 2. Audio player no sidebar do modal
+```tsx
+{audioUrl && (
+  <div className="w-full">
+    <AudioPlayer src={audioUrl} />
+  </div>
+)}
+```
 
-O audio player existe no leitor (`script-page-client.tsx`) mas **não aparece no modal**. O Figma mostra o player dentro do sidebar abaixo da cover.
+**`components/script-preview-modal/script-preview-modal.tsx`:**
 
-**Arquivo:** `components/script-preview-modal/sidebar.tsx`
+Verificar que o endpoint `scripts.getById` retorna `audio_url` (URL pública já resolvida).
+Se não retornar, adicionar ao select e resolver server-side dentro do tRPC router.
+Passar `audioUrl` como prop para `<ModalSidebar>`.
 
-- Adicionar `audioUrl?: string | null` como prop
-- Abaixo do cover: renderizar `<AudioPlayer src={audioUrl} />` se `audioUrl` presente
-- Se não tiver áudio, omitir o bloco
+---
 
-### 3. Passar `coverUrl` e `audioUrl` ao modal
+## Mobile & Tablet (Figma é desktop-only — especificação adicional)
 
-`ScriptPreviewModal` busca o script via `scripts.getById`. Verificar se o endpoint retorna `cover_path` e `audio_files[0].storage_path`.
+O modal de preview já tem tratamento responsivo básico (dois painéis → coluna única). Garantir que funcione bem em phone e tablet.
 
-**Arquivo:** `server/api/scripts.ts`
+### Modal — tamanho no mobile
 
-- Garantir que `getById` inclui `cover_path` e `audio_files(storage_path)` no select
-- No client: resolver URL pública do Storage para `cover_path` e `audio_files[0].storage_path` antes de passar como props
+Em phone (<768px), o modal deve ocupar quase toda a tela. Verificar que o `DialogContent` ou `SheetContent` use:
 
-> **Atenção (convenção):** URLs do Storage devem ser resolvidas server-side via `supabase.storage.from(bucket).getPublicUrl(path)`. Como o modal é client-side, o endpoint tRPC deve retornar a URL pública já resolvida, não o path bruto.
+```tsx
+className="w-full max-w-full sm:max-w-2xl h-[90dvh] sm:h-auto overflow-y-auto"
+```
+
+Usar `dvh` ao invés de `vh` para respeitar a barra de endereço dinâmica do iOS Safari.
+
+### Layout — empilhado no mobile
+
+No phone, o sidebar (cover, author, stats) deve aparecer **acima** do conteúdo principal (logline, sinopse). Nenhum `flex-row` fixo sem breakpoint:
+
+```tsx
+<div className="flex flex-col md:flex-row h-full">
+  <ModalSidebar ... />   {/* aparece primeiro no mobile */}
+  <ModalMain ... />
+</div>
+```
+
+### AudioPlayer — empilhado abaixo da cover no mobile
+
+No layout de coluna única do mobile, o `<AudioPlayer>` fica naturalmente abaixo da cover (pois está no sidebar que vem primeiro). Garantir que o player tenha `w-full` para ocupar a largura disponível na coluna.
+
+### Botão de fechar — touch target
+
+O botão de fechar o modal deve ter área mínima de toque de 44×44px:
+
+```tsx
+<button className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center ...">
+  <X className="w-4 h-4" />
+</button>
+```
+
+### Botão "Ler Roteiro" — touch target
+
+O CTA principal deve ter `min-h-[44px]`. O shadcn `<Button>` padrão já tem altura adequada, mas confirmar que não foi reduzido via `size="sm"`.
 
 ---
 
 ## Arquivos a modificar
 
-| Arquivo                                                    | Mudança                                                                   |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `server/api/scripts.ts`                                    | `getById` retorna `cover_url` e `audio_url` (URLs públicas já resolvidas) |
-| `components/script-preview-modal/sidebar.tsx`              | Cover placeholder + AudioPlayer se `audioUrl` presente                    |
-| `components/script-preview-modal/script-preview-modal.tsx` | Passar `coverUrl` e `audioUrl` para `ModalSidebar`                        |
+| Arquivo | Mudança |
+|---|---|
+| `components/script-preview-modal/sidebar.tsx` | Prop `audioUrl` + renderizar `<AudioPlayer>` abaixo da cover com `w-full` |
+| `components/script-preview-modal/script-preview-modal.tsx` | Buscar e passar `audioUrl`, verificar `h-[90dvh]` no mobile, botão fechar ≥44px |
+| `server/api/scripts.ts` | Se necessário: `getById` retornar `audio_url` resolvido |
 
 ---
 
 ## Acceptance criteria
 
-- [ ] Modal exibe cover placeholder 2:3 no sidebar; se script tem capa mostra a imagem
-- [ ] Modal exibe AudioPlayer no sidebar se script tem áudio; oculto se não tem
-- [ ] `getById` retorna URLs públicas (não paths brutos do Storage)
-- [ ] Layout dois painéis mantido em ≥ 768px; painel único empilhado em < 768px
+- [ ] Sidebar do modal exibe `<AudioPlayer>` abaixo da capa quando script tem áudio
+- [ ] Sem áudio: bloco ausente, sem espaço vazio
+- [ ] Mobile (<768px): modal ocupa `h-[90dvh]`, layout empilhado (sidebar primeiro)
+- [ ] Mobile: botão de fechar com área ≥44×44px
+- [ ] Mobile: AudioPlayer com `w-full` na coluna única
+- [ ] Desktop (≥768px): dois painéis lado a lado, sidebar fixo
 - [ ] `yarn build` sem erros de tipo

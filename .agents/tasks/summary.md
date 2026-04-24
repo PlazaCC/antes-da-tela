@@ -1,54 +1,92 @@
-# Task Summary — 2026-04-22 (revisado)
+# Task Summary — 2026-04-23 (revisado)
 
-## Phase 1 (poc-01 to poc-20): COMPLETE ✓
+## Fase 1 (poc-01 a poc-20): COMPLETO ✓
 
 ---
 
-## Phase 2 — Design final (poc-21 to poc-26)
+## Fase 2 — Design final (poc-21 a poc-26)
 
-### Prioridades e dependências
+### Telas aprovadas — referência de qualidade
+
+As seguintes telas foram implementadas além do wireframe do Figma e definem o padrão visual e de responsividade para todas as próximas:
+
+| Tela | Rota | Status |
+|---|---|---|
+| Home | `/` | ✓ Aprovada |
+| Perfil público | `/profile/[userId]` | ✓ Aprovada |
+| Editar Perfil | `/profile/edit` | ✓ Aprovada |
+| Dashboard | `/profile/dashboard` | ✓ Aprovada |
+| Meus Roteiros | `/profile/scripts` | ✓ Aprovada |
+| Upload Wizard | `/publish` | ✓ Aprovada |
+
+**O que diferencia as telas aprovadas do wireframe:**
+- Hero carousel com gradiente cinematográfico e tipografia editorial
+- Cover placeholder consistente (`aspect-[4/5]`) em todos os cards
+- Breakpoints fluidos com Tailwind (mobile-first)
+- Uso de `bg-elevated/40` + `border-border-subtle` para profundidade sutil
+- Ações do autor integradas no layout sem CTA separado
+
+---
+
+### Nota global — Mobile-first obrigatório
+
+> **O Figma cobre apenas 1440px (desktop).** Toda tela pendente deve ser implementada mobile-first: phone (<768px), tablet (768–1023px), desktop (≥1024px). Cada task file inclui uma seção "Mobile & Tablet" com specs específicas derivadas das telas aprovadas + UI/UX Pro Max guidelines.
+>
+> Regras globais para todas as telas:
+> - Touch targets ≥44×44px em todos os elementos interativos
+> - `text-base` (16px mínimo) em todos os inputs para evitar zoom automático no iOS
+> - `min-h-dvh` ao invés de `min-h-screen` (respeita viewport dinâmica do iOS Safari)
+> - `env(safe-area-inset-bottom)` em qualquer elemento fixo no rodapé
+> - Nunca usar `hover` como único indicador de interatividade
+> - Sem scroll aninhado no mobile
+
+### Prioridades — tarefas pendentes
 
 ```
-poc-26 (Dashboard: Edição e Exclusão de Roteiros) — P0, PRÓXIMA A EXECUTAR
-poc-25 (Upload/Edit: cover + banner) — CONCLUÍDO ✓
-  └── poc-21 (Home: cover thumbnail + "Em Alta")
-        └── poc-22 (Modal: cover + audio no sidebar)
-
-poc-24 (PDF Reader mobile)  — independente
-poc-23 (Search/Filter)      — independente, P2
+P0 — poc-24: Tela do Roteiro (redesign completo + mobile layout)
+P1 — poc-21: Home (infinite scroll + remover título "Roteiros recentes" + mobile grid)
+P2 — poc-23: Busca (alinhamento ao Figma + touch targets + mobile sheet)
+P3 — poc-22: Modal Preview (audio player no sidebar + mobile layout)
+P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA + UX)
 ```
 
 ### Status das tasks
 
-| Task | Arquivo | Prioridade | Status | Escopo real |
+| Task | Arquivo | Prioridade | Status | Escopo |
 |---|---|---|---|---|
-25: | poc-26 — Dashboard + Profile | `poc-26-profile-flow-final-design.md` | **P0** | pending | **Edição/Exclusão de roteiros e capas**, Depar ScriptCards |
-26: | poc-25 — Upload: capa e banner | `poc-25-upload-wizard-final-design.md` | **P0** | done | Schema migration + upload de capa e banner no FileStep |
-| poc-21 — Home: "Em Alta" + cover | `poc-21-home-final-design.md` | **P1** | pending | Seção hot (JS/POC) + ScriptCard cover thumbnail |
-| poc-22 — Modal: cover + player | `poc-22-script-modal-final-design.md` | **P1** | pending | Cover placeholder + AudioPlayer no sidebar |
-| poc-24 — PDF Reader mobile | `poc-24-pdf-reader-final-design.md` | **P1** | pending | Breadcrumbs + player fixo mobile + comments sheet |
-| poc-23 — Search/Filter depar | `poc-23-search-filter-final-design.md` | **P2** | pending | 2 ajustes menores (link resultados + apply fix) |
+| poc-24 — Tela do Roteiro | `poc-24-pdf-reader-final-design.md` | **P0** | pending | Hero banner, breadcrumbs, sinopse sempre visível, mobile layout completo |
+| poc-21 — Home: infinite scroll | `poc-21-home-final-design.md` | **P1** | pending | Infinite scroll + remover "Roteiros recentes" + grid mobile 2/3/4/5 cols |
+| poc-23 — Busca: Figma align | `poc-23-search-filter-final-design.md` | **P2** | pending | Cards com cover, link "ver todos", fix apply filter, touch targets, dvh |
+| poc-22 — Modal: audio | `poc-22-script-modal-final-design.md` | **P3** | pending | AudioPlayer no sidebar + mobile full-screen + touch targets |
+| poc-25 — Upload Wizard | `poc-25-upload-wizard-figma-align.md` | **P4** | pending | PreviewPanel ao vivo, heading por step, logline counter, cover na revisão, mobile sticky CTA |
 
-### O que já está feito em cada tela
+### Completo
+
+| Task | Descrição | Status |
+|---|---|---|
+| poc-26 | Dashboard + Profile flow | ✓ DONE |
+
+---
+
+## Estado atual por tela
 
 | Tela | Implementado | Falta |
 |---|---|---|
-| Home | Genre chips, grid, featured, filtros | Cover no ScriptCard, seção "Em Alta" |
-| Script Modal | 2 painéis, author, stats, tags | Cover placeholder, audio no sidebar |
-| Search Sheet | Bottom sheet com busca + resultados | Link "ver todos os resultados" |
-| Filter Panel | Gênero + classificação + checkboxes | Apply antes de fechar |
-| PDF Reader | Viewer, controles, comments, reactions | Breadcrumbs, mobile player fixo, comments sheet |
-| Upload Wizard | 4 steps completos, PDF + audio, cover + banner | - |
-| Perfil público | Banner, avatar, stats, FollowButton, grid | Cover no ScriptCard (dep poc-21) |
-43: | Editar Perfil | Nav sidebar, avatar upload, nome/bio | - |
-| Dashboard | Sidebar, MetricCards, tabela | **Ações de Editar e Excluir Roteiro** |
+| Home | Carousel banners, genre chips, grid, featured, filtros, cover nos cards | Infinite scroll, remover título "Roteiros recentes" |
+| Tela do Roteiro | Banner (sutil), cover, título, logline, autor, rating, PDF viewer, comments, audio, ações | Hero banner cinematic, breadcrumbs, sinopse visível, mobile layout |
+| Modal Preview | 2 painéis, cover, author, stats, tags, sidebar metadata | AudioPlayer no sidebar |
+| Search Sheet | Bottom sheet, input, resultados texto | Cards com cover, link "ver todos" |
+| Filter Panel | Checkboxes gênero + classificação | Fix: apply antes de fechar |
+| Upload Wizard | 4 steps completos, PDF + audio + cover + banner | — |
+| Perfil público | Banner, avatar, stats, tabs, grid | — |
+| Editar Perfil | Nav sidebar, avatar upload, nome/bio, form | — |
+| Dashboard | Sidebar, MetricCards, tabela, ações editar/excluir | — |
 
 ---
 
 ## Figma references
 
 - **File key:** `iUb8odefGSZiHz4KjuzX1M`
-- **MCP tool:** `mcp__Framelink_Figma_MCP__get_figma_data(fileKey, nodeId)`
 - Full component map: `.agents/figma.meta.json`
 - Design tokens: `.agents/design-system.meta.json`
 

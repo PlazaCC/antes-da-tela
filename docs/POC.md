@@ -48,7 +48,7 @@ Secundário: produtores, diretores, leitores de storytelling, críticos e curado
    - implementação preferida: `pdf.js` com import dinâmico e render por demanda
 
 3. Sistema de registro e perfis
-   - cadastro: nome, email, senha
+   - cadastro/login via Google OAuth (sem e-mail/senha na POC)
    - perfis simplificados para POC (nome, bio, avatar, lista de roteiros)
 
 4. Comentários por página
@@ -138,14 +138,24 @@ Aprendizado chave: comentários ancorados a trechos/partes geram alto engajament
 
 ---
 
-# 13. Próximos passos para implementação (prioridade)
+# 13. Estado atual e próximos passos (atualizado 2026-04-23)
 
-1. Definir schema Drizzle para `scripts`, `script_files`, `comments`, `ratings`, `audio_files`.
-2. Implementar fluxo de upload (preferir upload direto cliente → Supabase Storage com políticas autenticadas).
-3. Implementar viewer PDF básico com `pdfjs-dist` (import dinâmico, render por demanda).
-4. Implementar comentários por página: DB + API (tRPC) + UI.
-5. Criar routers tRPC de domínio e testes de integração básicos.
-6. Fechar decisão de infraestrutura (RFC-002) e documentar ADR correspondente.
+## Implementado ✓
+
+- Schema Drizzle completo: `scripts`, `script_files`, `audio_files`, `comments`, `comment_reactions`, `ratings`, `users`
+- Upload de PDF, áudio, capa (2:3) e banner — via Supabase Storage, upload direto do cliente
+- Viewer PDF com `pdfjs-dist` (import dinâmico), navegação e zoom
+- Comentários por página com reações (emoji)
+- Avaliações por estrela (1-5)
+- Auth: Supabase Auth SSR, login/cadastro via Google OAuth (sem e-mail/senha na POC)
+- Telas aprovadas: Home, Perfil público, Editar Perfil, Dashboard, Meus Roteiros, Upload Wizard
+
+## Pendente — prioridade de execução
+
+1. **P0 — Tela do Roteiro:** redesign completo — hero banner cinematográfico, breadcrumbs, sinopse sempre visível, mobile layout (audio fixo + comments Sheet). Ver `.agents/tasks/poc-24-pdf-reader-final-design.md`.
+2. **P1 — Home:** infinite scroll para a grid de roteiros, remover título "Roteiros recentes". Ver `.agents/tasks/poc-21-home-final-design.md`.
+3. **P2 — Busca:** alinhamento ao Figma — cards com cover nos resultados, link "ver todos", fix "Aplicar Filtros". Ver `.agents/tasks/poc-23-search-filter-final-design.md`.
+4. **P3 — Modal Preview:** AudioPlayer no sidebar. Ver `.agents/tasks/poc-22-script-modal-final-design.md`.
 
 ---
 

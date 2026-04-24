@@ -50,14 +50,19 @@ avatar, badge, button, card, checkbox, comment, dialog, drag-zone, dropdown-menu
 Estado de implementação (essencial)
 
 - Implementado:
-  - Infra e integrações básicas (cliente Supabase, Drizzle configurado, tRPC handler ativo).
-  - Componentes UI iniciais e página de integrações para verificar Sentry/PostHog/Resend.
-  - Dependência `pdfjs-dist` já presente em `package.json` (viewer planejado).
-- Pendente / Alta prioridade:
-  - Modelagem e migrations Drizzle para entidades `scripts`/`script_files`, `comments`, `ratings`, `audio_files`.
-  - Upload de arquivos (PDF/audio) integrado com Supabase Storage (política de bucket, upload direto do cliente recomendado).
-  - Viewer PDF com `pdf.js` (import dinâmico via `next/dynamic`) e ancoragem de comentários por número de página.
-  - Routers tRPC de domínio: `scripts`, `comments`, `uploads`.
+  - Todas as features centrais da POC: upload de PDF/audio/capa/banner, viewer PDF, comentários por página com reações, avaliações por estrela.
+  - Routers tRPC: `scripts`, `comments`, `ratings`, `uploads`, `users`.
+  - Schema Drizzle completo para `scripts`, `script_files`, `audio_files`, `comments`, `comment_reactions`, `ratings`, `users`.
+  - Auth com Supabase SSR (`@supabase/ssr`) — login/cadastro via Google OAuth (sem autenticação por e-mail/senha na POC).
+  - Telas aprovadas e responsivas: Home, Perfil público, Editar Perfil, Dashboard, Meus Roteiros, Upload Wizard.
+  - Componentes UI: ScriptCard (com cover), AudioPlayer, PDFViewer, CommentsSidebar, ScriptPreviewModal, SearchSheet, FilterPanel, NavBar, entre outros.
+- Nota sobre mobile-first: O Figma cobre apenas 1440px (desktop). Todas as telas pendentes devem ser implementadas mobile-first (phone <768px, tablet 768–1023px, desktop ≥1024px). Cada task file inclui seção "Mobile & Tablet" com specs. Regras globais: touch targets ≥44px, `text-base` em inputs (evitar zoom iOS), `min-h-dvh`, `env(safe-area-inset-bottom)` em fixed bars, sem scroll aninhado no mobile.
+- Pendente / Alta prioridade (ver `.agents/tasks/summary.md` para detalhes):
+  - **P0:** Tela do Roteiro — redesign completo (hero banner, breadcrumbs, sinopse, mobile layout com safe-area, PDF touch controls).
+  - **P1:** Home — infinite scroll, remover "Roteiros recentes", grid responsiva 2/3/4/5 colunas.
+  - **P2:** Busca — cards com cover, link "ver todos", fix apply filter, touch targets, dvh.
+  - **P3:** Modal Preview — AudioPlayer no sidebar, mobile full-screen, touch targets.
+  - **P4:** Upload Wizard — PreviewPanel ao vivo, heading por step, logline counter, mobile sticky CTA, inputs sem zoom iOS.
 
 Como rodar / comandos úteis
 
@@ -102,10 +107,16 @@ Checklist rápida para agentes antes de criar/alterar código
 - Setup: `docs/SETUP.md`
 - Dev integrations: `app/development/integrations/page.tsx`
 
-Próximo passo que posso executar (se autorizado)
+Próxima task a executar
 
-- Gerar um esqueleto de routers tRPC (`server/api/scripts.ts`, `server/api/comments.ts`) e um modelo Drizzle inicial para `scripts` e `comments` (sem aplicar migrations). Pergunte se devo prosseguir.
+Ver `.agents/tasks/summary.md` para prioridades e escopo detalhado. A próxima a executar é:
+
+**P0 — poc-24:** Redesign completo da tela do Roteiro (`app/scripts/[id]/script-page-client.tsx`).
+- Hero banner cinematográfico (h-[280px] md:h-[420px], gradiente, título sobreposto)
+- Breadcrumbs "← Home / Título do Roteiro"
+- Sinopse sempre visível abaixo dos metadados
+- Mobile: audio player fixo no rodapé + comments como Sheet
 
 ---
 
-Documento gerado automaticamente em 2026-04-14 por agente — mantenha sincronizado com ADRs e RFCs.
+Documento atualizado em 2026-04-23 — mantenha sincronizado com `.agents/tasks/summary.md`.
