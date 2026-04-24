@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export const AUDIO_SPEEDS = [0.75, 1, 1.25, 1.5, 2] as const
 export type AudioSpeed = (typeof AUDIO_SPEEDS)[number]
 
-export function useAudio(src: string) {
+export function useAudio() {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -15,7 +15,9 @@ export function useAudio(src: string) {
     const audio = audioRef.current
     if (!audio) return
     const onTime = () => setCurrentTime(audio.currentTime)
-    const onDur = () => { if (isFinite(audio.duration)) setDuration(audio.duration) }
+    const onDur = () => {
+      if (isFinite(audio.duration)) setDuration(audio.duration)
+    }
     const onEnd = () => setPlaying(false)
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('durationchange', onDur)
@@ -30,8 +32,13 @@ export function useAudio(src: string) {
   const togglePlay = useCallback(() => {
     const audio = audioRef.current
     if (!audio) return
-    if (playing) { audio.pause(); setPlaying(false) }
-    else { void audio.play(); setPlaying(true) }
+    if (playing) {
+      audio.pause()
+      setPlaying(false)
+    } else {
+      void audio.play()
+      setPlaying(true)
+    }
   }, [playing])
 
   const cycleSpeed = useCallback(() => {

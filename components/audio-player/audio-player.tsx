@@ -8,7 +8,9 @@ import { useState } from 'react'
 
 function formatTime(s: number) {
   if (!isFinite(s) || isNaN(s)) return '0:00'
-  return `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`
+  return `${Math.floor(s / 60)}:${Math.floor(s % 60)
+    .toString()
+    .padStart(2, '0')}`
 }
 
 interface Props {
@@ -17,8 +19,20 @@ interface Props {
 }
 
 export function AudioPlayer({ src, title }: Props) {
-  const { audioRef, playing, currentTime, duration, volume, speed, progress, togglePlay, cycleSpeed, seekTo, seekBy, setVolume } =
-    useAudio(src)
+  const {
+    audioRef,
+    playing,
+    currentTime,
+    duration,
+    volume,
+    speed,
+    progress,
+    togglePlay,
+    cycleSpeed,
+    seekTo,
+    seekBy,
+    setVolume,
+  } = useAudio()
   const { barRef, onMouseDown, onTouchStart, onTouchMove } = useProgressScrubber(seekTo)
   const [hovered, setHovered] = useState(false)
 
@@ -68,7 +82,6 @@ export function AudioPlayer({ src, title }: Props) {
           'grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 w-full max-w-4xl mx-auto transition-[padding] duration-300 delay-100',
           expanded ? 'py-3' : 'py-1.5',
         )}>
-
         {/* Left: title */}
         <div className='flex flex-col min-w-0 overflow-hidden'>
           <span
@@ -78,9 +91,7 @@ export function AudioPlayer({ src, title }: Props) {
             )}>
             Escuta guiada
           </span>
-          {title && (
-            <span className='font-display text-[13px] text-text-primary truncate leading-snug'>{title}</span>
-          )}
+          {title && <span className='font-display text-[13px] text-text-primary truncate leading-snug'>{title}</span>}
         </div>
 
         {/* Center: always-visible controls — fixed layout so play button never shifts */}
@@ -139,7 +150,9 @@ export function AudioPlayer({ src, title }: Props) {
               'font-mono text-[11px] text-text-muted tabular-nums whitespace-nowrap transition-all duration-300 delay-100 overflow-hidden',
               expanded ? 'max-w-24 opacity-100' : 'max-w-0 opacity-0',
             )}>
-            {formatTime(currentTime)}<span className='text-text-muted/40 mx-0.5'>/</span>{formatTime(duration)}
+            {formatTime(currentTime)}
+            <span className='text-text-muted/40 mx-0.5'>/</span>
+            {formatTime(duration)}
           </span>
 
           <button

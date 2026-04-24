@@ -373,6 +373,7 @@ export class ScriptsService {
 
     return {
       items: returnedItems,
+      hasMore,
       nextCursor,
     }
   }
