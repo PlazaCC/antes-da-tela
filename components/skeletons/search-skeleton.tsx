@@ -2,24 +2,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export function SearchSkeleton() {
   return (
-    <main className='max-w-[1140px] mx-auto px-5 pt-8 pb-16'>
+    <main className='w-full mx-auto px-2 pb-16'>
       <div className='flex flex-col gap-5'>
-        <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-          <Skeleton className='h-12 w-full max-w-[420px] rounded-full bg-elevated' />
-          <div className='flex flex-wrap gap-3'>
-            {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={index} className='h-10 w-28 rounded-full bg-elevated' />
-            ))}
-          </div>
-        </div>
-
         <div className='space-y-3'>
-          <Skeleton className='h-6 w-1/3 rounded-full bg-elevated' />
-          <div className='flex flex-wrap gap-2'>
-            {Array.from({ length: 5 }).map((_, index) => (
-              <Skeleton key={index} className='h-8 w-20 rounded-full bg-elevated' />
-            ))}
-          </div>
+          <Skeleton className='h-6 w-[220px] rounded-full bg-elevated' />
         </div>
 
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6'>
