@@ -10,7 +10,12 @@ import { PdfControls } from './pdf-controls'
 import { PDFViewerError } from './pdf-viewer-error'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
-pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC
+// Per react-pdf docs, the worker must be configured in the same module where
+// Document/Page are imported and rendered. This avoids default value overwrite
+// caused by module execution order in Next.js.
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC
+}
 
 type PDFViewerProps = {
   url: string
