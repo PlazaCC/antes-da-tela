@@ -1,6 +1,7 @@
 'use client'
 
 import { useContainerWidth } from '@/lib/hooks/use-container-width'
+import { PDFJS_WORKER_SRC } from '@/lib/utils/pdf-worker'
 import type { PDFPageProxy } from 'pdfjs-dist'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
@@ -9,7 +10,7 @@ import { PdfControls } from './pdf-controls'
 import { PDFViewerError } from './pdf-viewer-error'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
+pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC
 
 type PDFViewerProps = {
   url: string
@@ -63,12 +64,6 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     const toolbarHeight = pageToolbar?.getBoundingClientRect().bottom ?? 0
     const headerHeight = appHeader?.getBoundingClientRect().bottom ?? 0
     const topOverlayHeight = Math.max(toolbarHeight, headerHeight)
-
-    console.log('[PDFViewer] topOverlayHeight', {
-      toolbarHeight,
-      headerHeight,
-      topOverlayHeight,
-    })
 
     return topOverlayHeight
   }, [])

@@ -64,7 +64,7 @@ export function CommentsSidebar({ scriptId, currentUserId, title, synopsis, logl
   const hasAboutContent = !!(synopsis || logline)
 
   return (
-    <aside className='flex flex-col h-full bg-surface min-h-[calc(100vh-80px) pb-28]'>
+    <aside className='flex flex-col h-full bg-surface min-h-[calc(100vh-80px)] pb-8'>
       {/* Tab navigation */}
       <div className='flex shrink-0 border-b border-border-subtle'>
         {(['comments', 'about'] as Tab[]).map((tab) => (
