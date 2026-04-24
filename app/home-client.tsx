@@ -3,6 +3,7 @@
 import { FilterPanel } from '@/components/filter-panel'
 import { ScriptCard } from '@/components/script-card/script-card'
 import { ScriptPreviewModal } from '@/components/script-preview-modal'
+import { SearchSkeleton } from '@/components/skeletons'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { Skeleton } from '@/components/ui/skeleton'
 import { GENRES } from '@/lib/constants/scripts'
@@ -41,7 +42,7 @@ export function HomeClient() {
     enabled: !isSearchActive,
   })
 
-  const { data: searchData } = useQuery({
+  const { data: searchData, isFetching: isSearchFetching } = useQuery({
     ...trpc.scripts.search.queryOptions({
       query: search || undefined,
       genres: genres.length > 0 ? genres : undefined,
@@ -50,6 +51,7 @@ export function HomeClient() {
     enabled: isSearchActive,
   })
 
+  const showSearchSkeleton = isSearchActive && !searchData && isSearchFetching
   const displayedScripts = isSearchActive ? (searchData ?? []) : (recentData?.pages.flatMap((p) => p.items) ?? [])
 
   // Infinite scroll sentinel
@@ -78,7 +80,9 @@ export function HomeClient() {
     enabled: scriptIds.length > 0,
   })
 
-  const { data: trendingBanners } = useQuery(trpc.scripts.listTrendingBanners.queryOptions())
+  const { data: trendingBanners, isLoading: isTrendingBannersLoading } = useQuery(
+    trpc.scripts.listTrendingBanners.queryOptions(),
+  )
 
   return (
     <main className='w-full mx-auto'>
@@ -91,7 +95,7 @@ export function HomeClient() {
       />
       <FilterPanel open={filterOpen} onOpenChange={setFilterOpen} />
       {/* Banners em Alta Carousel */}
-      {trendingBanners && trendingBanners.length > 0 && (
+      {trendingBanners && trendingBanners.length > 0 ? (
         <section className='w-full'>
           <Carousel
             opts={{
@@ -145,7 +149,9 @@ export function HomeClient() {
             </div>
           </Carousel>
         </section>
-      )}
+      ) : isTrendingBannersLoading ? (
+        <Skeleton className='h-[300px] md:h-[552px]  w-full' />
+      ) : null}
 
       <div className='w-full px-4 flex flex-col gap-8 md:gap-12 pb-16 pt-8'>
         {/* Hero headline (Commented out as requested) */}
@@ -228,39 +234,43 @@ export function HomeClient() {
         )}
 
         {/* Resultados - only show title when search is active */}
-        <section className='flex flex-col gap-5'>
-          {isSearchActive && <h2 className='font-display text-heading-2 text-text-primary'>Resultados</h2>}
-          {displayedScripts.length > 0 ? (
-            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8'>
-              {displayedScripts.map((script) => (
-                <ScriptCard
-                  key={script.id}
-                  title={script.title}
-                  author={script.author?.name ?? ''}
-                  genre={script.genre ?? ''}
-                  rating={ratingsMap?.[script.id]?.average ?? null}
-                  ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
-                  pages={script.script_files?.[0]?.page_count ?? null}
-                  coverUrl={getStorageUrl('avatars', script.cover_path)}
-                  onPreview={() => setPreviewId(script.id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className='flex flex-col gap-2 py-8'>
-              <p className='text-text-secondary text-body-default'>
-                {isSearchActive ? 'Nenhum roteiro encontrado.' : 'Ainda não há roteiros publicados.'}
-              </p>
-              {isSearchActive && (
-                <button
-                  onClick={clearFilters}
-                  className='text-brand-accent text-body-small hover:underline underline-offset-4 w-fit'>
-                  Limpar filtros
-                </button>
-              )}
-            </div>
-          )}
-        </section>
+        {showSearchSkeleton ? (
+          <SearchSkeleton />
+        ) : (
+          <section className='flex flex-col gap-5'>
+            {isSearchActive && <h2 className='font-display text-heading-2 text-text-primary'>Resultados</h2>}
+            {displayedScripts.length > 0 ? (
+              <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8'>
+                {displayedScripts.map((script) => (
+                  <ScriptCard
+                    key={script.id}
+                    title={script.title}
+                    author={script.author?.name ?? ''}
+                    genre={script.genre ?? ''}
+                    rating={ratingsMap?.[script.id]?.average ?? null}
+                    ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
+                    pages={script.script_files?.[0]?.page_count ?? null}
+                    coverUrl={getStorageUrl('avatars', script.cover_path)}
+                    onPreview={() => setPreviewId(script.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className='flex flex-col gap-2 py-8'>
+                <p className='text-text-secondary text-body-default'>
+                  {isSearchActive ? 'Nenhum roteiro encontrado.' : 'Ainda não há roteiros publicados.'}
+                </p>
+                {isSearchActive && (
+                  <button
+                    onClick={clearFilters}
+                    className='text-brand-accent text-body-small hover:underline underline-offset-4 w-fit'>
+                    Limpar filtros
+                  </button>
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Infinite scroll sentinel */}
         <div ref={loaderRef} className='py-6 flex justify-center'>

@@ -11,7 +11,9 @@ export function PdfControls() {
   const increaseZoom = () => setZoom(Math.min(3.0, Math.round((zoom + 0.25) * 4) / 4))
 
   return (
-    <div className='sticky top-14 z-10 flex items-center gap-2 px-3 py-2 bg-bg-base/90 backdrop-blur-sm border-b border-border-subtle'>
+    <div
+      id='pdf-toolbar'
+      className='sticky top-14 z-10 flex items-center gap-2 px-3 py-2 bg-bg-base/90 backdrop-blur-sm border-b border-border-subtle'>
       {/* Page navigation */}
       <div className='bg-elevated border border-border-subtle rounded-sm flex items-center'>
         <button

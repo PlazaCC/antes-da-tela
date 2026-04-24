@@ -5,6 +5,7 @@ import { CommentsSheet } from '@/components/comments/comments-sheet'
 import { PDFViewer } from '@/components/pdf-viewer'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 import { ScriptPageMetadata } from '@/components/script-page/script-page-metadata'
+import { SynopsisSpoiler } from '@/components/synopsis/SynopsisSpoiler'
 import type { TagVariant } from '@/components/tag/tag'
 import {
   AlertDialog,
@@ -156,7 +157,7 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
       {pdfUrl && script.synopsis && (
         <div className='max-w-6xl mx-auto w-full px-5 pb-6 border-t border-border-subtle pt-6'>
           <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider mb-3'>Sinopse</h3>
-          <p className='text-body-default text-text-secondary leading-relaxed max-w-3xl'>{script.synopsis}</p>
+          <SynopsisSpoiler text={script.synopsis} collapsedHeight={144} />
         </div>
       )}
 
@@ -180,8 +181,10 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
             <CommentsSidebar
               scriptId={script.id}
               currentUserId={currentUserId}
+              title={script.title}
               synopsis={script.synopsis ?? null}
               logline={script.logline ?? null}
+              coverUrl={coverUrl ?? null}
             />
           </div>
 
@@ -198,9 +201,7 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
               <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider mb-3'>
                 Sinopse
               </h2>
-              <p className='text-body-default text-text-primary leading-relaxed whitespace-pre-wrap'>
-                {script.synopsis}
-              </p>
+              <p className='text-body-default text-text-primary leading-relaxed'>{script.synopsis}</p>
             </div>
           )}
 

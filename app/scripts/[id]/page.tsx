@@ -1,3 +1,4 @@
+import { ScriptPageSkeleton } from '@/components/skeletons'
 import { appRouter } from '@/server/api/root'
 import { createTRPCContext } from '@/trpc/init'
 import type { Metadata } from 'next'
@@ -74,12 +75,7 @@ export default async function ScriptPage({ params }: Props) {
   const { script, pdfUrl, audioUrl, bannerUrl, coverUrl, currentUserId } = await getPageData(id)
 
   return (
-    <Suspense
-      fallback={
-        <div className='min-h-screen bg-bg-base flex items-center justify-center'>
-          <p className='text-text-secondary font-mono text-label-mono-default'>Carregando…</p>
-        </div>
-      }>
+    <Suspense fallback={<ScriptPageSkeleton />}>
       <ScriptPageClient
         script={script}
         pdfUrl={pdfUrl}

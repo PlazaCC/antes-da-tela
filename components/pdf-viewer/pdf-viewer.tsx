@@ -25,6 +25,11 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 })
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const dragStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null)
+  // When the page changes, reset the visible PDF viewport to the top-center while keeping
+  // the current zoom level intact. The vertical movement is performed by native body
+  // scrolling, so we reset the browser scroll position relative to the PDF wrapper and
+  // not by changing zoom or the PDF content itself.
+  const pageResetRef = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
 
   const contentWidth = useMemo(() => (containerWidth > 0 ? containerWidth * zoom : 0), [containerWidth, zoom])
@@ -39,7 +44,34 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     setTotalPages(0)
     setLoading(true)
     setPan({ x: 0, y: 0 })
+    pageResetRef.current = true
   }, [url, setCurrentPage, setLoading, setTotalPages])
+
+  useEffect(() => {
+    // Mark the next page render as needing a viewport reset. This preserves zoom state
+    // across page changes while ensuring the user lands at the top of the PDF page.
+    pageResetRef.current = true
+  }, [currentPage])
+
+  const getTopOverlayHeight = useCallback(() => {
+    if (typeof document === 'undefined') return 0
+
+    // Use the page toolbar element by id to simplify sticky overlay height detection.
+    const pageToolbar = document.getElementById('pdf-toolbar')
+    const appHeader = document.querySelector('header')
+
+    const toolbarHeight = pageToolbar?.getBoundingClientRect().bottom ?? 0
+    const headerHeight = appHeader?.getBoundingClientRect().bottom ?? 0
+    const topOverlayHeight = Math.max(toolbarHeight, headerHeight)
+
+    console.log('[PDFViewer] topOverlayHeight', {
+      toolbarHeight,
+      headerHeight,
+      topOverlayHeight,
+    })
+
+    return topOverlayHeight
+  }, [])
 
   useEffect(() => {
     const containerHeight = containerRef.current?.clientHeight ?? 0
@@ -109,10 +141,32 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     [setLoading, setTotalPages],
   )
 
-  const onPageLoadSuccess = useCallback((page: PDFPageProxy) => {
-    const viewport = page.getViewport({ scale: 1 })
-    setPageSize({ width: viewport.width, height: viewport.height })
-  }, [])
+  const onPageLoadSuccess = useCallback(
+    (page: PDFPageProxy) => {
+      const viewport = page.getViewport({ scale: 1 })
+      setPageSize({ width: viewport.width, height: viewport.height })
+
+      if (pageResetRef.current && containerWidth > 0) {
+        // The PDF wrapper can be horizontally wider than the viewport when zoomed in.
+        // Keep the current zoom, reset the PDF view to the top, and center horizontally.
+        const minX = Math.min(containerWidth - contentWidth, 0)
+        const centerX = contentWidth > containerWidth ? Math.max((containerWidth - contentWidth) / 2, minX) : 0
+        setPan({ x: centerX, y: 0 })
+
+        // Vertical PDF scroll is handled by the page/body scroll. Compute the exact
+        // target scroll position from the wrapper top and subtract the combined height
+        // of sticky overlays (header + toolbar) so the PDF page begins below them.
+        if (containerRef.current) {
+          const overlayHeight = getTopOverlayHeight()
+          const targetScroll = window.scrollY + containerRef.current.getBoundingClientRect().top - overlayHeight
+          window.scrollTo({ top: targetScroll })
+        }
+
+        pageResetRef.current = false
+      }
+    },
+    [containerWidth, contentWidth, getTopOverlayHeight],
+  )
 
   const onDocumentLoadError = useCallback(
     (error: Error) => {
@@ -130,7 +184,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     <div className='flex flex-col'>
       <PdfControls />
 
-      <div ref={containerRef} className='relative w-full overflow-x-auto overflow-y-hidden'>
+      <div ref={containerRef} className='relative w-full overflow-x-auto overflow-y-hidden md:overflow-x-hidden'>
         {isLoading && (
           <div className='absolute inset-0 z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm min-h-[400px]'>
             <div className='flex flex-col items-center gap-3'>

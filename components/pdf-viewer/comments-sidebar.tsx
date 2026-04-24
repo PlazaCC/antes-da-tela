@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button'
 import { REACTION_EMOJIS, type ReactionEmoji } from '@/lib/constants/reactions'
 import { useCommentActions } from '@/lib/hooks/use-comment-actions'
 import type { CommentWithAuthor, ReactionSummary } from '@/lib/types'
-import { formatPublishedDate } from '@/lib/utils/format-date'
 import { cn } from '@/lib/utils'
+import { formatPublishedDate } from '@/lib/utils/format-date'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { usePDFViewerStore } from './pdf-viewer-store'
@@ -19,8 +20,10 @@ type Tab = 'comments' | 'about'
 interface CommentsSidebarProps {
   scriptId: string
   currentUserId: string | null
+  title?: string | null
   synopsis?: string | null
   logline?: string | null
+  coverUrl?: string | null
 }
 
 function buildReactionBarItems(commentId: string, reactionsMap: Record<string, ReactionSummary[]>) {
@@ -36,7 +39,7 @@ function buildReactionBarItems(commentId: string, reactionsMap: Record<string, R
   })
 }
 
-export function CommentsSidebar({ scriptId, currentUserId, synopsis, logline }: CommentsSidebarProps) {
+export function CommentsSidebar({ scriptId, currentUserId, title, synopsis, logline, coverUrl }: CommentsSidebarProps) {
   const { currentPage } = usePDFViewerStore()
   const trpc = useTRPC()
   const [content, setContent] = useState('')
@@ -61,7 +64,7 @@ export function CommentsSidebar({ scriptId, currentUserId, synopsis, logline }: 
   const hasAboutContent = !!(synopsis || logline)
 
   return (
-    <aside className='flex flex-col h-full bg-surface'>
+    <aside className='flex flex-col h-full bg-surface min-h-[calc(100vh-80px) pb-28]'>
       {/* Tab navigation */}
       <div className='flex shrink-0 border-b border-border-subtle'>
         {(['comments', 'about'] as Tab[]).map((tab) => (
@@ -169,21 +172,37 @@ export function CommentsSidebar({ scriptId, currentUserId, synopsis, logline }: 
 
       {/* About tab */}
       {activeTab === 'about' && hasAboutContent && (
-        <div className='flex-1 overflow-y-auto p-5 flex flex-col gap-6'>
+        <div className='flex-1 overflow-y-auto p-5 flex flex-col gap-2'>
+          {coverUrl && (
+            <div>
+              <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>Capa</h3>
+              <div className='aspect-[4/5] h-full max-h-[280px] w-fit overflow-hidden rounded-sm bg-bg-elevated relative flex items-center justify-center border-b border-border-subtle/50 group-hover:border-brand-accent/30 transition-colors'>
+                <Image
+                  src={coverUrl}
+                  alt='Capa do roteiro'
+                  width={400}
+                  height={600}
+                  className='rounded-sm border border-border-subtle w-full h-full object-cover transition-transform duration-300 hover:scale-105'
+                />
+              </div>
+            </div>
+          )}
+          {title && (
+            <div>
+              <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>Título</h3>
+              <h3 className='font-display text-heading-3 text-text-primary leading-tight line-clamp-2'>{title}</h3>
+            </div>
+          )}
           {logline && (
             <div>
-              <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider mb-2'>
-                Logline
-              </h3>
+              <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>Logline</h3>
               <p className='text-body-default text-text-secondary leading-relaxed'>{logline}</p>
             </div>
           )}
           {synopsis && (
             <div>
-              <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider mb-2'>
-                Sinopse
-              </h3>
-              <p className='text-body-default text-text-secondary leading-relaxed whitespace-pre-wrap'>{synopsis}</p>
+              <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>Sinopse</h3>
+              <p className='text-body-default text-text-secondary leading-relaxed'>{synopsis}</p>
             </div>
           )}
         </div>
