@@ -5,6 +5,9 @@ import { FileStep } from '@/components/publish/file-step'
 import { GenreStep } from '@/components/publish/genre-step'
 import { InfoStep } from '@/components/publish/info-step'
 import { ReviewStep } from '@/components/publish/review-step'
+import { LoadingState } from '@/components/shared/loading-state'
+import { PageShell } from '@/components/shared/page-shell'
+import { SectionCard } from '@/components/shared/section-card'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -70,41 +73,31 @@ export function PublishPage({ scriptId }: PublishPageProps) {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
 
   return (
-    <div className='max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-12 pb-24 md:pb-12'>
+    <PageShell
+      title={isEditing ? 'Editar Roteiro' : 'Publicar Roteiro'}
+      description='Complete as etapas abaixo para disponibilizar sua obra.'
+      headerActions={
+        <Button
+          variant='secondary'
+          onClick={() => {
+            if (hasUnsavedChanges) {
+              setIsCancelDialogOpen(true)
+              return
+            }
+            router.back()
+          }}
+          disabled={uploading || isPending}>
+          Cancelar
+        </Button>
+      }
+      className='max-w-3xl px-4 md:px-6 pb-24 md:pb-12'>
       <div className='flex flex-col gap-6 md:gap-8'>
-        <div className='flex items-center justify-between gap-4'>
-          <div className='flex flex-col gap-1 md:gap-2'>
-            <h1 className='font-display text-heading-3 md:text-heading-2 text-text-primary'>
-              {isEditing ? 'Editar Roteiro' : 'Publicar Roteiro'}
-            </h1>
-            <p className='text-body-small md:text-body-large text-text-secondary'>
-              Complete as etapas abaixo para disponibilizar sua obra.
-            </p>
-          </div>
-
-          <Button
-            variant='secondary'
-            onClick={() => {
-              if (hasUnsavedChanges) {
-                setIsCancelDialogOpen(true)
-                return
-              }
-              router.back()
-            }}
-            disabled={uploading || isPending}>
-            Cancelar
-          </Button>
-        </div>
-
         <Progress current={step} steps={[...STEP_LABELS]} />
 
         {isEditing && isLoadingScript ? (
-          <div className='bg-surface border border-border-default rounded-sm p-12 flex flex-col items-center justify-center gap-4'>
-            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-accent'></div>
-            <p className='font-mono text-label-mono-caps text-text-muted'>Carregando roteiro...</p>
-          </div>
+          <LoadingState label='roteiro' />
         ) : (
-          <div className='bg-surface border border-border-default rounded-sm p-5 md:p-8 flex flex-col gap-6 md:gap-8'>
+          <SectionCard className='p-5 md:p-8 flex flex-col gap-6 md:gap-8'>
             {step === 1 && <InfoStep register={register} errors={formState.errors} />}
             {step === 2 && (
               <FileStep
@@ -178,7 +171,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                 </Button>
               )}
             </div>
-          </div>
+          </SectionCard>
         )}
       </div>
 
@@ -206,6 +199,6 @@ export function PublishPage({ scriptId }: PublishPageProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   )
 }

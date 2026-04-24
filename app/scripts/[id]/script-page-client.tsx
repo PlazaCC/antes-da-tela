@@ -4,9 +4,8 @@ import { AudioPlayer } from '@/components/audio-player'
 import { CommentsSheet } from '@/components/comments/comments-sheet'
 import { PDFViewer } from '@/components/pdf-viewer'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
-import { StarRating } from '@/components/star-rating/star-rating'
+import { ScriptPageMetadata } from '@/components/script-page/script-page-metadata'
 import type { TagVariant } from '@/components/tag/tag'
-import { Tag } from '@/components/tag/tag'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +22,7 @@ import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
-import { Film, Pencil, Trash2 } from 'lucide-react'
+import { Film } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -102,29 +101,11 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
   const genreVariant: TagVariant = GENRE_VARIANT_MAP[script.genre ?? ''] ?? 'default'
   const isOwner = !!currentUserId && currentUserId === script.author?.id
 
-  const ownerActions = isOwner ? (
-    <div className='flex items-center gap-2 shrink-0'>
-      <Link
-        href={`/publish?id=${script.id}`}
-        className='flex items-center gap-1.5 px-3 h-9 min-h-[44px] md:min-h-0 md:h-8 rounded-sm border border-border-subtle text-text-secondary font-sans text-[12px] hover:border-border-default transition-colors touch-manipulation'>
-        <Pencil className='w-3.5 h-3.5' />
-        Editar
-      </Link>
-      <button
-        onClick={() => setDeleteModalOpen(true)}
-        className='flex items-center gap-1.5 px-3 h-9 min-h-[44px] md:min-h-0 md:h-8 rounded-sm border border-state-error/20 text-state-error font-sans text-[12px] hover:bg-state-error/10 transition-colors touch-manipulation'>
-        <Trash2 className='w-3.5 h-3.5' />
-        Excluir
-      </button>
-    </div>
-  ) : null
+  const handleDeleteTrigger = () => setDeleteModalOpen(true)
 
   return (
     <div
-      className={cn(
-        'bg-bg-base flex flex-col min-h-dvh',
-        audioUrl && 'pb-[calc(54px+env(safe-area-inset-bottom))]',
-      )}>
+      className={cn('bg-bg-base flex flex-col min-h-dvh', audioUrl && 'pb-[calc(54px+env(safe-area-inset-bottom))]')}>
       {/* Breadcrumbs */}
       <div className='flex items-center gap-2 px-5 py-3 border-b border-border-subtle bg-bg-base'>
         <Link
@@ -156,86 +137,19 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
 
       {/* Script metadata */}
       <div className='max-w-6xl mx-auto w-full px-5 py-6'>
-        {bannerUrl ? (
-          /* When banner is present: compact metadata row (no cover, no duplicate title) */
-          <div className='flex flex-col gap-3'>
-            <div className='flex items-center justify-between gap-4 flex-wrap'>
-              <div className='flex items-center gap-2 flex-wrap'>
-                {script.genre && <Tag variant={genreVariant}>{script.genre}</Tag>}
-                {script.age_rating && <Tag variant='default'>{script.age_rating}</Tag>}
-              </div>
-              {ownerActions}
-            </div>
-            {script.author && (
-              <p className='font-mono text-label-mono-default text-text-muted'>
-                por{' '}
-                <a
-                  href={`/profile/${script.author.id}`}
-                  className='text-text-secondary hover:text-brand-accent transition-colors'>
-                  {script.author.name}
-                </a>
-              </p>
-            )}
-            <RatingBox
-              isOwner={isOwner}
-              ratingData={ratingData}
-              userRating={userRating}
-              isRatingPending={isRatingPending}
-              currentUserId={currentUserId}
-              onRate={rate}
-            />
-          </div>
-        ) : (
-          /* When no banner: full metadata layout with cover */
-          <div className='flex flex-col md:flex-row gap-6 md:gap-8'>
-            <div className='w-28 md:w-36 shrink-0 aspect-[4/5] rounded-sm bg-elevated border border-border-subtle overflow-hidden relative shadow-lg'>
-              {coverUrl ? (
-                <Image src={coverUrl} alt={script.title} fill className='object-cover' />
-              ) : (
-                <div className='flex flex-col items-center justify-center h-full gap-2'>
-                  <Film className='w-8 h-8 text-text-muted' />
-                  <span className='font-mono text-[10px] text-text-muted uppercase'>Sem Capa</span>
-                </div>
-              )}
-            </div>
-
-            <div className='flex flex-col gap-4 flex-1 min-w-0'>
-              <div className='flex items-center gap-2 flex-wrap'>
-                {script.genre && <Tag variant={genreVariant}>{script.genre}</Tag>}
-                {script.age_rating && <Tag variant='default'>{script.age_rating}</Tag>}
-              </div>
-
-              <div className='flex items-start justify-between gap-4'>
-                <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-tight'>
-                  {script.title}
-                </h1>
-                {ownerActions}
-              </div>
-
-              {script.logline && <p className='text-body-large text-text-secondary max-w-3xl'>{script.logline}</p>}
-
-              {script.author && (
-                <p className='font-mono text-label-mono-default text-text-muted'>
-                  por{' '}
-                  <a
-                    href={`/profile/${script.author.id}`}
-                    className='text-text-secondary hover:text-brand-accent transition-colors'>
-                    {script.author.name}
-                  </a>
-                </p>
-              )}
-
-              <RatingBox
-                isOwner={isOwner}
-                ratingData={ratingData}
-                userRating={userRating}
-                isRatingPending={isRatingPending}
-                currentUserId={currentUserId}
-                onRate={rate}
-              />
-            </div>
-          </div>
-        )}
+        <ScriptPageMetadata
+          script={script}
+          bannerUrl={bannerUrl}
+          coverUrl={coverUrl}
+          genreVariant={genreVariant}
+          isOwner={isOwner}
+          currentUserId={currentUserId}
+          ratingData={ratingData}
+          userRating={userRating}
+          isRatingPending={isRatingPending}
+          onRate={rate}
+          onDelete={handleDeleteTrigger}
+        />
       </div>
 
       {/* Synopsis — visible above the reader when PDF is present */}
@@ -327,58 +241,6 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      )}
-    </div>
-  )
-}
-
-interface RatingBoxProps {
-  isOwner: boolean
-  ratingData: { average: number; total: number } | undefined
-  userRating: number | null | undefined
-  isRatingPending: boolean
-  currentUserId: string | null
-  onRate: (value: number) => void
-}
-
-function RatingBox({ isOwner, ratingData, userRating, isRatingPending, currentUserId, onRate }: RatingBoxProps) {
-  if (isOwner) {
-    return (
-      <div
-        className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'
-        aria-live='polite'>
-        <StarRating value={ratingData?.average ?? 0} readOnly allowHalf />
-        {ratingData && ratingData.total > 0 && (
-          <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-            {ratingData.average.toFixed(1)} <span className='text-text-muted'>({ratingData.total})</span>
-          </span>
-        )}
-        <span className='font-mono text-label-mono-small text-text-muted hidden md:inline'>
-          Você não pode avaliar seu próprio roteiro
-        </span>
-      </div>
-    )
-  }
-
-  return (
-    <div className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'>
-      <StarRating
-        value={userRating ?? ratingData?.average ?? 0}
-        allowHalf={!currentUserId}
-        readOnly={!currentUserId || isRatingPending}
-        onChange={onRate}
-      />
-      {ratingData && ratingData.total > 0 && (
-        <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-          {ratingData.average.toFixed(1)} <span className='text-text-muted'>({ratingData.total})</span>
-        </span>
-      )}
-      {!currentUserId && (
-        <span className='font-mono text-label-mono-small text-text-muted'>
-          <a href='/auth/login' className='text-brand-accent hover:underline'>
-            Avaliar
-          </a>
-        </span>
       )}
     </div>
   )
