@@ -1,8 +1,9 @@
 'use client'
 
+import { RatingSummary } from '@/components/rating-summary/rating-summary'
+import { Tag } from '@/components/tag/tag'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Tag } from '@/components/tag/tag'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { cn, getStorageUrl } from '@/lib/utils'
 import { formatPublishedDate } from '@/lib/utils/format-date'
@@ -10,8 +11,8 @@ import { useTRPC } from '@/trpc/client'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import { AuthorSection } from './author-section'
 import { ModalSidebar } from './sidebar'
 import { StatsSection } from './stats-section'
@@ -79,68 +80,62 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
             {/* Background Cover with Gradient Overlay (Mobile Only) */}
             {bannerUrl && (
               <div className='absolute inset-0 md:hidden z-0'>
-                <Image
-                  src={bannerUrl}
-                  alt={script.title}
-                  fill
-                  className='object-cover opacity-20'
-                />
+                <Image src={bannerUrl} alt={script.title} fill className='object-cover opacity-20' />
                 <div className='absolute inset-0 bg-gradient-to-t from-surface via-surface/90 to-transparent' />
               </div>
             )}
 
             <ModalSidebar script={script} publishedAtFormatted={publishedAt} coverUrl={coverUrl} onClose={onClose} />
 
-            <div className='flex-1 overflow-y-auto p-5 md:p-8 flex flex-col gap-5 md:gap-8 min-w-0 z-10 pb-28 md:pb-8'>
+            <div className='flex-1 overflow-y-auto p-5 md:p-8 flex flex-col gap-4 md:gap-6 min-w-0 z-10 pb-28 md:pb-8'>
               {script.title && (
                 <h1 className='font-display text-heading-3 md:text-heading-2 text-text-primary uppercase tracking-wide leading-tight'>
                   {script.title}
                 </h1>
               )}
-              
-              <AuthorSection author={script.author} ratingData={stats} onClose={onClose} />
 
+              <AuthorSection author={script.author} onClose={onClose} />
+
+              {stats && <RatingSummary average={stats?.average ?? 0} total={stats?.total ?? 0} />}
               {(script.genre || script.age_rating) && (
                 <div className='flex flex-wrap gap-1.5 md:gap-2'>
                   {script.genre && (
-                    <Tag variant='drama' className='uppercase font-mono text-[9px] md:text-[10px] tracking-wider px-2 py-0.5'>
+                    <Tag
+                      variant='drama'
+                      className='uppercase font-mono text-[9px] md:text-[10px] tracking-wider px-2 py-0.5'>
                       {script.genre}
                     </Tag>
                   )}
                   {script.age_rating && (
-                    <Tag variant='privado' className='uppercase font-mono text-[9px] md:text-[10px] tracking-wider px-2 py-0.5'>
+                    <Tag
+                      variant='privado'
+                      className='uppercase font-mono text-[9px] md:text-[10px] tracking-wider px-2 py-0.5'>
                       {script.age_rating}
                     </Tag>
                   )}
                 </div>
               )}
 
-              <div className='w-full h-px bg-border-subtle' />
+              <div className='w-full h-px border-b border-border-subtle' />
 
-              <StatsSection
-                ratingData={stats}
-                commentData={commentData}
-                distributionData={stats}
-              />
+              <StatsSection ratingData={stats} commentData={commentData} distributionData={stats} />
 
-              <div className='w-full h-px bg-border-subtle' />
+              <div className='w-full h-px border-b border-border-subtle' />
 
               {script.logline && (
                 <div className='flex flex-col gap-2 md:gap-3'>
-                  <span className='font-mono text-[10px] text-brand-accent uppercase tracking-[0.05em]'>
-                    Logline
-                  </span>
+                  <span className='font-mono text-[10px] text-brand-accent uppercase tracking-[0.05em]'>Logline</span>
                   <blockquote className='border-l-2 border-brand-accent pl-4 md:pl-5'>
-                    <p className='text-body-small md:text-body-default text-text-primary leading-relaxed'>{script.logline}</p>
+                    <p className='text-body-small md:text-body-default text-text-primary leading-relaxed'>
+                      {script.logline}
+                    </p>
                   </blockquote>
                 </div>
               )}
 
               {script.synopsis && (
                 <div className='flex flex-col gap-2 md:gap-3'>
-                  <span className='font-mono text-[10px] text-brand-accent uppercase tracking-[0.05em]'>
-                    Sinopse
-                  </span>
+                  <span className='font-mono text-[10px] text-brand-accent uppercase tracking-[0.05em]'>Sinopse</span>
                   <p className='text-body-small md:text-body-default text-text-secondary leading-relaxed line-clamp-6'>
                     {script.synopsis}
                   </p>
@@ -164,8 +159,6 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
             </div>
           </div>
         )}
-
-
       </DialogContent>
     </Dialog>
   )

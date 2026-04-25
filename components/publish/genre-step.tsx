@@ -1,5 +1,6 @@
 'use client'
 
+import { FormField } from '@/components/shared/form-field'
 import { AGE_RATINGS, formatAgeRating, GENRES } from '@/lib/constants/scripts'
 import { cn } from '@/lib/utils'
 import type { PublishFormValues } from '@/lib/validators/publish'
@@ -14,10 +15,7 @@ interface GenreStepProps {
 export function GenreStep({ genre, ageRating, setValue }: GenreStepProps) {
   return (
     <div className='flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300'>
-      <div className='flex flex-col gap-4'>
-        <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
-          Gênero Predominante
-        </label>
+      <FormField label='Gênero Predominante'>
         <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
           {GENRES.map((item) => (
             <button
@@ -34,13 +32,10 @@ export function GenreStep({ genre, ageRating, setValue }: GenreStepProps) {
             </button>
           ))}
         </div>
-      </div>
+      </FormField>
 
-      <div className='flex flex-col gap-4'>
-        <label className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider text-xs'>
-          Classificação Indicativa
-        </label>
-        <div className='grid grid-cols-2 md:grid-cols-3 md:grid-cols-6 gap-2'>
+      <FormField label='Classificação Indicativa'>
+        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2'>
           {AGE_RATINGS.map((rating) => (
             <button
               key={rating}
@@ -56,7 +51,7 @@ export function GenreStep({ genre, ageRating, setValue }: GenreStepProps) {
             </button>
           ))}
         </div>
-      </div>
+      </FormField>
     </div>
   )
 }

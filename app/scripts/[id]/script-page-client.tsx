@@ -1,11 +1,12 @@
 'use client'
 
 import { AudioPlayer } from '@/components/audio-player'
+import { CommentsSheet } from '@/components/comments/comments-sheet'
 import { PDFViewer } from '@/components/pdf-viewer'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
-import { StarRating } from '@/components/star-rating/star-rating'
+import { ScriptPageMetadata } from '@/components/script-page/script-page-metadata'
+import { SynopsisSpoiler } from '@/components/synopsis/SynopsisSpoiler'
 import type { TagVariant } from '@/components/tag/tag'
-import { Tag } from '@/components/tag/tag'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +23,7 @@ import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
-import { Film, Pencil, Trash2 } from 'lucide-react'
+import { Film } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -69,7 +70,6 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
     trpc.scripts.delete.mutationOptions({
       onSuccess: () => {
         toast.success('Roteiro excluído com sucesso')
-        // Invalidate lists where this script might appear
         queryClient.invalidateQueries(trpc.scripts.listFeatured.queryFilter())
         queryClient.invalidateQueries(trpc.scripts.listRecent.queryFilter())
         queryClient.invalidateQueries(trpc.scripts.listByAuthor.queryFilter({ authorId: currentUserId ?? '' }))
@@ -93,7 +93,7 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
 
   if (!script) {
     return (
-      <div className='min-h-screen bg-bg-base flex items-center justify-center'>
+      <div className='min-h-dvh bg-bg-base flex items-center justify-center'>
         <p className='text-state-error font-mono text-label-mono-default'>Roteiro não encontrado.</p>
       </div>
     )
@@ -102,171 +102,122 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
   const genreVariant: TagVariant = GENRE_VARIANT_MAP[script.genre ?? ''] ?? 'default'
   const isOwner = !!currentUserId && currentUserId === script.author?.id
 
+  const handleDeleteTrigger = () => setDeleteModalOpen(true)
+
   return (
-    <div className='bg-bg-base flex flex-col'>
-      {/* Banner */}
-      {bannerUrl && (
-        <div className='w-full h-48 md:h-64 absolute overflow-hidden'>
-          <Image src={bannerUrl} alt={script.title} fill priority className='object-cover object-center opacity-20' />
-          <div className='absolute inset-0 bg-gradient-to-t from-bg-base to-transparent' />
-        </div>
-      )}
-
-      {/* Script header */}
-      <div className={cn('max-w-6xl mx-auto w-full px-5 pb-8', !bannerUrl ? 'pt-8' : 'pt-24 relative z-10')}>
-        <div className='flex flex-col md:flex-row gap-6 md:gap-8'>
-          {/* Cover on Details Page */}
-          <div className='w-32 md:w-40 shrink-0 aspect-[4/5] rounded-sm bg-elevated border border-border-subtle overflow-hidden relative shadow-lg'>
-            {coverUrl ? (
-              <Image src={coverUrl} alt={script.title} fill className='object-cover' />
-            ) : (
-              <div className='flex flex-col items-center justify-center h-full gap-2'>
-                <Film className='w-8 h-8 text-text-muted' />
-                <span className='font-mono text-[10px] text-text-muted uppercase'>Sem Capa</span>
-              </div>
-            )}
-          </div>
-
-          <div className='flex flex-col gap-4 flex-1 min-w-0'>
-            <div className='flex items-center gap-2 flex-wrap'>
-              {script.genre && <Tag variant={genreVariant}>{script.genre}</Tag>}
-              {script.age_rating && <Tag variant='default'>{script.age_rating}</Tag>}
-            </div>
-
-            <div className='flex items-start justify-between gap-4'>
-              <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-tight'>
-                {script.title}
-              </h1>
-
-              {isOwner && (
-                <div className='flex items-center gap-2 mt-1 shrink-0'>
-                  <Link
-                    href={`/publish?id=${script.id}`}
-                    className='flex items-center gap-1.5 px-3 h-8 rounded-sm border border-border-subtle text-text-secondary font-sans text-[12px] hover:border-border-default transition-colors'>
-                    <Pencil className='w-3.5 h-3.5' />
-                    Editar
-                  </Link>
-                  <button
-                    onClick={() => setDeleteModalOpen(true)}
-                    className='flex items-center gap-1.5 px-3 h-8 rounded-sm border border-state-error/20 text-state-error font-sans text-[12px] hover:bg-state-error/10 transition-colors'>
-                    <Trash2 className='w-3.5 h-3.5' />
-                    Excluir
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {script.logline && <p className='text-body-large text-text-secondary max-w-3xl'>{script.logline}</p>}
-
-            {script.author && (
-              <p className='font-mono text-label-mono-default text-text-muted'>
-                por{' '}
-                <a
-                  href={`/profile/${script.author.id}`}
-                  className='text-text-secondary hover:text-brand-accent transition-colors'>
-                  {script.author.name}
-                </a>
-              </p>
-            )}
-
-            {/* RatingBox — ref: Figma 38:123 */}
-            {isOwner ? (
-              <div
-                className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'
-                aria-live='polite'>
-                <StarRating value={ratingData?.average ?? 0} readOnly allowHalf />
-                {ratingData && ratingData.total > 0 && (
-                  <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-                    {ratingData.average.toFixed(1)} <span className='text-text-muted'>({ratingData.total})</span>
-                  </span>
-                )}
-                <span className='font-mono text-label-mono-small text-text-muted'>
-                  Você não pode avaliar seu próprio roteiro
-                </span>
-              </div>
-            ) : (
-              <div className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'>
-                <StarRating
-                  value={userRating ?? ratingData?.average ?? 0}
-                  allowHalf={!currentUserId}
-                  readOnly={!currentUserId || isRatingPending}
-                  onChange={rate}
-                />
-                {ratingData && ratingData.total > 0 && (
-                  <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-                    {ratingData.average.toFixed(1)} <span className='text-text-muted'>({ratingData.total})</span>
-                  </span>
-                )}
-                {!currentUserId && (
-                  <span className='font-mono text-label-mono-small text-text-muted'>
-                    <a href='/auth/login' className='text-brand-accent hover:underline'>
-                      Avaliar
-                    </a>
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
+    <div
+      className={cn('bg-bg-base flex flex-col min-h-dvh', audioUrl && 'pb-[calc(54px+env(safe-area-inset-bottom))]')}>
+      {/* Breadcrumbs */}
+      <div className='flex items-center gap-2 px-5 py-3 border-b border-border-subtle bg-bg-base'>
+        <Link
+          href='/'
+          className='font-mono text-label-mono-small text-text-muted hover:text-text-primary transition-colors'>
+          ← Home
+        </Link>
+        <span className='text-text-muted font-mono text-label-mono-small'>/</span>
+        <span className='font-mono text-label-mono-small text-text-secondary truncate max-w-[140px] md:max-w-[280px]'>
+          {script.title}
+        </span>
       </div>
 
-      {/* Audio player */}
-      {audioUrl && (
-        <div className='max-w-6xl mx-auto w-full px-5 pb-4'>
-          <AudioPlayer src={audioUrl} className='max-w-sm' />
+      {/* Hero Banner — only rendered when bannerUrl exists */}
+      {bannerUrl && (
+        <div className='relative w-full h-[200px] md:h-[300px] lg:h-[420px] overflow-hidden bg-elevated'>
+          <Image src={bannerUrl} alt={script.title} fill priority className='object-cover object-center' />
+          <div className='absolute inset-0 bg-gradient-to-t from-bg-base via-bg-base/40 to-transparent' />
+          <div className='absolute bottom-0 left-0 right-0 px-5 md:px-12 pb-8 max-w-6xl mx-auto w-full'>
+            <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-tight line-clamp-2'>
+              {script.title}
+            </h1>
+            {script.logline && (
+              <p className='text-body-default text-text-secondary mt-2 line-clamp-2 max-w-2xl'>{script.logline}</p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Reader — PDF + sidebar */}
+      {/* Script metadata */}
+      <div className='max-w-6xl mx-auto w-full px-5 py-6'>
+        <ScriptPageMetadata
+          script={script}
+          bannerUrl={bannerUrl}
+          coverUrl={coverUrl}
+          genreVariant={genreVariant}
+          isOwner={isOwner}
+          currentUserId={currentUserId}
+          ratingData={ratingData}
+          userRating={userRating}
+          isRatingPending={isRatingPending}
+          onRate={rate}
+          onDelete={handleDeleteTrigger}
+        />
+      </div>
+
+      {/* Synopsis — visible above the reader when PDF is present */}
+      {pdfUrl && script.synopsis && (
+        <div className='max-w-6xl mx-auto w-full px-5 pb-6 border-t border-border-subtle pt-6'>
+          <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider mb-3'>Sinopse</h3>
+          <SynopsisSpoiler text={script.synopsis} collapsedHeight={144} />
+        </div>
+      )}
+
+      {/* Audio player — fixed bottom bar on all viewports (Spotify-style) */}
+      {audioUrl && <AudioPlayer src={audioUrl} title={script.title} />}
+
+      {/* Reader — 50/50 split; page scrolls, sidebar sticks to viewport */}
       {pdfUrl ? (
-        <div className='flex flex-col lg:flex-row flex-1 min-h-0 border-t border-border-subtle max-h-[90vh]'>
-          {/* PDF area */}
-          <div className='flex-1 min-w-0 p-5 overflow-auto min-h-[90vh]'>
+        <div className='flex flex-col lg:flex-row border-t border-border-subtle'>
+          {/* PDF column — natural height, page provides the single scroll */}
+          <div className='flex-1 min-w-0 lg:w-1/2 min-h-[60vh]'>
             <PDFViewer url={pdfUrl} />
           </div>
 
-          {/* Comments sidebar (ref: Figma 51:1007) */}
-          <CommentsSidebar scriptId={script.id} currentUserId={currentUserId} />
+          {/* Comments sidebar — sticky 50%, fills viewport below navbar */}
+          <div
+            className={cn(
+              'hidden lg:flex flex-col lg:w-1/2 border-l border-border-subtle sticky top-14 self-start',
+              audioUrl ? 'h-[calc(100vh-3.5rem-54px)]' : 'h-[calc(100vh-3.5rem)]',
+            )}>
+            <CommentsSidebar
+              scriptId={script.id}
+              currentUserId={currentUserId}
+              title={script.title}
+              synopsis={script.synopsis ?? null}
+              logline={script.logline ?? null}
+              coverUrl={coverUrl ?? null}
+            />
+          </div>
+
+          {/* Comments — mobile sheet */}
+          <div className='lg:hidden'>
+            <CommentsSheet scriptId={script.id} currentUserId={currentUserId} />
+          </div>
         </div>
       ) : (
-        /* Fallback: synopsis when no PDF available */
-        <div className='max-w-4xl mx-auto w-full px-5 pb-12 h-full'>
+        /* No PDF state */
+        <div className='flex-1 max-w-4xl mx-auto w-full px-5 py-12'>
           {script.synopsis && (
             <div className='mb-10'>
               <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider mb-3'>
-                Synopsis
+                Sinopse
               </h2>
-              <p className='text-body-default text-text-primary leading-relaxed whitespace-pre-wrap'>
-                {script.synopsis}
-              </p>
+              <p className='text-body-default text-text-primary leading-relaxed'>{script.synopsis}</p>
             </div>
           )}
 
-          {script.script_files?.[0] && (
-            <div className='rounded-sm border border-border-subtle bg-surface p-6'>
-              <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider mb-4'>
-                Script File
-              </h2>
-              <div className='flex flex-col gap-2'>
-                {script.script_files[0].page_count && (
-                  <p className='text-sm text-text-secondary'>
-                    <span className='text-text-muted'>Pages: </span>
-                    {script.script_files[0].page_count}
-                  </p>
-                )}
-                {script.script_files[0].file_size && (
-                  <p className='text-sm text-text-secondary'>
-                    <span className='text-text-muted'>Size: </span>
-                    {(script.script_files[0].file_size / 1024 / 1024).toFixed(1)} MB
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+          <div className='rounded-sm border border-border-subtle bg-surface p-8 flex flex-col items-center gap-4 text-center'>
+            <Film className='w-12 h-12 text-text-muted' />
+            <p className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>
+              PDF não disponível
+            </p>
+            <p className='text-body-small text-text-secondary max-w-sm'>
+              O arquivo deste roteiro não está disponível para leitura no momento.
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete confirmation */}
       {isOwner && (
         <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
           <AlertDialogContent>

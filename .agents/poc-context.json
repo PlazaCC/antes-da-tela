@@ -96,8 +96,33 @@
       "poc-19 — profile pages",
       "poc-20 — upload wizard redesign"
     ],
-    "execution_order": "poc-26 (Edição/Exclusão) → poc-25 → poc-21 → poc-22 (parallel: poc-24, poc-23)",
+    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-27 → poc-21 → poc-22 (parallel: poc-23)",
     "phase2_tasks": [
+      {
+        "id": "poc-27",
+        "title": "PDF Viewer: migrate to react-pdf",
+        "status": "pending",
+        "priority": "P0 — bug fix (zoom overflow) + fundação para sincronização áudio-texto futura",
+        "task_file": ".agents/tasks/poc-27-pdf-viewer-react-pdf.md",
+        "real_scope": "Substituir implementação manual de canvas/pdfjs-dist por react-pdf (Document + Page). Resolve overflow de zoom. Preserva text layer, Zustand store e CommentsSidebar. Cria hook useContainerWidth.",
+        "already_done": [
+          "PDF viewer funcional com canvas rendering",
+          "text layer com seleção de texto",
+          "zoom +/- com debounce",
+          "paginação prev/next",
+          "Zustand store (currentPage, totalPages, zoom, isLoading)",
+          "CommentsSidebar consome currentPage do store"
+        ],
+        "key_files": [
+          "components/pdf-viewer/pdf-viewer.tsx",
+          "components/pdf-viewer/pdf-viewer-store.ts",
+          "components/pdf-viewer/index.tsx",
+          "lib/utils/pdf.ts",
+          "lib/hooks/use-container-width.ts",
+          "package.json",
+          "app/globals.css"
+        ]
+      },
       {
         "id": "poc-25",
         "title": "Upload Wizard: cover + banner image uploads",
@@ -147,13 +172,13 @@
       {
         "id": "poc-24",
         "title": "PDF Reader: breadcrumbs + mobile (player fixo + comments sheet)",
-        "status": "pending",
+        "status": "done",
         "priority": "P1",
         "figma_nodeId": "51:1007",
         "task_file": ".agents/tasks/poc-24-pdf-reader-final-design.md",
         "real_scope": "Breadcrumbs bar + audio player fixed mobile + CommentsSidebar como Sheet no mobile",
-        "already_done": ["PDF viewer", "zoom/page controls", "comments sidebar", "reactions", "audio player desktop"],
-        "key_files": ["app/scripts/[id]/script-page-client.tsx"]
+        "already_done": ["PDF viewer", "zoom/page controls", "comments sidebar", "reactions", "audio player desktop", "hero banner condicional", "tabs Comentários/Sobre", "sticky sidebar desktop", "synopsis acima do leitor", "mobile sheet + FAB", "no-PDF state redesenhado"],
+        "key_files": ["app/scripts/[id]/script-page-client.tsx", "components/pdf-viewer/comments-sidebar.tsx"]
       },
       {
         "id": "poc-23",

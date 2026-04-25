@@ -1,256 +1,193 @@
 'use client'
-
-import { cn } from '@/lib/utils'
-import { loadPdfjsLib } from '@/lib/utils/pdf'
-import type { PDFDocumentProxy, PDFPageProxy, PageViewport } from 'pdfjs-dist'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useContainerWidth } from '@/lib/hooks/use-container-width'
+import '@/lib/utils/pdf-worker'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Document, Page, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/Page/TextLayer.css'
+import { PageCallback } from 'react-pdf/dist/shared/types.js'
+import { PdfControls } from './pdf-controls'
 import { PDFViewerError } from './pdf-viewer-error'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
-type PdfjsLib = typeof import('pdfjs-dist')
+import type { PDFDocumentProxy } from 'pdfjs-dist'
 
-interface PDFViewerProps {
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
+
+type PDFViewerProps = {
   url: string
 }
 
 export function PDFViewerInner({ url }: PDFViewerProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const canvasWrapperRef = useRef<HTMLDivElement>(null)
-  const textLayerRef = useRef<HTMLDivElement>(null)
-  const pdfDocRef = useRef<PDFDocumentProxy | null>(null)
-  const renderTaskRef = useRef<{ cancel: () => void } | null>(null)
-  const textLayerTaskRef = useRef<{ cancel: () => void } | null>(null)
-  const pdfjsRef = useRef<PdfjsLib | null>(null)
-  const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const { currentPage, totalPages, zoom, isLoading, setTotalPages, setLoading, setCurrentPage } = usePDFViewerStore()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<HTMLDivElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const containerWidth = useContainerWidth(containerRef)
+  const { currentPage, zoom, isLoading, setCurrentPage, setTotalPages, setLoading } = usePDFViewerStore()
   const [pdfError, setPdfError] = useState<string | null>(null)
+  const [pageSize, setPageSize] = useState({ width: 0, height: 0 })
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const dragStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null)
+  // When the page changes, reset the visible PDF viewport to the top-center while keeping
+  // the current zoom level intact. The vertical movement is performed by native body
+  // scrolling, so we reset the browser scroll position relative to the PDF wrapper and
+  // not by changing zoom or the PDF content itself.
+  const pageResetRef = useRef(false)
+  const [isDragging, setIsDragging] = useState(false)
 
-  const renderPage = useCallback(async (pageNum: number, userZoom: number) => {
-    if (!canvasRef.current || !canvasWrapperRef.current || !pdfDocRef.current || !pdfjsRef.current) return
+  const contentWidth = useMemo(() => (containerWidth > 0 ? containerWidth * zoom : 0), [containerWidth, zoom])
+  const contentHeight = useMemo(
+    () => (pageSize.width > 0 ? contentWidth * (pageSize.height / pageSize.width) : 0),
+    [contentWidth, pageSize.height, pageSize.width],
+  )
 
-    if (renderTaskRef.current) {
-      renderTaskRef.current.cancel()
-      renderTaskRef.current = null
-    }
-    if (textLayerTaskRef.current) {
-      textLayerTaskRef.current.cancel()
-      textLayerTaskRef.current = null
-    }
+  useEffect(() => {
+    setPdfError(null)
+    setCurrentPage(1)
+    setTotalPages(0)
+    setLoading(true)
+    setPan({ x: 0, y: 0 })
+    pageResetRef.current = true
+  }, [url, setCurrentPage, setLoading, setTotalPages])
 
-    const page = (await pdfDocRef.current.getPage(pageNum)) as PDFPageProxy
+  useEffect(() => {
+    // Mark the next page render as needing a viewport reset. This preserves zoom state
+    // across page changes while ensuring the user lands at the top of the PDF page.
+    pageResetRef.current = true
+  }, [currentPage])
 
-    // Compute fit-to-width scale, then apply user zoom on top
-    const naturalViewport = page.getViewport({ scale: 1 }) as PageViewport
-    const containerWidth = canvasWrapperRef.current.clientWidth || naturalViewport.width
-    const baseScale = containerWidth / naturalViewport.width
-    const scale = baseScale * userZoom
+  const getTopOverlayHeight = useCallback(() => {
+    if (typeof document === 'undefined') return 0
 
-    const viewport = page.getViewport({ scale }) as PageViewport
-    const canvas = canvasRef.current
-    const outputScale = window.devicePixelRatio || 1
+    // Use the page toolbar element by id to simplify sticky overlay height detection.
+    const pageToolbar = document.getElementById('pdf-toolbar')
+    const appHeader = document.querySelector('header')
 
-    canvas.width = Math.floor(viewport.width * outputScale)
-    canvas.height = Math.floor(viewport.height * outputScale)
-    canvas.style.width = `${Math.floor(viewport.width)}px`
-    canvas.style.height = `${Math.floor(viewport.height)}px`
+    const toolbarHeight = pageToolbar?.getBoundingClientRect().bottom ?? 0
+    const headerHeight = appHeader?.getBoundingClientRect().bottom ?? 0
+    const topOverlayHeight = Math.max(toolbarHeight, headerHeight)
 
-    const context = canvas.getContext('2d')
-    if (!context) return
-
-    if (typeof context.resetTransform === 'function') {
-      context.resetTransform()
-    } else {
-      context.setTransform(1, 0, 0, 1, 0, 0)
-    }
-    context.setTransform(outputScale, 0, 0, outputScale, 0, 0)
-    context.clearRect(0, 0, canvas.width, canvas.height)
-
-    const renderTask = page.render({ canvasContext: context, viewport, canvas })
-    renderTaskRef.current = renderTask
-
-    try {
-      await renderTask.promise
-    } catch (error) {
-      if (error instanceof Error) {
-        setPdfError(error.message)
-      } else {
-        setPdfError('Falha ao renderizar o PDF.')
-      }
-      pdfDocRef.current = null
-      return
-    } finally {
-      renderTaskRef.current = null
-    }
-
-    // Text layer — enables text selection over the canvas
-    if (textLayerRef.current) {
-      const container = textLayerRef.current
-      container.innerHTML = ''
-      container.style.width = `${Math.floor(viewport.width)}px`
-      container.style.height = `${Math.floor(viewport.height)}px`
-
-      try {
-        const tl = new pdfjsRef.current.TextLayer({
-          textContentSource: page.streamTextContent(),
-          container,
-          viewport,
-        })
-        textLayerTaskRef.current = tl
-        await tl.render()
-      } catch {
-        // text layer cancelled or unsupported
-      } finally {
-        textLayerTaskRef.current = null
-      }
-    }
+    return topOverlayHeight
   }, [])
 
-  // Load PDF document once per URL
   useEffect(() => {
-    let cancelled = false
+    const containerHeight = containerRef.current?.clientHeight ?? 0
 
-    async function loadPDF() {
-      setLoading(true)
-      setPdfError(null)
-      setCurrentPage(1)
-      setTotalPages(0)
+    setPan((current) => {
+      const maxX = 0
+      const minX = Math.min(containerWidth - contentWidth, 0)
+      const maxY = 0
+      const minY = Math.min(containerHeight - contentHeight, 0)
 
-      const pdfjsLib = await loadPdfjsLib()
-      pdfjsRef.current = pdfjsLib
-
-      const pdf = await pdfjsLib.getDocument(url).promise
-      if (cancelled) {
-        pdf.destroy?.()
-        return
+      return {
+        x: containerWidth && contentWidth > containerWidth ? Math.max(Math.min(current.x, maxX), minX) : 0,
+        y: containerHeight && contentHeight > containerHeight ? Math.max(Math.min(current.y, maxY), minY) : 0,
       }
+    })
+  }, [containerWidth, contentWidth, contentHeight])
 
-      pdfDocRef.current = pdf
+  useEffect(() => {
+    if (!containerRef.current || !overlayRef.current) return
+
+    const element = overlayRef.current
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return
+      event.preventDefault()
+      dragStartRef.current = { x: event.clientX, y: event.clientY, panX: pan.x, panY: pan.y }
+      setIsDragging(true)
+      element.setPointerCapture(event.pointerId)
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!dragStartRef.current) return
+      event.preventDefault()
+      const deltaX = event.clientX - dragStartRef.current.x
+      const deltaY = event.clientY - dragStartRef.current.y
+      const nextX = dragStartRef.current.panX + deltaX
+      const nextY = dragStartRef.current.panY + deltaY
+      const maxX = 0
+      const minX = Math.min(containerWidth - contentWidth, 0)
+      const maxY = 0
+      const minY = Math.min((containerRef.current?.clientHeight ?? 0) - contentHeight, 0)
+      setPan({ x: Math.max(Math.min(nextX, maxX), minX), y: Math.max(Math.min(nextY, maxY), minY) })
+    }
+
+    const handlePointerUp = () => {
+      dragStartRef.current = null
+      setIsDragging(false)
+    }
+
+    element.addEventListener('pointerdown', handlePointerDown)
+    element.addEventListener('pointermove', handlePointerMove)
+    element.addEventListener('pointerup', handlePointerUp)
+    element.addEventListener('pointercancel', handlePointerUp)
+
+    return () => {
+      element.removeEventListener('pointerdown', handlePointerDown)
+      element.removeEventListener('pointermove', handlePointerMove)
+      element.removeEventListener('pointerup', handlePointerUp)
+      element.removeEventListener('pointercancel', handlePointerUp)
+    }
+  }, [containerWidth, contentWidth, contentHeight, pan])
+
+  const onDocumentLoadSuccess = useCallback(
+    (pdf: PDFDocumentProxy) => {
       setTotalPages(pdf.numPages)
       setLoading(false)
-      await renderPage(1, usePDFViewerStore.getState().zoom)
-    }
+    },
+    [setLoading, setTotalPages],
+  )
 
-    loadPDF().catch((error) => {
-      console.error(error)
-      if (!cancelled) {
-        setPdfError(error instanceof Error ? error.message : 'Falha ao carregar o PDF.')
-        setLoading(false)
-        pdfDocRef.current = null
-        setTotalPages(0)
+  const onPageLoadSuccess = useCallback(
+    (page: PageCallback) => {
+      const viewport = page.getViewport({ scale: 1 })
+      setPageSize({ width: viewport.width, height: viewport.height })
+
+      if (pageResetRef.current && containerWidth > 0) {
+        // The PDF wrapper can be horizontally wider than the viewport when zoomed in.
+        // Keep the current zoom, reset the PDF view to the top, and center horizontally.
+        const minX = Math.min(containerWidth - contentWidth, 0)
+        const centerX = contentWidth > containerWidth ? Math.max((containerWidth - contentWidth) / 2, minX) : 0
+        setPan({ x: centerX, y: 0 })
+
+        // Vertical PDF scroll is handled by the page/body scroll. Compute the exact
+        // target scroll position from the wrapper top and subtract the combined height
+        // of sticky overlays (header + toolbar) so the PDF page begins below them.
+        if (containerRef.current) {
+          const overlayHeight = getTopOverlayHeight()
+          const targetScroll = window.scrollY + containerRef.current.getBoundingClientRect().top - overlayHeight
+          window.scrollTo({ top: targetScroll })
+        }
+
+        pageResetRef.current = false
       }
-    })
-    return () => {
-      cancelled = true
+    },
+    [containerWidth, contentWidth, getTopOverlayHeight],
+  )
+
+  const onDocumentLoadError = useCallback(
+    (error: Error) => {
+      setPdfError(error?.message ?? 'Falha ao carregar o PDF.')
+      setLoading(false)
+    },
+    [setLoading],
+  )
+
+  const opt = useMemo(() => {
+    return {
+      cMapUrl: '/bcmaps/',
+      cMapPacked: true,
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url])
-
-  // Re-render on page change using current zoom
-  useEffect(() => {
-    if (!pdfDocRef.current) return
-    renderPage(currentPage, usePDFViewerStore.getState().zoom)
-  }, [currentPage, renderPage])
-
-  // Re-render on zoom change — debounced 300ms
-  useEffect(() => {
-    if (!pdfDocRef.current) return
-    if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
-    zoomTimerRef.current = setTimeout(() => {
-      renderPage(usePDFViewerStore.getState().currentPage, usePDFViewerStore.getState().zoom)
-    }, 300)
-    return () => {
-      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
-    }
-  }, [zoom, renderPage])
-
-  // Re-render on container resize (e.g. sidebar toggle, window resize)
-  useEffect(() => {
-    if (!canvasWrapperRef.current) return
-    const observer = new ResizeObserver(() => {
-      if (!pdfDocRef.current) return
-      if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current)
-      resizeTimerRef.current = setTimeout(() => {
-        renderPage(usePDFViewerStore.getState().currentPage, usePDFViewerStore.getState().zoom)
-      }, 150)
-    })
-    observer.observe(canvasWrapperRef.current)
-    return () => observer.disconnect()
-  }, [renderPage])
-
-  const goToPrev = () => currentPage > 1 && setCurrentPage(currentPage - 1)
-  const goToNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1)
-
-  const decreaseZoom = () => {
-    const z = usePDFViewerStore.getState().zoom
-    usePDFViewerStore.getState().setZoom(Math.max(0.5, Math.round((z - 0.25) * 4) / 4))
-  }
-  const increaseZoom = () => {
-    const z = usePDFViewerStore.getState().zoom
-    usePDFViewerStore.getState().setZoom(Math.min(3.0, Math.round((z + 0.25) * 4) / 4))
-  }
+  }, [])
 
   if (pdfError) {
     return <PDFViewerError message={pdfError} />
   }
 
   return (
-    <div className='flex flex-col w-full'>
-      {/* Controls bar — sticks to the top of the parent scroll container */}
-      <div
-        className={cn(
-          'sticky top-0 left-2 z-10 p-2 max-w-fit rounded-lg',
-          'bg-bg-base/20 backdrop-blur-sm',
-          'flex items-center gap-3',
-        )}>
-        {/* PageController (ref: Figma 50:1837) */}
-        <div className='bg-elevated border border-border-subtle rounded-sm flex items-center gap-2 px-3 py-1.5'>
-          <button
-            type='button'
-            onClick={goToPrev}
-            disabled={currentPage <= 1}
-            aria-label='Página anterior'
-            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
-            ←
-          </button>
-          <span className='font-mono text-label-mono-default text-text-secondary tabular-nums'>
-            {currentPage} / {totalPages || '—'}
-          </span>
-          <button
-            type='button'
-            onClick={goToNext}
-            disabled={currentPage >= totalPages}
-            aria-label='Próxima página'
-            className='text-text-secondary hover:text-text-primary disabled:opacity-30 text-sm min-w-[44px] min-h-[44px] flex items-center justify-center'>
-            →
-          </button>
-        </div>
+    <div className='flex flex-col'>
+      <PdfControls />
 
-        {/* ZoomController (ref: Figma 50:1836) */}
-        <div className='bg-elevated border border-border-subtle rounded-sm flex items-center gap-1 px-2 py-1.5'>
-          <button
-            type='button'
-            onClick={decreaseZoom}
-            aria-label='Reduzir zoom'
-            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
-            −
-          </button>
-          <span className='font-mono text-label-mono-small text-text-muted w-10 text-center tabular-nums'>
-            {Math.round(zoom * 100)}%
-          </span>
-          <button
-            type='button'
-            onClick={increaseZoom}
-            aria-label='Aumentar zoom'
-            className='text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-medium'>
-            +
-          </button>
-        </div>
-      </div>
-
-      {/* Canvas wrapper — fills container width, measured for fit-to-width scale */}
-      <div ref={canvasWrapperRef} className='relative w-full'>
+      <div ref={containerRef} className='relative w-full overflow-x-auto overflow-y-hidden md:overflow-x-hidden'>
         {isLoading && (
           <div className='absolute inset-0 z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm min-h-[400px]'>
             <div className='flex flex-col items-center gap-3'>
@@ -261,12 +198,46 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
             </div>
           </div>
         )}
-        <canvas
-          ref={canvasRef}
-          className='block rounded-sm border border-border-subtle shadow-elevation-1'
-          aria-label={`Página ${currentPage} de ${totalPages}`}
-        />
-        <div ref={textLayerRef} className='pdf-text-layer' aria-hidden='true' />
+
+        <div className='relative'>
+          <div
+            ref={dragRef}
+            className='inline-block'
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px)`,
+              transition: isDragging ? 'none' : 'transform 0.15s ease-out',
+            }}>
+            <Document
+              key={url}
+              file={url}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              loading={<div className='animate-pulse bg-elevated h-[600px]' />}
+              className='inline-block'
+              options={opt}>
+              <Page
+                pageNumber={currentPage}
+                width={containerWidth > 0 ? containerWidth * zoom : undefined}
+                onLoadSuccess={onPageLoadSuccess}
+                renderTextLayer
+                renderAnnotationLayer={false}
+                className='block rounded-sm border border-border-subtle shadow-elevation-1'
+              />
+            </Document>
+          </div>
+
+          <div
+            ref={overlayRef}
+            className='absolute inset-0 z-0 cursor-grab pointer-events-none md:pointer-events-auto'
+            style={{
+              touchAction: 'pan-y',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+            }}
+          />
+        </div>
       </div>
     </div>
   )
