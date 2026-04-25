@@ -1,21 +1,17 @@
 'use client'
-
 import { useContainerWidth } from '@/lib/hooks/use-container-width'
-import { PDFJS_WORKER_SRC } from '@/lib/utils/pdf-worker'
-import type { PDFPageProxy } from 'pdfjs-dist'
+import '@/lib/utils/pdf-worker'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/TextLayer.css'
+import { PageCallback } from 'react-pdf/dist/shared/types.js'
 import { PdfControls } from './pdf-controls'
 import { PDFViewerError } from './pdf-viewer-error'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
-// Per react-pdf docs, the worker must be configured in the same module where
-// Document/Page are imported and rendered. This avoids default value overwrite
-// caused by module execution order in Next.js.
-if (typeof window !== 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC
-}
+import type { PDFDocumentProxy } from 'pdfjs-dist'
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
 
 type PDFViewerProps = {
   url: string
@@ -134,7 +130,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
   }, [containerWidth, contentWidth, contentHeight, pan])
 
   const onDocumentLoadSuccess = useCallback(
-    (pdf: { numPages: number }) => {
+    (pdf: PDFDocumentProxy) => {
       setTotalPages(pdf.numPages)
       setLoading(false)
     },
@@ -142,7 +138,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
   )
 
   const onPageLoadSuccess = useCallback(
-    (page: PDFPageProxy) => {
+    (page: PageCallback) => {
       const viewport = page.getViewport({ scale: 1 })
       setPageSize({ width: viewport.width, height: viewport.height })
 
@@ -176,6 +172,13 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
     [setLoading],
   )
 
+  const opt = useMemo(() => {
+    return {
+      cMapUrl: '/bcmaps/',
+      cMapPacked: true,
+    }
+  }, [])
+
   if (pdfError) {
     return <PDFViewerError message={pdfError} />
   }
@@ -205,11 +208,13 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
               transition: isDragging ? 'none' : 'transform 0.15s ease-out',
             }}>
             <Document
+              key={url}
               file={url}
               onLoadSuccess={onDocumentLoadSuccess}
               onLoadError={onDocumentLoadError}
               loading={<div className='animate-pulse bg-elevated h-[600px]' />}
-              className='inline-block'>
+              className='inline-block'
+              options={opt}>
               <Page
                 pageNumber={currentPage}
                 width={containerWidth > 0 ? containerWidth * zoom : undefined}
