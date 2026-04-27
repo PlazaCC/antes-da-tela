@@ -99,6 +99,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
     setStep(1)
     files.resetFiles()
     progress.resetProgress()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, scriptId])
 
   useEffect(() => {
