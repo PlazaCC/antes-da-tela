@@ -20,7 +20,7 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       ref={ref}
       className={cn('rounded-3xl border p-5 shadow-sm transition-colors', variantClasses[color], className)}
       {...props}>
-      <p className='text-sm uppercase tracking-[0.24em] text-muted-foreground'>{title}</p>
+      <h3 className='text-sm uppercase tracking-[0.24em] text-muted-foreground'>{title}</h3>
       <div className='mt-3 flex items-end gap-3'>
         <span className='text-3xl font-semibold'>{value}</span>
         {variation ? <span className='text-sm'>{variation}</span> : null}
