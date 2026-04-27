@@ -99,8 +99,10 @@ describe('validatePdfStructure', () => {
 })
 
 describe('PDFViewer component', () => {
-  it('exports PDFViewer as a dynamic (SSR-disabled) component', async () => {
+  it('exports PDFViewer as a defined renderable component', async () => {
     const { PDFViewer } = await import('@/components/pdf-viewer/index')
+    // next/dynamic returns an object wrapper — validate it is defined and non-null
     expect(PDFViewer).toBeDefined()
+    expect(PDFViewer).not.toBeNull()
   })
 })

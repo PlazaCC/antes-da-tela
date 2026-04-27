@@ -4,7 +4,7 @@ import '@ungap/with-resolvers'
 
 import { loadPdfjsLib } from '@/lib/utils/pdf'
 import { usePDFViewerStore } from './pdf-viewer-store'
-import { calculateCenteredPan, calculateFitScale, getTopOverlayHeight } from '@/lib/utils/pdf-render'
+import { calculateCenteredPan, calculateFitScale, clampPan, getTopOverlayHeight } from '@/lib/utils/pdf-render'
 import type { PdfjsLib } from '@/lib/utils/pdf'
 import type { PDFDocumentProxy, PDFPageProxy, PageViewport } from 'pdfjs-dist'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -29,6 +29,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
 
   const {
     currentPage,
+    totalPages,
     zoom,
     isLoading,
     setCurrentPage,
@@ -265,13 +266,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
       const nextY = dragStartRef.current.panY + deltaY
 
       const containerHeight = containerRef.current?.clientHeight ?? 0
-      const minX = Math.min(containerWidthRef.current - contentWidth, 0)
-      const minY = Math.min(containerHeight - contentHeight, 0)
-
-      setPan({
-        x: Math.max(Math.min(nextX, 0), minX),
-        y: Math.max(Math.min(nextY, 0), minY),
-      })
+      setPan(clampPan(nextX, nextY, containerWidthRef.current, contentWidth, containerHeight, contentHeight))
     },
     [contentWidth, contentHeight],
   )
@@ -320,7 +315,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
               width: contentWidth ? `${contentWidth}px` : 'auto',
               height: contentHeight ? `${contentHeight}px` : 'auto',
             }}
-            aria-label={`Página ${currentPage} de ${usePDFViewerStore.getState().totalPages}`}
+            aria-label={`Página ${currentPage} de ${totalPages}`}
           />
           <div
             ref={textLayerRef}

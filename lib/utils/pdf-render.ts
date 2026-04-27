@@ -10,7 +10,7 @@ export function getTopOverlayHeight(): number {
   return Math.max(toolbarHeight, headerHeight)
 }
 
-export function calculatePanBounds(
+function calculatePanBounds(
   containerWidth: number,
   contentWidth: number,
   containerHeight: number,

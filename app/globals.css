@@ -25,7 +25,7 @@
 }
 
 .pdf-text-layer ::selection {
-  background: rgba(37, 99, 235, 0.25);
+  background: hsl(var(--color-brand-accent) / 0.25);
   color: transparent;
 }
 
