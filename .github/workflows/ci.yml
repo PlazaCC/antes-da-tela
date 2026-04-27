@@ -51,5 +51,24 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Run tests
-        run: yarn test:run
+      - name: Run tests with coverage
+        run: yarn test:coverage --reporter=verbose 2>&1 | tee /tmp/coverage-output.txt
+
+      - name: Post coverage summary
+        if: always()
+        run: |
+          echo "## Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          grep -A 6 "Coverage summary" /tmp/coverage-output.txt >> $GITHUB_STEP_SUMMARY || echo "Coverage report not available" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          # Test count summary
+          echo "" >> $GITHUB_STEP_SUMMARY
+          grep -E "Test Files|Tests " /tmp/coverage-output.txt | head -2 >> $GITHUB_STEP_SUMMARY || true
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7

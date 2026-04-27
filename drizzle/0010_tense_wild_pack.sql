@@ -1,0 +1,2 @@
+ALTER POLICY "Comments on published scripts are publicly readable" ON "comments" TO public USING (deleted_at is null and exists(select 1 from scripts where id = script_id and status = 'published'));--> statement-breakpoint
+ALTER POLICY "Script files follow script visibility" ON "script_files" TO public USING (exists(select 1 from scripts where id = script_id and (status = 'published' or auth.uid() = author_id)));

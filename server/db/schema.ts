@@ -105,7 +105,7 @@ export const scriptFiles = pgTable(
       as: 'permissive',
       to: 'public',
       for: 'select',
-      using: sql`true`,
+      using: sql`exists(select 1 from scripts where id = script_id and (status = 'published' or auth.uid() = author_id))`,
     }),
     pgPolicy('Authors manage their script files', {
       as: 'permissive',
@@ -171,7 +171,7 @@ export const comments = pgTable(
       as: 'permissive',
       to: 'public',
       for: 'select',
-      using: sql`deleted_at is null`,
+      using: sql`deleted_at is null and exists(select 1 from scripts where id = script_id and status = 'published')`,
     }),
     pgPolicy('Authenticated users can create comments', {
       as: 'permissive',

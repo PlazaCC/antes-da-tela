@@ -31,6 +31,7 @@ export const DragZone = React.forwardRef<HTMLDivElement, DragZoneProps>(
           else if (ref) ref.current = node
           rootRef.current = node
         }}
+        aria-label={isDragActive ? 'Solte os arquivos aqui' : title}
         className={cn(
           'rounded-sm border border-dashed border-border-subtle bg-elevated px-6 py-10 text-center transition cursor-pointer',
           'hover:border-brand-accent/80 hover:bg-surface',
