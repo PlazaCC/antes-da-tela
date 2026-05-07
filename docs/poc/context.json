@@ -20,7 +20,7 @@
     "orm": "Drizzle ORM + postgres driver (prepare: false)",
     "database": "Supabase Postgres — pooler transaction port 6543",
     "storage": "Supabase Storage + Cloudflare CDN",
-    "pdf": "react-pdf (Document + Page, ssr: false)",
+    "pdf": "pdfjs-dist (canvas rendering, SSR disabled via next/dynamic)",
     "state": "Zustand",
     "cache": "TanStack Query + superjson",
     "ui": "shadcn/ui + Radix UI + Tailwind v3",
@@ -96,14 +96,14 @@
       "poc-19 — profile pages",
       "poc-20 — upload wizard redesign"
     ],
-    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-27 ✓ → poc-21 → (parallel: poc-23)",
+    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-27 ✓ → (parallel: poc-21, poc-28) → poc-23",
     "phase2_tasks": [
       {
         "id": "poc-27",
-        "title": "PDF Viewer: migrate to react-pdf",
+        "title": "PDF Viewer: zoom overflow fix + useContainerWidth hook",
         "status": "done",
         "priority": "P0 — bug fix (zoom overflow) + fundação para sincronização áudio-texto futura",
-        "real_scope": "Substituiu implementação manual de canvas/pdfjs-dist por react-pdf (Document + Page). Resolve overflow de zoom. Preserva text layer, Zustand store e CommentsSidebar. Hook useContainerWidth criado.",
+        "real_scope": "Corrigiu overflow de zoom no leitor PDF (pdfjs-dist + canvas). Criou hook useContainerWidth com ResizeObserver para escala responsiva. Mantém Zustand store e CommentsSidebar.",
         "key_files": [
           "components/pdf-viewer/pdf-viewer.tsx",
           "components/pdf-viewer/pdf-viewer-store.ts",
@@ -176,6 +176,32 @@
           "no-PDF state redesenhado"
         ],
         "key_files": ["app/scripts/[id]/script-page-client.tsx", "components/pdf-viewer/comments-sidebar.tsx"]
+      },
+      {
+        "id": "poc-28",
+        "title": "PDF Viewer: Infinite Scroll com Comentários por Página",
+        "status": "pending",
+        "priority": "P1",
+        "figma_nodeId": "51:1007",
+        "task_file": "docs/poc/tasks/poc-28-pdf-viewer-infinite-scroll.md",
+        "real_scope": "Substituir paginação do leitor por scroll contínuo vertical com N canvases (lazy via IntersectionObserver). Layout grid 3fr/2fr por página no desktop (canvas + comentários lado a lado). Mobile: comentários em Collapsible por página. Novo endpoint comments.listAll.",
+        "already_done": [
+          "pdfjs-dist + canvas rendering funcional",
+          "useContainerWidth hook (ResizeObserver)",
+          "Zustand store (currentPage, zoom, isLoading)",
+          "CommentsSidebar com input + reactions",
+          "comments.page_number no schema",
+          "Mobile Sheet + FAB (poc-24)"
+        ],
+        "key_files": [
+          "components/pdf-viewer/pdf-viewer.tsx",
+          "components/pdf-viewer/pdf-viewer-store.ts",
+          "components/pdf-viewer/pdf-controls.tsx",
+          "components/pdf-viewer/comments-sidebar.tsx",
+          "server/api/comments.ts",
+          "server/services/comments.service.ts",
+          "app/(app)/scripts/[slug]/page.tsx"
+        ]
       },
       {
         "id": "poc-23",

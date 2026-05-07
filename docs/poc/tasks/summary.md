@@ -46,6 +46,7 @@ As seguintes telas foram implementadas além do wireframe do Figma e definem o p
 
 ```
 P1 — poc-21: Home (infinite scroll + remover título "Roteiros recentes" + mobile grid)
+P1 — poc-28: PDF Viewer (infinite scroll de páginas + comentários por página lado a lado)
 P2 — poc-23: Busca (alinhamento ao Figma + touch targets + mobile sheet)
 P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA + UX)
 ```
@@ -54,15 +55,16 @@ P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA
 
 | Task                           | Arquivo                                | Prioridade | Status  | Escopo                                                                                       |
 | ------------------------------ | -------------------------------------- | ---------- | ------- | -------------------------------------------------------------------------------------------- |
-| poc-21 — Home: infinite scroll | `poc-21-home-final-design.md`          | **P1**     | pending | Infinite scroll + remover "Roteiros recentes" + grid mobile 2/3/4/5 cols                     |
-| poc-23 — Busca: Figma align    | `poc-23-search-filter-final-design.md` | **P2**     | pending | Cards com cover, link "ver todos", fix apply filter, touch targets, dvh                      |
+| poc-21 — Home: infinite scroll       | `poc-21-home-final-design.md`              | **P1**     | pending | Infinite scroll + remover "Roteiros recentes" + grid mobile 2/3/4/5 cols                                   |
+| poc-28 — PDF Viewer: infinite scroll | `poc-28-pdf-viewer-infinite-scroll.md`     | **P1**     | pending | N canvases com lazy render (IntersectionObserver) + comentários lado a lado por página (grid 3fr/2fr)      |
+| poc-23 — Busca: Figma align          | `poc-23-search-filter-final-design.md`     | **P2**     | pending | Cards com cover, link "ver todos", fix apply filter, touch targets, dvh                                     |
 | poc-25 — Upload Wizard         | `poc-25-upload-wizard-figma-align.md`  | **P4**     | pending | PreviewPanel ao vivo, heading por step, logline counter, cover na revisão, mobile sticky CTA |
 
 ### Completo
 
 | Task   | Descrição                                                                           | Status |
 | ------ | ----------------------------------------------------------------------------------- | ------ |
-| poc-27 | PDF Viewer: migração para react-pdf, resolve zoom overflow                          | ✓ DONE |
+| poc-27 | PDF Viewer: zoom overflow fix + hook useContainerWidth                             | ✓ DONE |
 | poc-26 | Dashboard + Profile flow                                                            | ✓ DONE |
 | poc-25 | Upload Wizard — cover + banner uploads                                              | ✓ DONE |
 | poc-24 | PDF Reader — hero condicional, tabs sidebar, sticky desktop, synopsis, mobile sheet | ✓ DONE |
@@ -74,7 +76,7 @@ P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA
 | Tela            | Implementado                                                                                          | Falta                                               |
 | --------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
 | Home            | Carousel banners, genre chips, grid, featured, filtros, cover nos cards                               | Infinite scroll, remover título "Roteiros recentes" |
-| Tela do Roteiro | Banner (sutil), cover, título, logline, autor, rating, PDF viewer (react-pdf), comments, audio, ações | —                                                   |
+| Tela do Roteiro | Banner (sutil), cover, título, logline, autor, rating, PDF viewer (pdfjs-dist), comments, audio, ações | Infinite scroll de páginas + comentários por página |
 | Modal Preview   | 2 painéis, cover, author, stats, tags, sidebar metadata                                               | —                                                   |
 | Search Sheet    | Bottom sheet, input, resultados texto                                                                 | Cards com cover, link "ver todos"                   |
 | Filter Panel    | Checkboxes gênero + classificação                                                                     | Fix: apply antes de fechar                          |
