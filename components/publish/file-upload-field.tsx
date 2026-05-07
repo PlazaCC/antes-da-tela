@@ -3,7 +3,7 @@
 import { DragZone } from '@/components/drag-zone/drag-zone'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { Trash2 } from 'lucide-react'
+import { AlertCircle, Trash2 } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 interface FileUploadFieldProps {
@@ -14,6 +14,7 @@ interface FileUploadFieldProps {
   error: string | null
   progress: number
   onFileDrop: (file: File) => void
+  onFileReject?: () => void
   onRemove: () => void
   preview?: ReactNode
   className?: string
@@ -30,6 +31,7 @@ export function FileUploadField({
   error,
   progress,
   onFileDrop,
+  onFileReject,
   onRemove,
   preview,
   className,
@@ -60,6 +62,7 @@ export function FileUploadField({
             const file = files[0]
             if (file) onFileDrop(file)
           }}
+          onFilesReject={onFileReject}
           className={cn(error && 'border-state-error/50 bg-state-error/5')}
         />
       ) : (
@@ -90,7 +93,12 @@ export function FileUploadField({
         </p>
       )}
 
-      {error && <p className='text-state-error text-xs font-mono'>{error}</p>}
+      {error && (
+        <p className='flex items-center gap-1.5 text-state-error text-xs'>
+          <AlertCircle className='size-3.5 shrink-0' />
+          {error}
+        </p>
+      )}
 
       {progress > 0 && progress < 100 && (
         <div className='flex flex-col gap-1.5'>

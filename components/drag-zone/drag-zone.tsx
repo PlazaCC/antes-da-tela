@@ -8,14 +8,16 @@ export interface DragZoneProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string
   subtitle?: string
   onFilesDrop?: (files: File[]) => void
+  onFilesReject?: () => void
   accept?: Accept
   maxFiles?: number
 }
 
 export const DragZone = React.forwardRef<HTMLDivElement, DragZoneProps>(
-  ({ className, title = 'Arraste e solte os arquivos aqui', subtitle = 'ou clique para selecionar', onFilesDrop, accept, maxFiles, ...props }, ref) => {
+  ({ className, title = 'Arraste e solte os arquivos aqui', subtitle = 'ou clique para selecionar', onFilesDrop, onFilesReject, accept, maxFiles, ...props }, ref) => {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
       onDrop: onFilesDrop,
+      onDropRejected: onFilesReject,
       accept,
       maxFiles,
     })

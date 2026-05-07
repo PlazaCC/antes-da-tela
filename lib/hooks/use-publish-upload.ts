@@ -49,7 +49,15 @@ export function usePublishUpload() {
       }
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) resolve()
-        else reject(new Error(`Upload falhou: ${xhr.status}`))
+        else {
+          const statusMessages: Record<number, string> = {
+            400: 'Arquivo inválido ou formato não suportado.',
+            403: 'Sem permissão para fazer upload.',
+            413: 'Arquivo excede o tamanho máximo permitido.',
+          }
+          const msg = statusMessages[xhr.status] ?? 'Falha no upload. Tente novamente.'
+          reject(new Error(msg))
+        }
       }
       xhr.onerror = () => reject(new Error('Erro de rede durante o upload'))
       xhr.send(file)
