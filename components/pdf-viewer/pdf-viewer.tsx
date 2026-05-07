@@ -1,51 +1,105 @@
 'use client'
 
-import { useRef } from 'react'
-import { usePDFViewerStore } from './pdf-viewer-store'
-import { usePDFRender } from './use-pdf-render'
-import { usePDFPan } from './use-pdf-pan'
+import { ErrorFallback } from '@/components/error-fallback'
+import { usePdfjs } from '@/lib/hooks/use-pdfjs'
+import type * as PdfjsLib from 'pdfjs-dist'
+import { useEffect, useRef, useState } from 'react'
 import { PdfControls } from './pdf-controls'
-import { PDFViewerError } from './pdf-viewer-error'
+import { usePDFViewerStore } from './pdf-viewer-store'
 
 interface PDFViewerProps {
   url: string
 }
 
 export function PDFViewerInner({ url }: PDFViewerProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const textLayerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const pdfjs = usePdfjs()
+  const { currentPage, zoom, isLoading, setTotalPages, setLoading } = usePDFViewerStore()
+  const [error, setError] = useState<Error | null>(null)
+  const docRef = useRef<PdfjsLib.PDFDocumentProxy | null>(null)
 
-  const { currentPage, totalPages, zoom, isLoading } = usePDFViewerStore()
+  // Scroll container to top when page changes
+  useEffect(() => {
+    containerRef.current?.scrollTo({ top: 0, behavior: 'instant' })
+  }, [currentPage])
 
-  const { pdfError, pageSize, containerWidthRef } = usePDFRender(url, canvasRef, containerRef, textLayerRef)
+  // Load PDF document
+  useEffect(() => {
+    if (!pdfjs || !url) return
 
-  const contentWidth = pageSize.width * zoom
-  const contentHeight = pageSize.height * zoom
+    setLoading(true)
+    setError(null)
 
-  const { pan, isDragging, handlePointerDown, handlePointerMove, handlePointerUp } = usePDFPan(
-    containerRef,
-    containerWidthRef,
-    contentWidth,
-    contentHeight,
-    pageSize,
-  )
+    const loadPdf = async () => {
+      try {
+        const doc = await pdfjs.getDocument(url).promise
+        docRef.current = doc
+        setTotalPages(doc.numPages)
+        setLoading(false)
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err))
+        setError(error)
+        setLoading(false)
+      }
+    }
 
-  if (pdfError) {
-    return <PDFViewerError message={pdfError} />
+    loadPdf()
+
+    return () => {
+      docRef.current?.destroy()
+      docRef.current = null
+    }
+  }, [pdfjs, url, setTotalPages, setLoading])
+
+  // Render current page
+  useEffect(() => {
+    if (!pdfjs || !canvasRef.current || !docRef.current || currentPage < 1) return
+
+    const renderPage = async () => {
+      if (!docRef.current) return
+
+      try {
+        const page = await docRef.current.getPage(currentPage)
+        const canvas = canvasRef.current
+        if (!canvas) return
+
+        const context = canvas.getContext('2d')
+        if (!context) return
+
+        const viewport = page.getViewport({ scale: zoom })
+        canvas.width = viewport.width
+        canvas.height = viewport.height
+
+        await page.render({
+          canvasContext: context,
+          canvas: canvas,
+          viewport: viewport,
+        }).promise
+      } catch (err) {
+        console.error('Error rendering page:', err)
+      }
+    }
+
+    renderPage()
+  }, [pdfjs, currentPage, zoom])
+
+  if (error) {
+    return (
+      <ErrorFallback
+        title='Erro ao carregar PDF'
+        message={`Não foi possível carregar o PDF. ${error.message}`}
+        reset={() => setError(null)}
+        className='min-h-[600px]'
+      />
+    )
   }
 
   return (
     <div className='flex flex-col'>
       <PdfControls />
 
-      <div
-        ref={containerRef}
-        className='relative w-full h-[80vh] overflow-hidden touch-none'
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}>
+      <div ref={containerRef} className='relative w-full h-[80vh] overflow-auto bg-bg-secondary'>
         {isLoading && (
           <div className='absolute inset-0 z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm'>
             <div className='flex flex-col items-center gap-3'>
@@ -57,31 +111,7 @@ export function PDFViewerInner({ url }: PDFViewerProps) {
           </div>
         )}
 
-        <div
-          className='absolute top-0 left-0'
-          style={{
-            transform: `translate(${pan.x}px, ${pan.y}px)`,
-            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-          }}>
-          <canvas
-            ref={canvasRef}
-            className='block rounded-sm border border-border-subtle shadow-elevation-1'
-            style={{
-              width: contentWidth ? `${contentWidth}px` : 'auto',
-              height: contentHeight ? `${contentHeight}px` : 'auto',
-            }}
-            aria-label={`Página ${currentPage} de ${totalPages}`}
-          />
-          <div
-            ref={textLayerRef}
-            className='absolute inset-0 pdf-text-layer pointer-events-none'
-            style={{
-              width: contentWidth ? `${contentWidth}px` : 'auto',
-              height: contentHeight ? `${contentHeight}px` : 'auto',
-            }}
-            aria-hidden='true'
-          />
-        </div>
+        <canvas ref={canvasRef} className='block mx-auto' />
       </div>
     </div>
   )

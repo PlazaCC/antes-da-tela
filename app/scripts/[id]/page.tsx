@@ -3,10 +3,18 @@ import { appRouter } from '@/server/api/root'
 import { createTRPCContext } from '@/trpc/init'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { cache, Suspense } from 'react'
 import { ScriptPageClient } from './script-page-client'
 
 type Props = { params: Promise<{ id: string }> }
+
+// UUID regex pattern (RFC 4122)
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+function validateUUID(id: string): boolean {
+  return UUID_REGEX.test(id)
+}
 
 const getPageData = cache(async (id: string) => {
   const ctx = await createTRPCContext({ headers: await headers() })
@@ -49,6 +57,11 @@ const getPageData = cache(async (id: string) => {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
+
+  if (!validateUUID(id)) {
+    notFound()
+  }
+
   const { script, bannerUrl } = await getPageData(id)
   const title = script?.title ?? 'Roteiro'
   const description = script?.logline ?? 'Leia e discuta roteiros audiovisuais.'
@@ -72,6 +85,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ScriptPage({ params }: Props) {
   const { id } = await params
+
+  if (!validateUUID(id)) {
+    notFound()
+  }
+
   const { script, pdfUrl, audioUrl, bannerUrl, coverUrl, currentUserId } = await getPageData(id)
 
   return (

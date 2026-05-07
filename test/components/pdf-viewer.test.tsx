@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { act, renderHook } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mockDestroy = vi.fn()
 const mockGetDocument = vi.fn().mockReturnValue({
@@ -10,7 +11,6 @@ vi.mock('pdfjs-dist', () => ({
   __esModule: true,
   GlobalWorkerOptions: mockGlobalWorkerOptions,
   getDocument: mockGetDocument,
-  TextLayer: vi.fn(),
 }))
 
 vi.mock('@ungap/with-resolvers', () => ({}))
@@ -18,7 +18,6 @@ vi.mock('@ungap/with-resolvers', () => ({}))
 function makeFile(bytes: number[] = [1, 2, 3]) {
   const buffer = new Uint8Array(bytes).buffer as ArrayBuffer
   const file = new File([buffer], 'test.pdf', { type: 'application/pdf' })
-  // jsdom does not implement File.arrayBuffer — define it directly
   Object.defineProperty(file, 'arrayBuffer', {
     value: vi.fn().mockResolvedValue(buffer),
     writable: true,
@@ -26,34 +25,57 @@ function makeFile(bytes: number[] = [1, 2, 3]) {
   return file
 }
 
-describe('loadPdfjsLib', () => {
+describe('URL.parse polyfill', () => {
+  it('should have URL.parse defined after importing pdf utils', async () => {
+    await import('@/lib/utils/pdf')
+    expect(typeof URL.parse).toBe('function')
+  })
+
+  it('should parse valid URLs using polyfill', async () => {
+    await import('@/lib/utils/pdf')
+    const url = URL.parse('https://example.com/path')
+    expect(url).not.toBeNull()
+    expect(url?.href).toContain('example.com')
+  })
+
+  it('should handle invalid URLs gracefully', async () => {
+    await import('@/lib/utils/pdf')
+    const url = URL.parse('not a valid url')
+    expect(url).toBeNull()
+  })
+
+  it('should parse URLs with base parameter', async () => {
+    await import('@/lib/utils/pdf')
+    const url = URL.parse('path', 'https://example.com/')
+    expect(url).not.toBeNull()
+    expect(url?.href).toContain('example.com')
+  })
+})
+
+describe('getPdfjs', () => {
   beforeEach(() => {
     vi.resetModules()
     mockGlobalWorkerOptions.workerSrc = ''
   })
 
-  it('sets workerSrc to pdf.worker.min.mjs via import.meta.url pattern', async () => {
-    const { loadPdfjsLib } = await import('@/lib/utils/pdf')
-    const lib = await loadPdfjsLib()
-    expect(lib.GlobalWorkerOptions.workerSrc).toContain('pdf.worker.min.mjs')
+  it('returns the pdfjs-dist module', async () => {
+    const { getPdfjs } = await import('@/lib/utils/pdf')
+    const pdfjs = await getPdfjs()
+    expect(pdfjs).toBeDefined()
+    expect(typeof pdfjs.getDocument).toBe('function')
+  })
+
+  it('sets workerSrc to the static worker path', async () => {
+    const { getPdfjs } = await import('@/lib/utils/pdf')
+    await getPdfjs()
+    expect(mockGlobalWorkerOptions.workerSrc).toBe('/pdf.worker.min.mjs')
   })
 
   it('returns the same instance on repeated calls (singleton)', async () => {
-    const { loadPdfjsLib } = await import('@/lib/utils/pdf')
-    const a = await loadPdfjsLib()
-    const b = await loadPdfjsLib()
+    const { getPdfjs } = await import('@/lib/utils/pdf')
+    const a = await getPdfjs()
+    const b = await getPdfjs()
     expect(a).toBe(b)
-  })
-
-  it('only configures workerSrc on the first call', async () => {
-    const { loadPdfjsLib } = await import('@/lib/utils/pdf')
-    await loadPdfjsLib()
-    const firstSrc = mockGlobalWorkerOptions.workerSrc
-    mockGlobalWorkerOptions.workerSrc = 'overwritten-by-test'
-    await loadPdfjsLib()
-    // singleton returns early — workerSrc is NOT reset
-    expect(mockGlobalWorkerOptions.workerSrc).toBe('overwritten-by-test')
-    expect(firstSrc).toContain('pdf.worker.min.mjs')
   })
 })
 
@@ -98,10 +120,25 @@ describe('validatePdfStructure', () => {
   })
 })
 
+describe('usePdfjs hook', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    mockGlobalWorkerOptions.workerSrc = ''
+  })
+
+  it('starts as null then resolves to pdfjs instance', async () => {
+    const { usePdfjs } = await import('@/lib/hooks/use-pdfjs')
+    const { result } = renderHook(() => usePdfjs())
+    expect(result.current).toBeNull()
+    await act(async () => {})
+    expect(result.current).not.toBeNull()
+    expect(typeof result.current?.getDocument).toBe('function')
+  })
+})
+
 describe('PDFViewer component', () => {
   it('exports PDFViewer as a defined renderable component', async () => {
     const { PDFViewer } = await import('@/components/pdf-viewer/index')
-    // next/dynamic returns an object wrapper — validate it is defined and non-null
     expect(PDFViewer).toBeDefined()
     expect(PDFViewer).not.toBeNull()
   })
