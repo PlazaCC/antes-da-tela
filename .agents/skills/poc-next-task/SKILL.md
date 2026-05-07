@@ -22,6 +22,18 @@ For a quick human-readable summary, also consult `docs/poc/tasks/summary.md`.
 
 ---
 
+## State Sync
+
+Before picking the next task, reconcile context.json with task files:
+
+1. For each task in `phase2_tasks[]` where `status ≠ "done"`, scan its `task_file` header.
+2. If the task file shows "CONCLUÍDO ✓" or `Status: done/DONE`, update `context.json` status to `"done"` before continuing.
+3. Task files are authoritative for completion state — context.json is the index.
+
+This prevents picking tasks already completed when context.json is stale.
+
+---
+
 ## Design Source
 
 Figma via MCP FramLink is the only source of truth.
@@ -40,7 +52,12 @@ Figma via MCP FramLink is the only source of truth.
 1. Read task file — capture `objective`, `files_to_create/update`, component refs, acceptance items
 2. For design tasks → call `mcp_framelink_fig_get_figma_data` with only the nodeIds in scope
 3. Implement — minimal, focused changes to listed files only
-4. Update Plaza MCP: `pending → in_progress` on start; `in_progress → done` on completion
+4. Update status in TWO places on every transition:
+   - **context.json** `phase2_tasks[].status`: `"pending"` → `"in_progress"` on start; `"in_progress"` → `"done"` on completion
+   - **Plaza MCP**: `pending → in_progress` on start; `in_progress → done` on completion
+   On completion also:
+   - Update `execution_order` to add `✓` suffix to this task ID (e.g. `poc-28` → `poc-28 ✓`)
+   - Update task file header: prepend "CONCLUÍDO ✓" to title, set `Status: done`, add `Concluído em: YYYY-MM-DD`
 5. Mark acceptance items verifiably complete (`- [ ]` → `- [x]`)
 6. Output commit suggestion — **never run `git commit` or `git push`**
 

@@ -167,6 +167,24 @@ Files changed: <N> (<list file names>)
 **Ready for PR?** YES / NO — <one sentence reason>
 ```
 
+Always end the report with one of these two verdict blocks.
+
+```
+## VERDICT: APPROVED
+```
+
+or
+
+```
+## VERDICT: NEEDS_FIXES
+- [ ] [FILE:LINE] <what to fix>
+- [ ] [FILE:LINE] <what to fix>
+```
+
+APPROVED means zero Critical issues and all validators passed.
+NEEDS_FIXES means at least one Critical issue or a validator failure.
+Important Issues alone do not block approval but must appear in the report.
+
 ---
 
 ## Anti-Hallucination Rules
@@ -176,6 +194,9 @@ Files changed: <N> (<list file names>)
 - **Always** include `[FILE:LINE]` for every issue.
 - If you're unsure whether a pattern is a problem, say "Unverified — needs human review at [FILE:LINE]."
 - Do not invent rules not present in CLAUDE.md or `.claude/rules/`.
+- **Confidence threshold:** Only mark something as Critical or Important when you can point to the exact line and explain the problem clearly. If uncertain, mark it as Minor or note it as unverified.
+- **Diff scope:** Only flag code that appears in the current diff. Pre-existing code is not in scope unless it was directly changed in this branch.
+- **No regression:** Lines not touched by this branch are not findings, even if they look wrong.
 
 ---
 
@@ -207,6 +228,14 @@ Files changed: <N> (<list file names>)
 
 ## Integration
 
-**Called before:** `finishing-a-development-branch` — run code-review, fix issues, then create PR.
+**Called after:** `/create-pr` opens the PR, then this skill reviews it.
 
-**After completing review:** If issues found, fix them in the branch, then re-run this skill to confirm no regressions before creating the PR.
+**Review cycle:**
+
+`/create-pr` runs first. Then `/code-review` reviews the branch.
+
+If the verdict is NEEDS_FIXES:
+1. Fix every item in the list.
+2. Run `/create-pr` again to update the PR.
+3. Run `/code-review` again.
+4. Repeat until the verdict is APPROVED.

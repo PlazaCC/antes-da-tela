@@ -167,6 +167,24 @@ Files changed: <N> (<list file names>)
 **Ready for PR?** YES / NO — <one sentence reason>
 ```
 
+Always end the report with one of these two VERDICT blocks — no exceptions:
+
+```
+## VERDICT: APPROVED
+```
+
+or
+
+```
+## VERDICT: NEEDS_FIXES
+- [ ] [FILE:LINE] <what to fix>
+- [ ] [FILE:LINE] <what to fix>
+```
+
+`APPROVED` = zero Critical issues + all validators pass.
+`NEEDS_FIXES` = any Critical issue OR any validator failure.
+Important Issues alone do not block APPROVED, but must be listed.
+
 ---
 
 ## Anti-Hallucination Rules
@@ -176,6 +194,9 @@ Files changed: <N> (<list file names>)
 - **Always** include `[FILE:LINE]` for every issue.
 - If you're unsure whether a pattern is a problem, say "Unverified — needs human review at [FILE:LINE]."
 - Do not invent rules not present in CLAUDE.md or `.claude/rules/`.
+- **Confidence threshold:** Only include in Critical or Important when you are certain (high confidence, traceable to a specific line). When uncertain → downgrade to Minor or write "Unverified — needs human review at [FILE:LINE]."
+- **Diff scope:** Only flag code that appears in `git diff main...HEAD`. Never flag pre-existing code unless it was directly modified in this branch.
+- **No regression:** If a line was not touched by this branch, it is not a finding — even if it looks wrong.
 
 ---
 
@@ -207,6 +228,16 @@ Files changed: <N> (<list file names>)
 
 ## Integration
 
-**Called before:** `finishing-a-development-branch` — run code-review, fix issues, then create PR.
+**Called after:** `/create-pr` — the PR is opened first, then this skill reviews it.
 
-**After completing review:** If issues found, fix them in the branch, then re-run this skill to confirm no regressions before creating the PR.
+**PR → Review Cycle:**
+
+`/create-pr` runs first, then `/code-review` reviews the PR branch.
+
+If VERDICT is `NEEDS_FIXES`:
+1. Fix every item in the NEEDS_FIXES list.
+2. Run `/create-pr` again (updates the PR with the new commits).
+3. Re-run `/code-review` to validate.
+4. Repeat until VERDICT is `APPROVED`.
+
+The cycle is: create-pr → code-review → fix → create-pr → code-review → … → APPROVED.

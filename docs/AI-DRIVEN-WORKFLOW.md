@@ -36,8 +36,10 @@ The delivery cycle follows the same sequence.
 1. `/brainstorm` refines the idea when a new task must be created or when the current direction is still unclear.
 2. `/create-poc-task` creates the task after the idea is ready.
 3. `/poc-next-task` executes the next available task.
-4. `/code-review` reviews what was implemented.
-5. `/create-pr` creates the pull request after the reviewed change is ready.
+4. `/create-pr` creates the pull request from the current branch.
+5. `/code-review` reviews the PR branch.
+   - If there are fixes needed, address them and run both steps again.
+   - Repeat until the review passes.
 
 ## Optional Design Step
 
@@ -54,8 +56,10 @@ Tasks already exist.
 1. Run `/poc-next-task`.
 2. Implement the selected task.
 3. Run `/poc-refine-design` if the task needs Figma refinement.
-4. Run `/code-review`.
-5. Run `/create-pr`.
+4. Run `/create-pr`.
+5. Run `/code-review`.
+   - If the review passes, the work is done.
+   - If there are fixes, address them and go back to step 4.
 
 ### Flow B
 
@@ -65,8 +69,10 @@ No tasks exist.
 2. Run `/create-poc-task`.
 3. Run `/poc-next-task`.
 4. Run `/poc-refine-design` if the task needs Figma refinement.
-5. Run `/code-review`.
-6. Run `/create-pr`.
+5. Run `/create-pr`.
+6. Run `/code-review`.
+   - If the review passes, the work is done.
+   - If there are fixes, address them and go back to step 5.
 
 ## Skill Roles
 
@@ -78,9 +84,9 @@ No tasks exist.
 
 `/poc-refine-design` improves the current task when design work needs another pass with Figma.
 
-`/code-review` checks implementation quality before the change moves forward.
+`/create-pr` opens the pull request from the current branch.
 
-`/create-pr` formalizes the reviewed change as a pull request.
+`/code-review` reviews the PR branch and signals whether it is ready or needs fixes. Cycles with `/create-pr` until the review passes.
 
 ## Operating Rule
 
@@ -93,9 +99,9 @@ If there is a task, execute it.
 
 If the implementation needs design alignment, refine the design.
 
-If the implementation is complete, review it.
+If the implementation is complete, open the pull request.
 
-If the review is complete, open the pull request.
+If the review finds issues, fix them and open a new pull request. Repeat until the review passes.
 
 ## Summary
 

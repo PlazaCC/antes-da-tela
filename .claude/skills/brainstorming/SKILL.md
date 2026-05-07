@@ -71,24 +71,29 @@ Check whether the idea is already covered by an existing task. If it is, say so 
 ## Process
 
 1. **Read the current workflow and backlog**
-  - Understand where the request fits in the current project phase.
-  - Look for overlaps, dependencies, and missing pieces.
+
+- Understand where the request fits in the current project phase.
+- Look for overlaps, dependencies, and missing pieces.
 
 2. **Ask clarifying questions one at a time**
-  - Focus on user value, constraints, urgency, dependencies, and success criteria.
-  - Prefer multiple choice when possible.
+
+- Focus on user value, constraints, urgency, dependencies, and success criteria.
+- Prefer multiple choice when possible.
 
 3. **Propose 2-3 task directions**
-  - Present trade-offs clearly.
-  - Lead with your recommended option and explain why it best fits the project now.
+
+- Present trade-offs clearly.
+- Lead with your recommended option and explain why it best fits the project now.
 
 4. **Narrow to the best next task**
-  - Prefer the smallest valuable task that can move the POC forward cleanly.
-  - If the request is too large, split it into multiple future task candidates and only recommend the next one.
+
+- Prefer the smallest valuable task that can move the POC forward cleanly.
+- If the request is too large, split it into multiple future task candidates and only recommend the next one.
 
 5. **Present a `/create-poc-task`-ready payload**
-  - Package the chosen direction so it can be turned into a task without more ideation.
-  - Wait for approval or corrections.
+
+- Package the chosen direction so it can be turned into a task without more ideation.
+- Wait for approval or corrections.
 
 ## Output Contract
 
@@ -101,28 +106,36 @@ Priority: P0 | P1 | P2 | P3 | P4
 Description: <1-3 sentences>
 
 Why now:
+
 - <dependency, opportunity, or backlog reason>
 
 Already done:
+
 - <known existing work>
 
 Gaps:
+
 - <what is missing>
 
 Key files:
+
 - <likely files or areas>
 
 Figma node id:
+
 - <optional>
 
 Mobile specs:
+
 - <optional>
 
 Suggested acceptance criteria:
+
 - <criterion>
 - <criterion>
 
 Next step:
+
 - Run `/create-poc-task` with this payload.
 ```
 
