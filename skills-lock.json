@@ -37,7 +37,7 @@
       "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "brainstorming": {
-      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.claude\\skills\\brainstorming",
       "sourceType": "local",
       "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
@@ -191,6 +191,11 @@
       "sourceType": "local",
       "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
+    "poc-refine-design": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills\\poc-refine-design",
+      "sourceType": "local",
+      "computedHash": "860987b83958a7c3c6f90a80188634bae22c717873c26ff52032451eb14f92ec"
+    },
     "react-query-classic-migration": {
       "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
       "sourceType": "local",
@@ -205,6 +210,11 @@
       "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
       "sourceType": "local",
       "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "refactor-plan": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills\\refactor-plan",
+      "sourceType": "local",
+      "computedHash": "d71263641d76cbbccdcdb58177e10ff9695353b519d5eb11455a624107b8a27f"
     },
     "requesting-code-review": {
       "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
