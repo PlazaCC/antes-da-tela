@@ -7,14 +7,14 @@ description: >-
 user-invocable: true
 ---
 
-# Skill: create-agent-rules (Claude)
+# Skill: create-agent-rules
 
 Resumo
 
 - Propósito: automatizar a criação de arquivos de "rules" e guidelines para agentes,
   seguindo as melhores práticas do VS Code Chat nativo e as convenções do repositório.
-- Onde escrever: `.claude/rules/` para regras dirigidas ao Claude/Code; e
-  `.agents/skills/<name>/SKILL.md` para skills que devam ser invocadas no VS Code Chat.
+- Onde escrever: `.agents/skills/<name>/SKILL.md` (skill de automação) e, quando
+  aplicável, templates em `.claude/rules/` ou `.agents/rules/`.
 
 Quando usar
 

@@ -2,69 +2,109 @@
   "version": 1,
   "skills": {
     "adapter-aws-lambda": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "7623ff9a26f90994a5cc7725f552c6295ac2367f515859816072e33e340f853b"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "adapter-express": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "dfd3cf56bf78cebf6d2196d5cd0c38cc7ce33fcef6048862ca68a69135cc1f3a"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "adapter-fastify": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "d5c1d3ed8b0cd34e722e9f4a982d9314477beb4b13f4bdeda306ec0fad96e6e3"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "adapter-fetch": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "e4fd3631b00ee54810414a2b82b8b0d895503d6c44b9c51b0ce403dd05d8a116"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "adapter-standalone": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "4bb04e7d2b02e73bc46432e1cbde584b317c370a6f103d33d5c39ff4433a192c"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "add-dependency": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "auth": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "d840a0dbaeee1f161cc41c552baab5c55f4b2677faa0dbabcc4b20cb54ee25b9"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "brainstorming": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "f483c304fcde060211ffae00f49bb728536e7e7613c99db45b5b924d9fc17243"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "caching": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "22211fdb7ea9cf4852693c65649cc8de5da281bc18890b1514d9b1baebe1295b"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "check-env": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "client-setup": {
-      "source": "@trpc/client",
-      "sourceType": "node_modules",
-      "computedHash": "88a88d6eace925785968014e8d2ddc0ae96d1d70cde28af4e2788825d916ae10"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "code-review": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "create-agent-rules": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "create-agent-skill": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "create-poc-task": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "create-pr": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "db-migrate": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "dispatching-parallel-agents": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "e21044ae7496fc285f1df9ff3fb518a3a20bea6f5216c1f59f4987e12c769a0a"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "dotenv": {
-      "source": "dotenv",
-      "sourceType": "node_modules",
-      "computedHash": "7580a9737aebb75d98d174bed9b3545586db2d3a112f0fe69c8b79eecfd5ce99"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "dotenvx": {
-      "source": "dotenv",
-      "sourceType": "node_modules",
-      "computedHash": "851072ff03649019eeadb9780b87eacdc3e0b39b8407105354144f692ebc699b"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "error-handling": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "140c1ea11d7922196a5d3b21a6283f1488a18d760402d347fb0dced46a4a976a"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "executing-plans": {
       "source": "obra/superpowers",
@@ -72,164 +112,189 @@
       "computedHash": "2f709d1a2c7564f8ce6a9bb707e7f5451117ba80f8e8e2302662c29bc61246a6"
     },
     "figma-implement-design": {
-      "source": "figma/mcp-server-guide",
-      "sourceType": "github",
-      "computedHash": "adad024a37deea876a5ef9572e16224dc85d88fe0d8451773c75d55e9ea0d854"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "find-skills": {
-      "source": "vercel-labs/skills",
-      "sourceType": "github",
-      "computedHash": "9e1c8b3103f92fa8092568a44fe64858de7c5c9dc65ce4bea8f168080e889cfd"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "finishing-a-development-branch": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "9edba9a38684c060fdc38290f640e1dc0c37de286723ac9be73bacacf7cd6f3d"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "frontend-design": {
-      "source": "anthropics/skills",
-      "sourceType": "github",
-      "computedHash": "516bd2154eb843a8240e43d5b285229129853114ad7075a5e141e1c08e408c84"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "github-actions-docs": {
-      "source": "xixu-me/skills",
-      "sourceType": "github",
-      "computedHash": "ead3fa2aff18e829c468dee593e1dc897aa95dc7a07d9ff8ff9f30c296b19af8"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "links": {
-      "source": "@trpc/client",
-      "sourceType": "node_modules",
-      "computedHash": "49d9166ba6fcd32b68252bdb419581da39426dc7ba141921001e9460ac5d1666"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "middlewares": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "012024d3aa6bd2fa4747ff5e220b9bc4d0d13046811b91b6aa77d4c01a7a94e6"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "new-drizzle-table": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "new-page": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "new-shadcn-component": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "new-trpc-router": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "next-best-practices": {
-      "source": "vercel-labs/next-skills",
-      "sourceType": "github",
-      "computedHash": "db85045827ebeb83ac8dbc992b69188755eeb74dcf01cbf5e694d58aa494a106"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "nextjs": {
-      "source": "vercel-labs/vercel-plugin",
-      "sourceType": "github",
-      "computedHash": "d3a48eada4dbae95856d643a0c9c54a38974ee7896a4d34f93aead13d26c343a"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "nextjs-supabase-auth": {
-      "source": "sickn33/antigravity-awesome-skills",
-      "sourceType": "github",
-      "computedHash": "f2f8b00877ed450e4b5d1e040b52c1c4d312ec2264c75d2248253814c2a9e9ba"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "non-json-content-types": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "53a4eab51e5a7524c9cdc5809cf62215331b9ec1338413e68bf6f825b73df271"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "poc-next-task": {
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "react-query-classic-migration": {
-      "source": "@trpc/tanstack-react-query",
-      "sourceType": "node_modules",
-      "computedHash": "29f94294eff7c8f8a3af1642fd5de4e237abdfe08152b996a776c1dfd05a08eb"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "react-query-setup": {
-      "source": "@trpc/tanstack-react-query",
-      "sourceType": "node_modules",
-      "computedHash": "b6069de9fbc894d8f5134db0b69ae72ec99dd569dc9cd0bd0406ddbdbbaaf340"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "receiving-code-review": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "2760c85d4f4117b0006e7ba755f4bbd61f8f4c185f347999763c97f507274e30"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "requesting-code-review": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "246e65cd72a7e360987d94e6c61564ce6d71c6361d1784d529d70e4cbbe8522d"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "server-setup": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "6da8ce9de5bf6e532aabb6a951c4ca5b36a9f30279a5e551c4f567cf64b7e338"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "server-side-calls": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "e414acd2a77c03a38b4f3580ad90e9a0d5f8e538377c722a453d91fb37e1dc8f"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "service-oriented-architecture": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "08fec569e0380ea01b0b02c9b77051ac9cd2585926af9c91c819592dcff955bc"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "shadcn": {
-      "source": "shadcn/ui",
-      "sourceType": "github",
-      "computedHash": "642a177bee320618caa49f5106cadb4e7594c606e867f61ba7b56d19cf745cd5"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "simplify": {
-      "source": "brianlovin/claude-config",
-      "sourceType": "github",
-      "computedHash": "80ddf9f6ae4ad33f03b4e84e183c9458e19f6e13d85129261394634529aeb4b8"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "subagent-driven-development": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "a197f8e5fba5ea59013e1adbaa90dd42db35de8f074feca200c8038de584a83b"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "subscriptions": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "416e4fe8c3c9869f489f72de77f9c9fb9bbfd6a0b9697fe18851d84d5b50e4af"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "supabase": {
-      "source": "supabase/agent-skills",
-      "sourceType": "github",
-      "computedHash": "3bc4f56943a13f4fe355742a4b3b30c56008e6d265ae71f19c592410b5f5a01f"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "supabase-postgres-best-practices": {
-      "source": "supabase/agent-skills",
-      "sourceType": "github",
-      "computedHash": "8e41c7417894e6f394614ee7ca3ee5322b1e58d890255d441f42dea98732597f"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "superjson": {
-      "source": "@trpc/client",
-      "sourceType": "node_modules",
-      "computedHash": "93855915aff4f8e6a34bb9eb2b7311d1700a4ed9e8a92a7755e366863cfea432"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "systematic-debugging": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "72e9ab72627e4fd8ed26a582e82309a98ecdc4f6e1c99418430ac05682c9e91d"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "tailwind-design-system": {
-      "source": "wshobson/agents",
-      "sourceType": "github",
-      "computedHash": "f54f39ce967af3a4bba1f662c3600f0253467508d5fbbc7c545c67e102da2253"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "test-driven-development": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "126f1ebf6ccd414f42544f6e83d8cc5adb089e1108eaffb7c400701e37eecd9f"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "trpc-router": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "24f4a2b02946d1037e9cfdaedd309f34e06265b41b98548d82a6fa97c1ccff8b"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "typescript-advanced-types": {
-      "source": "wshobson/agents",
-      "sourceType": "github",
-      "computedHash": "ee8377c523a911be41c31037b477805773ca5ab5ade181e44ca7dd3cd8df6692"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "ui-ux-pro-max": {
-      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
-      "sourceType": "github",
-      "computedHash": "1d70f4e82bae766934977ea6fb32623358e2ecb562926f7d2cd8ca6c31024cc5"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "using-git-worktrees": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "52bbb4b6e80918e83e92a1514f3b3757712154c2a8a42de24919e48a794c54fc"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "using-superpowers": {
       "source": "obra/superpowers",
@@ -237,39 +302,39 @@
       "computedHash": "e0eced9fbb205c212f420aded0c6f2bf5d5f059254679a8459b4fe72390160be"
     },
     "validators": {
-      "source": "@trpc/server",
-      "sourceType": "node_modules",
-      "computedHash": "4502c88cbc8187e2440abf068d49878042919dfbbbf4a01803b87e2a084c8380"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "vercel-react-best-practices": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "computedHash": "43ca6c197f8ec13055079da7053232d477068b03ca443f9ac1bc819b95cdd432"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "verification-before-completion": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "9b446f0c7fe1cfb560b1d34439523b1a76d5f177290007b2c053a1c749a4a8ba"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "vitest": {
-      "source": "onmax/nuxt-skills",
-      "sourceType": "github",
-      "computedHash": "4180d5256b0da05f5d39f15bc9a0850d67fe87e8bf7d7bd6ff28f0fb795dce5c"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "web-design-guidelines": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "writing-plans": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "bfaed11054ad8021c66860244e2d2e0d1eca483ae9f5fbfcb956e99c61f5c3d7"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "writing-skills": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "b0e3065034610df41b9119445b5fd052042752bb3e598ca66aea2403a7c7685e"
+      "source": "C:\\Development\\plaza\\antes-da-tela\\.agents\\skills",
+      "sourceType": "local",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   }
 }

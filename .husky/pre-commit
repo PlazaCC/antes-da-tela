@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# Pre-commit hook: Verify code quality and sync agent skills
+# Runs: type-check → lint → skills:sync
+# Aborts commit if any check fails
+
+echo "🔍 Running pre-commit verification..."
+
+# 1. Type check (TypeScript)
+echo ""
+echo "📝 Checking TypeScript types..."
+yarn type-check
+if [ $? -ne 0 ]; then
+  echo "❌ Type check failed. Commit aborted."
+  exit 1
+fi
+echo "✅ Types valid"
+
+# 2. Linting (ESLint)
+echo ""
+echo "🔎 Running ESLint..."
+yarn lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Commit aborted."
+  exit 1
+fi
+echo "✅ Linting passed"
+
+# 3. Skills sync
+echo ""
+# Check if .agents/skills/ was modified in staging area
+git diff --cached --name-only | grep -q "^\.agents/skills/" 2>/dev/null
+
+if [ $? -eq 0 ]; then
+  echo "🔄 Changes detected in .agents/skills/ — syncing to all agents..."
+
+  # Sync skills to all agents
+  yarn skills:sync
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Skills sync failed. Commit aborted."
+    exit 1
+  fi
+
+  # Add synced directories back to staging
+  git add .claude/skills/ .cursor/skills/ .agents/skills/ 2>/dev/null || true
+  echo "✅ Skills synced and staged"
+fi
+
+echo ""
+echo "✨ All checks passed! Commit ready to proceed."

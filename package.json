@@ -26,7 +26,11 @@
     "test:ci": "vitest run --reporter=dot",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "skills": "npx skills"
+    "skills": "npx skills",
+    "skills:sync": "node scripts/sync-skills.js",
+    "skills:sync:force": "node scripts/sync-skills.js --force",
+    "skills:sync:check": "node scripts/sync-skills.js && git diff --quiet || (echo 'Skills are out of sync. Run: yarn skills:sync' && exit 1)",
+    "prepare": "husky install"
   },
   "engines": {
     "node": ">=24.0.0",
