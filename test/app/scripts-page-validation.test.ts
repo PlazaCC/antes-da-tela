@@ -1,11 +1,5 @@
+import { validateUUID } from '@/lib/validators/uuid'
 import { describe, expect, it } from 'vitest'
-
-// UUID validation regex from app/scripts/[id]/page.tsx
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
-function validateUUID(id: string): boolean {
-  return UUID_REGEX.test(id)
-}
 
 describe('UUID Validation', () => {
   it('should accept valid UUIDs', () => {

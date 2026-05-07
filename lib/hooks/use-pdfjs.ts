@@ -8,7 +8,17 @@ export function usePdfjs() {
   const [pdfjs, setPdfjs] = useState<typeof PdfjsLib | null>(null)
 
   useEffect(() => {
-    getPdfjs().then(setPdfjs)
+    let cancelled = false
+
+    getPdfjs().then((result) => {
+      if (!cancelled) {
+        setPdfjs(result)
+      }
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return pdfjs
