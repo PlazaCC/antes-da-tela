@@ -17,11 +17,25 @@ interface ScriptCardBaseProps {
   pages: number | null
   status?: 'publicado' | 'rascunho' | 'privado'
   coverUrl?: string
-  onPreview?: () => void
 }
 
-export type ScriptCardProps = ScriptCardBaseProps & { className?: string } & 
-  ({ href: string } | { href?: never; onPreview?: () => void })
+type ScriptCardAnchorProps = ScriptCardBaseProps &
+  Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof ScriptCardBaseProps | 'href'> & {
+    href: string
+    onPreview?: never
+  }
+
+type ScriptCardDivProps = ScriptCardBaseProps &
+  Omit<React.HTMLAttributes<HTMLDivElement>, keyof ScriptCardBaseProps | 'href'> & {
+    href?: never
+    onPreview?: () => void
+  }
+
+export type ScriptCardProps = ScriptCardAnchorProps | ScriptCardDivProps
+
+function isAnchorProps(props: ScriptCardProps): props is ScriptCardAnchorProps {
+  return typeof props.href === 'string'
+}
 
 // ─── Private content component ────────────────────────────────────────────────
 
@@ -94,20 +108,33 @@ const baseClasses =
   'group flex flex-col gap-3 rounded-sm border border-border bg-surface p-0 transition-all duration-150 hover:border-brand-accent hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base w-full'
 
 export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((props, ref) => {
-  const { 
-    title, 
-    author, 
-    genre, 
-    rating, 
-    ratingTotal, 
-    pages, 
-    status, 
-    coverUrl, 
-    onPreview,
-    className,
-    ...rest 
-  } = props
-  
+  if (isAnchorProps(props)) {
+    const { title, author, genre, rating, ratingTotal, pages, status, coverUrl, href, ...anchorProps } = props
+    const content = (
+      <ScriptCardContent
+        title={title}
+        author={author}
+        genre={genre}
+        rating={rating}
+        ratingTotal={ratingTotal}
+        pages={pages}
+        status={status}
+        coverUrl={coverUrl}
+      />
+    )
+
+    return (
+      <a
+        ref={ref as React.ForwardedRef<HTMLAnchorElement>}
+        href={href}
+        {...anchorProps}
+        className={cn(baseClasses, 'cursor-pointer', anchorProps.className)}>
+        {content}
+      </a>
+    )
+  }
+
+  const { title, author, genre, rating, ratingTotal, pages, status, coverUrl, onPreview, ...divProps } = props
   const content = (
     <ScriptCardContent
       title={title}
@@ -118,42 +145,39 @@ export const ScriptCard = React.forwardRef<ScriptCardElement, ScriptCardProps>((
       pages={pages}
       status={status}
       coverUrl={coverUrl}
-      onPreview={onPreview}
     />
   )
 
-  // ── Anchor variant ────────────────────────────────────────────────────────
-  if ('href' in props && props.href) {
-    return (
-      <a
-        ref={ref as React.ForwardedRef<HTMLAnchorElement>}
-        href={props.href}
-        className={cn(baseClasses, 'cursor-pointer', className)}
-        {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
-        {content}
-      </a>
-    )
-  }
+  const handleClick: React.MouseEventHandler<HTMLDivElement> | undefined =
+    onPreview || divProps.onClick
+      ? (event) => {
+          divProps.onClick?.(event)
+          if (!event.defaultPrevented) {
+            onPreview?.()
+          }
+        }
+      : undefined
 
-  // ── Div (interactive) variant ─────────────────────────────────────────────
+  const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> | undefined = onPreview
+    ? (event) => {
+        divProps.onKeyDown?.(event)
+        if (event.defaultPrevented) return
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onPreview()
+        }
+      }
+    : divProps.onKeyDown
+
   return (
     <div
       ref={ref as React.ForwardedRef<HTMLDivElement>}
-      className={cn(baseClasses, onPreview && 'cursor-pointer', className)}
-      onClick={onPreview}
-      onKeyDown={
-        onPreview
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onPreview()
-              }
-            }
-          : undefined
-      }
-      role={onPreview ? 'button' : undefined}
-      tabIndex={onPreview ? 0 : undefined}
-      {...(rest as React.HTMLAttributes<HTMLDivElement>)}>
+      {...divProps}
+      className={cn(baseClasses, onPreview && 'cursor-pointer', divProps.className)}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role={onPreview ? (divProps.role ?? 'button') : divProps.role}
+      tabIndex={onPreview ? (divProps.tabIndex ?? 0) : divProps.tabIndex}>
       {content}
     </div>
   )

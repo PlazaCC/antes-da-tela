@@ -31,6 +31,7 @@ export function PDFViewerInner({ url }: PDFViewerProps): ReactElement {
   const [isDocumentReady, setIsDocumentReady] = useState(false)
   const docRef = useRef<PdfjsLib.PDFDocumentProxy | null>(null)
   const renderTaskRef = useRef<ReturnType<PdfjsLib.PDFPageProxy['render']> | null>(null)
+  const renderRequestIdRef = useRef(0)
 
   useEffect(() => {
     containerRef.current?.scrollTo({ top: 0 })
@@ -44,6 +45,7 @@ export function PDFViewerInner({ url }: PDFViewerProps): ReactElement {
     setError(null)
     setIsDocumentReady(false)
     setCurrentPage(1)
+    setTotalPages(0)
 
     async function loadPdf(): Promise<void> {
       try {
@@ -76,6 +78,7 @@ export function PDFViewerInner({ url }: PDFViewerProps): ReactElement {
       return
 
     let isDisposed = false
+    const renderRequestId = ++renderRequestIdRef.current
 
     async function cancelActiveRender(): Promise<void> {
       const activeTask = renderTaskRef.current
@@ -99,12 +102,12 @@ export function PDFViewerInner({ url }: PDFViewerProps): ReactElement {
       if (!docRef.current) return
 
       await cancelActiveRender()
-      if (isDisposed || !docRef.current) return
+      if (isDisposed || !docRef.current || renderRequestId !== renderRequestIdRef.current) return
 
       let renderTask: ReturnType<PdfjsLib.PDFPageProxy['render']> | null = null
       try {
         const page = await docRef.current.getPage(currentPage)
-        if (isDisposed) return
+        if (isDisposed || renderRequestId !== renderRequestIdRef.current) return
 
         const canvas = canvasRef.current
         if (!canvas) return
@@ -115,8 +118,15 @@ export function PDFViewerInner({ url }: PDFViewerProps): ReactElement {
         const baseViewport = page.getViewport({ scale: 1 })
         const fitWidthScale = containerWidth / baseViewport.width
         const viewport = page.getViewport({ scale: fitWidthScale * zoom })
-        canvas.width = viewport.width
-        canvas.height = viewport.height
+        const devicePixelRatio = window.devicePixelRatio || 1
+        canvas.width = Math.floor(viewport.width * devicePixelRatio)
+        canvas.height = Math.floor(viewport.height * devicePixelRatio)
+        canvas.style.width = `${viewport.width}px`
+        canvas.style.height = `${viewport.height}px`
+        context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0)
+        context.clearRect(0, 0, viewport.width, viewport.height)
+
+        if (isDisposed || renderRequestId !== renderRequestIdRef.current) return
 
         renderTask = page.render({
           canvasContext: context,
@@ -140,6 +150,7 @@ export function PDFViewerInner({ url }: PDFViewerProps): ReactElement {
 
     return () => {
       isDisposed = true
+      renderRequestIdRef.current += 1
       renderTaskRef.current?.cancel()
       renderTaskRef.current = null
     }
