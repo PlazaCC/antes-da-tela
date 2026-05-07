@@ -46,6 +46,7 @@ export function PDFViewerInner({ url }: PDFViewerProps): ReactElement {
     setIsDocumentReady(false)
     setCurrentPage(1)
     setTotalPages(0)
+    renderRequestIdRef.current = 0
 
     async function loadPdf(): Promise<void> {
       try {
@@ -123,8 +124,9 @@ export function PDFViewerInner({ url }: PDFViewerProps): ReactElement {
         canvas.height = Math.floor(viewport.height * devicePixelRatio)
         canvas.style.width = `${viewport.width}px`
         canvas.style.height = `${viewport.height}px`
+        context.setTransform(1, 0, 0, 1, 0, 0)
+        context.clearRect(0, 0, canvas.width, canvas.height)
         context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0)
-        context.clearRect(0, 0, viewport.width, viewport.height)
 
         if (isDisposed || renderRequestId !== renderRequestIdRef.current) return
 
