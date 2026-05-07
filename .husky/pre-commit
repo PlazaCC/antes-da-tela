@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Pre-commit hook: Verify code quality
+# Runs: type-check → lint
+# Aborts commit if any check fails
+
+echo "🔍 Running pre-commit verification..."
+
+# 1. Type check (TypeScript)
+echo ""
+echo "📝 Checking TypeScript types..."
+yarn type-check
+if [ $? -ne 0 ]; then
+  echo "❌ Type check failed. Commit aborted."
+  exit 1
+fi
+echo "✅ Types valid"
+
+# 2. Linting (ESLint)
+echo ""
+echo "🔎 Running ESLint..."
+yarn lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Commit aborted."
+  exit 1
+fi
+echo "✅ Linting passed"
+
+echo ""
+echo "✨ All checks passed! Commit ready to proceed."

@@ -1,14 +1,18 @@
 ---
 name: poc-refine-design
-description: Use when a POC task has been implemented and needs design alignment with Figma — tokens diverge, components are mismatched, or the design-system metadata is stale. This skill has been consolidated into `figma-design-workflow`.
-maturity: deprecated
+description: 'Use when a POC task has been implemented and needs design alignment with Figma — tokens diverge, components are mismatched, or the design-system metadata is stale. Triggers: post-implementation review, design QA pass, or when `.agents/design-system.meta.json` may be out of sync with the Figma source.'
 ---
 
 # poc-refine-design
 
-Align the last completed (or in-progress) POC task with the Figma design source. Compares `.agents/design-system.meta.json` against live Figma data, resolves token/component divergences, applies all corrections, updates task checklists, and performs layout-regression checks against recent tasks to prevent regressions and security regressions.
+Align the last completed (or in-progress) POC task with the Figma design source. **Always use the Figma via MCP FramLink as the primary source for tokens, components, and layouts.**
 
-For implementation work that produces repository code (components, pages, or variants), follow the `figma-implement-design` skill workflow. This skill focuses on refinement, token reconciliation, and regression gating; `figma-implement-design` covers code translation and component implementation.
+- The `.agents/figma.meta.json` and `.agents/design-system.meta.json` files are only fallback/support.
+- There are no more local assets in `.agents/figma/` — ignore any mention of local SVG/PNG/PDF assets.
+- Official Figma links for reference:
+  - Main flow: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1388
+  - Script registration: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1350
+  - User profile: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-2075
 
 ## Workflow
 
@@ -16,8 +20,8 @@ For implementation work that produces repository code (components, pages, or var
 
 Read the recent task history before making any changes:
 
-- Inspect `.agents/tasks/` and collect the last N completed or modified tasks (default N=3). Use `execution_order`, `completed_at`, or git history to order.
-- For each recent task capture: `id`, `status`, `execution_order`, `completed_at`, and any layout snapshots (e.g. `.agents/tasks/<id>/layout/*.png`).
+- Inspect `docs/poc/tasks/` and collect the last N completed or modified tasks (default N=3). Use `execution_order`, `completed_at`, or git history to order.
+- For each recent task capture: `id`, `status`, `execution_order`, `completed_at`, and any layout snapshots (e.g. `docs/poc/tasks/<id>/layout/*.png`).
 - If any recent task modified layout, interaction flow, or security-sensitive UI (auth, confirmation dialogs, role-based UI), mark it as a regression-sensitive change and include it in the comparison set.
 - If regression-sensitive changes are found, run layout diffs (image diff or DOM/class diff) against the candidate task before applying updates. If diffs indicate regressions, escalate for manual review (do not apply breaking changes automatically).
 
@@ -25,25 +29,13 @@ Read the recent task history before making any changes:
 
 Read in order:
 
-- `.agents/poc-context.json` — execution order, task list, token format
-- `.agents/tasks/<task-file>.md` — acceptance checklist, component references
+- `docs/poc/context.json` — execution order, task list, token format
+- `docs/poc/tasks/<task-file>.md` — acceptance checklist, component references
 - `.agents/figma.meta.json` — `fileKey`, page/component nodeId map
 - `.agents/design-system.meta.json` — current tokens, component registry
 - `.agents/design-system.plan.md` — strategy and priorities
 
-**Before calling FramLink MCP**, check for local Figma exports (prefer local assets to reduce MCP payload and speed comparisons):
-
-- `.agents/figma/components/*.svg` — exported component SVGs (use to map component names to vector assets and avoid re-requesting static renders).
-- `.agents/figma/screens/*.{pdf,png}` — exported screen PDFs/PNGs for visual/layout diffs (task-specific screens).
-- `.agents/figma/frames/*.{pdf,png}` — full-frame exports of the `Foundations` and `Components` pages for reference and baseline comparisons.
-
-Semantics reminder: `components` = SVG vectors, `screens` = PDF/PNG full-screen exports, `frames` = full frame/page exports (Foundations & Components) used as canonical baselines.
-
-Prefer these local exports when available; only call `mcp_framelink_fig_get_figma_data` to fetch node JSON or rendered assets if a required export is missing or when authoritative live data is needed.
-
-> DEPRECATED: This skill has been consolidated into `figma-design-workflow`.
->
-> Use the unified skill at `.claude/skills/figma-design-workflow/SKILL.md` for both implementation and refinement workflows. This file remains for backward compatibility and will be removed in a future cleanup.
+**Always call `mcp_framelink_fig_get_figma_data` to fetch node JSON or rendered assets.** Only use local metadata files if MCP is unavailable.
 
 ### 2. Determine Target Task (with regression context)
 
@@ -60,7 +52,7 @@ From the task file, collect:
 - Figma nodeIds referenced
 - Token names used
 - Layout snapshots or screenshot paths for visual diffing
-- Local export paths (if present): component SVG filenames under `.agents/figma/components/`, screen exports under `.agents/figma/screens/`, and frame exports under `.agents/figma/frames/` — use these for fast comparisons and visual diffs.
+- Task files now in `docs/poc/tasks/` (migrated from `.agents/tasks/`)
 
 ### 4. Query Figma via FramLink MCP
 
@@ -68,7 +60,7 @@ From the task file, collect:
 mcp_framelink_fig_get_figma_data(fileKey, nodeIds)
 ```
 
-Use `figma.meta.json.components` to map component names → nodeIds. Prefer mapping via local SVG filenames in `.agents/figma/components/` when names match. Request only nodes relevant to the task (pages `Foundations` + task-specific frames) and fetch rendered exports only when local screen/frame exports are not available or when live assets are required for verification.
+Use `figma.meta.json.components` only as a fallback to map component names → nodeIds. **Always request only nodes relevant to the task from MCP.**
 
 If the MCP call fails with a permissions error → **stop and ask the user for the Figma token**. Do not write partial data.
 
@@ -91,6 +83,7 @@ Include a `regression_audit` object in memory with the tasks compared and a `ris
 - Before writing updates to `.agents/design-system.meta.json`, run the regression audit:
   - If `risk` is `none` or `low`, proceed with minimal corrections and annotate changes with `regression_audit: {status: "auto-applied", compared_tasks: [...], risk: "low"}`.
   - If `risk` is `medium` or `high`, save proposed changes as a draft (`.agents/design-system.meta.json.draft`) and require a manual review step. Do not overwrite production meta automatically.
+- Task file state migrated to `docs/poc/` — use `docs/poc/tasks/<task-file>.md` paths
 - Write all safe corrections to `.agents/design-system.meta.json`.
 - If strategy changes, update `.agents/design-system.plan.md`.
 
@@ -98,7 +91,7 @@ Make minimal changes — do not rewrite sections unrelated to the task.
 
 ### 7. Update Task Checklist
 
-Mark acceptance items in `.agents/tasks/<task-file>.md` as completed for items verifiably checked in this run. Add a checklist entry for `Regression audit` with status `passed` or `requires_review`.
+Mark acceptance items in `docs/poc/tasks/<task-file>.md` as completed for items verifiably checked in this run. Add a checklist entry for `Regression audit` with status `passed` or `requires_review`.
 
 ### 8. Deliver Report
 
@@ -118,9 +111,9 @@ Commit suggestion:       feat(design): <message>
 
 ## Operational Rules
 
-- Always run the recent tasks verification and regression audit before applying changes that affect layout or interactive components.
-- For `risk` levels `medium` or `high` require manual approval — do not apply automatically.
-- Ask for MCP token on permission failure — never write incomplete data.
-- Never auto-commit or push; produce a commit suggestion and save drafts when needed.
-- Convert hex → HSL only when `poc-context.json.tokens_format` requires it.
-- Preserve existing task acceptance history — when marking checklist items, include audit metadata.
+- **Always prioritize Figma via MCP FramLink.**
+- Ignore any instruction to look for local assets in `.agents/figma/`.
+- Local files `.agents/figma.meta.json` and `.agents/design-system.meta.json` are fallback only.
+- Never write tokens or secrets to project files.
+- Minimal, focused changes only; do not rewrite unrelated sections.
+- Never auto-commit or push; only produce commit suggestions.

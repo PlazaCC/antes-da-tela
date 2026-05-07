@@ -30,7 +30,7 @@ export function Avatar({ src, name, size = 'md', className }: AvatarProps) {
         className,
       )}>
       {src ? (
-        <Image src={src} alt={name} width={px} height={px} unoptimized className='w-full h-full object-cover' />
+        <Image src={src} alt={name} width={px} height={px} className='w-full h-full object-cover' />
       ) : (
         <span className={cn('text-brand-accent font-medium leading-none select-none', textSize)}>
           {initials(name)}

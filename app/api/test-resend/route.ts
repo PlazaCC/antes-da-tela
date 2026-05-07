@@ -3,6 +3,10 @@ import { AppError } from '@/lib/errors'
 import { Resend } from 'resend'
 
 async function handler(req: Request) {
+  if (process.env.NODE_ENV === 'production') {
+    return new Response('Not Found', { status: 404 })
+  }
+
   const API_KEY = process.env.RESEND_API_KEY
   const TEST_TO = process.env.TEST_RESEND_TO
 

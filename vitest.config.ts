@@ -8,6 +8,17 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: 'test/setup.ts',
     include: ['test/**/*.test.{ts,tsx}'],
-    // Coverage disabled in config for PoC; run with `--coverage` if needed
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'lcov', 'html'],
+      include: ['components/**', 'lib/**', 'server/**', 'trpc/**'],
+      exclude: ['components/ui/**', '**/*.d.ts', '**/index.ts'],
+      thresholds: {
+        lines: 9,
+        functions: 9,
+        branches: 9,
+        statements: 9,
+      },
+    },
   },
 })

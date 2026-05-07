@@ -62,7 +62,7 @@ export function ScriptPreviewModal({ scriptId, open, onOpenChange }: ScriptPrevi
 
         <DialogPrimitive.Close
           className={cn(
-            'absolute top-4 right-4 z-10 w-8 h-8 rounded-sm flex items-center justify-center',
+            'absolute top-4 right-4 w-8 h-8 rounded-sm flex items-center justify-center z-[9999]',
             'bg-elevated border border-border-subtle text-text-muted',
             'hover:text-text-primary hover:border-border-default transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent',

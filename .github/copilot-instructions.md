@@ -56,3 +56,9 @@ Rules:
 - [`.agents/rules/supabase.md`](../.agents/rules/supabase.md) — Supabase auth + DB patterns
 - [`.agents/rules/ui.md`](../.agents/rules/ui.md) — shadcn/ui + Tailwind rules
 - [`.agents/skills/new-shadcn-component/SKILL.md`](../.agents/skills/new-shadcn-component/SKILL.md) — install and wrap shadcn components
+
+## graphify
+
+Before answering architecture or codebase questions, read `graphify-out/GRAPH_REPORT.md` if it exists.
+If `graphify-out/wiki/index.md` exists, navigate it for deep questions.
+Type `/graphify` in Copilot Chat to build or update the knowledge graph.

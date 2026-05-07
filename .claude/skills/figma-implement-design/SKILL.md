@@ -57,7 +57,7 @@ Read in order:
 - `.agents/design-system.meta.json` — current tokens and component registry
 - `.agents/design-system.plan.md` — strategy and priorities
 
-Prefer local exports under `.agents/figma/components`, `.agents/figma/screens`, `.agents/figma/frames` before calling MCP.
+Prefer local exports under `.agents/figma/components`, `.agents/figma/screens`, and `.agents/figma/frames` before calling MCP.
 
 ### 3 — Identify objective
 

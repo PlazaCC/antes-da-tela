@@ -11,23 +11,23 @@ See @package.json for available scripts.
 
 ## Stack
 
-| Camada      | Tecnologia                                          |
-| :---------- | :-------------------------------------------------- |
-| Framework   | Next.js (App Router) — TypeScript                   |
-| Auth        | Supabase Auth via `@supabase/ssr`                   |
-| API         | tRPC v11 + Zod                                      |
+| Camada      | Tecnologia                                                |
+| :---------- | :-------------------------------------------------------- |
+| Framework   | Next.js (App Router) — TypeScript                         |
+| Auth        | Supabase Auth via `@supabase/ssr`                         |
+| API         | tRPC v11 + Zod                                            |
 | ORM         | Drizzle ORM (migrations only) + Supabase JS SDK (runtime) |
-| Banco       | Supabase Postgres                                   |
-| Storage     | Supabase Storage + Cloudflare CDN                   |
-| Cache       | TanStack Query + superjson                          |
-| Estado UI   | Zustand                                             |
-| Leitor PDF  | pdf.js                                              |
-| UI          | shadcn/ui + Radix UI + Tailwind CSS v3              |
-| Analytics   | PostHog (client: posthog-js / server: posthog-node) |
-| Erros       | Sentry (via `@sentry/nextjs` wizard)                |
-| Email       | Resend                                              |
-| Deploy      | Vercel (Hobby / free tier)                          |
-| Package mgr | Yarn 4 (Berry) — `nodeLinker: node-modules`         |
+| Banco       | Supabase Postgres                                         |
+| Storage     | Supabase Storage + Cloudflare CDN                         |
+| Cache       | TanStack Query + superjson                                |
+| Estado UI   | Zustand                                                   |
+| Leitor PDF  | pdf.js                                                    |
+| UI          | shadcn/ui + Radix UI + Tailwind CSS v3                    |
+| Analytics   | PostHog (client: posthog-js / server: posthog-node)       |
+| Erros       | Sentry (via `@sentry/nextjs` wizard)                      |
+| Email       | Resend                                                    |
+| Deploy      | Vercel (Hobby / free tier)                                |
+| Package mgr | Yarn 4 (Berry) — `nodeLinker: node-modules`               |
 
 ---
 
@@ -39,6 +39,7 @@ yarn build             # Production build
 yarn lint              # ESLint
 yarn db:generate       # Generate SQL migration files for schema
 yarn db:migrate        # Apply schema migrations to Supabase Postgres
+yarn skills:sync       # Sync agent skills from .agents/ to .claude/
 ```
 
 ---
@@ -113,22 +114,30 @@ yarn db:migrate        # Apply schema migrations to Supabase Postgres
 > **Rule #1 — Always check `components/ui/` first.** Before building any UI element, check if a shadcn primitive already exists. Use it as-is or compose a wrapper.
 
 **Installing components — official CLI only:**
+
 ```bash
 yarn dlx shadcn@latest add <component>   # e.g. dialog, table, form, select
 ```
+
 - **Never** manually create or copy files into `components/ui/` — that directory is owned by the shadcn registry and the CLI.
 - **Never** edit files inside `components/ui/` directly. If you need custom behavior, create a wrapper (see below).
 
 **Customising components — wrapper pattern:**
 Create wrappers in `components/<feature>/<component>.tsx`, not in `components/ui/`:
+
 ```tsx
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { cn } from "@/lib/utils"
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 
 export function ConfirmDialog({ className, ...props }) {
-  return <Dialog><DialogContent className={cn(className)} {...props} /></Dialog>
+  return (
+    <Dialog>
+      <DialogContent className={cn(className)} {...props} />
+    </Dialog>
+  )
 }
 ```
+
 - Always accept and forward the `className` prop.
 - Always use `cn()` from `@/lib/utils` for class merging (never string concatenation).
 - Use the `asChild` prop (Radix `Slot`) to compose without extra DOM nodes.
@@ -150,10 +159,20 @@ export function ConfirmDialog({ className, ...props }) {
 
 ## Rules
 
-See `.claude/rules/` for detailed, path-scoped rules:
+See `.agents/rules/` for detailed, path-scoped rules:
 
 - `typescript.md` — TypeScript + tRPC conventions
 - `supabase.md` — Supabase Auth + DB patterns
 - `drizzle.md` — ORM schema and migration patterns
 - `nextjs.md` — App Router + RSC conventions
 - `ui.md` — shadcn/ui + Tailwind rules
+
+## graphify
+
+This project has a graphify knowledge graph at graphify-out/.
+
+Rules:
+
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)

@@ -1,6 +1,6 @@
 ---
 name: refactor-plan
-description: Plano executável para refatorações arquiteturais: modularização, remoção de duplicação e priorização por ganho de redução de código e consistência.
+description: 'Plano executável para refatorações arquiteturais: modularização, remoção de duplicação e priorização por ganho de redução de código e consistência.'
 user-invocable: true
 ---
 

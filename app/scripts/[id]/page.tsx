@@ -1,8 +1,10 @@
 import { ScriptPageSkeleton } from '@/components/skeletons'
+import { validateUUID } from '@/lib/validators/uuid'
 import { appRouter } from '@/server/api/root'
 import { createTRPCContext } from '@/trpc/init'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { cache, Suspense } from 'react'
 import { ScriptPageClient } from './script-page-client'
 
@@ -49,6 +51,11 @@ const getPageData = cache(async (id: string) => {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
+
+  if (!validateUUID(id)) {
+    notFound()
+  }
+
   const { script, bannerUrl } = await getPageData(id)
   const title = script?.title ?? 'Roteiro'
   const description = script?.logline ?? 'Leia e discuta roteiros audiovisuais.'
@@ -72,6 +79,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ScriptPage({ params }: Props) {
   const { id } = await params
+
+  if (!validateUUID(id)) {
+    notFound()
+  }
+
   const { script, pdfUrl, audioUrl, bannerUrl, coverUrl, currentUserId } = await getPageData(id)
 
   return (

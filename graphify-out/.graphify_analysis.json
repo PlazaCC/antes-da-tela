@@ -1,0 +1,784 @@
+{
+  "communities": {
+    "0": [
+      "app_api_sentry_example_api_route_ts",
+      "app_api_test_resend_route_ts",
+      "app_api_trpc_trpc_route_ts",
+      "app_auth_callback_route_ts",
+      "app_authenticated_layout_tsx",
+      "comments_service_commentsservice_list",
+      "init_createtrpccontext",
+      "init_mapstatustotrpccode",
+      "layout_authcheck",
+      "layout_authenticatedlayout",
+      "route_get",
+      "route_handler",
+      "route_sentryexampleapierror",
+      "route_sentryexampleapierror_constructor",
+      "trpc_init_ts"
+    ],
+    "1": [
+      "scripts_getscriptpublishdefaults",
+      "scripts_service_scriptsservice",
+      "scripts_service_scriptsservice_addaudiofile",
+      "scripts_service_scriptsservice_constructor",
+      "scripts_service_scriptsservice_create",
+      "scripts_service_scriptsservice_delete",
+      "scripts_service_scriptsservice_getbyid",
+      "scripts_service_scriptsservice_getdashboardmetrics",
+      "scripts_service_scriptsservice_listfeatured",
+      "scripts_service_scriptsservice_listrecent",
+      "scripts_service_scriptsservice_listtrendingbanners",
+      "scripts_service_scriptsservice_search",
+      "server_domain_scripts_ts",
+      "server_services_scripts_service_ts",
+      "users_service_usersservice_unfollow"
+    ],
+    "2": [
+      "app_profile_userid_page_tsx",
+      "app_scripts_id_page_tsx",
+      "page_generatemetadata",
+      "page_getpagedata",
+      "page_profilepage",
+      "scripts_service_scriptsservice_listbyauthor",
+      "server_services_users_service_ts",
+      "users_service_usersservice",
+      "users_service_usersservice_constructor",
+      "users_service_usersservice_createprofile",
+      "users_service_usersservice_follow",
+      "users_service_usersservice_getprofile",
+      "users_service_usersservice_getprofilestats",
+      "users_service_usersservice_isfollowing"
+    ],
+    "3": [
+      "ratings_calculateaveragerating",
+      "ratings_calculateaverageratingnullable",
+      "ratings_calculateratingdistribution",
+      "ratings_roundrating",
+      "ratings_service_ratingsservice",
+      "ratings_service_ratingsservice_constructor",
+      "ratings_service_ratingsservice_getaverage",
+      "ratings_service_ratingsservice_getmanyaverage",
+      "ratings_service_ratingsservice_getstats",
+      "ratings_service_ratingsservice_getuserrating",
+      "ratings_service_ratingsservice_upsertrating",
+      "server_domain_ratings_ts",
+      "server_services_ratings_service_ts"
+    ],
+    "4": [
+      "comments_service_commentsservice",
+      "comments_service_commentsservice_constructor",
+      "comments_service_commentsservice_countbyscript",
+      "comments_service_commentsservice_create",
+      "comments_service_commentsservice_delete",
+      "comments_service_commentsservice_listreactionsbypage",
+      "comments_service_commentsservice_togglereaction",
+      "reactions_aggregatereactions",
+      "scripts_service_scriptsservice_update",
+      "server_domain_reactions_ts",
+      "server_services_comments_service_ts",
+      "users_service_usersservice_updateprofile"
+    ],
+    "5": [
+      "client_getqueryclient",
+      "client_trpcreactprovider",
+      "query_client_makequeryclient",
+      "server_hydrateclient",
+      "trpc_client_tsx",
+      "trpc_query_client_ts",
+      "trpc_server_tsx"
+    ],
+    "6": [
+      "components_theme_provider_tsx",
+      "theme_provider_applytheme",
+      "theme_provider_formattheme",
+      "theme_provider_getsystemtheme",
+      "theme_provider_readstoredtheme",
+      "theme_provider_themeprovider"
+    ],
+    "7": [
+      "app_development_integrations_page_tsx",
+      "page_showfeedback",
+      "page_triggerposthog",
+      "page_triggerresend",
+      "page_triggersentry"
+    ],
+    "8": [
+      "components_star_rating_star_rating_tsx",
+      "star_rating_cn",
+      "star_rating_handleclick",
+      "star_rating_handlekeydown",
+      "star_rating_handlemousemove"
+    ],
+    "9": [
+      "alert_dialog_alertdialogcancel",
+      "alert_dialog_alertdialogportal",
+      "alert_dialog_alertdialogtrigger",
+      "alert_dialog_cn",
+      "components_ui_alert_dialog_tsx"
+    ],
+    "10": [
+      "setup_resizeobserver",
+      "setup_resizeobserver_disconnect",
+      "setup_resizeobserver_observe",
+      "setup_resizeobserver_unobserve",
+      "test_setup_ts"
+    ],
+    "11": [
+      "app_scripts_id_script_page_client_tsx",
+      "script_page_client_cn",
+      "script_page_client_handledelete",
+      "script_page_client_handledeletetrigger"
+    ],
+    "12": [
+      "code_block_checkicon",
+      "code_block_codeblock",
+      "code_block_copyicon",
+      "components_tutorial_code_block_tsx"
+    ],
+    "13": [
+      "carousel_carousel",
+      "carousel_cn",
+      "carousel_usecarousel",
+      "components_ui_carousel_tsx"
+    ],
+    "14": [
+      "app_auth_error_page_tsx",
+      "page_errordetail",
+      "page_errorpage"
+    ],
+    "15": [
+      "audio_player_cn",
+      "audio_player_formattime",
+      "components_audio_player_audio_player_tsx"
+    ],
+    "16": [
+      "components_auth_google_auth_button_tsx",
+      "google_auth_button_googleauthbutton",
+      "google_auth_button_googleicon"
+    ],
+    "17": [
+      "components_filter_panel_filter_panel_tsx",
+      "filter_panel_filterpanel",
+      "filter_panel_filtersectionheader"
+    ],
+    "18": [
+      "components_follow_button_follow_button_tsx",
+      "follow_button_cn",
+      "follow_button_followbutton"
+    ],
+    "19": [
+      "comments_sidebar_buildreactionbaritems",
+      "comments_sidebar_cn",
+      "components_pdf_viewer_comments_sidebar_tsx"
+    ],
+    "20": [
+      "scripts_test_makectx",
+      "scripts_test_makesupabasemock",
+      "test_scripts_scripts_test_ts"
+    ],
+    "21": [
+      "app_authenticated_dashboard_layout_tsx",
+      "layout_dashboardlayout"
+    ],
+    "22": [
+      "app_authenticated_dashboard_profile_edit_components_edit_profile_form_tsx",
+      "edit_profile_form_editprofileform"
+    ],
+    "23": [
+      "app_authenticated_dashboard_profile_edit_page_tsx",
+      "page_editprofilepage"
+    ],
+    "24": [
+      "app_authenticated_dashboard_publish_page_tsx",
+      "page_publishroute"
+    ],
+    "25": [
+      "app_auth_login_page_tsx",
+      "page_loginpage"
+    ],
+    "26": [
+      "app_development_layout_tsx",
+      "layout_developmentlayout"
+    ],
+    "27": [
+      "app_error_tsx",
+      "error_globalerror"
+    ],
+    "28": [
+      "app_global_error_tsx",
+      "global_error_globalerror"
+    ],
+    "29": [
+      "app_home_client_tsx",
+      "home_client_cn"
+    ],
+    "30": [
+      "app_layout_tsx",
+      "layout_rootlayout"
+    ],
+    "31": [
+      "app_not_found_tsx",
+      "not_found_notfound"
+    ],
+    "32": [
+      "app_profile_userid_components_profile_header_tsx",
+      "profile_header_statitem"
+    ],
+    "33": [
+      "app_profile_userid_profile_client_tsx",
+      "profile_client_cn"
+    ],
+    "34": [
+      "app_scripts_id_loading_tsx",
+      "loading_loading"
+    ],
+    "35": [
+      "app_toaster_apptoaster",
+      "components_app_toaster_app_toaster_tsx"
+    ],
+    "36": [
+      "avatar_initials",
+      "components_avatar_avatar_tsx"
+    ],
+    "37": [
+      "comments_sheet_commentssheet",
+      "components_comments_comments_sheet_tsx"
+    ],
+    "38": [
+      "components_dashboard_empty_scripts_state_tsx",
+      "empty_scripts_state_emptyscriptsstate"
+    ],
+    "39": [
+      "components_dashboard_metric_card_tsx",
+      "metric_card_metriccard"
+    ],
+    "40": [
+      "actions_scriptactionsdropdown",
+      "components_dashboard_scripts_table_actions_tsx"
+    ],
+    "41": [
+      "components_dashboard_scripts_table_row_tsx",
+      "row_scriptmetricsrow"
+    ],
+    "42": [
+      "components_env_var_warning_tsx",
+      "env_var_warning_envvarwarning"
+    ],
+    "43": [
+      "components_navbar_nav_links_tsx",
+      "nav_links_navlinks"
+    ],
+    "44": [
+      "components_navbar_navbar_mobile_controls_tsx",
+      "navbar_mobile_controls_navbarmobilecontrols"
+    ],
+    "45": [
+      "components_navbar_navbar_tsx",
+      "navbar_navbar"
+    ],
+    "46": [
+      "components_pdf_viewer_pdf_controls_tsx",
+      "pdf_controls_pdfcontrols"
+    ],
+    "47": [
+      "components_pdf_viewer_pdf_viewer_error_tsx",
+      "pdf_viewer_error_pdfviewererror"
+    ],
+    "48": [
+      "components_pdf_viewer_pdf_viewer_tsx",
+      "pdf_viewer_loadpdf"
+    ],
+    "49": [
+      "components_posthog_provider_tsx",
+      "posthog_provider_posthogprovider"
+    ],
+    "50": [
+      "components_progress_progress_tsx",
+      "progress_cn"
+    ],
+    "51": [
+      "components_publish_file_step_tsx",
+      "file_step_renderexistingfilename"
+    ],
+    "52": [
+      "components_publish_genre_step_tsx",
+      "genre_step_genrestep"
+    ],
+    "53": [
+      "components_radio_box_radio_box_tsx",
+      "radio_box_radiobox"
+    ],
+    "54": [
+      "components_rating_info_stat_item_tsx",
+      "stat_item_statitem"
+    ],
+    "55": [
+      "components_rating_summary_rating_summary_tsx",
+      "rating_summary_ratingsummary"
+    ],
+    "56": [
+      "components_script_page_script_page_owner_actions_tsx",
+      "script_page_owner_actions_scriptpageowneractions"
+    ],
+    "57": [
+      "components_script_preview_modal_script_preview_modal_tsx",
+      "script_preview_modal_onclose"
+    ],
+    "58": [
+      "components_search_sheet_search_sheet_tsx",
+      "search_sheet_handlechange"
+    ],
+    "59": [
+      "components_shared_loading_state_tsx",
+      "loading_state_loadingstate"
+    ],
+    "60": [
+      "components_shared_section_heading_tsx",
+      "section_heading_sectionheading"
+    ],
+    "61": [
+      "components_synopsis_synopsisspoiler_tsx",
+      "synopsisspoiler_synopsisspoiler"
+    ],
+    "62": [
+      "components_tutorial_connect_supabase_steps_tsx",
+      "connect_supabase_steps_connectsupabasesteps"
+    ],
+    "63": [
+      "components_tutorial_tutorial_step_tsx",
+      "tutorial_step_tutorialstep"
+    ],
+    "64": [
+      "avatar_cn",
+      "components_ui_avatar_tsx"
+    ],
+    "65": [
+      "badge_badge",
+      "components_ui_badge_tsx"
+    ],
+    "66": [
+      "components_ui_dialog_tsx",
+      "dialog_cn"
+    ],
+    "67": [
+      "components_ui_skeleton_tsx",
+      "skeleton_skeleton"
+    ],
+    "68": [
+      "components_ui_switch_tsx",
+      "switch_cn"
+    ],
+    "69": [
+      "components_ui_tooltip_tsx",
+      "tooltip_tooltipcontent"
+    ],
+    "70": [
+      "components_ui_visually_hidden_tsx",
+      "visually_hidden_visuallyhidden"
+    ],
+    "71": [
+      "pdf_viewer_test_makefile",
+      "test_components_pdf_viewer_test_tsx"
+    ],
+    "72": [
+      "render_customrender",
+      "test_utils_render_tsx"
+    ],
+    "73": [
+      "app_authenticated_dashboard_profile_dashboard_page_tsx"
+    ],
+    "74": [
+      "app_authenticated_dashboard_profile_scripts_page_tsx"
+    ],
+    "75": [
+      "app_authenticated_account_page_tsx"
+    ],
+    "76": [
+      "app_development_components_page_tsx"
+    ],
+    "77": [
+      "app_development_design_system_page_tsx"
+    ],
+    "78": [
+      "app_development_page_tsx"
+    ],
+    "79": [
+      "app_page_tsx"
+    ],
+    "80": [
+      "app_profile_userid_components_scripts_tab_tsx"
+    ],
+    "81": [
+      "components_app_sidebar_app_sidebar_tsx"
+    ],
+    "82": [
+      "components_audio_player_index_ts"
+    ],
+    "83": [
+      "components_avatar_index_ts"
+    ],
+    "84": [
+      "components_comment_comment_tsx"
+    ],
+    "85": [
+      "components_comments_reaction_bar_tsx"
+    ],
+    "86": [
+      "components_dashboard_delete_script_dialog_tsx"
+    ],
+    "87": [
+      "components_dashboard_scripts_table_index_ts"
+    ],
+    "88": [
+      "components_dashboard_scripts_table_scripts_table_tsx"
+    ],
+    "89": [
+      "components_drag_zone_drag_zone_tsx"
+    ],
+    "90": [
+      "components_error_fallback_tsx"
+    ],
+    "91": [
+      "components_filter_panel_index_ts"
+    ],
+    "92": [
+      "components_follow_button_index_ts"
+    ],
+    "93": [
+      "components_info_info_tsx"
+    ],
+    "94": [
+      "components_metric_card_metric_card_tsx"
+    ],
+    "95": [
+      "components_navbar_index_ts"
+    ],
+    "96": [
+      "components_navbar_navbar_search_tsx"
+    ],
+    "97": [
+      "components_navbar_user_menu_tsx"
+    ],
+    "98": [
+      "components_pdf_viewer_index_tsx"
+    ],
+    "99": [
+      "components_pdf_viewer_pdf_viewer_store_ts"
+    ],
+    "100": [
+      "components_progress_index_ts"
+    ],
+    "101": [
+      "components_publish_file_upload_field_tsx"
+    ],
+    "102": [
+      "components_publish_info_step_tsx"
+    ],
+    "103": [
+      "components_publish_publish_page_tsx"
+    ],
+    "104": [
+      "components_publish_review_step_tsx"
+    ],
+    "105": [
+      "components_rating_info_index_ts"
+    ],
+    "106": [
+      "components_rating_info_rating_info_tsx"
+    ],
+    "107": [
+      "components_script_card_script_card_tsx"
+    ],
+    "108": [
+      "components_script_page_rating_box_tsx"
+    ],
+    "109": [
+      "components_script_page_script_page_metadata_tsx"
+    ],
+    "110": [
+      "components_script_preview_modal_author_section_tsx"
+    ],
+    "111": [
+      "components_script_preview_modal_index_ts"
+    ],
+    "112": [
+      "components_script_preview_modal_sidebar_tsx"
+    ],
+    "113": [
+      "components_script_preview_modal_stats_section_tsx"
+    ],
+    "114": [
+      "components_search_sheet_index_ts"
+    ],
+    "115": [
+      "components_shared_form_field_tsx"
+    ],
+    "116": [
+      "components_shared_page_shell_tsx"
+    ],
+    "117": [
+      "components_shared_section_card_tsx"
+    ],
+    "118": [
+      "components_skeletons_home_skeleton_tsx"
+    ],
+    "119": [
+      "components_skeletons_index_ts"
+    ],
+    "120": [
+      "components_skeletons_script_page_skeleton_tsx"
+    ],
+    "121": [
+      "components_skeletons_search_skeleton_tsx"
+    ],
+    "122": [
+      "components_tag_tag_tsx"
+    ],
+    "123": [
+      "components_theme_switcher_tsx"
+    ],
+    "124": [
+      "components_tutorial_fetch_data_steps_tsx"
+    ],
+    "125": [
+      "components_tutorial_sign_up_user_steps_tsx"
+    ],
+    "126": [
+      "components_ui_button_tsx"
+    ],
+    "127": [
+      "components_ui_card_tsx"
+    ],
+    "128": [
+      "components_ui_checkbox_tsx"
+    ],
+    "129": [
+      "components_ui_dropdown_menu_tsx"
+    ],
+    "130": [
+      "components_ui_input_tsx"
+    ],
+    "131": [
+      "components_ui_label_tsx"
+    ],
+    "132": [
+      "components_ui_progress_tsx"
+    ],
+    "133": [
+      "components_ui_sheet_tsx"
+    ],
+    "134": [
+      "components_ui_sonner_tsx"
+    ],
+    "135": [
+      "components_ui_tabs_tsx"
+    ],
+    "136": [
+      "scripts_check_coverage_js"
+    ],
+    "137": [
+      "server_api_comments_ts"
+    ],
+    "138": [
+      "server_api_ratings_ts"
+    ],
+    "139": [
+      "server_api_root_ts"
+    ],
+    "140": [
+      "server_api_scripts_ts"
+    ],
+    "141": [
+      "server_api_users_ts"
+    ],
+    "142": [
+      "server_db_schema_ts"
+    ],
+    "143": [
+      "test_components_avatar_test_tsx"
+    ],
+    "144": [
+      "test_components_button_test_tsx"
+    ],
+    "145": [
+      "test_components_comment_test_tsx"
+    ],
+    "146": [
+      "test_components_dialog_test_tsx"
+    ],
+    "147": [
+      "test_components_drag_zone_test_tsx"
+    ],
+    "148": [
+      "test_components_dropdown_menu_test_tsx"
+    ],
+    "149": [
+      "test_components_info_test_tsx"
+    ],
+    "150": [
+      "test_components_input_test_tsx"
+    ],
+    "151": [
+      "test_components_metric_card_test_tsx"
+    ],
+    "152": [
+      "test_components_progress_test_tsx"
+    ],
+    "153": [
+      "test_components_radio_box_test_tsx"
+    ],
+    "154": [
+      "test_components_reaction_bar_test_tsx"
+    ],
+    "155": [
+      "test_components_script_card_test_tsx"
+    ],
+    "156": [
+      "test_components_skeleton_test_tsx"
+    ],
+    "157": [
+      "test_components_skeletons_test_tsx"
+    ],
+    "158": [
+      "test_components_star_rating_test_tsx"
+    ],
+    "159": [
+      "test_components_switch_test_tsx"
+    ],
+    "160": [
+      "test_components_tabs_test_tsx"
+    ],
+    "161": [
+      "test_components_tag_test_tsx"
+    ],
+    "162": [
+      "test_components_tooltip_test_tsx"
+    ],
+    "163": [
+      "test_e2e_oauth_callback_test_ts"
+    ],
+    "164": [
+      "test_mocks_handlers_ts"
+    ],
+    "165": [
+      "test_mocks_server_ts"
+    ],
+    "166": [
+      "test_trpc_trpc_test_ts"
+    ],
+    "167": [
+      "test_utils_utils_test_ts"
+    ]
+  },
+  "cohesion": {},
+  "god_nodes": [
+    {
+      "id": "scripts_service_scriptsservice",
+      "label": "ScriptsService",
+      "degree": 13
+    },
+    {
+      "id": "users_service_usersservice",
+      "label": "UsersService",
+      "degree": 9
+    },
+    {
+      "id": "comments_service_commentsservice",
+      "label": "CommentsService",
+      "degree": 8
+    },
+    {
+      "id": "page_getpagedata",
+      "label": "getPageData()",
+      "degree": 7
+    },
+    {
+      "id": "ratings_service_ratingsservice",
+      "label": "RatingsService",
+      "degree": 7
+    },
+    {
+      "id": "route_get",
+      "label": "GET()",
+      "degree": 5
+    },
+    {
+      "id": "route_handler",
+      "label": "handler()",
+      "degree": 4
+    },
+    {
+      "id": "page_showfeedback",
+      "label": "showFeedback()",
+      "degree": 4
+    },
+    {
+      "id": "setup_resizeobserver",
+      "label": "ResizeObserver",
+      "degree": 4
+    },
+    {
+      "id": "client_getqueryclient",
+      "label": "getQueryClient()",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "AuthCheck()",
+      "target": "GET()",
+      "source_files": [
+        "app\\(authenticated)\\layout.tsx",
+        "app\\api\\sentry-example-api\\route.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `AuthCheck()` unexpectedly reaches hub `GET()`"
+    },
+    {
+      "source": "getPageData()",
+      "target": "createTRPCContext()",
+      "source_files": [
+        "app\\profile\\[userId]\\page.tsx",
+        "trpc\\init.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "generateMetadata()",
+      "target": "getPageData()",
+      "source_files": [
+        "app\\scripts\\[id]\\page.tsx",
+        "app\\profile\\[userId]\\page.tsx"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `generateMetadata()` unexpectedly reaches hub `getPageData()`"
+    },
+    {
+      "source": "handler()",
+      "target": "GET()",
+      "source_files": [
+        "app\\auth\\callback\\route.ts",
+        "app\\api\\sentry-example-api\\route.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "createTRPCContext()",
+      "target": "GET()",
+      "source_files": [
+        "trpc\\init.ts",
+        "app\\api\\sentry-example-api\\route.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    }
+  ]
+}

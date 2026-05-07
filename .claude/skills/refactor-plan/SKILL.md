@@ -1,106 +1,99 @@
 ---
 name: refactor-plan
-description: >-
-  Plano executável para refatorações arquiteturais: modularização, remoção de
-  duplicação e priorização por ganho de redução de código e consistência.
+description: 'Plano executável para refatorações arquiteturais: modularização, remoção de duplicação e priorização por ganho de redução de código e consistência.'
 user-invocable: true
 ---
 
-# Refactor Plan — Plano de Refatoração Arquitetural (Claude)
+# Refactor Plan — Plano de Refatoração Arquitetural
 
-Resumo e objetivo
+Resumo
 
-- Gera um processo reproduzível para identificar, priorizar e propor
-  extrações/refatorações com foco em arquitetura limpa, modularização e DRY.
-- Prioriza arquivos grandes e trechos repetidos, estimando ganho em linhas de
-  código, risco e esforço.
+- Objetivo: gerar um processo reproduzível para detectar e priorizar oportunidades de refatoração com foco em arquitetura limpa, modularização e eliminação de duplicação (DRY). Prioriza arquivos grandes e trechos de código repetidos ≥ 3 vezes, estimando ganho em linhas de código e consistência.
 
 Quando usar
 
-- Ao detectar duplicações ou arquivos grandes em `components/`, `app/` ou
-  áreas de domínio (ex.: `scripts`, `publish`, `profile`).
-- Ao planejar uma refatoração incremental com validação automatizada e gates
-  manuais.
+- Ao identificar acúmulos de markup/logic similares em `components/`, `app/` ou áreas de domínio (ex.: `scripts`, `publish`, `profile`).
+- Quando o objetivo for reduzir volume de código, aumentar consistência e facilitar testes/reatribuição de responsabilidades.
 
-Entradas (parâmetros de execução)
+Entradas (parâmetros)
 
-- `scope` (string, opcional): `publish`, `profile`, `scripts`, `all` (default: `all`).
-- `overwrite` (boolean, opcional): permitir sobrescrever arquivos locais (default: `false`).
-- `branch_prefix` (string, opcional): prefixo para branches criados (default: `feat/refactor`).
-- `large_file_lines` (integer, opcional): limiar para considerar "arquivo grande" (default: `150`).
-- `duplicate_threshold` (integer, opcional): ocorrências mínimas para considerar um snippet duplicado (default: `3`).
-- `min_snippet_lines` (integer, opcional): linhas mínimas de um snippet (default: `5`).
+- `scope` (string | optional): área alvo — `publish`, `profile`, `scripts`, `all`. Default: `all`.
+- `overwrite` (boolean | optional): permitir sobrescrever arquivos locais quando aplicável. Default: `false`.
+- `branch_prefix` (string | optional): prefixo do branch. Default: `feat/refactor`.
+- `large_file_lines` (integer | optional): limiar para considerar "arquivo grande". Default: `150` (baseado nas regras do repo: meta 100, hard limit 150).
+- `duplicate_threshold` (integer | optional): ocorrências mínimas para considerar um snippet como duplicação problemática. Default: `3`.
+- `min_snippet_lines` (integer | optional): linhas mínimas de um snippet para ser considerado. Default: `5`.
 
 Saída esperada
 
-- `candidates.json`: lista ordenada de candidatos com metadados: `filePath`, `lines`, `duplicationClusters` (occurrences, files, avgLines), `estimatedLinesSaved`, `priorityScore`, `suggestedExtraction`.
-- Sketch de componentes/abstrações sugeridas (ex.: `FormField`, `PageShell`, `SectionCard`) com locais de uso.
-- Checklist de verificação pós-refactor: `yarn lint`, `yarn type-check`, `yarn test:run`, `yarn build`.
+- `candidates.json` (resumo): lista de candidatos ordenados por `priorityScore`. Cada item inclui: `filePath`, `lines`, `duplicationClusters` (occurrences, files, avgLines), `estimatedLinesSaved`, `priorityScore`, `suggestedExtraction`.
+- SKETCH de componentes a extrair (ex.: `FormField`, `PageShell`, `SectionCard`, `SectionHeading`) com localizações de uso.
+- Checklist de verificação: `yarn lint`, `yarn type-check`, `yarn test:run`, `yarn build`.
 
-Ferramentas e skills recomendadas
+Ferramentas/skills usadas
 
-- `grep_search`, `file_search`, `read_file`, `semantic_search` — detecção e análise.
-- `simplify` — polimento de mudanças propostas.
-- `shadcn`, `nextjs`, `next-best-practices` — padrões de UI e composição.
-- `verification-before-completion` — gates finais antes de marcar como concluído.
+- `grep_search`, `file_search`, `read_file`, `semantic_search` (para detecção inicial).
+- `simplify` — polimento das alterações propostas.
+- `shadcn`, `nextjs`, `next-best-practices` — para aplicar padrões do projeto (wrappers, `asChild`, RSC/client boundaries).
+- `verification-before-completion` — gates finais antes de considerar pronto.
 
-Fluxo de execução (detalhado)
+Processo (passo-a-passo)
 
 1. Detectar hotspots
-   - Listar arquivos no `scope` (busca por `**/*.{tsx,ts,jsx,js}`) e medir linhas.
-   - Marcar "grandes" arquivos (`lines >= large_file_lines`).
+   - Listar arquivos no `scope` (`file_search` com `**/*.{tsx,ts,jsx,js}`) e medir `lines` (usar `read_file` e contar linhas).
+   - Marcar como "grande" arquivos com `lines >= large_file_lines`.
 2. Detectar duplicações
-   - Extrair snippets multi-linha (>= `min_snippet_lines`) contendo JSX ou markup.
-   - Normalizar (trim, remover indent, tokenizar literais simples) e gerar fingerprint.
+   - Para cada arquivo, extrair snippets multi-linha (>= `min_snippet_lines`) que contenham elementos JSX ou markup repetido.
+   - Normalizar snippets (trim, remover espaçamento/indent, substituir literais simples por tokens) e gerar fingerprint (hash).
    - Agregar fingerprints e filtrar clusters com `occurrences >= duplicate_threshold`.
 3. Calcular métricas e priorizar
    - `estimatedLinesSaved = occurrences * avgLinesPerSnippet`.
-   - `priorityScore = estimatedLinesSaved * (1 + log10(lines_in_file + 1))` (heurística ajustável).
-   - Preferir candidatos com alto `estimatedLinesSaved` e baixo risco técnico.
+   - `priorityScore = estimatedLinesSaved * (1 + log10(lines_in_file + 1))` (heurística; ajustar conforme necessidade).
+   - Preferir candidatos com alto `estimatedLinesSaved` e baixo risco (UI-only vs lógica de domínio).
 4. Gerar sugestões de extração
-   - Para cada cluster prioritário, sugerir abstração, arquivos a atualizar e estimativa de esforço (pequeno/médio/grande).
+   - Para cada cluster prioritário, sugerir abstração (componente/pattern), locais a atualizar e uma estimativa de esforço (pequeno/medio/grande).
 5. Revisão manual e gates
-   - Gerar `candidates.json` e resumo legível com exemplos de snippets.
-   - Não aplicar patches automaticamente sem aprovação do autor/revisor.
-6. Implementação iterativa (opcional)
-   - Após aprovação, aplicar extrações uma a uma; rodar lint/type-check/tests após cada mudança.
+   - Produzir `candidates.json` e um resumo legível com exemplos de snippets.
+   - Não aplicar patches automaticamente — aguardar aprovação do autor.
+6. (Opcional) Implementação iterativa
+   - Ao aprovar, aplicar 1 extração por vez, rodar `yarn lint`/`type-check`/`test:run` após cada alteração.
 
-Critérios de priorização e políticas
+Critérios de priorização (regras práticas)
 
-- Priorizar `estimatedLinesSaved` (descendente).
-- Multiplicar prioridade para arquivos grandes (maior custo de manutenção).
-- Evitar alterações em `server/db/schema.ts`, migrations ou RLS.
-- Nunca editar `components/ui/` diretamente — crie wrappers em `components/<feature>/`.
+- Priorizar por `estimatedLinesSaved` (maior primeiro).
+- Arquivos grandes recebem multiplicador (problemas ali tendem a ter maior custo de manutenção).
+- Preferir refatorações que não toquem `server/db/schema.ts`, migrations ou RLS.
+- Evitar editar diretamente `components/ui/` — criar wrappers em `components/<feature>/`.
 
-Exemplos de prompts (uso)
+Exemplos de prompts
 
 - "Run `refactor-plan` for scope=scripts, duplicate_threshold=3, large_file_lines=150"
 - "Generate extraction candidates for scope=publish and return top 10 by estimatedLinesSaved"
 
-Perguntas que o agente deve fazer ao usuário
+Perguntas a fazer ao usuário (quando necessário)
 
 - Qual `scope` deseja priorizar? (`publish`, `profile`, `scripts`, `all`)
-- Confirmar `large_file_lines` e `duplicate_threshold`.
-- Permitir sobrescrever arquivos automaticamente em caso de conflitos? (recomendado: `false`)
+- Confirmar `large_file_lines` (padrão `150`) e `duplicate_threshold` (padrão `3`).
+- Permitir sobrescrever arquivos automaticamente se houver conflitos? (recomendado: `false`)
 
-Segurança, riscos e edge cases
+Segurança e edge cases
 
-- Nunca executar migrations, DDL, ou comandos destrutivos automaticamente.
-- Se `yarn type-check`/`yarn lint` falharem por erros não relacionados, pausar e solicitar revisão humana.
-- Em clusters que incluem lógica (não só markup), marcar como alto risco e exigir revisão manual.
+- Nunca executar migrations ou comandos DDL automaticamente.
+- Se `yarn type-check`/`yarn lint` falharem por erros não relacionados às mudanças, pausar e solicitar revisão humana.
+- Em clusters que envolvem lógica (não só markup), marcar como maior risco e exigir revisão manual.
 
-Checklist de conclusão
+Checklist final antes de considerar pronto
 
 - [ ] `yarn lint` — sem erros
 - [ ] `yarn type-check` — sem erros
 - [ ] `yarn test:run` — exit code 0
-- [ ] Nenhuma alteração direta em `components/ui/` (usar wrappers)
+- [ ] Não há alterações diretas em `components/ui/` (apenas wrappers em `components/*`)
 
 Notas finais
 
-- Use esta skill como automação de descoberta e priorização; implementação deve ser incremental e revisada pelo time.
-- Parâmetros default (`150` linhas, `3` repetições) são recomendação inicial e podem ser adaptados.
+- Use este skill como uma automação de descoberta e priorização — a execução das extrações deve ser incremental e revisada pelo time.
+- Valores default (`150` linhas, `3` repetições) podem ser alterados por parâmetro.
 
 ---
 
-Fim do `refactor-plan` (Claude).
+Fim do `refactor-plan`.

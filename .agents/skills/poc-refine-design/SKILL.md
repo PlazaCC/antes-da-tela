@@ -1,6 +1,6 @@
 ---
 name: poc-refine-design
-description: Use when a POC task has been implemented and needs design alignment with Figma — tokens diverge, components are mismatched, or the design-system metadata is stale. Triggers: post-implementation review, design QA pass, or when `.agents/design-system.meta.json` may be out of sync with the Figma source.
+description: 'Use when a POC task has been implemented and needs design alignment with Figma — tokens diverge, components are mismatched, or the design-system metadata is stale. Triggers: post-implementation review, design QA pass, or when `.agents/design-system.meta.json` may be out of sync with the Figma source.'
 ---
 
 # poc-refine-design
@@ -20,8 +20,8 @@ Align the last completed (or in-progress) POC task with the Figma design source.
 
 Read the recent task history before making any changes:
 
-- Inspect `.agents/tasks/` and collect the last N completed or modified tasks (default N=3). Use `execution_order`, `completed_at`, or git history to order.
-- For each recent task capture: `id`, `status`, `execution_order`, `completed_at`, and any layout snapshots (e.g. `.agents/tasks/<id>/layout/*.png`).
+- Inspect `docs/poc/tasks/` and collect the last N completed or modified tasks (default N=3). Use `execution_order`, `completed_at`, or git history to order.
+- For each recent task capture: `id`, `status`, `execution_order`, `completed_at`, and any layout snapshots (e.g. `docs/poc/tasks/<id>/layout/*.png`).
 - If any recent task modified layout, interaction flow, or security-sensitive UI (auth, confirmation dialogs, role-based UI), mark it as a regression-sensitive change and include it in the comparison set.
 - If regression-sensitive changes are found, run layout diffs (image diff or DOM/class diff) against the candidate task before applying updates. If diffs indicate regressions, escalate for manual review (do not apply breaking changes automatically).
 
@@ -29,8 +29,8 @@ Read the recent task history before making any changes:
 
 Read in order:
 
-- `.agents/poc-context.json` — execution order, task list, token format
-- `.agents/tasks/<task-file>.md` — acceptance checklist, component references
+- `docs/poc/context.json` — execution order, task list, token format
+- `docs/poc/tasks/<task-file>.md` — acceptance checklist, component references
 - `.agents/figma.meta.json` — `fileKey`, page/component nodeId map
 - `.agents/design-system.meta.json` — current tokens, component registry
 - `.agents/design-system.plan.md` — strategy and priorities
@@ -52,7 +52,7 @@ From the task file, collect:
 - Figma nodeIds referenced
 - Token names used
 - Layout snapshots or screenshot paths for visual diffing
-- Local export paths (if present): component SVG filenames under `.agents/figma/components/`, screen exports under `.agents/figma/screens/`, and frame exports under `.agents/figma/frames/` — use these for fast comparisons and visual diffs.
+- Task files now in `docs/poc/tasks/` (migrated from `.agents/tasks/`)
 
 ### 4. Query Figma via FramLink MCP
 
@@ -83,6 +83,7 @@ Include a `regression_audit` object in memory with the tasks compared and a `ris
 - Before writing updates to `.agents/design-system.meta.json`, run the regression audit:
   - If `risk` is `none` or `low`, proceed with minimal corrections and annotate changes with `regression_audit: {status: "auto-applied", compared_tasks: [...], risk: "low"}`.
   - If `risk` is `medium` or `high`, save proposed changes as a draft (`.agents/design-system.meta.json.draft`) and require a manual review step. Do not overwrite production meta automatically.
+- Task file state migrated to `docs/poc/` — use `docs/poc/tasks/<task-file>.md` paths
 - Write all safe corrections to `.agents/design-system.meta.json`.
 - If strategy changes, update `.agents/design-system.plan.md`.
 
@@ -90,7 +91,7 @@ Make minimal changes — do not rewrite sections unrelated to the task.
 
 ### 7. Update Task Checklist
 
-Mark acceptance items in `.agents/tasks/<task-file>.md` as completed for items verifiably checked in this run. Add a checklist entry for `Regression audit` with status `passed` or `requires_review`.
+Mark acceptance items in `docs/poc/tasks/<task-file>.md` as completed for items verifiably checked in this run. Add a checklist entry for `Regression audit` with status `passed` or `requires_review`.
 
 ### 8. Deliver Report
 
