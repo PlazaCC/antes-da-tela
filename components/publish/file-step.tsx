@@ -1,5 +1,6 @@
 'use client'
 
+import { notifyError } from '@/lib/feedback'
 import { getStorageUrl } from '@/lib/utils'
 import { validatePdfStructure } from '@/lib/utils/pdf'
 import type { PublishFormValues } from '@/lib/validators/publish'
@@ -137,16 +138,23 @@ export function FileStep({
         file={pdfFile}
         error={pdfError}
         progress={pdfProgress}
+        onFileReject={() => {
+          const msg = 'Apenas arquivos PDF são aceitos'
+          onSetPdfError(msg)
+          notifyError(msg)
+        }}
         onFileDrop={async (file) => {
           const error = validatePDF(file)
           if (error) {
             onSetPdfError(error)
+            notifyError(error)
             return
           }
 
           const structureError = await validatePdfStructure(file)
           if (structureError) {
             onSetPdfError(structureError)
+            notifyError(structureError)
             return
           }
 
@@ -170,14 +178,20 @@ export function FileStep({
       <FileUploadField
         label='Pilotagem / Audio Drama'
         labelInfo='Opcional'
-        accept={{ 'audio/*': ['.mp3', '.wav', '.m4a'] }}
+        accept={{ 'audio/mpeg': ['.mp3'], 'audio/wav': ['.wav'], 'audio/x-wav': ['.wav'] }}
         file={audioFile}
         error={audioError}
         progress={audioProgress}
+        onFileReject={() => {
+          const msg = 'Apenas MP3 ou WAV são aceitos'
+          onSetAudioError(msg)
+          notifyError(msg)
+        }}
         onFileDrop={(file) => {
           const error = validateAudio(file)
           if (error) {
             onSetAudioError(error)
+            notifyError(error)
           } else {
             setAudioFile(file)
             onSetAudioError('')
@@ -187,7 +201,7 @@ export function FileStep({
           setAudioFile(null)
           setValue('audioStoragePath', '')
         }}
-        infoText='Limite: 20MB. MP3, WAV ou M4A.'
+        infoText='Limite: 20MB. MP3 ou WAV.'
         showExisting={!audioFile && !!audioStoragePath}
         existingFileName={renderExistingFileName(audioStoragePath)}
         preview={
@@ -205,10 +219,16 @@ export function FileStep({
           file={coverFile}
           error={coverError}
           progress={coverProgress}
+          onFileReject={() => {
+            const msg = 'Apenas imagens JPEG, PNG ou WebP são aceitas'
+            onSetCoverError(msg)
+            notifyError(msg)
+          }}
           onFileDrop={(file) => {
             const error = validateImage(file)
             if (error) {
               onSetCoverError(error)
+              notifyError(error)
             } else {
               setCoverFile(file)
               onSetCoverError('')
@@ -245,10 +265,16 @@ export function FileStep({
           file={bannerFile}
           error={bannerError}
           progress={bannerProgress}
+          onFileReject={() => {
+            const msg = 'Apenas imagens JPEG, PNG ou WebP são aceitas'
+            onSetBannerError(msg)
+            notifyError(msg)
+          }}
           onFileDrop={(file) => {
             const error = validateImage(file)
             if (error) {
               onSetBannerError(error)
+              notifyError(error)
             } else {
               setBannerFile(file)
               onSetBannerError('')

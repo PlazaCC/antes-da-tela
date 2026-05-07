@@ -9,6 +9,7 @@ import { LoadingState } from '@/components/shared/loading-state'
 import { PageShell } from '@/components/shared/page-shell'
 import { SectionCard } from '@/components/shared/section-card'
 import { Button } from '@/components/ui/button'
+import { AlertCircle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -135,7 +136,10 @@ export function PublishPage({ scriptId }: PublishPageProps) {
             {step === 4 && <ReviewStep values={formValues} pdfFile={pdfFile} audioFile={audioFile} />}
 
             {uploadError ? (
-              <p className='text-state-error text-xs font-mono'>{uploadError}</p>
+              <p className='flex items-center gap-1.5 text-state-error text-sm'>
+                <AlertCircle className='size-4 shrink-0' />
+                {uploadError}
+              </p>
             ) : uploading ? (
               <p className='text-text-secondary text-sm'>Preparando o envio...</p>
             ) : null}

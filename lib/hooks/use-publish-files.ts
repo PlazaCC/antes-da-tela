@@ -10,8 +10,10 @@ export function validatePDF(file: File): string | null {
   return null
 }
 
+const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/x-wav']
+
 export function validateAudio(file: File): string | null {
-  if (!file.type.startsWith('audio/')) return 'Apenas arquivos de áudio são aceitos'
+  if (!ALLOWED_AUDIO_TYPES.includes(file.type)) return 'Apenas MP3 ou WAV são aceitos'
   if (file.size > MAX_AUDIO_BYTES) return 'O arquivo deve ter no máximo 20 MB'
   return null
 }

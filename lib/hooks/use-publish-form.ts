@@ -1,3 +1,4 @@
+import { notifyError } from '@/lib/feedback'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { usePublishFiles } from '@/lib/hooks/use-publish-files'
 import { usePublishUpload } from '@/lib/hooks/use-publish-upload'
@@ -248,8 +249,10 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
         })
       }
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Falha no envio. Tente novamente.'
       progress.setUploading(false)
-      progress.setUploadError(error instanceof Error ? error.message : 'Falha no envio. Tente novamente.')
+      progress.setUploadError(msg)
+      notifyError(msg)
     }
   }
 
