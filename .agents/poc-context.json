@@ -20,7 +20,7 @@
     "orm": "Drizzle ORM + postgres driver (prepare: false)",
     "database": "Supabase Postgres — pooler transaction port 6543",
     "storage": "Supabase Storage + Cloudflare CDN",
-    "pdf": "pdfjs-dist (next/dynamic, ssr: false)",
+    "pdf": "react-pdf (Document + Page, ssr: false)",
     "state": "Zustand",
     "cache": "TanStack Query + superjson",
     "ui": "shadcn/ui + Radix UI + Tailwind v3",
@@ -96,23 +96,14 @@
       "poc-19 — profile pages",
       "poc-20 — upload wizard redesign"
     ],
-    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-27 → poc-21 → poc-22 (parallel: poc-23)",
+    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-27 ✓ → poc-21 → (parallel: poc-23)",
     "phase2_tasks": [
       {
         "id": "poc-27",
         "title": "PDF Viewer: migrate to react-pdf",
-        "status": "pending",
+        "status": "done",
         "priority": "P0 — bug fix (zoom overflow) + fundação para sincronização áudio-texto futura",
-        "task_file": ".agents/tasks/poc-27-pdf-viewer-react-pdf.md",
-        "real_scope": "Substituir implementação manual de canvas/pdfjs-dist por react-pdf (Document + Page). Resolve overflow de zoom. Preserva text layer, Zustand store e CommentsSidebar. Cria hook useContainerWidth.",
-        "already_done": [
-          "PDF viewer funcional com canvas rendering",
-          "text layer com seleção de texto",
-          "zoom +/- com debounce",
-          "paginação prev/next",
-          "Zustand store (currentPage, totalPages, zoom, isLoading)",
-          "CommentsSidebar consome currentPage do store"
-        ],
+        "real_scope": "Substituiu implementação manual de canvas/pdfjs-dist por react-pdf (Document + Page). Resolve overflow de zoom. Preserva text layer, Zustand store e CommentsSidebar. Hook useContainerWidth criado.",
         "key_files": [
           "components/pdf-viewer/pdf-viewer.tsx",
           "components/pdf-viewer/pdf-viewer-store.ts",
@@ -125,17 +116,26 @@
       },
       {
         "id": "poc-25",
-        "title": "Upload Wizard: cover + banner image uploads",
-        "status": "done",
-        "priority": "P0 — bloqueante para poc-21 e poc-22",
-        "task_file": ".agents/tasks/poc-25-upload-wizard-final-design.md",
-        "real_scope": "Schema migration (cover_path em scripts) + upload de capa e banner no FileStep",
+        "title": "Upload Wizard: alinhamento ao Figma",
+        "status": "pending",
+        "priority": "P4",
+        "task_file": ".agents/tasks/poc-25-upload-wizard-figma-align.md",
+        "real_scope": "PreviewPanel ao vivo, heading por step, logline counter, cover na revisão, mobile sticky CTA — exclusivamente layout e UX, sem alterar lógica de upload",
+        "already_done": [
+          "Wizard 4 steps com navegação (Voltar/Continuar/Publicar)",
+          "Progress bar com labels das etapas",
+          "cover + banner image uploads (schema migration + FileStep)",
+          "DragZone para PDF, áudio, capa (2:3), banner (16:9)",
+          "Cancel Dialog com detecção de unsaved changes",
+          "Modo de edição (?id=...)"
+        ],
         "key_files": [
-          "server/db/schema.ts",
-          "server/api/scripts.ts",
-          "lib/hooks/use-publish-wizard.ts",
+          "app/(authenticated)/publish/page.tsx",
+          "components/publish/info-step.tsx",
           "components/publish/file-step.tsx",
-          "app/(authenticated)/publish/page.tsx"
+          "components/publish/genre-step.tsx",
+          "components/publish/review-step.tsx",
+          "lib/hooks/use-publish-wizard.ts"
         ]
       },
       {
@@ -152,21 +152,6 @@
           "server/api/scripts.ts",
           "components/script-card/script-card.tsx",
           "app/home-client.tsx"
-        ]
-      },
-      {
-        "id": "poc-22",
-        "title": "Script Modal: cover placeholder + audio no sidebar",
-        "status": "pending",
-        "priority": "P1",
-        "figma_nodeId": "51:718",
-        "task_file": ".agents/tasks/poc-22-script-modal-final-design.md",
-        "real_scope": "Cover placeholder 2:3 no ModalSidebar; AudioPlayer no sidebar se audioUrl presente",
-        "already_done": ["dois painéis", "título", "author section", "stats", "tags", "logline/synopsis"],
-        "key_files": [
-          "server/api/scripts.ts",
-          "components/script-preview-modal/sidebar.tsx",
-          "components/script-preview-modal/script-preview-modal.tsx"
         ]
       },
       {
