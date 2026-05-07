@@ -52,6 +52,9 @@ next-env.d.ts
 # Claude Code
 .claude/settings.local.json
 
+# Skills lock — machine-specific absolute paths, regenerate with yarn skills:sync
+skills-lock.json
+
 # MCP Files
 .playwright-mcp
 
