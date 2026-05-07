@@ -215,8 +215,8 @@
 
   "figma": {
     "fileKey": "iUb8odefGSZiHz4KjuzX1M",
-    "meta": ".agents/figma.meta.json",
-    "design_system": ".agents/design-system.meta.json",
+    "meta": "docs/design-system/figma.meta.json",
+    "design_system": "docs/design-system/design-system.meta.json",
     "sections": {
       "fluxo_principal": "186:1388",
       "fluxo_cadastro": "186:1350",
@@ -256,6 +256,6 @@
   "meta": {
     "generated_at": "2026-04-22",
     "agent_rules": ".agents/rules/",
-    "how_to_use": "Feed this file as context before executing any task. Locate the task file via phase2_tasks[].task_file. Fetch live Figma data for each screen via figma.screens[screen_name] + Framelink MCP. Design tokens in .agents/design-system.meta.json."
+    "how_to_use": "Feed this file as context before executing any task. Locate the task file via phase2_tasks[].task_file. Fetch live Figma data for each screen via figma.screens[screen_name] + Framelink MCP. Design tokens live in docs/design-system/design-system.meta.json and Figma metadata lives in docs/design-system/figma.meta.json."
   }
 }

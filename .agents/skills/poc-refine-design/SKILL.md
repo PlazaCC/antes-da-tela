@@ -1,13 +1,13 @@
 ---
 name: poc-refine-design
-description: 'Use when a POC task has been implemented and needs design alignment with Figma — tokens diverge, components are mismatched, or the design-system metadata is stale. Triggers: post-implementation review, design QA pass, or when `.agents/design-system.meta.json` may be out of sync with the Figma source.'
+description: 'Use when a POC task has been implemented and needs design alignment with Figma — tokens diverge, components are mismatched, or the design-system metadata is stale. Triggers: post-implementation review, design QA pass, or when `docs/design-system/design-system.meta.json` may be out of sync with the Figma source.'
 ---
 
 # poc-refine-design
 
 Align the last completed (or in-progress) POC task with the Figma design source. **Always use the Figma via MCP FramLink as the primary source for tokens, components, and layouts.**
 
-- The `.agents/figma.meta.json` and `.agents/design-system.meta.json` files are only fallback/support.
+- The `docs/design-system/figma.meta.json` and `docs/design-system/design-system.meta.json` files are only fallback/support.
 - There are no more local assets in `.agents/figma/` — ignore any mention of local SVG/PNG/PDF assets.
 - Official Figma links for reference:
   - Main flow: https://www.figma.com/design/iUb8odefGSZiHz4KjuzX1M/Antes-da-Tela-%E2%80%94-Design-System?node-id=186-1388
@@ -31,9 +31,8 @@ Read in order:
 
 - `docs/poc/context.json` — execution order, task list, token format
 - `docs/poc/tasks/<task-file>.md` — acceptance checklist, component references
-- `.agents/figma.meta.json` — `fileKey`, page/component nodeId map
-- `.agents/design-system.meta.json` — current tokens, component registry
-- `.agents/design-system.plan.md` — strategy and priorities
+- `docs/design-system/figma.meta.json` — `fileKey`, page/component nodeId map
+- `docs/design-system/design-system.meta.json` — current tokens, component registry
 
 **Always call `mcp_framelink_fig_get_figma_data` to fetch node JSON or rendered assets.** Only use local metadata files if MCP is unavailable.
 
@@ -52,7 +51,7 @@ From the task file, collect:
 - Figma nodeIds referenced
 - Token names used
 - Layout snapshots or screenshot paths for visual diffing
-- Task files now in `docs/poc/tasks/` (migrated from `.agents/tasks/`)
+- Task files now live in `docs/poc/tasks/`
 
 ### 4. Query Figma via FramLink MCP
 
@@ -80,12 +79,12 @@ Include a `regression_audit` object in memory with the tasks compared and a `ris
 
 - Consolidate tokens that share the same value under different names.
 - Correct `type` field: distinguish `component` (interactive, reusable) from `asset` (image/SVG).
-- Before writing updates to `.agents/design-system.meta.json`, run the regression audit:
+- Before writing updates to `docs/design-system/design-system.meta.json`, run the regression audit:
   - If `risk` is `none` or `low`, proceed with minimal corrections and annotate changes with `regression_audit: {status: "auto-applied", compared_tasks: [...], risk: "low"}`.
-  - If `risk` is `medium` or `high`, save proposed changes as a draft (`.agents/design-system.meta.json.draft`) and require a manual review step. Do not overwrite production meta automatically.
+  - If `risk` is `medium` or `high`, save proposed changes as a draft (`docs/design-system/design-system.meta.json.draft`) and require a manual review step. Do not overwrite production meta automatically.
 - Task file state migrated to `docs/poc/` — use `docs/poc/tasks/<task-file>.md` paths
-- Write all safe corrections to `.agents/design-system.meta.json`.
-- If strategy changes, update `.agents/design-system.plan.md`.
+- Write all safe corrections to `docs/design-system/design-system.meta.json`.
+- If strategy changes, update the relevant `docs/` guides instead of creating a legacy planning file.
 
 Make minimal changes — do not rewrite sections unrelated to the task.
 
@@ -113,7 +112,7 @@ Commit suggestion:       feat(design): <message>
 
 - **Always prioritize Figma via MCP FramLink.**
 - Ignore any instruction to look for local assets in `.agents/figma/`.
-- Local files `.agents/figma.meta.json` and `.agents/design-system.meta.json` are fallback only.
+- Local files `docs/design-system/figma.meta.json` and `docs/design-system/design-system.meta.json` are fallback only.
 - Never write tokens or secrets to project files.
 - Minimal, focused changes only; do not rewrite unrelated sections.
 - Never auto-commit or push; only produce commit suggestions.

@@ -6,26 +6,26 @@ paths:
 
 # Claude Code Skills Rules
 
-This is the Claude Code-specific skill rules file. Synced automatically from `.agents/rules/skills-ecosystem.md` via `yarn skills:sync`.
+This is the Claude Code-specific skill rules file. Synced automatically from `.agents/rules/skills-ecosystem.md` via `yarn skills`.
 
 ## Quick Reference
 
 **Source:** `.agents/skills/` (canonical)
 **This location:** `.claude/skills/` (auto-synced)
-**Sync command:** `yarn skills:sync`
+**Sync command:** `yarn skills`
 
 ## Never
 
 - ❌ Edit skills in `.claude/skills/` — always edit in `.agents/skills/`
-- ❌ Delete `.claude/skills/` manually — use `yarn skills:sync` CLI
+- ❌ Delete `.claude/skills/` manually — use `yarn skills` or `yarn skills:force`
 - ❌ Create skills directly here — create in `.agents/skills/` and sync
 
 ## Always
 
 - ✅ Create/modify skills in `.agents/skills/`
-- ✅ Run `yarn skills:sync` after making changes
+- ✅ Run `yarn skills` after making changes
 - ✅ Commit both `.agents/skills/` and `.claude/skills/` changes
-- ✅ Use `yarn skills:sync:check` to verify sync before commit
+- ✅ Use `yarn skills:force` only when a regular sync is not enough
 
 ## Full Rules
 
@@ -39,5 +39,5 @@ See `.agents/rules/skills-ecosystem.md` for complete documentation on:
 
 ---
 
-**Last synced:** Auto-managed via `yarn skills:sync`
+**Last synced:** Auto-managed via `yarn skills`
 **Official docs:** https://skills.sh/docs

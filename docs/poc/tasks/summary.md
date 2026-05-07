@@ -88,8 +88,8 @@ P4 — poc-25: Upload Wizard (alinhamento ao Figma — PreviewPanel + mobile CTA
 ## Figma references
 
 - **File key:** `iUb8odefGSZiHz4KjuzX1M`
-- Full component map: `.agents/figma.meta.json`
-- Design tokens: `.agents/design-system.meta.json`
+- Full component map: `docs/design-system/figma.meta.json`
+- Design tokens: `docs/design-system/design-system.meta.json`
 
 | Screen            | nodeId     |
 | ----------------- | ---------- |

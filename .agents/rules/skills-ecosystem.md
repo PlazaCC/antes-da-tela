@@ -3,7 +3,7 @@ paths:
   - '.agents/skills/**'
   - '.claude/skills/**'
   - '.cursor/skills/**'
-  - 'scripts/sync-skills.js'
+  - 'scripts/sync-skills.mjs'
 ---
 
 # Skills.sh Ecosystem Rules
@@ -13,7 +13,7 @@ This document defines the standards for creating, maintaining, and synchronizing
 ## Canonical Source
 
 - **Authoritative:** `.agents/skills/` — All SKILL.md files live here
-- **Read-only (synced):** `.claude/skills/`, `.cursor/skills/`, etc. — Agent-specific directories populated by `yarn skills:sync`
+- **Read-only (synced):** `.claude/skills/`, `.cursor/skills/`, etc. — Agent-specific directories populated by `yarn skills`
 - **Never edit:** Synced skill directories — always edit in `.agents/skills/` and resync
 
 ## Pre-Commit Quality Gate
@@ -22,12 +22,11 @@ Before each commit, `.husky/pre-commit` automatically runs:
 
 1. **Type Check** — `yarn type-check` (validates TypeScript)
 2. **Linting** — `yarn lint` (validates code style)
-3. **Skills Sync** — `yarn skills:sync` (if `.agents/skills/` changed)
 
 ✅ If all pass → commit proceeds
 ❌ If any fail → commit aborted, you fix errors and retry
 
-This ensures **zero commits with type errors, linting issues, or diverged skill directories**.
+Skill sync is manual. Run `yarn skills` whenever `.agents/skills/` changes.
 
 ## SKILL.md Format Requirements
 
@@ -104,13 +103,13 @@ After creating or modifying a skill in `.agents/skills/`:
 
 ```bash
 # Sync to all detected agents (Claude Code, Cursor, etc.)
-yarn skills:sync
+yarn skills
 
 # Force resync (nuke .claude/skills/ and reinstall)
-yarn skills:sync:force
+yarn skills:force
 
 # Single agent (Claude Code only)
-yarn skills:sync --agent=claude-code
+yarn skills --agent=claude-code
 ```
 
 ### Automatic (Git Hooks)
@@ -119,10 +118,9 @@ On each `git commit`:
 
 - **Type Check** (`yarn type-check`) — Validates TypeScript syntax
 - **Linting** (`yarn lint`) — Validates code style with ESLint
-- **Skills Sync** (`yarn skills:sync`) — Syncs if `.agents/skills/` changed
 - If ANY check fails, commit is aborted
-- Prevents divergence between `.agents/` and agent directories
-- No manual intervention — fix errors and retry
+- Skill sync remains a manual step when skills change
+- Fix errors, rerun checks, and sync separately if needed
 
 ### CI/CD
 
@@ -130,7 +128,7 @@ In GitHub Actions:
 
 ```yaml
 - name: Sync agent skills
-  run: yarn skills:sync
+  run: yarn skills
 
 - name: Verify no uncommitted skill changes
   run: git diff --quiet
@@ -148,7 +146,7 @@ In GitHub Actions:
 └── skill-65-name/
     └── SKILL.md
 
-.claude/skills/  ← Auto-populated by yarn skills:sync
+.claude/skills/  ← Auto-populated by yarn skills
 ├── skill-1-name/
 │   └── SKILL.md (copy)
 ├── skill-2-name/
@@ -190,7 +188,7 @@ Before committing a new or modified skill:
 - [ ] No personal information or secrets
 - [ ] Links are absolute (not relative to `.agents/`)
 - [ ] No references to deleted or moved files
-- [ ] Run `yarn skills:sync` before committing
+- [ ] Run `yarn skills` before committing if `.agents/skills/` changed
 - [ ] `.claude/skills/` changes are committed (auto-updated)
 
 ## Common Tasks
@@ -200,10 +198,10 @@ Before committing a new or modified skill:
 ```bash
 npx skills init skills/my-new-skill
 # Edit: skills/my-new-skill/SKILL.md
-yarn skills:sync
+yarn skills
 git add skills/my-new-skill/ .claude/skills/my-new-skill/
 git commit -m "feat(skills): add my-new-skill"
-# Pre-commit runs: type-check → lint → skills:sync
+# Pre-commit runs: type-check → lint
 # ✅ All checks pass → commit succeeds
 ```
 
@@ -229,7 +227,7 @@ git commit -m "feat(skills): add my-new-skill"
 ```bash
 mv .agents/skills/old-name .agents/skills/new-name
 # Update name: field in SKILL.md to match
-yarn skills:sync
+yarn skills
 git add .agents/skills/new-name/ .claude/skills/
 git commit -m "refactor(skills): rename old-name → new-name"
 ```
@@ -238,7 +236,7 @@ git commit -m "refactor(skills): rename old-name → new-name"
 
 ```bash
 rm -rf .agents/skills/my-skill
-yarn skills:sync
+yarn skills
 git add -A .agents/skills/ .claude/skills/
 git commit -m "chore(skills): remove my-skill"
 ```
@@ -246,7 +244,7 @@ git commit -m "chore(skills): remove my-skill"
 ### Update all skills (resync)
 
 ```bash
-yarn skills:sync:force
+yarn skills:force
 git add .claude/skills/ .cursor/skills/ .agents/skills/
 git commit -m "chore(skills): force resync all agent directories"
 ```
@@ -261,19 +259,19 @@ git commit -m "chore(skills): force resync all agent directories"
 
 ### Skill not appearing in agent
 
-1. Verify skill was synced: `yarn skills:sync`
+1. Verify skill was synced: `yarn skills`
 2. Check agent's skills directory exists: `.claude/skills/`
 3. Verify skill file is at correct path: `.claude/skills/{name}/SKILL.md`
-4. Force resync: `yarn skills:sync:force`
+4. Force resync: `yarn skills:force`
 
 ### Divergence between `.agents/` and `.claude/`
 
 ```bash
 # Restore sync
-yarn skills:sync:force
+yarn skills:force
 
-# Verify
-yarn skills:sync:check
+# Review the mirrored changes
+git diff -- .agents/skills .claude/skills
 ```
 
 ## References

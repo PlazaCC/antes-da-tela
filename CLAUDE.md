@@ -39,7 +39,8 @@ yarn build             # Production build
 yarn lint              # ESLint
 yarn db:generate       # Generate SQL migration files for schema
 yarn db:migrate        # Apply schema migrations to Supabase Postgres
-yarn skills:sync       # Sync agent skills from .agents/ to .claude/
+yarn skills            # Sync agent skills from .agents/ to detected targets
+yarn skills:force      # Rebuild synced agent skills from scratch
 ```
 
 ---

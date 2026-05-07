@@ -1,6 +1,6 @@
 ---
 name: create-poc-task
-description: Analyzes current POC task state, creates a standardized new task file, and updates poc-context.json and summary.md. Use when adding a new task to the Antes da Tela POC backlog.
+description: Analyzes current POC task state, creates a standardized new task file, and updates docs/poc/context.json and docs/poc/tasks/summary.md. Use when adding a new task to the Antes da Tela POC backlog.
 user-invocable: true
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
@@ -16,12 +16,14 @@ Create a standardized task file for the Antes da Tela POC, inserted at the corre
 ## Inputs
 
 Required:
+
 - `title` — task title
 - `scope` — Frontend / Backend / Full-stack
 - `priority` — P0–P4
 - `description` — what should be achieved (1–3 sentences)
 
 Optional:
+
 - `figma_nodeId`, `key_files`, `already_done`, `gaps`, `mobile_specs`
 
 If inputs are missing, ask for `title`, `priority`, and `description` before continuing.
@@ -32,13 +34,13 @@ If inputs are missing, ask for `title`, `priority`, and `description` before con
 
 ### 1. Read context (parallel reads)
 
-- `.agents/poc-context.json` → `phase2_tasks[]`: existing IDs, statuses, `execution_order`
-- `.agents/tasks/summary.md` → current status table
+- `docs/poc/context.json` → `phase2_tasks[]`: existing IDs, statuses, `execution_order`
+- `docs/poc/tasks/summary.md` → current status table
 
 ### 2. Determine task ID and filename
 
 - Next ID = max numeric suffix in `phase2_tasks[].id` + 1 (or use user-provided ID)
-- Filename: `.agents/tasks/poc-{NN}-{title-slug}.md`
+- Filename: `docs/poc/tasks/poc-{NN}-{title-slug}.md`
 
 ### 3. Create task file
 
@@ -47,9 +49,9 @@ Use the standard template (see below). All sections required.
 ```markdown
 # poc-{NN} — {Title}
 
-**Scope:** {scope}  
-**Priority:** {PX}  
-**Status:** pending  
+**Scope:** {scope}
+**Priority:** {PX}
+**Status:** pending
 **Figma:** {screen} `{nodeId}`
 
 ---
@@ -71,6 +73,7 @@ Use the standard template (see below). All sections required.
 ## Mobile & Tablet (Figma é desktop-only — especificação adicional)
 
 {Phone/tablet/desktop specs. Always include global rules:}
+
 - Touch targets ≥44×44px
 - `text-base` (16px min) on all inputs
 - `min-h-dvh` instead of `min-h-screen`
@@ -81,8 +84,8 @@ Use the standard template (see below). All sections required.
 
 ## Arquivos a modificar
 
-| Arquivo | Mudança |
-|---|---|
+| Arquivo  | Mudança    |
+| -------- | ---------- |
 | `{file}` | `{change}` |
 
 ---
@@ -104,7 +107,7 @@ Insert new entry into `phase2_tasks[]` in priority order (P0 before P1 before P2
   "status": "pending",
   "priority": "{PX}",
   "figma_nodeId": "{nodeId}",
-  "task_file": ".agents/tasks/poc-{NN}-{slug}.md",
+  "task_file": "docs/poc/tasks/poc-{NN}-{slug}.md",
   "real_scope": "{scope description}",
   "already_done": [],
   "key_files": []

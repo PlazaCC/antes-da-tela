@@ -1,25 +1,22 @@
 ---
 name: figma-implement-design
-description: Unified Figma implementation + refinement workflow that translates Figma designs into production-ready code, reconciles design tokens, and performs regression-safe metadata updates. Prefer canonical local exports under `.agents/figma/components`, `.agents/figma/screens`, and `.agents/figma/frames`.
+description: Unified Figma implementation + refinement workflow that translates Figma designs into production-ready code, reconciles design tokens, and performs regression-safe metadata updates. Use live MCP data with canonical metadata under `docs/design-system/`.
 disable-model-invocation: false
 maturity: stable
 ---
 
 # Figma — Implement & Refine
 
-This skill combines implementation-focused guidance (translating Figma nodes into repository code) with refinement and regression-safe design QA (token reconciliation, nodeId verification, and metadata corrections). It prefers local canonical exports and only calls MCP tools when live data is required.
+This skill combines implementation-focused guidance (translating Figma nodes into repository code) with refinement and regression-safe design QA (token reconciliation, nodeId verification, and metadata corrections). It uses live MCP data as the primary source and keeps tracked metadata under `docs/design-system/`.
 
-## Local Figma Exports (preferred)
+## Canonical Local Metadata
 
-Repository convention: canonical Figma exports live under `.agents/figma/` in three folders with distinct semantics:
+Repository convention: the tracked local Figma metadata lives under `docs/design-system/`.
 
-- `.agents/figma/components/` — exported component SVGs (vector icons and reusable artwork). Use these to map component names to vector assets and avoid re-requesting static renders.
-- `.agents/figma/screens/` — exported screen artifacts (`.pdf` and `.png`) for full-screen visual/layout diffs and review.
-- `.agents/figma/frames/` — full-frame exports (PDF/PNG) of the `Foundations` and `Components` pages used as canonical references and baselines.
+- `docs/design-system/figma.meta.json` — file key, section map, screen nodeIds, component nodeIds
+- `docs/design-system/design-system.meta.json` — tokens, typography, spacing, and component registry
 
-When a required export is present locally, prefer it for visual validation and asset extraction. Only call MCP tools (for node JSON or screenshots) when the local export is missing or authoritative live data is required.
-
-Semantics reminder: `components` = SVG vectors, `screens` = PDF/PNG screen exports, `frames` = full page/frame exports for reference.
+There is no tracked local `.agents/figma/` export tree in this repository. Fetch live nodes, screenshots, and assets via MCP when needed.
 
 ## When to use this skill
 
@@ -31,8 +28,8 @@ If the request is to edit Figma nodes directly, use `figma-use`. If the request 
 ## Prerequisites
 
 - Figma MCP server (or `figma-desktop` MCP) accessible and authorized.
-- Local export directory `.agents/figma/` may contain `components/`, `screens/`, and `frames/`.
-- Task context in `.agents/tasks/<task-file>.md` and `.agents/poc-context.json` when running refinement.
+- Local metadata under `docs/design-system/` is available as fallback.
+- Task context lives in `docs/poc/tasks/<task-file>.md` and `docs/poc/context.json` when running refinement.
 
 ## High-level workflow
 
@@ -44,20 +41,19 @@ If the request is to edit Figma nodes directly, use `figma-use`. If the request 
 
 ### 1 — Safety & regression checks
 
-- Inspect recent tasks in `.agents/tasks/` (default N=3). Mark tasks that modified layout or security-sensitive UI as `regression-sensitive`.
+- Inspect recent tasks in `docs/poc/tasks/` (default N=3). Mark tasks that modified layout or security-sensitive UI as `regression-sensitive`.
 - If regression-sensitive tasks exist, include them in the comparison set and run layout diffs. If diffs indicate risk, require manual review and do not auto-apply breaking changes.
 
 ### 2 — Load context
 
 Read in order:
 
-- `.agents/poc-context.json` — execution order, token format
-- `.agents/tasks/<task-file>.md` — acceptance checklist and component references
-- `.agents/figma.meta.json` — fileKey and nodeId map
-- `.agents/design-system.meta.json` — current tokens and component registry
-- `.agents/design-system.plan.md` — strategy and priorities
+- `docs/poc/context.json` — execution order, token format
+- `docs/poc/tasks/<task-file>.md` — acceptance checklist and component references
+- `docs/design-system/figma.meta.json` — fileKey and nodeId map
+- `docs/design-system/design-system.meta.json` — current tokens and component registry
 
-Prefer local exports under `.agents/figma/components`, `.agents/figma/screens`, and `.agents/figma/frames` before calling MCP.
+Use MCP for live node data and screenshots. Use `docs/design-system/*.json` only as tracked local metadata.
 
 ### 3 — Identify objective
 
@@ -71,14 +67,12 @@ Prefer local exports under `.agents/figma/components`, `.agents/figma/screens`, 
 2. Fetch design context and screenshot
    - `get_design_context(fileKey, nodeId)` → layout, typography, tokens
    - `get_screenshot(fileKey, nodeId)` → visual reference
-3. Prefer local assets
-   - Check `.agents/figma/components/` for SVGs before downloading duplicates.
-4. Download assets returned by MCP (icons, images, SVGs).
-5. Translate to project conventions
+3. Download assets returned by MCP (icons, images, SVGs).
+4. Translate to project conventions
    - Reuse existing primitives, map Figma tokens to project tokens, use `cn()` for class merging.
-6. Implement components/pages
+5. Implement components/pages
    - Add TypeScript props, small docs, and unit/visual tests where appropriate.
-7. Validate visually
+6. Validate visually
    - Compare implemented UI to screenshot: spacing, typography, colors, interactive states.
 
 ## Refinement branch (tokens, metadata, regression audits)
@@ -102,7 +96,7 @@ mcp_framelink_fig_get_figma_data(fileKey, nodeIds)
 5. Apply corrections (regression gating)
    - Create `regression_audit` with compared tasks and `risk` ∈ {none, low, medium, high}.
    - If `risk` is `none` or `low`: apply minimal corrections and annotate changes with `regression_audit: { status: "auto-applied", ... }`.
-   - If `risk` is `medium` or `high`: write a draft (`.agents/design-system.meta.json.draft`) and require manual review. Do NOT overwrite production meta automatically.
+   - If `risk` is `medium` or `high`: write a draft (`docs/design-system/design-system.meta.json.draft`) and require manual review. Do NOT overwrite production meta automatically.
 
 6. Update task checklist
    - Mark verifiable acceptance items and add a `Regression audit` checklist entry with status.
@@ -129,18 +123,12 @@ Provide a conventional commit suggestion (type/scope/short message) and list any
 
 ## Operational rules
 
-- Prefer local exports under `.agents/figma/` before calling MCP tools.
+- Prefer live MCP data and the tracked metadata under `docs/design-system/`.
 - If an MCP call fails with permissions, STOP and ask the user for the Figma token.
 - NEVER auto-commit, stage, or push. Produce commit suggestions only.
-- Convert hex → HSL only if `.agents/poc-context.json` requires it.
+- Convert hex → HSL only if `docs/poc/context.json` requires it.
 - Preserve existing task acceptance history when marking checklist items.
-- Do not add external icon packages; use SVGs from Figma exports or MCP assets.
-
-## Asset rules (quick)
-
-- Use `.agents/figma/components/*.svg` for component vectors.
-- Use `.agents/figma/screens/*.{pdf,png}` for full-screen diffs.
-- Use `.agents/figma/frames/*.{pdf,png}` for Foundations/Components reference frames.
+- Do not add external icon packages; use SVGs or assets obtained directly from MCP.
 
 ---
 

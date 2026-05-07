@@ -152,10 +152,9 @@ Aprendizado chave: comentários ancorados a trechos/partes geram alto engajament
 
 ## Pendente — prioridade de execução
 
-1. **P0 — Tela do Roteiro:** redesign completo — hero banner cinematográfico, breadcrumbs, sinopse sempre visível, mobile layout (audio fixo + comments Sheet). Ver `.agents/tasks/poc-24-pdf-reader-final-design.md`.
-2. **P1 — Home:** infinite scroll para a grid de roteiros, remover título "Roteiros recentes". Ver `.agents/tasks/poc-21-home-final-design.md`.
-3. **P2 — Busca:** alinhamento ao Figma — cards com cover nos resultados, link "ver todos", fix "Aplicar Filtros". Ver `.agents/tasks/poc-23-search-filter-final-design.md`.
-4. **P3 — Modal Preview:** AudioPlayer no sidebar. Ver `.agents/tasks/poc-22-script-modal-final-design.md`.
+1. **P1 — Home:** infinite scroll para a grid de roteiros, remover título "Roteiros recentes". Ver `docs/poc/tasks/poc-21-home-final-design.md`.
+2. **P2 — Busca:** alinhamento ao Figma — cards com cover nos resultados, link "ver todos", fix "Aplicar Filtros". Ver `docs/poc/tasks/poc-23-search-filter-final-design.md`.
+3. **P4 — Upload Wizard:** alinhamento ao Figma com PreviewPanel ao vivo, headings por etapa e CTA sticky no mobile. Ver `docs/poc/tasks/poc-25-upload-wizard-figma-align.md`.
 
 ---
 

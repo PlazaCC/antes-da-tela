@@ -1,6 +1,6 @@
 ---
 name: poc-next-task
-description: Identifies and executes the next pending POC task. Fast context pickup from poc-context.json — no build/lint at start. Use for starting the next task, resuming in-progress work, or targeting a specific task by ID.
+description: Identifies and executes the next pending POC task. Fast context pickup from docs/poc/context.json — no build/lint at start. Use for starting the next task, resuming in-progress work, or targeting a specific task by ID.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -10,13 +10,13 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 **2 reads max to identify the target:**
 
-1. Read `.agents/poc-context.json` — scan `new_tasks` + `execution_order`:
+1. Read `docs/poc/context.json` — scan `phase2_tasks[]` + `execution_order`:
    - Argument provided (e.g. `poc-10`) → match `id` directly
    - `in_progress` tasks by execution_order step → resume first match
    - `pending` tasks by execution_order step → start first match
 2. Read the `task_file` path from the matched task entry.
 
-For a quick human-readable summary, also consult `.agents/tasks/summary.md`.
+For a quick human-readable summary, also consult `docs/poc/tasks/summary.md`.
 
 **Never run `yarn build` or `yarn lint` at task start.** Released code is already validated. Builds run only post-implementation when an acceptance item explicitly requires it.
 
@@ -26,9 +26,9 @@ For a quick human-readable summary, also consult `.agents/tasks/summary.md`.
 
 Figma via MCP FramLink is the only source of truth.
 
-- `.agents/figma.meta.json` + `.agents/design-system.meta.json` → fallback only if MCP unavailable
+- `docs/design-system/figma.meta.json` + `docs/design-system/design-system.meta.json` → fallback only if MCP unavailable
 - No local assets in `.agents/figma/` — always use MCP
-- Official Figma links (file key from `figma.meta.json`):
+- Official Figma links (file key from `docs/design-system/figma.meta.json`):
   - Main flow: `node-id=186-1388`
   - Script registration: `node-id=186-1350`
   - User profile: `node-id=186-2075`

@@ -16,9 +16,8 @@ Purpose: short, actionable guidance for AI coding agents working in this reposit
 - **Automatic Quality Gate:** Pre-commit hook `.husky/pre-commit` runs automatically on `git commit`:
   1. `yarn type-check` — validates TypeScript
   2. `yarn lint` — validates code style
-  3. `yarn skills:sync` — syncs skills if `.agents/skills/` changed
   - If ANY check fails, commit is aborted. Fix errors and retry.
-  - **No manual verification needed** — pre-commit handles it automatically
+  - Skill sync stays manual via `yarn skills` when `.agents/skills/` changes.
 - **Database Safety:** If any migration or database command fails, STOP and ask for manual verification. Do NOT attempt alternative workarounds. See `.agents/rules/supabase.md`.
 - Read relevant SKILL.md files before acting. Example: [.agents/skills/writing-skills/SKILL.md](.agents/skills/writing-skills/SKILL.md).
 
@@ -39,7 +38,8 @@ Purpose: short, actionable guidance for AI coding agents working in this reposit
 - `yarn drizzle-kit generate` — generate Drizzle SQL migrations
 - `yarn drizzle-kit migrate` — apply migrations to Supabase
 - `yarn dlx shadcn@latest add <component>` — install new shadcn/ui components
-- `yarn skills:sync` — sync all agent skills (auto-detects agents, runs pre-commit via Git hook)
+- `yarn skills` — sync agent skills to detected targets
+- `yarn skills:force` — rebuild synced agent skills from scratch
 
 **Key project patterns**
 

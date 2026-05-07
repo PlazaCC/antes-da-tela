@@ -35,9 +35,8 @@ Arquivos e locais-chave (ponto de partida para qualquer task)
 
 Design system — arquivos de referência
 
-- Tokens Figma (canônico): `.agents/design-system.meta.json` — cores, tipografia, espaçamento, componentes, guidelines
-- Plano de implementação: `.agents/design-system.plan.md`
-- Integração Figma: `.agents/figma.meta.json`
+- Tokens Figma (canônico): `docs/design-system/design-system.meta.json` — cores, tipografia, espaçamento, componentes, guidelines
+- Integração Figma: `docs/design-system/figma.meta.json`
 - Guia UI (shadcn/ui): `docs/UI.md`
 - Guia Figma: `docs/FIGMA.md`
 - Tokens CSS: `app/globals.css` (variáveis HSL em `:root` e `.dark`)
@@ -57,11 +56,9 @@ Estado de implementação (essencial)
   - Telas aprovadas e responsivas: Home, Perfil público, Editar Perfil, Dashboard, Meus Roteiros, Upload Wizard.
   - Componentes UI: ScriptCard (com cover), AudioPlayer, PDFViewer, CommentsSidebar, ScriptPreviewModal, SearchSheet, FilterPanel, NavBar, entre outros.
 - Nota sobre mobile-first: O Figma cobre apenas 1440px (desktop). Todas as telas pendentes devem ser implementadas mobile-first (phone <768px, tablet 768–1023px, desktop ≥1024px). Cada task file inclui seção "Mobile & Tablet" com specs. Regras globais: touch targets ≥44px, `text-base` em inputs (evitar zoom iOS), `min-h-dvh`, `env(safe-area-inset-bottom)` em fixed bars, sem scroll aninhado no mobile.
-- Pendente / Alta prioridade (ver `.agents/tasks/summary.md` para detalhes):
-  - **P0:** Tela do Roteiro — redesign completo (hero banner, breadcrumbs, sinopse, mobile layout com safe-area, PDF touch controls).
+- Pendente / Alta prioridade (ver `docs/poc/tasks/summary.md` para detalhes):
   - **P1:** Home — infinite scroll, remover "Roteiros recentes", grid responsiva 2/3/4/5 colunas.
   - **P2:** Busca — cards com cover, link "ver todos", fix apply filter, touch targets, dvh.
-  - **P3:** Modal Preview — AudioPlayer no sidebar, mobile full-screen, touch targets.
   - **P4:** Upload Wizard — PreviewPanel ao vivo, heading por step, logline counter, mobile sticky CTA, inputs sem zoom iOS.
 
 Como rodar / comandos úteis
@@ -96,7 +93,7 @@ Notas técnicas e convenções importantes
 
 Checklist rápida para agentes antes de criar/alterar código
 
-1. Ler este documento e `.agents/tasks/summary.md` (resumo de estado canônico para a POC).
+1. Ler este documento e `docs/poc/tasks/summary.md` (resumo de estado canônico para a POC).
 2. Verificar ADR/RFC correspondentes antes de propor mudanças (`docs/adrs/`, `docs/rfc/`).
 3. Se for mexer em DB, editar `server/db/schema.ts` e gerar migration (`yarn drizzle-kit generate`) — não aplique migrations sem revisar `DATABASE_URL_UNPOOLED`.
 4. Para upload de arquivos, preferir implementar upload direto cliente → Supabase Storage; só criar endpoint server-side se houver necessidade de processamento.
@@ -109,14 +106,14 @@ Checklist rápida para agentes antes de criar/alterar código
 
 Próxima task a executar
 
-Ver `.agents/tasks/summary.md` para prioridades e escopo detalhado. A próxima a executar é:
+Ver `docs/poc/tasks/summary.md` para prioridades e escopo detalhado. A próxima a executar é:
 
-**P0 — poc-24:** Redesign completo da tela do Roteiro (`app/scripts/[id]/script-page-client.tsx`).
-- Hero banner cinematográfico (h-[280px] md:h-[420px], gradiente, título sobreposto)
-- Breadcrumbs "← Home / Título do Roteiro"
-- Sinopse sempre visível abaixo dos metadados
-- Mobile: audio player fixo no rodapé + comments como Sheet
+**P1 — poc-21:** Home (`app/home-client.tsx`).
+
+- Infinite scroll para a grid principal
+- Remover o título "Roteiros recentes"
+- Ajustar a grid mobile/tablet para 2/3/4/5 colunas conforme a task
 
 ---
 
-Documento atualizado em 2026-04-23 — mantenha sincronizado com `.agents/tasks/summary.md`.
+Documento atualizado em 2026-04-23 — mantenha sincronizado com `docs/poc/tasks/summary.md`.

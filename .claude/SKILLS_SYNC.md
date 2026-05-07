@@ -1,158 +1,69 @@
 # Skills Synchronization Guide
 
-## Official Standard
+## Source of truth
 
-This project uses **skills.sh** — the official open-source agent skills CLI from Vercel.
+- Canonical skills live in `.agents/skills/`.
+- Claude consumes the mirrored copies in `.claude/skills/`.
+- Never edit `.claude/skills/` directly.
 
-### How It Works
+## Commands
 
-- **Authoritative Source:** `.agents/skills/` contains all 65+ SKILL.md definitions
-- **Claude Code Path:** `.claude/skills/` is synchronized TO this location by the official `npx skills` CLI
-- **Never delete .claude/skills manually** — use `npx skills` commands instead
-
-### Key Discovery Locations (Official)
-
-The skills.sh CLI discovers skills in these locations:
-
-- `.agents/skills/` ← **Primary canonical source**
-- `.claude/skills/` ← **Claude Code integration point**
-- `.agents/` → `.claude/` sync happens via CLI
-
-### Synchronization
-
-**One-time setup:**
+The project exposes two package scripts backed by `scripts/sync-skills.mjs`:
 
 ```bash
-yarn skills:sync
+yarn skills
+yarn skills:force
 ```
 
-This installs all 65 skills from `.agents/skills/` to `.claude/skills/` using the official CLI.
+Use them as follows:
 
-**If skills don't appear in Claude Code after a fresh `git clone`:**
+- `yarn skills` updates `.claude/skills/` from `.agents/skills/`.
+- `yarn skills:force` rebuilds the sync from scratch.
+
+## Current workflow
+
+Skill sync is **manual**.
+
+Run `yarn skills` whenever one of these is true:
+
+- You changed any file under `.agents/skills/`.
+- You pulled changes that modified skills.
+- Claude is not discovering a skill you expect to be available.
+
+## Pre-commit behavior
+
+`.husky/pre-commit` does **not** run skill sync anymore.
+
+The hook currently runs only:
+
+1. `yarn type-check`
+2. `yarn lint`
+
+That means keeping `.claude/skills/` aligned is an explicit step, not an automatic side effect of `git commit`.
+
+## Recommended sequence after skill edits
 
 ```bash
-yarn skills:sync
+yarn skills
+yarn type-check
+yarn lint
 ```
 
-**To force resynchronize (nuke and reinstall):**
+If a regular sync is not enough, run `yarn skills:force` and review the resulting diff.
+
+## Troubleshooting
+
+**Skills not showing in Claude Code**
+
+Run:
 
 ```bash
-yarn skills:sync:force
+yarn skills
 ```
 
-### Why We Sync (Not Copy-Paste or Symlinks)
+**Sync command fails**
 
-The **official skills.sh CLI approach**:
-
-- ✅ Respects the skills.sh ecosystem standard
-- ✅ Automatically detects all agents on your system
-- ✅ Handles `.claude/` discovery path correctly
-- ✅ Supports both copy and symlink modes
-- ✅ Maintains consistent metadata and telemetry
-
-Manual approaches (NOT recommended):
-
-- ❌ Direct copy-paste creates duplicates and maintenance debt
-- ❌ Git-tracked symlinks break on Windows without special permissions
-
-## Automatic Synchronization (Pre-commit Hooks)
-
-All skill syncing is automatic via `.husky/pre-commit`, which runs **comprehensive quality checks** before allowing commits:
-
-1. **Type Check** (`yarn type-check`) — Validates TypeScript
-2. **Linting** (`yarn lint`) — Validates code style (ESLint)
-3. **Skills Sync** (`yarn skills:sync`) — Auto-syncs if `.agents/skills/` changed
-
-**Result:** If ANY check fails, the commit is aborted. You must fix errors before trying again.
-
-### How It Works
-
-```bash
-$ git commit -m "feat: add new feature"
-
-# Pre-commit hook runs:
-✓ yarn type-check
-  ✅ Types valid
-✓ yarn lint
-  ✅ Linting passed
-✓ Detect .agents/skills/ changes
-  ✓ yarn skills:sync
-  ✅ Skills synced and staged
-✓ Commit proceeds with all checks passed
-```
-
-Or if there's an error:
-
-```bash
-$ git commit -m "feat: add feature with bug"
-
-# Pre-commit hook runs:
-✓ yarn type-check
-✓ yarn lint
-  ❌ ESLint error: unused variable on line 42
-  ❌ Linting failed. Commit aborted.
-
-# You fix the error and try again:
-$ yarn lint          # Fix error
-$ git add .
-$ git commit -m "feat: add feature with bug fix"
-```
-
-## Intelligent Multi-Agent Support
-
-`scripts/sync-skills.js` automatically detects and syncs to all installed agents:
-
-- `.claude/skills/` (Claude Code)
-- `.cursor/skills/` (Cursor IDE)
-- `.cline/skills/` (Cline)
-- `.agents/skills/` (Generic agents)
-- And more...
-
-**No configuration needed** — detection is automatic.
-
-### Manual Control
-
-```bash
-# Incremental sync (smart add)
-yarn skills:sync
-
-# Force resync (rebuild all)
-yarn skills:sync:force
-
-# Single agent
-yarn skills:sync --agent=cursor
-
-# Verify sync status
-yarn skills:sync:check
-```
-
-## Project Rules
-
-See `.agents/rules/skills-ecosystem.md` for complete standards on:
-
-- SKILL.md format and validation
-- Naming conventions
-- Discovery paths
-- Quality checklist
-- Troubleshooting guide
-- ❌ Splits source of truth between `.agents/` and `.claude/`
-
-### CI/CD Integration
-
-In GitHub Actions or CI:
-
-```yaml
-- name: Sync skills
-  run: yarn skills:sync
-```
-
-### Troubleshooting
-
-**Q: Skills not showing in Claude Code?**
-A: Run `yarn skills:sync` to refresh the sync.
-
-**Q: "No skills found" error?**
-A: Ensure all SKILL.md files in `.agents/skills/` have valid YAML frontmatter:
+Check that every `SKILL.md` under `.agents/skills/` has valid YAML frontmatter with at least:
 
 ```yaml
 ---
@@ -161,16 +72,12 @@ description: What this skill does
 ---
 ```
 
-**Q: Can I edit skills in `.claude/skills/`?**
-A: No. Always edit in `.agents/skills/` and resync:
+**Unsure where to edit a skill**
 
-```bash
-yarn skills:sync
-```
+Edit `.agents/skills/` only, then resync.
 
-### References
+## References
 
-- [Official skills.sh Documentation](https://skills.sh/docs)
-- [Official CLI Reference](https://skills.sh/docs/cli)
-- [Skill Discovery Rules](https://skills.sh/docs#skill-discovery)
-- [GitHub: vercel-labs/skills](https://github.com/vercel-labs/skills)
+- https://skills.sh/docs
+- https://skills.sh/docs/cli
+- https://github.com/vercel-labs/skills

@@ -26,10 +26,8 @@
     "test:ci": "vitest run --reporter=dot",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "skills": "npx skills",
-    "skills:sync": "node scripts/sync-skills.mjs",
-    "skills:sync:force": "node scripts/sync-skills.mjs --force",
-    "skills:sync:check": "node scripts/sync-skills.mjs && git diff --quiet || (echo 'Skills are out of sync. Run: yarn skills:sync' && exit 1)",
+    "skills": "node scripts/sync-skills.mjs",
+    "skills:force": "node scripts/sync-skills.mjs --force",
     "prepare": "husky install"
   },
   "engines": {

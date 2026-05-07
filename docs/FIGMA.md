@@ -39,4 +39,4 @@ Incluídos no projeto:
 - Completar variações de `Tag` e `Input` conforme as especificações de estado do design system.
 - Estender a documentação com tokens, componentes e exemplos de uso.
 
-> Consulte `.agents/design-system.meta.json` para a versão atual do sistema de design extraído do Figma.
+> Consulte `docs/design-system/design-system.meta.json` para a versão atual do sistema de design extraído do Figma.
