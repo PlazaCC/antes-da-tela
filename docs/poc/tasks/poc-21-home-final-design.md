@@ -1,8 +1,9 @@
-# poc-21 — Home: infinite scroll
+# CONCLUÍDO ✓ poc-21 — Home: infinite scroll
 
 **Scope:** Frontend + Backend
 **Priority:** P1
-**Status:** pending
+**Status:** done
+**Concluído em:** 2026-05-12
 **Figma:** Home `51:562`
 
 ---
@@ -42,25 +43,30 @@ Adicionar `cursor` opcional ao `listRecent`:
 
 ```ts
 listRecent: publicProcedure
-  .input(z.object({ limit: z.number().default(20), cursor: z.string().optional() }))
+  .input(
+    z.object({ limit: z.number().default(20), cursor: z.string().optional() }),
+  )
   .query(async ({ ctx, input }) => {
     // query com .range() ou .gt('created_at', cursor)
     // retornar { items, nextCursor }
-  })
+  });
 ```
 
 **Frontend (`app/home-client.tsx`):**
 
 ```ts
-const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-  ...trpc.scripts.listRecent.infiniteQueryOptions(
-    { limit: 20 },
-    { getNextPageParam: (last) => last.nextCursor ?? undefined },
-  ),
-  enabled: !isSearchActive,
-})
+const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  useInfiniteQuery({
+    ...trpc.scripts.listRecent.infiniteQueryOptions(
+      { limit: 20 },
+      { getNextPageParam: (last) => last.nextCursor ?? undefined },
+    ),
+    enabled: !isSearchActive,
+  });
 
-const displayedScripts = isSearchActive ? (searchData ?? []) : (data?.pages.flatMap((p) => p.items) ?? [])
+const displayedScripts = isSearchActive
+  ? (searchData ?? [])
+  : (data?.pages.flatMap((p) => p.items) ?? []);
 ```
 
 **Sentinela de scroll:** usar `IntersectionObserver` nativo (sem lib extra):
@@ -137,12 +143,12 @@ O skeleton ao buscar próxima página deve ter o mesmo número de colunas que a 
 ```tsx
 {
   isFetchingNextPage && (
-    <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 lg:gap-8 w-full'>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 lg:gap-8 w-full">
       {Array.from({ length: 10 }).map((_, i) => (
-        <Skeleton key={i} className='aspect-[4/5] bg-elevated rounded-sm' />
+        <Skeleton key={i} className="aspect-[4/5] bg-elevated rounded-sm" />
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -156,14 +162,14 @@ Cada ScriptCard deve ser naturalmente clicável pela área completa da imagem + 
 
 ## Acceptance criteria
 
-- [ ] Título "Roteiros recentes" removido quando não há busca ativa
-- [ ] Grid carrega automaticamente mais roteiros ao rolar até o fim
-- [ ] `hasNextPage: false` → sentinela some, sem loader infinito
-- [ ] Quando busca ativa: grid de resultados (sem paginação, comportamento atual mantido)
-- [ ] Phone: grid com 2 colunas (`grid-cols-2`)
-- [ ] Tablet: grid com 3 colunas (`md:grid-cols-3`)
-- [ ] Desktop: grid com 4–5 colunas (`lg:grid-cols-4 xl:grid-cols-5`)
-- [ ] Skeleton de next-page com mesmas colunas que a grid
-- [ ] Carousel: setas de navegação ocultas no mobile (`hidden md:flex`)
-- [ ] Genre chips: scroll horizontal no mobile, sem quebra de linha
-- [ ] `yarn build` sem erros de tipo
+- [x] Título "Roteiros recentes" removido quando não há busca ativa
+- [x] Grid carrega automaticamente mais roteiros ao rolar até o fim
+- [x] `hasNextPage: false` → sentinela some, sem loader infinito
+- [x] Quando busca ativa: grid de resultados (sem paginação, comportamento atual mantido)
+- [x] Phone: grid com 2 colunas (`grid-cols-2`)
+- [x] Tablet: grid com 3 colunas (`md:grid-cols-3`)
+- [x] Desktop: grid com 4–5 colunas (`lg:grid-cols-4 xl:grid-cols-5`)
+- [x] Skeleton de next-page com mesmas colunas que a grid
+- [x] Carousel: setas de navegação ocultas no mobile (`hidden md:flex`)
+- [x] Genre chips: scroll horizontal no mobile, sem quebra de linha
+- [x] `yarn build` sem erros de tipo
