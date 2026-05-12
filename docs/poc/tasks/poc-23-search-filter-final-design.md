@@ -36,16 +36,24 @@ Substituir o `<Link>` atual por um card compacto:
   key={script.id}
   href={`/scripts/${script.id}`}
   onClick={() => onOpenChange(false)}
-  className='flex items-center gap-3 px-5 py-3 border-b border-border-subtle hover:bg-elevated transition-colors'>
+  className="flex items-center gap-3 px-5 py-3 border-b border-border-subtle hover:bg-elevated transition-colors"
+>
   {/* Miniatura de capa */}
-  <div className='w-9 aspect-[4/5] shrink-0 rounded-sm bg-elevated border border-border-subtle overflow-hidden relative'>
-    {script.cover_url && <Image src={script.cover_url} alt={script.title} fill className='object-cover' />}
+  <div className="w-9 aspect-[4/5] shrink-0 rounded-sm bg-elevated border border-border-subtle overflow-hidden relative">
+    {script.cover_url && (
+      <Image
+        src={script.cover_url}
+        alt={script.title}
+        fill
+        className="object-cover"
+      />
+    )}
   </div>
   {/* Info */}
-  <div className='flex flex-col gap-0.5 min-w-0'>
-    <span className='text-sm text-text-primary truncate'>{script.title}</span>
-    <span className='font-mono text-[10px] text-text-muted uppercase'>
-      {[script.genre, script.author?.name].filter(Boolean).join(' · ')}
+  <div className="flex flex-col gap-0.5 min-w-0">
+    <span className="text-sm text-text-primary truncate">{script.title}</span>
+    <span className="font-mono text-[10px] text-text-muted uppercase">
+      {[script.genre, script.author?.name].filter(Boolean).join(" · ")}
     </span>
   </div>
 </Link>
@@ -65,15 +73,16 @@ Adicionar rodapé no sheet quando `results.length > 0` e `safeQuery.length >= 2`
 }
 {
   results && results.length > 0 && safeQuery.length >= 2 && (
-    <div className='px-5 py-3 border-t border-border-subtle shrink-0'>
+    <div className="px-5 py-3 border-t border-border-subtle shrink-0">
       <Link
         href={`/?q=${encodeURIComponent(safeQuery)}`}
         onClick={() => onOpenChange(false)}
-        className='font-mono text-label-mono-small text-brand-accent hover:underline underline-offset-4'>
+        className="font-mono text-label-mono-small text-brand-accent hover:underline underline-offset-4"
+      >
         Ver todos os resultados para "{safeQuery}"
       </Link>
     </div>
-  )
+  );
 }
 ```
 
@@ -87,18 +96,19 @@ Atualmente o botão fecha o sheet sem garantir que os filtros sejam escritos na 
 {
   /* Antes */
 }
-;<button onClick={() => onOpenChange(false)}>Aplicar Filtros</button>
+<button onClick={() => onOpenChange(false)}>Aplicar Filtros</button>;
 
 {
   /* Depois — chamar apply() antes de fechar */
 }
-;<button
+<button
   onClick={() => {
-    apply(genres, ageRatings)
-    onOpenChange(false)
-  }}>
+    apply(genres, ageRatings);
+    onOpenChange(false);
+  }}
+>
   Aplicar Filtros
-</button>
+</button>;
 ```
 
 > `apply` vem de `useFilterParams`. Verificar se o FilterPanel já tem acesso ao hook ou se precisa receber `apply` como prop.
@@ -138,7 +148,7 @@ No mobile, ao abrir o sheet o input de busca deve ganhar foco automaticamente pa
 O input deve ter `min-h-[44px]` e `text-base` (nunca menor que 16px) para evitar o zoom automático do iOS:
 
 ```tsx
-<Input className='min-h-[44px] text-base ...' />
+<Input className="min-h-[44px] text-base ..." />
 ```
 
 ### FilterPanel — largura no mobile
@@ -171,3 +181,4 @@ O `w-9` da miniatura é ~36px — suficiente para display mas verificar que a im
 - [ ] FilterPanel: "Aplicar Filtros" aplica os filtros na URL antes de fechar o sheet
 - [ ] FilterPanel: largura `w-full sm:w-[380px]` (ocupa tela inteira em phone)
 - [ ] `yarn build` sem erros de tipo
+- [ ] Regression audit: requires_review (no layout snapshots available)
