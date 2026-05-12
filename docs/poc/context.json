@@ -96,7 +96,7 @@
       "poc-19 — profile pages",
       "poc-20 — upload wizard redesign"
     ],
-    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-27 ✓ → (parallel: poc-21, poc-28) → poc-23",
+    "execution_order": "poc-26 ✓ → poc-25 ✓ → poc-24 ✓ → poc-27 ✓ → (parallel: poc-21 ✓, poc-28) → poc-23",
     "phase2_tasks": [
       {
         "id": "poc-27",
@@ -117,7 +117,7 @@
       {
         "id": "poc-25",
         "title": "Upload Wizard: alinhamento ao Figma",
-        "status": "pending",
+        "status": "done",
         "priority": "P4",
         "task_file": "docs/poc/tasks/poc-25-upload-wizard-figma-align.md",
         "real_scope": "PreviewPanel ao vivo, heading por step, logline counter, cover na revisão, mobile sticky CTA — exclusivamente layout e UX, sem alterar lógica de upload",
@@ -146,7 +146,12 @@
         "figma_nodeId": "51:562",
         "task_file": "docs/poc/tasks/poc-21-home-final-design.md",
         "real_scope": "cover_path no schema (via poc-25), prop coverUrl no ScriptCard, seção 'Em Destaque' com banners via banner_path (função JS/POC com fallback para ScriptCards)",
-        "already_done": ["genre chips com active state", "grid 3 cols", "featured section", "filter/search"],
+        "already_done": [
+          "genre chips com active state",
+          "grid 3 cols",
+          "featured section",
+          "filter/search"
+        ],
         "key_files": [
           "server/db/schema.ts",
           "server/api/scripts.ts",
@@ -175,7 +180,10 @@
           "mobile sheet + FAB",
           "no-PDF state redesenhado"
         ],
-        "key_files": ["app/scripts/[id]/script-page-client.tsx", "components/pdf-viewer/comments-sidebar.tsx"]
+        "key_files": [
+          "app/scripts/[id]/script-page-client.tsx",
+          "components/pdf-viewer/comments-sidebar.tsx"
+        ]
       },
       {
         "id": "poc-28",
@@ -212,7 +220,10 @@
         "task_file": "docs/poc/tasks/poc-23-search-filter-final-design.md",
         "real_scope": "Link 'ver todos os resultados' no SearchSheet + fix no apply do FilterPanel",
         "already_done": ["SearchSheet funcional", "FilterPanel com checkboxes"],
-        "key_files": ["components/search-sheet/search-sheet.tsx", "components/filter-panel/filter-panel.tsx"]
+        "key_files": [
+          "components/search-sheet/search-sheet.tsx",
+          "components/filter-panel/filter-panel.tsx"
+        ]
       },
       {
         "id": "poc-26",
