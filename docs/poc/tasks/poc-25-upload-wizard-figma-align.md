@@ -1,8 +1,9 @@
-# poc-25 — Upload Wizard: alinhamento ao Figma
+# CONCLUÍDO ✓ poc-25 — Upload Wizard: alinhamento ao Figma
 
 **Scope:** Frontend
 **Priority:** P4
-**Status:** pending
+**Status:** done
+**Concluído em:** 2026-05-12
 **Figma refs:** Step 1 `115:1008`, Step 2 `115:1075`, Step 3 `125:1430`, Step 4 `128:1691`
 
 ---
@@ -63,14 +64,14 @@ Mudar o layout de `max-w-3xl mx-auto` (coluna única) para dois painéis lado a 
 {
   /* Container principal */
 }
-;<div className='flex flex-col lg:flex-row gap-8 items-start'>
+<div className="flex flex-col lg:flex-row gap-8 items-start">
   {/* FormPanel — flex-1, conteúdo atual do wizard */}
-  <div className='flex-1 min-w-0 bg-surface border border-border-default rounded-sm p-5 md:p-8 flex flex-col gap-6'>
+  <div className="flex-1 min-w-0 bg-surface border border-border-default rounded-sm p-5 md:p-8 flex flex-col gap-6">
     {/* steps como antes */}
   </div>
 
   {/* PreviewPanel — 320px fixo, sticky no desktop */}
-  <aside className='hidden lg:flex flex-col w-80 shrink-0 sticky top-24'>
+  <aside className="hidden lg:flex flex-col w-80 shrink-0 sticky top-24">
     <ScriptPreview
       title={formValues.title}
       genre={formValues.genre}
@@ -78,10 +79,10 @@ Mudar o layout de `max-w-3xl mx-auto` (coluna única) para dois painéis lado a 
       coverFile={coverFile}
       coverStoragePath={formValues.coverStoragePath}
       visibility={formValues.visibility}
-      onVisibilityChange={(v) => setValue('visibility', v)}
+      onVisibilityChange={(v) => setValue("visibility", v)}
     />
   </aside>
-</div>
+</div>;
 ```
 
 Criar `components/publish/script-preview.tsx`:
@@ -99,71 +100,94 @@ export function ScriptPreview({
   const coverUrl = coverFile
     ? URL.createObjectURL(coverFile)
     : coverStoragePath
-      ? getStorageUrl('avatars', coverStoragePath)
-      : null
+      ? getStorageUrl("avatars", coverStoragePath)
+      : null;
 
   return (
-    <div className='bg-surface border border-border-default rounded-sm p-6 flex flex-col gap-6 justify-between h-[560px]'>
-      <h3 className='font-semibold text-[15px] text-text-primary'>Prévia do roteiro</h3>
+    <div className="bg-surface border border-border-default rounded-sm p-6 flex flex-col gap-6 justify-between h-[560px]">
+      <h3 className="font-semibold text-[15px] text-text-primary">
+        Prévia do roteiro
+      </h3>
 
       {/* Cover + metadata */}
-      <div className='flex gap-5'>
+      <div className="flex gap-5">
         {/* Cover 2:3 */}
-        <div className='w-[108px] shrink-0 aspect-[2/3] rounded-sm bg-elevated border border-border-subtle overflow-hidden relative flex flex-col items-center justify-center gap-1'>
+        <div className="w-[108px] shrink-0 aspect-[2/3] rounded-sm bg-elevated border border-border-subtle overflow-hidden relative flex flex-col items-center justify-center gap-1">
           {coverUrl ? (
-            <Image src={coverUrl} alt='Capa' fill className='object-cover' unoptimized />
+            <Image
+              src={coverUrl}
+              alt="Capa"
+              fill
+              className="object-cover"
+              unoptimized
+            />
           ) : (
             <>
-              <ImageIcon className='w-6 h-6 text-text-muted' />
-              <span className='font-mono text-[10px] text-text-muted text-center'>Adicionar capa</span>
+              <ImageIcon className="w-6 h-6 text-text-muted" />
+              <span className="font-mono text-[10px] text-text-muted text-center">
+                Adicionar capa
+              </span>
             </>
           )}
         </div>
 
         {/* Metadata */}
-        <div className='flex flex-col gap-3 min-w-0'>
-          <div className='flex flex-col gap-1'>
-            <span className='font-mono text-[10px] text-brand-accent uppercase tracking-wider'>CATEGORIZAÇÃO</span>
-            <div className='flex gap-1.5 flex-wrap mt-1'>
-              {genre && <Tag variant='default'>{genre}</Tag>}
-              {ageRating && <Tag variant='default'>{formatAgeRating(ageRating)}</Tag>}
+        <div className="flex flex-col gap-3 min-w-0">
+          <div className="flex flex-col gap-1">
+            <span className="font-mono text-[10px] text-brand-accent uppercase tracking-wider">
+              CATEGORIZAÇÃO
+            </span>
+            <div className="flex gap-1.5 flex-wrap mt-1">
+              {genre && <Tag variant="default">{genre}</Tag>}
+              {ageRating && (
+                <Tag variant="default">{formatAgeRating(ageRating)}</Tag>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Title preview */}
-      <div className='flex flex-col gap-1'>
-        <p className='font-display text-[18px] text-text-primary leading-snug line-clamp-2'>
-          {title || <span className='text-text-muted italic'>Título do roteiro</span>}
+      <div className="flex flex-col gap-1">
+        <p className="font-display text-[18px] text-text-primary leading-snug line-clamp-2">
+          {title || (
+            <span className="text-text-muted italic">Título do roteiro</span>
+          )}
         </p>
       </div>
 
-      <div className='border-t border-border-subtle' />
+      <div className="border-t border-border-subtle" />
 
       {/* Visibilidade */}
-      <div className='flex flex-col gap-3'>
-        <span className='font-semibold text-[15px] text-text-primary'>Visibilidade</span>
-        <div className='flex flex-col gap-2'>
-          {(['public', 'private', 'draft'] as const).map((v) => (
+      <div className="flex flex-col gap-3">
+        <span className="font-semibold text-[15px] text-text-primary">
+          Visibilidade
+        </span>
+        <div className="flex flex-col gap-2">
+          {(["public", "private", "draft"] as const).map((v) => (
             <label
               key={v}
-              className='flex items-center gap-3 p-2.5 rounded-sm border border-border-subtle bg-elevated cursor-pointer hover:border-border-default transition-colors'>
+              className="flex items-center gap-3 p-2.5 rounded-sm border border-border-subtle bg-elevated cursor-pointer hover:border-border-default transition-colors"
+            >
               <input
-                type='radio'
+                type="radio"
                 checked={visibility === v}
                 onChange={() => onVisibilityChange(v)}
-                className='accent-brand-accent'
+                className="accent-brand-accent"
               />
-              <span className='text-body-small text-text-primary capitalize'>
-                {v === 'public' ? 'Público' : v === 'private' ? 'Privado' : 'Rascunho'}
+              <span className="text-body-small text-text-primary capitalize">
+                {v === "public"
+                  ? "Público"
+                  : v === "private"
+                    ? "Privado"
+                    : "Rascunho"}
               </span>
             </label>
           ))}
         </div>
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -242,11 +266,17 @@ A tela de revisão atual não mostra a capa. Adicionar a thumbnail da capa junto
   /* Ao lado da seção de Info */
 }
 {
-  ;(coverFile || coverStoragePath) && (
-    <div className='w-16 aspect-[2/3] rounded-sm overflow-hidden shrink-0'>
-      <Image src={coverUrl!} alt='Capa' width={64} height={96} className='object-cover' />
+  (coverFile || coverStoragePath) && (
+    <div className="w-16 aspect-[2/3] rounded-sm overflow-hidden shrink-0">
+      <Image
+        src={coverUrl!}
+        alt="Capa"
+        width={64}
+        height={96}
+        className="object-cover"
+      />
     </div>
-  )
+  );
 }
 ```
 
@@ -275,21 +305,21 @@ No mobile, os botões "Voltar" e "Continuar/Publicar" devem ficar fixos no rodap
 {
   /* Mobile: fixed bottom CTA */
 }
-;<div className='lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-bg-base border-t border-border-subtle px-5 py-4 flex gap-3 pb-[calc(16px+env(safe-area-inset-bottom))]'>
+<div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-bg-base border-t border-border-subtle px-5 py-4 flex gap-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
   {step > 1 && (
-    <Button variant='outline' className='flex-1' onClick={prevStep}>
+    <Button variant="outline" className="flex-1" onClick={prevStep}>
       Voltar
     </Button>
   )}
-  <Button className='flex-1' onClick={nextStep}>
-    {step === 4 ? 'Publicar' : 'Continuar'}
+  <Button className="flex-1" onClick={nextStep}>
+    {step === 4 ? "Publicar" : "Continuar"}
   </Button>
-</div>
+</div>;
 
 {
   /* Padding para não sobrepor conteúdo do form */
 }
-;<div className='lg:hidden h-[80px]' />
+<div className="lg:hidden h-[80px]" />;
 ```
 
 Em desktop (lg+), manter os botões dentro do FormPanel como atualmente.
@@ -302,18 +332,22 @@ Em phone, o progress bar com labels de todas as etapas pode ficar apertado. Em <
 {
   /* Labels das etapas: só no tablet+ */
 }
-;<div className='hidden md:flex justify-between ...'>
+<div className="hidden md:flex justify-between ...">
   {steps.map((s) => (
     <span key={s}>{s}</span>
   ))}
-</div>
+</div>;
 {
   /* Resumo compacto no mobile */
 }
-;<div className='flex md:hidden justify-between items-center mb-2'>
-  <span className='font-mono text-label-mono-small text-text-muted'>Etapa {step} de 4</span>
-  <span className='font-mono text-label-mono-small text-text-muted'>{STEP_META[step - 1].title}</span>
-</div>
+<div className="flex md:hidden justify-between items-center mb-2">
+  <span className="font-mono text-label-mono-small text-text-muted">
+    Etapa {step} de 4
+  </span>
+  <span className="font-mono text-label-mono-small text-text-muted">
+    {STEP_META[step - 1].title}
+  </span>
+</div>;
 ```
 
 ### DragZone — touch-friendly
@@ -353,15 +387,15 @@ No mobile, o formulário deve rolar normalmente pela página. Não usar `overflo
 
 ## Acceptance criteria
 
-- [ ] Desktop (lg+): FormPanel + PreviewPanel lado a lado; PreviewPanel `sticky top-24`
-- [ ] Mobile/tablet (<lg): PreviewPanel oculto, wizard ocupa largura total
-- [ ] Mobile: botões "Voltar/Continuar" fixos no rodapé com `env(safe-area-inset-bottom)`
-- [ ] Mobile: progress bar compacto com "Etapa X de 4" + título sem labels laterais
-- [ ] PreviewPanel: cover placeholder "Adicionar capa"; exibe imagem quando cover upada
-- [ ] PreviewPanel: título e gênero/classificação aparecem conforme preenchidos no form
-- [ ] PreviewPanel: seção "Visibilidade" com RadioBox (Público / Privado / Rascunho)
-- [ ] Heading dinâmico por step: título DM Serif + subtítulo com "Etapa X de 4 — ..."
-- [ ] Logline: contador "X/160" visível no campo
-- [ ] Todos os inputs com `text-base` e `min-h-[44px]` (sem zoom iOS)
-- [ ] Review: exibe thumbnail da capa se disponível
-- [ ] `yarn build` sem erros de tipo
+- [x] Desktop (lg+): FormPanel + PreviewPanel lado a lado; PreviewPanel `sticky top-24`
+- [x] Mobile/tablet (<lg): PreviewPanel oculto, wizard ocupa largura total
+- [x] Mobile: botões "Voltar/Continuar" fixos no rodapé com `env(safe-area-inset-bottom)`
+- [x] Mobile: progress bar compacto com "Etapa X de 4" + título sem labels laterais
+- [x] PreviewPanel: cover placeholder "Adicionar capa"; exibe imagem quando cover upada
+- [x] PreviewPanel: título e gênero/classificação aparecem conforme preenchidos no form
+- [x] PreviewPanel: seção "Visibilidade" com RadioBox (Público / Privado / Rascunho)
+- [x] Heading dinâmico por step: título DM Serif + subtítulo com "Etapa X de 4 — ..."
+- [x] Logline: contador "X/160" visível no campo
+- [x] Todos os inputs com `text-base` e `min-h-[44px]` (sem zoom iOS)
+- [x] Review: exibe thumbnail da capa se disponível
+- [x] `yarn build` sem erros de tipo

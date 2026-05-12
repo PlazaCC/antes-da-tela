@@ -130,12 +130,14 @@
           "Modo de edição (?id=...)"
         ],
         "key_files": [
-          "app/(authenticated)/publish/page.tsx",
+          "app/(authenticated)/(dashboard)/publish/page.tsx",
+          "components/publish/publish-page.tsx",
           "components/publish/info-step.tsx",
-          "components/publish/file-step.tsx",
-          "components/publish/genre-step.tsx",
           "components/publish/review-step.tsx",
-          "lib/hooks/use-publish-wizard.ts"
+          "components/publish/script-preview.tsx",
+          "lib/hooks/use-publish-form.ts",
+          "lib/validators/scripts.ts",
+          "server/services/scripts.service.ts"
         ]
       },
       {
