@@ -169,18 +169,6 @@ export function HomeClient() {
       ) : null}
 
       <div className="w-full px-4 flex flex-col gap-8 md:gap-12 pb-16 pt-8">
-        {/* Hero headline (Commented out as requested) */}
-        {/*
-        <div className='flex flex-col gap-2 md:gap-3'>
-          <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-[1.1]'>
-            Roteiros que <span className='text-brand-accent italic'>merecem</span> ser lidos.
-          </h1>
-          <p className='text-body-default md:text-body-large text-text-secondary max-w-xl'>
-            Plataforma de publicação, leitura e discussão de roteiros audiovisuais.
-          </p>
-        </div>
-        */}
-
         {/* Genre filter pills + filter trigger */}
         <div
           className="flex items-center gap-1.5 md:gap-2 py-2 overflow-x-auto md:flex-wrap md:overflow-hidden pb-1 md:pb-0 snap-x snap-mandatory"
