@@ -40,56 +40,58 @@ const readStoredTheme = (): Theme | null => {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<Theme>('system')
-  const [resolvedTheme, setResolvedTheme] = React.useState<'light' | 'dark'>('light')
+  const [resolvedTheme, setResolvedTheme] = React.useState<'light' | 'dark'>('dark')
   const [mounted, setMounted] = React.useState(false)
 
-  React.useLayoutEffect(() => {
-    const storedTheme = readStoredTheme() ?? 'system'
-    setTheme(storedTheme)
-    const nextResolved = applyTheme(storedTheme)
-    setResolvedTheme(nextResolved)
-    setMounted(true)
-  }, [])
+  //TEMA ESCURO FORÇADO PARA SEMPREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
-  React.useEffect(() => {
-    if (!mounted) {
-      return
-    }
+  // React.useLayoutEffect(() => {
+  //   const storedTheme = readStoredTheme() ?? 'system'
+  //   setTheme(storedTheme)
+  //   const nextResolved = applyTheme(storedTheme)
+  //   setResolvedTheme(nextResolved)
+  //   setMounted(true)
+  // }, [])
 
-    const next = applyTheme(theme)
-    setResolvedTheme(next)
+  // React.useEffect(() => {
+  //   if (!mounted) {
+  //     return
+  //   }
 
-    try {
-      window.localStorage.setItem(STORAGE_KEY, theme)
-    } catch {
-      // ignore
-    }
+  //   const next = applyTheme(theme)
+  //   setResolvedTheme(next)
 
-    const media = window.matchMedia('(prefers-color-scheme: dark)') as MediaQueryList & {
-      addListener?: (listener: (this: MediaQueryList, ev: MediaQueryListEvent) => void) => void
-      removeListener?: (listener: (this: MediaQueryList, ev: MediaQueryListEvent) => void) => void
-    }
-    const handleMediaChange = () => {
-      if (theme === 'system') {
-        const nextResolved = applyTheme('system')
-        setResolvedTheme(nextResolved)
-      }
-    }
+  //   try {
+  //     window.localStorage.setItem(STORAGE_KEY, theme)
+  //   } catch {
+  //     // ignore
+  //   }
 
-    if (media.addEventListener) {
-      media.addEventListener('change', handleMediaChange)
-    } else {
-      media.addListener?.(handleMediaChange)
-    }
+  //   const media = window.matchMedia('(prefers-color-scheme: dark)') as MediaQueryList & {
+  //     addListener?: (listener: (this: MediaQueryList, ev: MediaQueryListEvent) => void) => void
+  //     removeListener?: (listener: (this: MediaQueryList, ev: MediaQueryListEvent) => void) => void
+  //   }
+  //   const handleMediaChange = () => {
+  //     if (theme === 'system') {
+  //       const nextResolved = applyTheme('system')
+  //       setResolvedTheme(nextResolved)
+  //     }
+  //   }
 
-    return () => {
-      if (media.removeEventListener) {
-        media.removeEventListener('change', handleMediaChange)
-      } else {
-        media.removeListener?.(handleMediaChange)
-      }
-    }
-  }, [theme, mounted])
+  //   if (media.addEventListener) {
+  //     media.addEventListener('change', handleMediaChange)
+  //   } else {
+  //     media.addListener?.(handleMediaChange)
+  //   }
+
+  //   return () => {
+  //     if (media.removeEventListener) {
+  //       media.removeEventListener('change', handleMediaChange)
+  //     } else {
+  //       media.removeListener?.(handleMediaChange)
+  //     }
+  //   }
+  // }, [theme, mounted])
 
   const value = React.useMemo(
     () => ({
