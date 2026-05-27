@@ -1,5 +1,6 @@
 "use client";
 
+import { BnDisclaimerCallout } from "@/components/publish/bn-disclaimer-callout";
 import { formatAgeRating } from "@/lib/constants/scripts";
 import type { PublishFormValues } from "@/lib/validators/publish";
 import { FileIcon, Info, Music, Tag } from "lucide-react";
@@ -118,6 +119,8 @@ export function ReviewStep({
           através do seu painel.
         </p>
       </div>
+
+      <BnDisclaimerCallout />
     </div>
   );
 }

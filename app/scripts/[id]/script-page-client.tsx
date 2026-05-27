@@ -4,6 +4,7 @@ import { AudioPlayer } from '@/components/audio-player'
 import { CommentsSheet } from '@/components/comments/comments-sheet'
 import { PDFViewer } from '@/components/pdf-viewer'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
+import { BnCalloutCard } from '@/components/script-page/bn-callout-card'
 import { ScriptPageMetadata } from '@/components/script-page/script-page-metadata'
 import { SynopsisSpoiler } from '@/components/synopsis/SynopsisSpoiler'
 import type { TagVariant } from '@/components/tag/tag'
@@ -17,13 +18,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useScriptRating } from '@/lib/hooks/use-script-rating'
 import { cn } from '@/lib/utils'
 import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
-import { Film } from 'lucide-react'
+import { FileText, Film } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -45,15 +52,17 @@ interface Props {
   audioUrl: string | null
   bannerUrl: string | null
   coverUrl: string | null
+  pitchDeckUrl: string | null
   currentUserId: string | null
 }
 
-export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl, currentUserId }: Props) {
+export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl, pitchDeckUrl, currentUserId }: Props) {
   const trpc = useTRPC()
   const router = useRouter()
   const queryClient = useQueryClient()
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [pitchDeckOpen, setPitchDeckOpen] = useState(false)
 
   const averageOpts = trpc.ratings.getAverage.queryOptions({ scriptId: script?.id ?? '' })
   const userRatingOpts = trpc.ratings.getUserRating.queryOptions({
@@ -153,6 +162,25 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
         />
       </div>
 
+      {/* BN callout — visible only to the script owner */}
+      {isOwner && (
+        <div className='max-w-6xl mx-auto w-full px-5 pb-4'>
+          <BnCalloutCard />
+        </div>
+      )}
+
+      {/* Pitch Deck button */}
+      {pitchDeckUrl && (
+        <div className='max-w-6xl mx-auto w-full px-5 pb-4'>
+          <button
+            onClick={() => setPitchDeckOpen(true)}
+            className='inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-border-subtle bg-surface hover:bg-elevated transition-colors text-body-small text-text-secondary hover:text-text-primary'>
+            <FileText size={15} className='text-brand-accent' />
+            Ver Pitch Deck
+          </button>
+        </div>
+      )}
+
       {/* Synopsis — visible above the reader when PDF is present */}
       {pdfUrl && script.synopsis && (
         <div className='max-w-6xl mx-auto w-full px-5 pb-6 border-t border-border-subtle pt-6'>
@@ -164,18 +192,21 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
       {/* Audio player — fixed bottom bar on all viewports (Spotify-style) */}
       {audioUrl && <AudioPlayer src={audioUrl} title={script.title} />}
 
-      {/* Reader — 50/50 split; page scrolls, sidebar sticks to viewport */}
+      {/* Reader — 25/50/25 grid; left col reserved, center PDF, right comments */}
       {pdfUrl ? (
         <div className='flex flex-col lg:flex-row border-t border-border-subtle'>
-          {/* PDF column — natural height, page provides the single scroll */}
+          {/* Left column — reserved, no functionality for now */}
+          <div className='hidden lg:block lg:w-1/4 border-r border-border-subtle' />
+
+          {/* PDF column — center 50% */}
           <div className='flex-1 min-w-0 lg:w-1/2 min-h-[60vh]'>
             <PDFViewer url={pdfUrl} />
           </div>
 
-          {/* Comments sidebar — sticky 50%, fills viewport below navbar */}
+          {/* Comments sidebar — right 25%, fills viewport below navbar */}
           <div
             className={cn(
-              'hidden lg:flex flex-col lg:w-1/2 border-l border-border-subtle sticky top-14 self-start',
+              'hidden lg:flex flex-col lg:w-1/4 border-l border-border-subtle sticky top-14 self-start',
               audioUrl ? 'h-[calc(100vh-3.5rem-54px)]' : 'h-[calc(100vh-3.5rem)]',
             )}>
             <CommentsSidebar
@@ -215,6 +246,22 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
             </p>
           </div>
         </div>
+      )}
+
+      {/* Pitch Deck modal */}
+      {pitchDeckUrl && (
+        <Dialog open={pitchDeckOpen} onOpenChange={setPitchDeckOpen}>
+          <DialogContent className='max-w-4xl w-full h-[90vh] flex flex-col p-0 gap-0'>
+            <DialogHeader className='px-5 py-4 border-b border-border-subtle shrink-0'>
+              <DialogTitle className='font-mono text-label-mono-default text-text-primary'>
+                Pitch Deck — {script.title}
+              </DialogTitle>
+            </DialogHeader>
+            <div className='flex-1 overflow-hidden'>
+              <PDFViewer url={pitchDeckUrl} />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Delete confirmation */}

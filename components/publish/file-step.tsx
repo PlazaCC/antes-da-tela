@@ -15,27 +15,33 @@ interface FileStepProps {
   audioFile: File | null
   coverFile: File | null
   bannerFile: File | null
+  pitchDeckFile: File | null
   pdfStoragePath: string
   audioStoragePath: string
   coverStoragePath: string
   bannerStoragePath: string
+  pitchDeckStoragePath: string
   setValue: UseFormSetValue<PublishFormValues>
   setPdfFile: (file: File | null) => void
   setAudioFile: (file: File | null) => void
   setCoverFile: (file: File | null) => void
   setBannerFile: (file: File | null) => void
+  setPitchDeckFile: (file: File | null) => void
   pdfProgress: number
   audioProgress: number
   coverProgress: number
   bannerProgress: number
+  pitchDeckProgress: number
   pdfError: string
   audioError: string
   coverError: string
   bannerError: string
+  pitchDeckError: string
   onSetPdfError: (error: string) => void
   onSetAudioError: (error: string) => void
   onSetCoverError: (error: string) => void
   onSetBannerError: (error: string) => void
+  onSetPitchDeckError: (error: string) => void
   validatePDF: (file: File) => string | null
   validateAudio: (file: File) => string | null
   validateImage: (file: File) => string | null
@@ -46,27 +52,33 @@ export function FileStep({
   audioFile,
   coverFile,
   bannerFile,
+  pitchDeckFile,
   pdfStoragePath,
   audioStoragePath,
   coverStoragePath,
   bannerStoragePath,
+  pitchDeckStoragePath,
   setValue,
   setPdfFile,
   setAudioFile,
   setCoverFile,
   setBannerFile,
+  setPitchDeckFile,
   pdfProgress,
   audioProgress,
   coverProgress,
   bannerProgress,
+  pitchDeckProgress,
   pdfError,
   audioError,
   coverError,
   bannerError,
+  pitchDeckError,
   onSetPdfError,
   onSetAudioError,
   onSetCoverError,
   onSetBannerError,
+  onSetPitchDeckError,
   validatePDF,
   validateAudio,
   validateImage,
@@ -207,6 +219,42 @@ export function FileStep({
         preview={
           <div className='w-10 h-10 rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
             <Music size={20} />
+          </div>
+        }
+      />
+
+      <FileUploadField
+        label='Pitch Deck'
+        labelInfo='Opcional'
+        accept={{ 'application/pdf': ['.pdf'] }}
+        file={pitchDeckFile}
+        error={pitchDeckError}
+        progress={pitchDeckProgress}
+        onFileReject={() => {
+          const msg = 'Apenas arquivos PDF são aceitos'
+          onSetPitchDeckError(msg)
+          notifyError(msg)
+        }}
+        onFileDrop={async (file) => {
+          const error = validatePDF(file)
+          if (error) {
+            onSetPitchDeckError(error)
+            notifyError(error)
+            return
+          }
+          setPitchDeckFile(file)
+          onSetPitchDeckError('')
+        }}
+        onRemove={() => {
+          setPitchDeckFile(null)
+          setValue('pitchDeckStoragePath', '')
+        }}
+        infoText='Limite: 5MB. Apenas PDF.'
+        showExisting={!pitchDeckFile && !!pitchDeckStoragePath}
+        existingFileName={renderExistingFileName(pitchDeckStoragePath)}
+        preview={
+          <div className='w-10 h-10 rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
+            <FileIcon size={20} />
           </div>
         }
       />

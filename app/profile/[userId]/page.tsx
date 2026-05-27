@@ -1,6 +1,7 @@
 import { appRouter } from '@/server/api/root'
 import type { ScriptListItem, ProfileStats, UserProfile } from '@/lib/types'
 import { createTRPCContext } from '@/trpc/init'
+import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { ProfileClient } from './profile-client'
 
@@ -15,6 +16,30 @@ async function getPageData(userId: string): Promise<PageData> {
     caller.users.getProfileStats({ userId }),
   ])
   return { user, scripts, stats }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { userId: string } | Promise<{ userId: string }>
+}): Promise<Metadata> {
+  const { userId } = await params
+  const { user } = await getPageData(userId)
+  const name = user?.name ?? 'Perfil'
+  return {
+    title: name,
+    description: `Confira os roteiros e obras de ${name} na plataforma Antes da Tela.`,
+    openGraph: {
+      title: `${name} | Antes da Tela`,
+      description: `Confira os roteiros e obras de ${name} na plataforma Antes da Tela.`,
+      images: [{ url: '/antes-da-tela-og.png', width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${name} | Antes da Tela`,
+      images: ['/antes-da-tela-og.png'],
+    },
+  }
 }
 
 export default async function ProfilePage({

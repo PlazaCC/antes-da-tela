@@ -1,0 +1,1 @@
+ALTER TABLE "scripts" ADD COLUMN "pitch_deck_path" text;

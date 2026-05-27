@@ -28,6 +28,7 @@ export class ScriptsService {
       ageRating,
       bannerPath,
       coverPath,
+      pitchDeckPath,
       audioStoragePath,
       audioDurationSeconds,
       ...scriptData
@@ -64,6 +65,7 @@ export class ScriptsService {
         age_rating: ageRating ?? null,
         banner_path: bannerPath ?? null,
         cover_path: coverPath ?? null,
+        pitch_deck_path: pitchDeckPath ?? null,
         author_id: userId,
         ...(isDraft
           ? { status: "draft", published_at: null }
@@ -147,6 +149,7 @@ export class ScriptsService {
       storagePath,
       fileSize,
       pageCount,
+      pitchDeckPath,
       audioStoragePath,
       audioDurationSeconds,
       ...updateData
@@ -184,6 +187,8 @@ export class ScriptsService {
       mappedData.banner_path = updateData.bannerPath;
     if (updateData.coverPath !== undefined)
       mappedData.cover_path = updateData.coverPath;
+    if (pitchDeckPath !== undefined)
+      mappedData.pitch_deck_path = pitchDeckPath;
 
     const { error: updateError } = await this.supabase
       .from("scripts")
@@ -425,7 +430,7 @@ export class ScriptsService {
     const { data: script } = await this.supabase
       .from("scripts")
       .select(
-        "id, title, logline, synopsis, genre, age_rating, is_featured, status, published_at, banner_path, cover_path," +
+        "id, title, logline, synopsis, genre, age_rating, is_featured, status, published_at, banner_path, cover_path, pitch_deck_path," +
           " script_files(id, storage_path, page_count, file_size)," +
           " audio_files(id, storage_path, duration_seconds)," +
           " author:users!author_id(id, name, image, bio)",

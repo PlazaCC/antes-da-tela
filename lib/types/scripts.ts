@@ -36,6 +36,7 @@ export interface ScriptDetail {
   published_at: string | null;
   banner_path: string | null;
   cover_path: string | null;
+  pitch_deck_path: string | null;
   banner_url?: string | null;
   cover_url?: string | null;
   script_files: ScriptFile[];

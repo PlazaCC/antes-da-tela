@@ -14,8 +14,39 @@ const defaultUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: 'Antes da Tela',
-  description: 'Plataforma de publicação, leitura e discussão de roteiros audiovisuais.',
+  title: {
+    default: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
+    template: '%s | Antes da Tela',
+  },
+  description:
+    'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
+  icons: {
+    icon: [
+      { url: '/favicon/favicon.ico', sizes: 'any' },
+      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/favicon/apple-touch-icon.png',
+    other: [
+      { rel: 'android-chrome', url: '/favicon/android-chrome-192x192.png', sizes: '192x192' },
+      { rel: 'android-chrome', url: '/favicon/android-chrome-512x512.png', sizes: '512x512' },
+    ],
+  },
+  manifest: '/favicon/site.webmanifest',
+  openGraph: {
+    title: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
+    description:
+      'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
+    images: [{ url: '/antes-da-tela-og.png', width: 1200, height: 630 }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
+    description:
+      'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
+    images: ['/antes-da-tela-og.png'],
+  },
 }
 
 const inter = Inter({

@@ -78,6 +78,13 @@
       "when": 1777264618650,
       "tag": "0010_tense_wild_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1779866565467,
+      "tag": "0011_faulty_black_knight",
+      "breakpoints": true
     }
   ]
 }

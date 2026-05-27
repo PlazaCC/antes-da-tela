@@ -5,12 +5,14 @@ interface UsePublishUploadProgressResult {
   audioProgress: number
   coverProgress: number
   bannerProgress: number
+  pitchDeckProgress: number
   uploading: boolean
   uploadError: string
   setPdfProgress: (value: number) => void
   setAudioProgress: (value: number) => void
   setCoverProgress: (value: number) => void
   setBannerProgress: (value: number) => void
+  setPitchDeckProgress: (value: number) => void
   setUploading: (value: boolean) => void
   setUploadError: (value: string) => void
   resetProgress: () => void
@@ -21,6 +23,7 @@ export function usePublishUploadProgress(): UsePublishUploadProgressResult {
   const [audioProgress, setAudioProgress] = useState(0)
   const [coverProgress, setCoverProgress] = useState(0)
   const [bannerProgress, setBannerProgress] = useState(0)
+  const [pitchDeckProgress, setPitchDeckProgress] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
 
@@ -29,6 +32,7 @@ export function usePublishUploadProgress(): UsePublishUploadProgressResult {
     setAudioProgress(0)
     setCoverProgress(0)
     setBannerProgress(0)
+    setPitchDeckProgress(0)
     setUploading(false)
     setUploadError('')
   }
@@ -38,12 +42,14 @@ export function usePublishUploadProgress(): UsePublishUploadProgressResult {
     audioProgress,
     coverProgress,
     bannerProgress,
+    pitchDeckProgress,
     uploading,
     uploadError,
     setPdfProgress,
     setAudioProgress,
     setCoverProgress,
     setBannerProgress,
+    setPitchDeckProgress,
     setUploading,
     setUploadError,
     resetProgress,

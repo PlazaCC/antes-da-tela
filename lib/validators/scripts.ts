@@ -13,6 +13,7 @@ export const scriptCreateSchema = z.object({
   pageCount: z.number().int().positive().optional(),
   bannerPath: z.string().nullable().optional(),
   coverPath: z.string().nullable().optional(),
+  pitchDeckPath: z.string().nullable().optional(),
   audioStoragePath: z.string().optional(),
   audioDurationSeconds: z.number().int().positive().optional(),
   // authorId is read from the session — never accepted from client input
@@ -28,6 +29,7 @@ export const scriptUpdateSchema = z.object({
   status: z.enum(["draft", "published"]).optional(),
   bannerPath: z.string().nullable().optional(),
   coverPath: z.string().nullable().optional(),
+  pitchDeckPath: z.string().nullable().optional(),
   // For now, updating the file itself is not in the schema,
   // but could be added if needed. The task says "reenviar PDF".
   storagePath: z.string().optional(),

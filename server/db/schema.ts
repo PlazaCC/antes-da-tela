@@ -65,6 +65,7 @@ export const scripts = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     bannerPath: text('banner_path'),
     coverPath: text('cover_path'),
+    pitchDeckPath: text('pitch_deck_path'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     publishedAt: timestamp('published_at'),
   },

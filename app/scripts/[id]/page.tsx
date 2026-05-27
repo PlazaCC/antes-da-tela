@@ -39,12 +39,19 @@ const getPageData = cache(async (id: string) => {
     coverUrl = data.publicUrl
   }
 
+  let pitchDeckUrl: string | null = null
+  if (script?.pitch_deck_path) {
+    const { data } = ctx.supabase.storage.from('scripts').getPublicUrl(script.pitch_deck_path)
+    pitchDeckUrl = data.publicUrl
+  }
+
   return {
     script,
     pdfUrl,
     audioUrl,
     bannerUrl,
     coverUrl,
+    pitchDeckUrl,
     currentUserId: authData.user?.id ?? null,
   }
 })
@@ -59,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { script, bannerUrl } = await getPageData(id)
   const title = script?.title ?? 'Roteiro'
   const description = script?.logline ?? 'Leia e discuta roteiros audiovisuais.'
-  const image = bannerUrl ?? '/opengraph-image.png'
+  const image = bannerUrl ?? '/antes-da-tela-og.png'
   return {
     title,
     description,
@@ -84,7 +91,8 @@ export default async function ScriptPage({ params }: Props) {
     notFound()
   }
 
-  const { script, pdfUrl, audioUrl, bannerUrl, coverUrl, currentUserId } = await getPageData(id)
+  const { script, pdfUrl, audioUrl, bannerUrl, coverUrl, pitchDeckUrl, currentUserId } =
+    await getPageData(id)
 
   return (
     <Suspense fallback={<ScriptPageSkeleton />}>
@@ -94,6 +102,7 @@ export default async function ScriptPage({ params }: Props) {
         audioUrl={audioUrl}
         bannerUrl={bannerUrl}
         coverUrl={coverUrl}
+        pitchDeckUrl={pitchDeckUrl}
         currentUserId={currentUserId}
       />
     </Suspense>

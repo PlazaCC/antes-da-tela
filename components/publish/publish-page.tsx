@@ -72,22 +72,27 @@ export function PublishPage({ scriptId }: PublishPageProps) {
     audioFile,
     coverFile,
     bannerFile,
+    pitchDeckFile,
     pdfProgress,
     audioProgress,
     coverProgress,
     bannerProgress,
+    pitchDeckProgress,
     pdfError,
     audioError,
     coverError,
     bannerError,
+    pitchDeckError,
     setPdfFile,
     setAudioFile,
     setCoverFile,
     setBannerFile,
+    setPitchDeckFile,
     setPdfError,
     setAudioError,
     setCoverError,
     setBannerError,
+    setPitchDeckError,
     isEditing,
     isLoadingScript,
     uploading,
@@ -191,27 +196,33 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                   audioFile={audioFile}
                   coverFile={coverFile}
                   bannerFile={bannerFile}
+                  pitchDeckFile={pitchDeckFile}
                   pdfStoragePath={formValues.pdfStoragePath ?? ""}
                   audioStoragePath={formValues.audioStoragePath ?? ""}
                   coverStoragePath={formValues.coverStoragePath ?? ""}
                   bannerStoragePath={formValues.bannerStoragePath ?? ""}
+                  pitchDeckStoragePath={formValues.pitchDeckStoragePath ?? ""}
                   setValue={setValue}
                   setPdfFile={setPdfFile}
                   setAudioFile={setAudioFile}
                   setCoverFile={setCoverFile}
                   setBannerFile={setBannerFile}
+                  setPitchDeckFile={setPitchDeckFile}
                   pdfProgress={pdfProgress}
                   audioProgress={audioProgress}
                   coverProgress={coverProgress}
                   bannerProgress={bannerProgress}
+                  pitchDeckProgress={pitchDeckProgress}
                   pdfError={pdfError}
                   audioError={audioError}
                   coverError={coverError}
                   bannerError={bannerError}
+                  pitchDeckError={pitchDeckError}
                   onSetPdfError={setPdfError}
                   onSetAudioError={setAudioError}
                   onSetCoverError={setCoverError}
                   onSetBannerError={setBannerError}
+                  onSetPitchDeckError={setPitchDeckError}
                   validatePDF={validatePDF}
                   validateAudio={validateAudio}
                   validateImage={validateImage}

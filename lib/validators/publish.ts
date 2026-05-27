@@ -11,6 +11,7 @@ export const publishFormSchema = z.object({
   audioStoragePath: z.string().or(z.literal('')),
   coverStoragePath: z.string().or(z.literal('')),
   bannerStoragePath: z.string().or(z.literal('')),
+  pitchDeckStoragePath: z.string().or(z.literal('')),
 })
 
 export type PublishFormValues = z.infer<typeof publishFormSchema>
