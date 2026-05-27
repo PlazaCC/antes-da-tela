@@ -84,7 +84,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
   const router = useRouter();
   const trpc = useTRPC();
   const { userId } = useCurrentUser();
-  const { getAccessToken, getUserId, uploadFile } = usePublishUpload();
+  const { uploadFile } = usePublishUpload();
   const isEditing = Boolean(scriptId);
 
   const files = usePublishFiles();
@@ -221,34 +221,32 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
     let pitchDeckPath = values.pitchDeckStoragePath;
 
     try {
+      if (!userId) throw new Error("Usuário não autenticado.");
       progress.setUploading(true);
-      const accessToken = await getAccessToken();
-      const uid = await getUserId();
+
+      const S3_FOLDER_MAP = {
+        scripts: "scripts",
+        audio: "audio",
+        covers: "covers",
+        banners: "banners",
+        "pitch-decks": "pitch-decks",
+      } as const;
 
       const uploadAsset = async (
         file: File | null,
         currentPath: string,
-        bucket: "scripts" | "audio" | "avatars",
+        folder: keyof typeof S3_FOLDER_MAP,
         onProgress: (pct: number) => void,
         fieldName: keyof PublishFormValues,
       ) => {
         if (!file) return currentPath;
 
-        const path =
-          currentPath ||
-          `${uid}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-        const shouldUpsert = Boolean(currentPath);
+        const sanitized = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const key = `${folder}/${userId}/${Date.now()}_${sanitized}`;
 
-        await uploadFile(
-          bucket,
-          path,
-          file,
-          accessToken,
-          onProgress,
-          shouldUpsert,
-        );
-        setValue(fieldName, path);
-        return path;
+        await uploadFile(key, file, onProgress);
+        setValue(fieldName, key);
+        return key;
       };
 
       pdfPath = await uploadAsset(
@@ -268,21 +266,21 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
       coverPath = await uploadAsset(
         files.coverFile,
         coverPath,
-        "avatars",
+        "covers",
         progress.setCoverProgress,
         "coverStoragePath",
       );
       bannerPath = await uploadAsset(
         files.bannerFile,
         bannerPath,
-        "avatars",
+        "banners",
         progress.setBannerProgress,
         "bannerStoragePath",
       );
       pitchDeckPath = await uploadAsset(
         files.pitchDeckFile,
         pitchDeckPath,
-        "scripts",
+        "pitch-decks",
         progress.setPitchDeckProgress,
         "pitchDeckStoragePath",
       );

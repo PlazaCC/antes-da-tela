@@ -1,4 +1,5 @@
 import { ScriptPageSkeleton } from '@/components/skeletons'
+import { getAssetUrl } from '@/lib/storage/url'
 import { validateUUID } from '@/lib/validators/uuid'
 import { appRouter } from '@/server/api/root'
 import { createTRPCContext } from '@/trpc/init'
@@ -15,35 +16,11 @@ const getPageData = cache(async (id: string) => {
   const caller = appRouter.createCaller(ctx)
   const [script, { data: authData }] = await Promise.all([caller.scripts.getById({ id }), ctx.supabase.auth.getUser()])
 
-  let pdfUrl: string | null = null
-  if (script?.script_files?.[0]?.storage_path) {
-    const { data } = ctx.supabase.storage.from('scripts').getPublicUrl(script.script_files[0].storage_path)
-    pdfUrl = data.publicUrl
-  }
-
-  let audioUrl: string | null = null
-  if (script?.audio_files?.[0]?.storage_path) {
-    const { data } = ctx.supabase.storage.from('audio').getPublicUrl(script.audio_files[0].storage_path)
-    audioUrl = data.publicUrl
-  }
-
-  let bannerUrl: string | null = null
-  if (script?.banner_path) {
-    const { data } = ctx.supabase.storage.from('avatars').getPublicUrl(script.banner_path)
-    bannerUrl = data.publicUrl
-  }
-
-  let coverUrl: string | null = null
-  if (script?.cover_path) {
-    const { data } = ctx.supabase.storage.from('avatars').getPublicUrl(script.cover_path)
-    coverUrl = data.publicUrl
-  }
-
-  let pitchDeckUrl: string | null = null
-  if (script?.pitch_deck_path) {
-    const { data } = ctx.supabase.storage.from('scripts').getPublicUrl(script.pitch_deck_path)
-    pitchDeckUrl = data.publicUrl
-  }
+  const pdfUrl = getAssetUrl(script?.script_files?.[0]?.storage_path, 'scripts')
+  const audioUrl = getAssetUrl(script?.audio_files?.[0]?.storage_path, 'audio')
+  const bannerUrl = getAssetUrl(script?.banner_path, 'avatars')
+  const coverUrl = getAssetUrl(script?.cover_path, 'avatars')
+  const pitchDeckUrl = getAssetUrl(script?.pitch_deck_path, 'scripts')
 
   return {
     script,

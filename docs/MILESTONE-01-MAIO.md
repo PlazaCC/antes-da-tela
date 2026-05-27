@@ -69,7 +69,7 @@ Upload e visualização de um PDF de pitch deck vinculado ao roteiro.
 
 - [x] **F3.2** — Gerar migration: `yarn db:generate` (ou `--custom add-pitch-deck-path` se preferir nomear)
 
-- [x] **F3.3** — Aplicar migration: `yarn db:migrate`
+- [x] **F3.3** — Aplicar migration: `yarn db:migrate` (aplicado manualmente)
 
 ### Steps — Upload no Wizard de Publicação
 
@@ -169,13 +169,13 @@ As colunas do banco (`storage_path`, `cover_path`, `banner_path`, `pitch_deck_pa
 
 ### F5.0 — Setup e configuração
 
-- [ ] **F5.0.1** — Instalar dependências:
+- [x] **F5.0.1** — Instalar dependências:
 
   ```bash
   yarn add @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
   ```
 
-- [ ] **F5.0.2** — Adicionar variáveis de ambiente em `.env` e `.env.example`:
+- [x] **F5.0.2** — Adicionar variáveis de ambiente em `.env` e `.env.example`:
 
   ```
   AWS_REGION=
@@ -194,16 +194,16 @@ As colunas do banco (`storage_path`, `cover_path`, `banner_path`, `pitch_deck_pa
 
 ### F5.1 — Infraestrutura server-side
 
-- [ ] **F5.1.1** — Criar `lib/storage/s3-client.ts`: singleton do `S3Client` usando as env vars AWS
+- [x] **F5.1.1** — Criar `lib/storage/s3-client.ts`: singleton do `S3Client` usando as env vars AWS
 
-- [ ] **F5.1.2** — Criar `app/api/upload/presign/route.ts` (POST):
+- [x] **F5.1.2** — Criar `app/api/upload/presign/route.ts` (POST):
   - Valida sessão Supabase server-side (rejeita sem sessão ativa)
   - Recebe `{ key: string, contentType: string }` no body
   - Valida que o prefixo do `key` começa com `{userId}/` dentro da pasta correta (previne path traversal e upload em nome de outro usuário)
   - Valida `contentType` contra lista de tipos permitidos (pdf, mp3, wav, jpg, png, webp)
   - Retorna `{ presignedUrl: string }` com expiração de 5 minutos
 
-- [ ] **F5.1.3** — Criar `lib/storage/url.ts` com `getAssetUrl(key: string): string`:
+- [x] **F5.1.3** — Criar `lib/storage/url.ts` com `getAssetUrl(key: string): string`:
   - Se a chave não contém `/` de prefixo de pasta (padrão antigo do Supabase, ex: `{userId}/{timestamp}_file.pdf`), serve da URL do Supabase Storage como fallback
   - Se começa com `scripts/`, `audio/`, `covers/`, `banners/`, `pitch-decks/`, monta URL S3/CDN
   - Usar `NEXT_PUBLIC_S3_PUBLIC_URL` como base
@@ -212,7 +212,7 @@ As colunas do banco (`storage_path`, `cover_path`, `banner_path`, `pitch_deck_pa
 
 ### F5.2 — Adaptar upload client-side
 
-- [ ] **F5.2.1** — Refatorar `lib/hooks/use-publish-upload.ts`:
+- [x] **F5.2.1** — Refatorar `lib/hooks/use-publish-upload.ts`:
   - Remover dependência do Supabase client e do `NEXT_PUBLIC_SUPABASE_URL`
   - Remover `getAccessToken()` e `getUserId()` (auth fica no servidor, na rota de presign)
   - Reescrever `uploadFile(key, file, onProgress)`:
@@ -220,7 +220,7 @@ As colunas do banco (`storage_path`, `cover_path`, `banner_path`, `pitch_deck_pa
     2. XHR `PUT` direto ao `presignedUrl` com o arquivo (sem header de auth — credenciais estão na URL)
     3. Reporta progresso via `xhr.upload.onprogress` (igual ao atual)
 
-- [ ] **F5.2.2** — Ajustar `usePublishForm.handlePublish()` em `lib/hooks/use-publish-form.ts`:
+- [x] **F5.2.2** — Ajustar `usePublishForm.handlePublish()` em `lib/hooks/use-publish-form.ts`:
   - A função `uploadAsset()` interna passa a gerar a chave S3 completa com prefixo de pasta (ex: `scripts/${uid}/...`)
   - Remover o parâmetro `bucket` de `uploadAsset` — o prefixo da pasta já identifica o tipo
   - Remover a chamada `getAccessToken()` / `getUserId()` antes do loop de uploads
@@ -230,11 +230,11 @@ As colunas do banco (`storage_path`, `cover_path`, `banner_path`, `pitch_deck_pa
 
 ### F5.3 — Adaptar resolução de URLs públicas
 
-- [ ] **F5.3.1** — Atualizar `app/scripts/[id]/page.tsx`: substituir todas as chamadas `ctx.supabase.storage.from(bucket).getPublicUrl(path)` por `getAssetUrl(path)` (importado de `lib/storage/url.ts`)
+- [x] **F5.3.1** — Atualizar `app/scripts/[id]/page.tsx`: substituir todas as chamadas `ctx.supabase.storage.from(bucket).getPublicUrl(path)` por `getAssetUrl(path)` (importado de `lib/storage/url.ts`)
 
-- [ ] **F5.3.2** — Atualizar `lib/utils.ts`: a função `getStorageUrl(bucket, path)` existente passa a chamar `getAssetUrl(path)` internamente (ou é deprecada e substituída diretamente)
+- [x] **F5.3.2** — Atualizar `lib/utils.ts`: a função `getStorageUrl(bucket, path)` existente passa a chamar `getAssetUrl(path)` internamente (ou é deprecada e substituída diretamente)
 
-- [ ] **F5.3.3** — Atualizar `components/publish/file-step.tsx` (linha ~119): substituir `getStorageUrl('avatars', storagePath)` por `getAssetUrl(storagePath)` nos previews de edição
+- [x] **F5.3.3** — Atualizar `components/publish/file-step.tsx` (linha ~119): substituir `getStorageUrl('avatars', storagePath)` por `getAssetUrl(storagePath)` nos previews de edição (coberto pela delegação em F5.3.2)
 
 ---
 
@@ -242,7 +242,7 @@ As colunas do banco (`storage_path`, `cover_path`, `banner_path`, `pitch_deck_pa
 
 > Esta etapa pode ser feita após a nova infra estar em produção. Novos uploads já vão direto ao S3; arquivos antigos continuam no Supabase até a migração.
 
-- [ ] **F5.4.1** — Escrever script `scripts/migrate-storage-to-s3.ts` que:
+- [x] **F5.4.1** — Escrever script `scripts/migrate-storage-to-s3.ts` que:
   - Lista todos os registros com `storage_path`, `audio_files.storage_path`, `cover_path`, `banner_path` no banco
   - Baixa cada arquivo do Supabase Storage
   - Faz upload para o S3 na chave com prefixo correto

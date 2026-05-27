@@ -1,49 +1,48 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-import { useMemo } from 'react'
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-
 /**
- * Provides upload utilities using XHR for progress reporting.
+ * Provides upload utilities via S3 presigned URLs.
  * Uploads remain client-side to avoid Vercel's 10s API route timeout.
+ * Auth is enforced server-side in /api/upload/presign.
  */
 export function usePublishUpload() {
-  const supabase = useMemo(() => createClient(), [])
+  async function getPresignedUrl(key: string, contentType: string): Promise<string> {
+    const res = await fetch('/api/upload/presign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, contentType }),
+    })
 
-  async function getAccessToken(): Promise<string> {
-    const { data } = await supabase.auth.getSession()
-    const token = data.session?.access_token
-    if (!token) throw new Error('Sessão expirada. Faça login novamente.')
-    return token
-  }
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: 'Falha ao obter URL de upload.' }))
+      throw new Error(error ?? 'Falha ao obter URL de upload.')
+    }
 
-  async function getUserId(): Promise<string> {
-    const { data } = await supabase.auth.getUser()
-    const id = data.user?.id
-    if (!id) throw new Error('Usuário não autenticado.')
-    return id
+    const { presignedUrl } = await res.json()
+    return presignedUrl as string
   }
 
   /**
-   * Uploads a file to Supabase Storage via XHR so upload progress is trackable.
-   * Returns the storage path used (bucket-relative).
+   * Uploads a file directly to S3 via a presigned PUT URL.
+   * Returns the S3 key (stored in the database).
    */
   function uploadFile(
-    bucket: string,
-    storagePath: string,
+    key: string,
     file: File,
-    accessToken: string,
     onProgress: (pct: number) => void,
-    upsert = false,
   ): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+      let presignedUrl: string
+      try {
+        presignedUrl = await getPresignedUrl(key, file.type || 'application/octet-stream')
+      } catch (err) {
+        reject(err)
+        return
+      }
+
       const xhr = new XMLHttpRequest()
-      xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/${bucket}/${storagePath}`)
-      xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
+      xhr.open('PUT', presignedUrl)
       xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
-      xhr.setRequestHeader('x-upsert', upsert ? 'true' : 'false')
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
       }
@@ -51,7 +50,6 @@ export function usePublishUpload() {
         if (xhr.status >= 200 && xhr.status < 300) resolve()
         else {
           const statusMessages: Record<number, string> = {
-            400: 'Arquivo inválido ou formato não suportado.',
             403: 'Sem permissão para fazer upload.',
             413: 'Arquivo excede o tamanho máximo permitido.',
           }
@@ -64,5 +62,5 @@ export function usePublishUpload() {
     })
   }
 
-  return { getAccessToken, getUserId, uploadFile }
+  return { uploadFile }
 }
