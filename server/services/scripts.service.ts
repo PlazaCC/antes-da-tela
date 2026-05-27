@@ -1,3 +1,4 @@
+import { getAssetUrl } from "@/lib/storage/url";
 import type {
   DashboardMetrics,
   ScriptDetail,
@@ -463,14 +464,8 @@ export class ScriptsService {
         ? scriptData.banner_path
         : null;
 
-    const coverUrl = coverPath
-      ? this.supabase.storage.from("avatars").getPublicUrl(coverPath).data
-          .publicUrl
-      : null;
-    const bannerUrl = bannerPath
-      ? this.supabase.storage.from("avatars").getPublicUrl(bannerPath).data
-          .publicUrl
-      : null;
+    const coverUrl = getAssetUrl(coverPath, "avatars");
+    const bannerUrl = getAssetUrl(bannerPath, "avatars");
 
     return {
       ...scriptData,
