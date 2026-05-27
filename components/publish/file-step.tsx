@@ -142,7 +142,7 @@ export function FileStep({
   }
 
   return (
-    <div className='flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-300'>
+    <div className='flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-300 w-full'>
       <FileUploadField
         label='Arquivo do Roteiro (PDF)'
         labelInfo='Obrigatório'

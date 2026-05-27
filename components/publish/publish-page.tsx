@@ -182,7 +182,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
           <LoadingState label="roteiro" />
         ) : (
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <SectionCard className="flex-1 min-w-0 p-5 md:p-8 flex flex-col gap-6 md:gap-8">
+            <SectionCard className="flex-1 min-w-0 p-5 md:p-8 flex flex-col gap-6 md:gap-8 w-full">
               {step === 1 && (
                 <InfoStep
                   register={register}
@@ -255,7 +255,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                 </p>
               ) : null}
 
-              <div className="hidden lg:flex items-center justify-between pt-4 border-t border-border-subtle">
+              <div className="hidden md:flex items-center justify-between pt-4 border-t border-border-subtle">
                 <Button
                   variant="ghost"
                   onClick={prevStep}
@@ -311,7 +311,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
         )}
       </div>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-bg-base border-t border-border-subtle px-5 py-4 flex gap-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
+      <div className="md:hidden fixed bottom-16 left-0 right-0 z-30 bg-bg-base border-t border-border-subtle px-5 py-4 flex gap-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
         {step > 1 ? (
           <Button
             variant="outline"
