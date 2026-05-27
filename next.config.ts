@@ -1,6 +1,8 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
+const s3Hostname = process.env.NEXT_PUBLIC_S3_PUBLIC_URL;
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   webpack: (config) => {
@@ -17,9 +19,15 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'rbesxenumiuijosbntzp.supabase.co',
       },
+      {
+        protocol: "https",
+        hostname: s3Hostname || "",
+        pathname: "/**",
+      },
     ],
   },
 }
+
 
 export default withSentryConfig(nextConfig, {
   // For all available options, see:
@@ -58,3 +66,5 @@ export default withSentryConfig(nextConfig, {
     },
   },
 })
+
+
