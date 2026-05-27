@@ -251,15 +251,13 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
       {/* Pitch Deck modal */}
       {pitchDeckUrl && (
         <Dialog open={pitchDeckOpen} onOpenChange={setPitchDeckOpen}>
-          <DialogContent className='max-w-4xl w-full h-[90vh] flex flex-col p-0 gap-0'>
+          <DialogContent className='!max-w-5xl !w-full aspect-video flex flex-col p-0 gap-0 overflow-hidden'>
             <DialogHeader className='px-5 py-4 border-b border-border-subtle shrink-0'>
               <DialogTitle className='font-mono text-label-mono-default text-text-primary'>
                 Pitch Deck — {script.title}
               </DialogTitle>
             </DialogHeader>
-            <div className='flex-1 overflow-hidden'>
               <PDFViewer url={pitchDeckUrl} />
-            </div>
           </DialogContent>
         </Dialog>
       )}
