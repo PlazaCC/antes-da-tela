@@ -185,6 +185,11 @@ export class ScriptsService {
     if (updateData.coverPath !== undefined)
       mappedData.cover_path = updateData.coverPath;
 
+    // Guard: no fields to update — return early instead of sending an empty UPDATE
+    if (Object.keys(mappedData).length === 0) {
+      return { id };
+    }
+
     const { error: updateError } = await this.supabase
       .from("scripts")
       .update(mappedData)
@@ -240,8 +245,10 @@ export class ScriptsService {
     }
 
     if (cleanupPromises.length > 0) {
-      // Run cleanup in background, don't block the response. Fail silently if storage removal fails.
-      Promise.all(cleanupPromises).catch(() => {});
+      // Run cleanup in background, don't block the response. Log but don't throw on storage errors.
+      Promise.all(cleanupPromises).catch((err) => {
+        console.error("Storage cleanup failed:", err);
+      });
     }
 
     // ── Update Associated Tables ──────────────────────────────────────────────
