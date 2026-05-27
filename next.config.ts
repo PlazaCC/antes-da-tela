@@ -1,7 +1,29 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
-const s3Hostname = process.env.NEXT_PUBLIC_S3_PUBLIC_URL;
+// Extract just the hostname from the S3 public URL (e.g. "antes-da-tela-dev.s3.sa-east-1.amazonaws.com")
+const s3PublicUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_URL
+const s3Hostname = s3PublicUrl ? new URL(s3PublicUrl).hostname : null
+
+const remotePatterns: NonNullable<NextConfig['images']>['remotePatterns'] = [
+  {
+    protocol: 'https',
+    hostname: '*.googleusercontent.com',
+  },
+  {
+    protocol: 'https',
+    hostname: 'rbesxenumiuijosbntzp.supabase.co',
+  },
+]
+
+// Only add S3 pattern if the env var is configured
+if (s3Hostname) {
+  remotePatterns.push({
+    protocol: 'https',
+    hostname: s3Hostname,
+    pathname: '/**',
+  })
+}
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -10,21 +32,7 @@ const nextConfig: NextConfig = {
     return config
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '*.googleusercontent.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'rbesxenumiuijosbntzp.supabase.co',
-      },
-      {
-        protocol: "https",
-        hostname: s3Hostname || "",
-        pathname: "/**",
-      },
-    ],
+    remotePatterns,
   },
 }
 
@@ -66,5 +74,3 @@ export default withSentryConfig(nextConfig, {
     },
   },
 })
-
-

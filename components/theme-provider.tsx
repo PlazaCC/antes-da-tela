@@ -12,36 +12,10 @@ type ThemeContextValue = {
 }
 
 const ThemeContext = React.createContext<ThemeContextValue | null>(null)
-const STORAGE_KEY = 'theme'
-
-const getSystemTheme = () => (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-
-const formatTheme = (theme: Theme) => (theme === 'system' ? getSystemTheme() : theme)
-
-const applyTheme = (theme: Theme) => {
-  const next = formatTheme(theme)
-  const root = document.documentElement
-  root.classList.toggle('dark', next === 'dark')
-  root.dataset.theme = theme
-  return next
-}
-
-const readStoredTheme = (): Theme | null => {
-  try {
-    const value = window.localStorage.getItem(STORAGE_KEY)
-    if (value === 'light' || value === 'dark' || value === 'system') {
-      return value
-    }
-  } catch {
-    // ignore
-  }
-  return null
-}
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<Theme>('system')
-  const [resolvedTheme, setResolvedTheme] = React.useState<'light' | 'dark'>('dark')
-  const [mounted, setMounted] = React.useState(false)
+  const [resolvedTheme] = React.useState<'light' | 'dark'>('dark')
 
   //TEMA ESCURO FORÇADO PARA SEMPREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 

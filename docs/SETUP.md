@@ -43,6 +43,7 @@ This document provides the official step-by-step instructions to set up the Ante
    - `DATABASE_URL` and `DATABASE_URL_UNPOOLED`
    - `NEXT_PUBLIC_POSTHOG_TOKEN`
    - `RESEND_API_KEY`
+   - `NEXT_PUBLIC_S3_PUBLIC_URL` — S3 bucket public base URL, e.g. `https://antes-da-tela-dev.s3.sa-east-1.amazonaws.com` (used by `next/image` remotePatterns and asset URL resolution)
    - `SENTRY_AUTH_TOKEN`
 
 ### Sentry environment variables

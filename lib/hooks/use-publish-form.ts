@@ -4,8 +4,8 @@ import { usePublishFiles } from "@/lib/hooks/use-publish-files";
 import { usePublishUpload } from "@/lib/hooks/use-publish-upload";
 import { usePublishUploadProgress } from "@/lib/hooks/use-publish-upload-progress";
 import {
-  publishFormSchema,
-  type PublishFormValues,
+    publishFormSchema,
+    type PublishFormValues,
 } from "@/lib/validators/publish";
 import { useTRPC } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -224,18 +224,12 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
       if (!userId) throw new Error("Usuário não autenticado.");
       progress.setUploading(true);
 
-      const S3_FOLDER_MAP = {
-        scripts: "scripts",
-        audio: "audio",
-        covers: "covers",
-        banners: "banners",
-        "pitch-decks": "pitch-decks",
-      } as const;
+      type S3Folder = "scripts" | "audio" | "covers" | "banners" | "pitch-decks"
 
       const uploadAsset = async (
         file: File | null,
         currentPath: string,
-        folder: keyof typeof S3_FOLDER_MAP,
+        folder: S3Folder,
         onProgress: (pct: number) => void,
         fieldName: keyof PublishFormValues,
       ) => {
