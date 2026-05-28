@@ -55,69 +55,80 @@ export function HiwReadPreview() {
     return () => clearInterval(t)
   }, [])
 
-  const lineStyle = (type: string) => ({
-    fontFamily: '"Courier New",monospace',
-    fontSize: 12,
-    lineHeight: 1.6,
-    color: type === 'action' ? 'hsl(var(--color-text-secondary))' : 'hsl(var(--color-text-primary))',
-    textTransform: type === 'slug' || type === 'char' ? 'uppercase' as const : undefined,
-    fontWeight: type === 'slug' ? '700' : undefined,
-    paddingLeft: type === 'char' ? '38%' : type === 'dialog' ? '22%' : undefined,
-    paddingRight: type === 'dialog' ? '18%' : undefined,
-  })
+  const lineClassName = (type: string) => {
+    const base = 'text-[12px] leading-[1.6] font-["Courier_New",monospace]'
+    const color = type === 'action' ? 'text-[hsl(var(--color-text-secondary))]' : 'text-[hsl(var(--color-text-primary))]'
+    const casing = type === 'slug' || type === 'char' ? 'uppercase' : ''
+    const weight = type === 'slug' ? 'font-bold' : ''
+    const padding = type === 'char' ? 'pl-[38%]' : type === 'dialog' ? 'pl-[22%] pr-[18%]' : ''
+    return [base, color, casing, weight, padding].filter(Boolean).join(' ')
+  }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: 20 }}>
-      <div style={{ background: 'rgb(14,14,14)', border: '1px solid rgb(37,37,37)', borderRadius: 2, padding: '20px 24px', position: 'relative' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <span className='land-chip land-chip-accent'>DRAMA</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgb(107,104,96)' }}>Cena 14 / 36</span>
+    <div className='grid gap-5 md:grid-cols-[1fr_180px]'>
+      <div className='relative rounded-[2px] border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] p-[20px_24px]'>
+        <div className='mb-3.5 flex items-center justify-between'>
+          <span className='inline-flex items-center rounded-[2px] border border-[rgba(232,92,47,0.4)] bg-[rgba(232,92,47,0.12)] px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--color-brand-accent))]'>
+            DRAMA
+          </span>
+          <span className='font-mono text-[10px] text-[rgb(107,104,96)]'>Cena 14 / 36</span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
+        <div className='relative flex flex-col gap-2.5'>
           {LINES.map((l, i) => (
-            <div key={i} style={{ position: 'relative' }}>
-              <span style={lineStyle(l.type)}>{l.text}</span>
+            <div key={i} className='relative'>
+              <span className={lineClassName(l.type)}>{l.text}</span>
               {reactions.filter((r) => r.lineIdx === i).map((r) => (
-                <span key={r.id} className='land-react-pop' style={{ position: 'absolute', right: -20, top: -4, fontSize: 16, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,.4))' }}>{r.emoji}</span>
+                <span
+                  key={r.id}
+                  className='absolute right-[-20px] top-[-4px] text-[16px] [filter:drop-shadow(0_4px_6px_rgba(0,0,0,.4))] [animation:land-react-pop_2.2s_ease-out_forwards]'>
+                  {r.emoji}
+                </span>
               ))}
               {comment.lineIdx === i && (
-                <div className='land-comment-in' style={{ position: 'absolute', left: 'calc(100% + 12px)', top: -4, width: 180, padding: '8px 10px', background: 'rgb(30,30,30)', border: '1px solid rgb(37,37,37)', borderLeft: '2px solid hsl(var(--color-brand-accent))', borderRadius: 2, zIndex: 10 }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'hsl(var(--color-brand-accent))', marginBottom: 3 }}>{comment.author}</div>
-                  <div style={{ fontSize: 11, lineHeight: 1.4, color: 'hsl(var(--color-text-primary))' }}>{comment.text}</div>
+                <div className='absolute left-[calc(100%+12px)] top-[-4px] z-10 w-[180px] rounded-[2px] border border-[rgb(37,37,37)] border-l-2 border-l-[hsl(var(--color-brand-accent))] bg-[rgb(30,30,30)] p-[8px_10px] [animation:land-comment-in_0.45s_ease]'>
+                  <div className='mb-[3px] font-mono text-[9px] uppercase tracking-[0.12em] text-[hsl(var(--color-brand-accent))]'>
+                    {comment.author}
+                  </div>
+                  <div className='text-[11px] leading-[1.4] text-[hsl(var(--color-text-primary))]'>
+                    {comment.text}
+                  </div>
                 </div>
               )}
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px dashed rgb(37,37,37)', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ flex: 1, height: 3, background: 'rgb(37,37,37)', borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: 'hsl(var(--color-brand-accent))', width: `${progress}%`, transition: 'width 0.06s linear' }} />
+        <div className='mt-5 flex items-center gap-3 border-t border-dashed border-[rgb(37,37,37)] pt-3.5'>
+          <div className='h-[3px] flex-1 overflow-hidden rounded-[2px] bg-[rgb(37,37,37)]'>
+            <div className='h-full bg-[hsl(var(--color-brand-accent))] transition-[width_0.06s_linear]' style={{ width: `${progress}%` }} />
           </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgb(107,104,96)' }}>leitura ao vivo</span>
+          <span className='font-mono text-[9px] uppercase tracking-[0.14em] text-[rgb(107,104,96)]'>leitura ao vivo</span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ padding: 14, background: 'rgb(14,14,14)', border: '1px solid rgb(37,37,37)', borderRadius: 2 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgb(107,104,96)' }}>Reações</span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10 }}>
+      <div className='flex flex-col gap-3.5'>
+        <div className='rounded-[2px] border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] p-[14px]'>
+          <span className='font-mono text-[10px] text-[rgb(107,104,96)]'>Reações</span>
+          <div className='mt-2.5 flex flex-col gap-[7px]'>
             {REACTIONS.map((e, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'hsl(var(--color-text-secondary))' }}>
-                <span style={{ fontSize: 14 }}>{e}</span>
-                <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11 }}>{['comoção','intenso','ótima cena','tensão','favorita'][i]}</span>
+              <div key={i} className='flex items-center gap-2 text-[13px] text-[hsl(var(--color-text-secondary))]'>
+                <span className='text-[14px]'>{e}</span>
+                <span className='font-sans text-[11px]'>{['comoção','intenso','ótima cena','tensão','favorita'][i]}</span>
               </div>
             ))}
           </div>
         </div>
-        <div style={{ padding: 14, background: 'rgb(14,14,14)', border: '1px solid rgb(37,37,37)', borderRadius: 2 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgb(107,104,96)' }}>Pulso ao vivo</span>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 36, marginTop: 10 }}>
+        <div className='rounded-[2px] border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] p-[14px]'>
+          <span className='font-mono text-[10px] text-[rgb(107,104,96)]'>Pulso ao vivo</span>
+          <div className='mt-2.5 flex h-[36px] items-end gap-[2px]'>
             {Array.from({ length: 20 }).map((_, i) => (
-              <span key={i} className='land-pulse-bar'
-                style={{ flex: 1, background: 'hsl(var(--color-brand-accent))', opacity: 0.65, height: 4 + (Math.sin(i * 0.7) + 1) * 12 }} />
+              <span
+                key={i}
+                className='flex-1 origin-bottom bg-[hsl(var(--color-brand-accent))] opacity-65 [animation:land-pulse-bar_1.2s_ease-in-out_infinite_alternate]'
+                style={{ animationDuration: (i + 1) % 3 === 0 ? '1.4s' : (i + 1) % 2 === 1 ? '0.9s' : '1.2s', height: 4 + (Math.sin(i * 0.7) + 1) * 12 }}
+              />
             ))}
           </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: 'rgb(107,104,96)', marginTop: 8, display: 'block' }}>8 leitores agora</span>
+          <span className='mt-2 block font-mono text-[9px] tracking-[0.1em] text-[rgb(107,104,96)]'>8 leitores agora</span>
         </div>
       </div>
     </div>

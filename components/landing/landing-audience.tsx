@@ -1,9 +1,6 @@
-const PY = 'clamp(80px,10vw,120px)'
-const PX = 'clamp(24px,6vw,80px)'
-
 function ArrowIcon() {
   return (
-    <svg className='shrink-0' style={{ width: 18, height: 18, color: 'hsl(var(--color-brand-accent))' }}
+    <svg className='shrink-0 w-[18px] h-[18px] text-[hsl(var(--color-brand-accent))]'
       viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.6'>
       <path d='M4 12h12M12 6l6 6-6 6' strokeLinecap='round' strokeLinejoin='round' />
     </svg>
@@ -12,38 +9,41 @@ function ArrowIcon() {
 
 export function LandingAudience() {
   return (
-    <section id='audience' style={{ padding: `${PY} ${PX}`, borderTop: '1px solid rgb(37,37,37)' }}>
-      <div className='mx-auto' style={{ maxWidth: 1280 }}>
+    <section id='audience' className='border-t border-[rgb(37,37,37)] px-[clamp(24px,6vw,80px)] py-[clamp(80px,10vw,120px)]'>
+      <div className='mx-auto max-w-[1280px]'>
         {/* header */}
-        <div className='grid gap-20 mb-16' style={{ gridTemplateColumns: 'clamp(140px,200px,200px) 1fr' }}>
+        <div className='grid gap-12 mb-12 md:mb-16 md:gap-20 md:grid-cols-[clamp(140px,200px,200px)_1fr]'>
           <div className='land-reveal'>
-            <span className='land-label'>
-              <span style={{ color: 'rgb(107,104,96)', marginRight: 4 }}>03 /</span>
+            <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
+              <span className='mr-1 text-[rgb(107,104,96)]'>03 /</span>
               Para quem é
             </span>
           </div>
-          <h2 className='font-display land-reveal' data-delay='1'
-            style={{ fontSize: 'clamp(36px,5.4vw,80px)', lineHeight: 0.98, margin: 0 }}>
+          <h2
+            className='font-display land-reveal m-0 text-[clamp(36px,5.4vw,80px)] leading-[0.98]'
+            data-delay='1'>
             Feito para quem
             <br />
             <span className='text-brand-accent italic'>vive de histórias.</span>
           </h2>
         </div>
 
-        <div className='grid gap-6' style={{ gridTemplateColumns: '1.4fr 1fr' }}>
+        <div className='grid gap-6 lg:grid-cols-[1.4fr_1fr]'>
           {/* primary card */}
-          <article className='land-reveal relative flex flex-col gap-6 overflow-hidden rounded-sm'
-            data-delay='1'
-            style={{ background: 'rgb(22,22,22)', border: '1px solid rgb(37,37,37)', padding: '56px 48px', minHeight: 480 }}>
+          <article
+            className='land-reveal relative flex flex-col gap-6 overflow-hidden rounded-sm border border-[rgb(37,37,37)] bg-[rgb(22,22,22)] p-8 md:p-[56px_48px] md:min-h-[480px]'
+            data-delay='1'>
             <div>
-              <span className='land-chip land-chip-accent'>Protagonista</span>
+              <span className='inline-flex items-center rounded-[2px] border border-[rgba(232,92,47,0.4)] bg-[rgba(232,92,47,0.12)] px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--color-brand-accent))]'>
+                Protagonista
+              </span>
             </div>
-            <h3 className='font-display relative z-10 m-0' style={{ fontSize: 'clamp(32px,3.6vw,52px)', lineHeight: 1.02 }}>
+            <h3 className='font-display relative z-10 m-0 text-[clamp(32px,3.6vw,52px)] leading-[1.02]'>
               Criadores,
               <br />
               <em className='text-brand-accent'>vocês são o ponto de partida.</em>
             </h3>
-            <p className='relative z-10 text-text-secondary' style={{ fontSize: 15, lineHeight: 1.65, maxWidth: 520 }}>
+            <p className='relative z-10 text-text-secondary text-[15px] leading-[1.65] max-w-[520px]'>
               Roteiristas, escritores, criadores de jogos, autores de universos narrativos e pessoas
               com histórias originais para contar. Publique sua obra, construa seu portfólio, receba
               retorno real e chegue à indústria com mais força.
@@ -51,21 +51,20 @@ export function LandingAudience() {
             <ul className='relative z-10 flex flex-col gap-2.5 list-none p-0 m-0'>
               {['Publicação organizada por gênero, formato e estilo', 'Registro de autoria automático em cada versão',
                 'Métricas de leitura, abandono e reação', 'Conexão direta com produtores e parceiros'].map((item) => (
-                <li key={item} className='flex items-center gap-3 text-text-primary' style={{ fontSize: 14 }}>
+                <li key={item} className='flex items-center gap-3 text-text-primary text-[14px]'>
                   <ArrowIcon />{item}
                 </li>
               ))}
             </ul>
-            <a href='#waitlist' className='land-btn land-btn-primary self-start relative z-10'>
-              Publicar minha história <span className='land-arrow'>→</span>
+            <a
+              href='#waitlist'
+              className='group relative z-10 inline-flex h-[52px] items-center justify-center gap-2.5 self-start rounded-[2px] bg-[hsl(var(--color-brand-accent))] px-[28px] text-[14px] font-semibold tracking-[0.01em] text-[rgb(14,14,14)] no-underline transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] hover:-translate-y-[2px] hover:shadow-[0_12px_32px_-10px_rgba(232,92,47,0.4)]'>
+              Publicar minha história <span className='transition-transform duration-200 group-hover:translate-x-[4px]'>→</span>
             </a>
             {/* deco dot grid */}
             <div className='absolute pointer-events-none'
-              style={{ right: -80, top: -80, width: 360, height: 360,
-                backgroundImage: 'radial-gradient(hsl(var(--color-brand-accent)) 1px,transparent 1px)',
-                backgroundSize: '12px 12px', opacity: 0.12,
-                maskImage: 'radial-gradient(ellipse at center,black,transparent 70%)',
-                WebkitMaskImage: 'radial-gradient(ellipse at center,black,transparent 70%)' }} />
+              className='pointer-events-none absolute right-[-80px] top-[-80px] h-[360px] w-[360px] bg-[radial-gradient(hsl(var(--color-brand-accent))_1px,transparent_1px)] opacity-[0.12] [background-size:12px_12px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] [webkit-mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]'
+            />
           </article>
 
           {/* side cards */}
@@ -78,21 +77,23 @@ export function LandingAudience() {
             ].map((c) => (
               <article key={c.num} className='land-reveal rounded-sm'
                 data-delay={c.delay}
-                style={{ background: 'rgb(14,14,14)', border: '1px solid rgb(37,37,37)', padding: '28px 32px' }}>
-                <div className='flex items-center gap-3.5 mb-4'>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgb(107,104,96)', letterSpacing: '0.14em' }}>{c.num}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'hsl(var(--color-text-secondary))' }}>{c.role}</span>
+                className='land-reveal rounded-sm border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] p-[28px_32px]'>
+                <div className='mb-4 flex items-center gap-3.5'>
+                  <span className='font-mono text-[11px] tracking-[0.14em] text-[rgb(107,104,96)]'>{c.num}</span>
+                  <span className='font-mono text-[11px] uppercase tracking-[0.12em] text-[hsl(var(--color-text-secondary))]'>{c.role}</span>
                 </div>
-                <h3 className='font-display text-text-primary m-0 mb-3' style={{ fontSize: 'clamp(20px,1.8vw,24px)', lineHeight: 1.15 }}>{c.title}</h3>
-                <p className='text-text-secondary' style={{ fontSize: 14, lineHeight: 1.6 }}>{c.body}</p>
+                <h3 className='font-display text-text-primary m-0 mb-3 text-[clamp(20px,1.8vw,24px)] leading-[1.15]'>{c.title}</h3>
+                <p className='text-text-secondary text-[14px] leading-[1.6]'>{c.body}</p>
               </article>
             ))}
 
-            <div className='land-reveal flex flex-col gap-3 rounded-sm'
-              data-delay='4'
-              style={{ padding: '24px 32px', border: '1px dashed rgb(52,52,52)', background: 'transparent' }}>
-              <span className='land-chip land-chip-lime'>Em breve</span>
-              <p className='text-text-secondary' style={{ fontSize: 13, lineHeight: 1.55, margin: 0 }}>
+            <div
+              className='land-reveal flex flex-col gap-3 rounded-sm border border-dashed border-[rgb(52,52,52)] bg-transparent p-[24px_32px]'
+              data-delay='4'>
+              <span className='inline-flex items-center rounded-[2px] border border-[rgba(200,232,122,0.4)] bg-[rgba(200,232,122,0.08)] px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--color-brand-lime))]'>
+                Em breve
+              </span>
+              <p className='text-text-secondary m-0 text-[13px] leading-[1.55]'>
                 Acesso especial para estudantes, professores e instituições de ensino audiovisual.
               </p>
             </div>

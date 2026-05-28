@@ -2,9 +2,6 @@
 
 import { useState } from 'react'
 
-const PY = 'clamp(80px,10vw,120px)'
-const PX = 'clamp(24px,6vw,80px)'
-
 const ROLES = ['Criador', 'Leitor', 'Produtor', 'Outro']
 
 const TRUST = [
@@ -32,39 +29,33 @@ export function LandingWaitlist() {
   return (
     <section
       id='lista-de-espera'
-      style={{
-        borderTop: '1px solid rgb(37,37,37)',
-        padding: `${PY} ${PX}`,
-        background: 'radial-gradient(ellipse at 80% 50%,rgba(232,92,47,0.07),transparent 60%),rgb(14,14,14)',
-      }}>
-      <div className='mx-auto' style={{ maxWidth: 1280 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
+      className='border-t border-[rgb(37,37,37)] bg-[radial-gradient(ellipse_at_80%_50%,rgba(232,92,47,0.07),transparent_60%),rgb(14,14,14)] px-[clamp(24px,6vw,80px)] py-[clamp(80px,10vw,120px)]'>
+      <div className='mx-auto max-w-[1280px]'>
+        <div className='grid gap-12 lg:grid-cols-2 lg:gap-20 items-start'>
 
           {/* left */}
           <div>
-            <div className='land-reveal' style={{ marginBottom: 12 }}>
-              <span className='land-label'>
-                <span style={{ color: 'rgb(107,104,96)', marginRight: 4 }}>06 /</span>
+            <div className='land-reveal mb-3'>
+              <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
+                <span className='mr-1 text-[rgb(107,104,96)]'>06 /</span>
                 Lista de espera
               </span>
             </div>
             <h2
-              className='font-display land-reveal'
-              data-delay='1'
-              style={{ fontSize: 'clamp(36px,5.4vw,72px)', lineHeight: 0.98, margin: '0 0 28px', maxWidth: '14ch' }}>
+              className='font-display land-reveal m-0 mb-7 max-w-[14ch] text-[clamp(36px,5.4vw,72px)] leading-[0.98]'
+              data-delay='1'>
               Antes da Tela<br />
               <span className='text-brand-accent italic'>está chegando.</span>
             </h2>
             <p
-              className='land-reveal text-text-secondary'
-              data-delay='2'
-              style={{ fontSize: 'clamp(15px,1.2vw,18px)', lineHeight: 1.65, maxWidth: 480, marginBottom: 40 }}>
+              className='land-reveal text-text-secondary max-w-[480px] text-[clamp(15px,1.2vw,18px)] leading-[1.65] mb-10'
+              data-delay='2'>
               Seja um dos primeiros a publicar seu roteiro, acompanhar como o público reage e levar esses dados para a indústria.
             </p>
-            <ul className='land-reveal' data-delay='3' style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <ul className='land-reveal flex flex-col gap-3 list-none p-0 m-0' data-delay='3'>
               {TRUST.map((t) => (
-                <li key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 14, color: 'rgb(107,104,96)', lineHeight: 1.5 }}>
-                  <span style={{ color: 'hsl(var(--color-brand-accent))', marginTop: 2, flexShrink: 0 }}>✓</span>
+                <li key={t} className='flex items-start gap-3 text-[14px] leading-[1.5] text-[rgb(107,104,96)]'>
+                  <span className='mt-[2px] shrink-0 text-[hsl(var(--color-brand-accent))]'>✓</span>
                   {t}
                 </li>
               ))}
@@ -74,43 +65,44 @@ export function LandingWaitlist() {
           {/* right */}
           <div className='land-reveal' data-delay='1'>
             {submitted ? (
-              <div className='land-success-pop' style={{ padding: 40, background: 'rgb(22,22,22)', border: '1px solid hsl(var(--color-brand-accent))', borderRadius: 4, display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 40 }}>🎬</span>
-                <h3 className='font-display' style={{ fontSize: 28, margin: 0, color: 'hsl(var(--color-text-primary))' }}>
+              <div className='flex flex-col items-start gap-4 rounded-[4px] border border-[hsl(var(--color-brand-accent))] bg-[rgb(22,22,22)] p-10 [animation:land-success-pop_0.6s_cubic-bezier(0.2,0.9,0.3,1)]'>
+                <span className='text-[40px]'>🎬</span>
+                <h3 className='font-display m-0 text-[28px] text-[hsl(var(--color-text-primary))]'>
                   Você está na lista.
                 </h3>
-                <p style={{ fontSize: 14, color: 'rgb(107,104,96)', lineHeight: 1.6, margin: 0 }}>
+                <p className='m-0 text-[14px] leading-[1.6] text-[rgb(107,104,96)]'>
                   Avisamos você assim que as portas abrirem. Obrigado por acreditar no projeto.
                 </p>
-                <span className='land-chip land-chip-accent'>{role}</span>
+                <span className='inline-flex items-center rounded-[2px] border border-[rgba(232,92,47,0.4)] bg-[rgba(232,92,47,0.12)] px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--color-brand-accent))]'>
+                  {role}
+                </span>
               </div>
             ) : (
               <form
                 onSubmit={handleSubmit}
-                style={{ background: 'rgb(22,22,22)', border: '1px solid rgb(37,37,37)', borderRadius: 4, padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
+                className='flex flex-col gap-6 rounded-[4px] border border-[rgb(37,37,37)] bg-[rgb(22,22,22)] p-8'>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgb(107,104,96)' }}>
+                <div className='flex flex-col gap-2.5'>
+                  <span className='font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>
                     Eu sou
                   </span>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div className='flex flex-wrap gap-2'>
                     {ROLES.map((r) => (
                       <button
                         key={r}
                         type='button'
                         onClick={() => setRole(r)}
-                        className={`land-chip ${r === role ? 'land-chip-accent' : 'land-chip-default'}`}
-                        style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}>
+                        className={`inline-flex items-center rounded-[2px] border px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] transition-[all_0.2s_ease] cursor-pointer ${r === role ? 'text-[hsl(var(--color-brand-accent))] border-[rgba(232,92,47,0.4)] bg-[rgba(232,92,47,0.12)]' : 'text-[hsl(var(--color-text-secondary))] border-[rgb(37,37,37)] bg-[rgb(22,22,22)]'}`}>
                         {r}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className='flex flex-col gap-2'>
                   <label
                     htmlFor='email-waitlist'
-                    style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgb(107,104,96)' }}>
+                    className='font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>
                     Email
                   </label>
                   <input
@@ -120,18 +112,18 @@ export function LandingWaitlist() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder='seu@email.com'
                     required
-                    style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'hsl(var(--color-text-primary))', background: 'rgb(14,14,14)', border: '1px solid rgb(52,52,52)', borderRadius: 2, padding: '12px 14px', outline: 'none', transition: 'border-color 0.2s ease' }}
+                    className='rounded-[2px] border border-[rgb(52,52,52)] bg-[rgb(14,14,14)] px-[14px] py-[12px] font-sans text-[14px] text-[hsl(var(--color-text-primary))] outline-none transition-[border-color_0.2s_ease]'
                     onFocus={(e) => { e.currentTarget.style.borderColor = 'hsl(var(--color-brand-accent))' }}
                     onBlur={(e) => { e.currentTarget.style.borderColor = 'rgb(52,52,52)' }}
                   />
                 </div>
 
                 {role === 'Criador' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className='flex flex-col gap-2'>
                     <label
                       htmlFor='project-waitlist'
-                      style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgb(107,104,96)' }}>
-                      O que você está criando? <span style={{ color: 'rgb(52,52,52)' }}>(opcional)</span>
+                      className='font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>
+                      O que você está criando? <span className='text-[rgb(52,52,52)]'>(opcional)</span>
                     </label>
                     <input
                       id='project-waitlist'
@@ -139,7 +131,7 @@ export function LandingWaitlist() {
                       value={project}
                       onChange={(e) => setProject(e.target.value)}
                       placeholder='Uma série, um curta, um longa...'
-                      style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'hsl(var(--color-text-primary))', background: 'rgb(14,14,14)', border: '1px solid rgb(52,52,52)', borderRadius: 2, padding: '12px 14px', outline: 'none', transition: 'border-color 0.2s ease' }}
+                      className='rounded-[2px] border border-[rgb(52,52,52)] bg-[rgb(14,14,14)] px-[14px] py-[12px] font-sans text-[14px] text-[hsl(var(--color-text-primary))] outline-none transition-[border-color_0.2s_ease]'
                       onFocus={(e) => { e.currentTarget.style.borderColor = 'hsl(var(--color-brand-accent))' }}
                       onBlur={(e) => { e.currentTarget.style.borderColor = 'rgb(52,52,52)' }}
                     />
@@ -149,9 +141,8 @@ export function LandingWaitlist() {
                 <button
                   type='submit'
                   disabled={!email || !role || loading}
-                  className='land-btn land-btn-primary'
-                  style={{ opacity: email && role ? 1 : 0.4, cursor: email && role ? 'pointer' : 'not-allowed', alignSelf: 'flex-start' }}>
-                  {loading ? 'Aguarde...' : 'Garantir meu lugar'} <span className='land-arrow'>→</span>
+                  className={`group inline-flex h-[52px] items-center justify-center gap-2.5 self-start rounded-[2px] bg-[hsl(var(--color-brand-accent))] px-[28px] text-[14px] font-semibold tracking-[0.01em] text-[rgb(14,14,14)] transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] ${email && role ? 'opacity-100 cursor-pointer hover:-translate-y-[2px] hover:shadow-[0_12px_32px_-10px_rgba(232,92,47,0.4)]' : 'opacity-40 cursor-not-allowed'}`}>
+                  {loading ? 'Aguarde...' : 'Garantir meu lugar'} <span className='transition-transform duration-200 group-hover:translate-x-[4px]'>→</span>
                 </button>
               </form>
             )}

@@ -1,38 +1,29 @@
 'use client'
 
-const PY = 'clamp(80px,10vw,120px)'
-const PX = 'clamp(24px,6vw,80px)'
-
 export function LandingManifesto() {
   return (
     <section
       id='manifesto'
-      style={{ padding: `${PY} ${PX}`, borderTop: '1px solid rgb(37,37,37)' }}>
+      className='border-t border-[rgb(37,37,37)] px-[clamp(24px,6vw,80px)] py-[clamp(80px,10vw,120px)]'>
       <div
-        className='mx-auto grid gap-20 items-start'
-        style={{
-          maxWidth: 1280,
-          gridTemplateColumns: 'clamp(140px,200px,200px) 1fr',
-        }}>
-        <div className='land-reveal' style={{ position: 'sticky', top: 120 }}>
-          <span className='land-label'>
-            <span style={{ color: 'rgb(107,104,96)', marginRight: 4 }}>01 /</span>
+        className='mx-auto grid items-start gap-12 md:gap-20 md:grid-cols-[clamp(140px,200px,200px)_1fr] max-w-[1280px]'>
+        <div className='land-reveal md:sticky md:top-[120px]'>
+          <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
+            <span className='mr-1 text-[rgb(107,104,96)]'>01 /</span>
             Manifesto
           </span>
         </div>
 
         <div>
           <h2
-            className='font-display land-reveal'
-            style={{ fontSize: 'clamp(36px,5.4vw,80px)', lineHeight: 0.98, margin: '0 0 56px', maxWidth: '14ch' }}>
+            className='font-display land-reveal m-0 mb-14 max-w-[16ch] text-[clamp(36px,5.4vw,80px)] leading-[0.98]'>
             De onde vai surgir
             <br />
             <span className='text-brand-accent italic'>a próxima grande história?</span>
           </h2>
 
           <div
-            className='flex flex-col text-text-secondary'
-            style={{ gap: 24, fontSize: 'clamp(15px,1.2vw,18px)', lineHeight: 1.65, maxWidth: 620 }}>
+            className='flex flex-col gap-6 text-text-secondary text-[clamp(15px,1.2vw,18px)] leading-[1.65] max-w-[620px]'>
             <p className='land-reveal' data-delay='1'>
               Filmes, séries e jogos originais não aparecem do nada. Antes de chegarem às telas, eles
               começam como ideias, roteiros, personagens, mundos e universos ainda em construção.
@@ -43,15 +34,8 @@ export function LandingManifesto() {
               onde encontrar aquilo que está procurando.
             </p>
             <p
-              className='land-reveal font-display text-text-primary'
-              data-delay='3'
-              style={{
-                fontSize: 'clamp(22px,2.2vw,30px)',
-                lineHeight: 1.25,
-                marginTop: 16,
-                paddingTop: 28,
-                borderTop: '1px solid rgb(37,37,37)',
-              }}>
+              className='land-reveal font-display text-text-primary mt-4 border-t border-[rgb(37,37,37)] pt-7 text-[clamp(22px,2.2vw,30px)] leading-[1.25]'
+              data-delay='3'>
               O Antes da Tela nasce para aproximar esses mundos.
             </p>
           </div>

@@ -2,9 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const PY = 'clamp(80px,10vw,120px)'
-const PX = 'clamp(24px,6vw,80px)'
-
 const FEATURED = [
   { genre: 'Drama',        title: 'O Silêncio do Abismo',  author: 'Maria Lopes',      pages: 98,  rating: 4.6, color: 'rgb(40,22,18)',  pattern: 'diagonal' },
   { genre: 'Thriller',     title: 'Carne Viva',             author: 'João Restier',     pages: 124, rating: 4.4, color: 'rgb(22,18,30)',  pattern: 'dots' },
@@ -27,25 +24,29 @@ function FeaturedCard({ genre, title, author, pages, rating, color, pattern }: t
   const [hovered, setHovered] = useState(false)
   return (
     <article
-      className='land-reveal'
-      style={{ flex: '0 0 300px', scrollSnapAlign: 'start', background: 'rgb(22,22,22)', border: `1px solid ${hovered ? 'hsl(var(--color-brand-accent))' : 'rgb(37,37,37)'}`, borderRadius: 4, overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'transform 0.3s ease,border-color 0.3s ease', transform: hovered ? 'translateY(-6px)' : 'none', cursor: 'pointer' }}
+      className={`land-reveal flex flex-[0_0_300px] flex-col overflow-hidden rounded-[4px] border bg-[rgb(22,22,22)] transition-[transform_0.3s_ease,border-color_0.3s_ease] cursor-pointer snap-center ${hovered ? 'border-[hsl(var(--color-brand-accent))] -translate-y-[6px]' : 'border-[rgb(37,37,37)]'}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}>
-      <div style={{ height: 240, position: 'relative', padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden', background: color }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: PATTERNS[pattern], backgroundSize: pattern === 'dots' ? '14px 14px' : pattern === 'rings' ? '60px 60px' : undefined, opacity: 0.35 }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(0,0,0,0.55) 100%)' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-          <span className='land-chip land-chip-accent'>{genre.toUpperCase()}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'hsl(var(--color-text-primary))' }}>{pages}p</span>
+      <div className='relative flex h-[240px] flex-col justify-between overflow-hidden p-4' style={{ background: color }}>
+        <div
+          className='absolute inset-0 opacity-35'
+          style={{ backgroundImage: PATTERNS[pattern], backgroundSize: pattern === 'dots' ? '14px 14px' : pattern === 'rings' ? '60px 60px' : undefined }}
+        />
+        <div className='absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgba(0,0,0,0.55)_100%)]' />
+        <div className='relative z-[1] flex justify-between'>
+          <span className='inline-flex items-center rounded-[2px] border border-[rgba(232,92,47,0.4)] bg-[rgba(232,92,47,0.12)] px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--color-brand-accent))]'>
+            {genre.toUpperCase()}
+          </span>
+          <span className='font-mono text-[11px] text-[hsl(var(--color-text-primary))]'>{pages}p</span>
         </div>
-        <span className='font-display' style={{ fontSize: 24, lineHeight: 1.05, color: 'hsl(var(--color-text-primary))', position: 'relative', zIndex: 1 }}>{title}</span>
+        <span className='relative z-[1] font-display text-[24px] leading-[1.05] text-[hsl(var(--color-text-primary))]'>{title}</span>
       </div>
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12 }}>
-          <span style={{ color: 'hsl(var(--color-brand-accent))', fontWeight: 700 }}>★ {rating}</span>
-          <span style={{ color: 'rgb(107,104,96)' }}>por {author}</span>
+      <div className='flex flex-col gap-3.5 p-4'>
+        <div className='flex items-center justify-between text-[12px]'>
+          <span className='font-bold text-[hsl(var(--color-brand-accent))]'>★ {rating}</span>
+          <span className='text-[rgb(107,104,96)]'>por {author}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid rgb(37,37,37)', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: hovered ? 'hsl(var(--color-brand-accent))' : 'hsl(var(--color-text-secondary))', transition: 'color 0.2s ease' }}>
+        <div className={`flex justify-between border-t border-[rgb(37,37,37)] pt-3 font-mono text-[11px] uppercase tracking-[0.12em] transition-[color_0.2s_ease] ${hovered ? 'text-[hsl(var(--color-brand-accent))]' : 'text-[hsl(var(--color-text-secondary))]'}`}>
           <span>Leia agora</span>
           <span>→</span>
         </div>
@@ -79,25 +80,23 @@ export function LandingFeatured() {
   }, [])
 
   return (
-    <section id='roteiros' style={{ borderTop: '1px solid rgb(37,37,37)', paddingTop: PY, paddingBottom: PY }}>
-      <div className='mx-auto' style={{ maxWidth: 1280 }}>
-        <div style={{ padding: `0 ${PX}`, marginBottom: 48 }}>
-          <div className='land-reveal' style={{ marginBottom: 12 }}>
-            <span className='land-label'>
-              <span style={{ color: 'rgb(107,104,96)', marginRight: 4 }}>05 /</span>
+    <section id='roteiros' className='border-t border-[rgb(37,37,37)] py-[clamp(80px,10vw,120px)]'>
+      <div className='mx-auto max-w-[1280px]'>
+        <div className='mb-12 px-[clamp(24px,6vw,80px)]'>
+          <div className='land-reveal mb-3'>
+            <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
+              <span className='mr-1 text-[rgb(107,104,96)]'>05 /</span>
               Em destaque
             </span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 32 }}>
-            <h2 className='font-display land-reveal' data-delay='1' style={{ fontSize: 'clamp(36px,5.4vw,80px)', lineHeight: 0.98, margin: 0 }}>
+          <div className='flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-8'>
+            <h2 className='font-display land-reveal m-0 text-[clamp(36px,5.4vw,80px)] leading-[0.98]' data-delay='1'>
               Roteiros que estão<br /><span className='text-brand-accent italic'>ganhando vida agora.</span>
             </h2>
             <div className='land-reveal flex gap-2' data-delay='2'>
               {[-1, 1].map((dir) => (
                 <button key={dir} onClick={() => scrollBy(dir)} aria-label={dir === -1 ? 'Anterior' : 'Próximo'}
-                  style={{ width: 48, height: 48, border: '1px solid rgb(52,52,52)', borderRadius: '50%', color: 'hsl(var(--color-text-primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: 'transparent', transition: 'background 0.2s ease,border-color 0.2s ease,transform 0.2s ease' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'hsl(var(--color-brand-accent))'; e.currentTarget.style.borderColor = 'hsl(var(--color-brand-accent))'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgb(52,52,52)'; e.currentTarget.style.transform = 'none' }}>
+                  className='flex h-12 w-12 items-center justify-center rounded-full border border-[rgb(52,52,52)] bg-transparent text-[hsl(var(--color-text-primary))] transition-[background_0.2s_ease,border-color_0.2s_ease,transform_0.2s_ease] hover:bg-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))] hover:-translate-y-[2px]'>
                   <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.6' width={20} height={20}>
                     <path d={dir === -1 ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6'} strokeLinecap='round' />
                   </svg>
@@ -108,23 +107,25 @@ export function LandingFeatured() {
         </div>
       </div>
 
-      <div style={{ position: 'relative' }}>
-        <div style={{ position: 'absolute', inset: '0 0 0 auto', width: 80, background: 'linear-gradient(to right,transparent,rgb(14,14,14))', pointerEvents: 'none', zIndex: 1 }} />
-        <div ref={trackRef} className='land-track' style={{ padding: `0 ${PX}` }}>
+      <div className='relative'>
+        <div className='pointer-events-none absolute inset-y-0 right-0 z-[1] w-[80px] bg-[linear-gradient(to_right,transparent,rgb(14,14,14))]' />
+        <div
+          ref={trackRef}
+          className='flex gap-5 px-[clamp(24px,6vw,80px)] overflow-x-auto overflow-y-hidden snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
           {FEATURED.map((f, i) => <FeaturedCard key={i} {...f} />)}
-          <div style={{ flex: '0 0 180px', display: 'flex', alignItems: 'center' }}>
-            <a href='#' className='font-display' style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 24, color: 'hsl(var(--color-text-primary))', borderBottom: '1px solid rgb(37,37,37)', paddingBottom: 6, textDecoration: 'none', transition: 'color 0.2s ease,border-color 0.2s ease' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'hsl(var(--color-brand-accent))'; e.currentTarget.style.borderColor = 'hsl(var(--color-brand-accent))' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'hsl(var(--color-text-primary))'; e.currentTarget.style.borderColor = 'rgb(37,37,37)' }}>
+          <div className='flex flex-[0_0_180px] items-center'>
+            <a
+              href='#'
+              className='font-display inline-flex items-center gap-2.5 border-b border-[rgb(37,37,37)] pb-1.5 text-[24px] text-[hsl(var(--color-text-primary))] no-underline transition-[color_0.2s_ease,border-color_0.2s_ease] hover:text-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))]'>
               Ver tudo <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.4' width={20} height={20}><path d='M5 12h14M13 6l6 6-6 6' strokeLinecap='round' /></svg>
             </a>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 6, marginTop: 32, justifyContent: 'center', padding: `0 ${PX}` }}>
+      <div className='mt-8 flex justify-center gap-1.5 px-[clamp(24px,6vw,80px)]'>
         {FEATURED.map((_, i) => (
-          <span key={i} style={{ width: 24, height: 2, background: i === activeIdx ? 'hsl(var(--color-brand-accent))' : 'rgb(52,52,52)', transition: 'background 0.3s ease' }} />
+          <span key={i} className={`h-[2px] w-[24px] transition-[background_0.3s_ease] ${i === activeIdx ? 'bg-[hsl(var(--color-brand-accent))]' : 'bg-[rgb(52,52,52)]'}`} />
         ))}
       </div>
     </section>

@@ -1,7 +1,5 @@
 'use client'
 
-const PX = 'clamp(24px,6vw,80px)'
-
 const LINKS = [
   {
     heading: 'Plataforma',
@@ -20,43 +18,26 @@ const LINKS = [
 export function LandingFooter() {
   return (
     <footer
-      style={{
-        borderTop: '1px solid rgb(37,37,37)',
-        background: 'rgb(10,10,10)',
-        padding: `clamp(48px,7vw,80px) ${PX} 32px`,
-      }}>
-      <div className='mx-auto' style={{ maxWidth: 1280 }}>
+      className='border-t border-[rgb(37,37,37)] bg-[rgb(10,10,10)] px-[clamp(24px,6vw,80px)] pb-8 pt-[clamp(48px,7vw,80px)]'>
+      <div className='mx-auto max-w-[1280px]'>
 
         {/* main grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr repeat(3,1fr)', gap: 48, marginBottom: 64 }}>
+        <div className='grid gap-10 mb-12 md:mb-16 lg:grid-cols-[1.4fr_repeat(3,1fr)] lg:gap-12'>
 
           {/* brand column */}
           <div>
-            <div className='font-display' style={{ fontSize: 22, color: 'hsl(var(--color-text-primary))', marginBottom: 14, lineHeight: 1 }}>
-              Antes da Tela<span style={{ color: 'hsl(var(--color-brand-accent))' }}>.</span>
+            <div className='font-display text-[22px] leading-none text-[hsl(var(--color-text-primary))] mb-3.5'>
+              Antes da Tela<span className='text-[hsl(var(--color-brand-accent))]'>.</span>
             </div>
-            <p style={{ fontSize: 13, color: 'rgb(107,104,96)', lineHeight: 1.65, maxWidth: 260, margin: '0 0 24px' }}>
+            <p className='m-0 mb-6 max-w-[260px] text-[13px] leading-[1.65] text-[rgb(107,104,96)]'>
               Plataforma de publicação, leitura e descoberta de roteiros audiovisuais brasileiros.
             </p>
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div className='flex gap-2.5'>
               {['Instagram', 'LinkedIn'].map((s) => (
                 <a
                   key={s}
                   href='#'
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 10,
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    color: 'rgb(107,104,96)',
-                    textDecoration: 'none',
-                    padding: '5px 10px',
-                    border: '1px solid rgb(37,37,37)',
-                    borderRadius: 2,
-                    transition: 'color 0.2s ease,border-color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = 'hsl(var(--color-brand-accent))'; e.currentTarget.style.borderColor = 'hsl(var(--color-brand-accent))' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'rgb(107,104,96)'; e.currentTarget.style.borderColor = 'rgb(37,37,37)' }}>
+                  className='rounded-[2px] border border-[rgb(37,37,37)] px-[10px] py-[5px] font-mono text-[10px] uppercase tracking-[0.12em] text-[rgb(107,104,96)] no-underline transition-[color_0.2s_ease,border-color_0.2s_ease] hover:text-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))]'>
                   {s}
                 </a>
               ))}
@@ -66,17 +47,15 @@ export function LandingFooter() {
           {/* link columns */}
           {LINKS.map((col) => (
             <div key={col.heading}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgb(107,104,96)', display: 'block', marginBottom: 16 }}>
+              <span className='mb-4 block font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>
                 {col.heading}
               </span>
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <ul className='flex flex-col gap-2.5 list-none m-0 p-0'>
                 {col.items.map((item) => (
                   <li key={item}>
                     <a
                       href='#'
-                      style={{ fontSize: 14, color: 'rgb(107,104,96)', textDecoration: 'none', transition: 'color 0.2s ease' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = 'hsl(var(--color-text-primary))' }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = 'rgb(107,104,96)' }}>
+                      className='text-[14px] text-[rgb(107,104,96)] no-underline transition-[color_0.2s_ease] hover:text-[hsl(var(--color-text-primary))]'>
                       {item}
                     </a>
                   </li>
@@ -87,21 +66,21 @@ export function LandingFooter() {
         </div>
 
         {/* partnership */}
-        <div style={{ borderTop: '1px solid rgb(37,37,37)', paddingTop: 24, marginBottom: 20, textAlign: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgb(52,52,52)', letterSpacing: '0.1em' }}>
+        <div className='mb-5 border-t border-[rgb(37,37,37)] pt-6 text-center'>
+          <span className='font-mono text-[11px] tracking-[0.1em] text-[rgb(52,52,52)]'>
             uma parceria entre{' '}
-            <span style={{ color: 'rgb(107,104,96)' }}>Irmãos de Criação</span>
+            <span className='text-[rgb(107,104,96)]'>Irmãos de Criação</span>
             {' '}&{' '}
-            <span style={{ color: 'rgb(107,104,96)' }}>Plaza Creative Collective</span>
+            <span className='text-[rgb(107,104,96)]'>Plaza Creative Collective</span>
           </span>
         </div>
 
         {/* bottom bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgb(52,52,52)', letterSpacing: '0.06em' }}>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <span className='font-mono text-[11px] tracking-[0.06em] text-[rgb(52,52,52)]'>
             © 2026 Antes da Tela. Feito no Brasil com café e roteiros.
           </span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgb(52,52,52)', letterSpacing: '0.1em' }}>
+          <span className='font-mono text-[10px] tracking-[0.1em] text-[rgb(52,52,52)]'>
             v 0.1 · em construção
           </span>
         </div>
