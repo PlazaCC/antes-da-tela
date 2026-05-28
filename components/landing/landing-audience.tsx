@@ -62,8 +62,7 @@ export function LandingAudience() {
               Publicar minha história <span className='transition-transform duration-200 group-hover:translate-x-[4px]'>→</span>
             </a>
             {/* deco dot grid */}
-            <div className='absolute pointer-events-none'
-              className='pointer-events-none absolute right-[-80px] top-[-80px] h-[360px] w-[360px] bg-[radial-gradient(hsl(var(--color-brand-accent))_1px,transparent_1px)] opacity-[0.12] [background-size:12px_12px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] [webkit-mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]'
+            <div className='absolute pointer-events-none pointer-events-none absolute right-[-80px] top-[-80px] h-[360px] w-[360px] bg-[radial-gradient(hsl(var(--color-brand-accent))_1px,transparent_1px)] opacity-[0.12] [background-size:12px_12px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] [webkit-mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]'
             />
           </article>
 
@@ -75,9 +74,8 @@ export function LandingAudience() {
               { num: '03', role: 'Produtores e indústria', title: 'Encontre histórias com público interessado e criadores prontos.',
                 body: 'Menos dependência de contatos e achismos. Mais descoberta com base em sinais reais de engajamento.', delay: '3' },
             ].map((c) => (
-              <article key={c.num} className='land-reveal rounded-sm'
-                data-delay={c.delay}
-                className='land-reveal rounded-sm border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] p-[28px_32px]'>
+              <article key={c.num} className='land-reveal rounded-sm land-reveal rounded-sm border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] p-[28px_32px]'
+                data-delay={c.delay}>
                 <div className='mb-4 flex items-center gap-3.5'>
                   <span className='font-mono text-[11px] tracking-[0.14em] text-[rgb(107,104,96)]'>{c.num}</span>
                   <span className='font-mono text-[11px] uppercase tracking-[0.12em] text-[hsl(var(--color-text-secondary))]'>{c.role}</span>
