@@ -3,9 +3,9 @@
 Plataforma de publicação, leitura e discussão de roteiros audiovisuais.
 POC para validar: consumo de roteiros, demanda por feedback estruturado, valor de curadoria.
 
-See @docs/adrs/ADR-001-antes-da-tela.md for full architectural decisions.
-See @docs/SETUP.md for step-by-step environment setup.
-See @package.json for available scripts.
+See `docs/adrs/ADR-001-antes-da-tela.md` for full architectural decisions.
+See `docs/SETUP.md` for step-by-step environment setup.
+See `package.json` for available scripts.
 
 ---
 
@@ -158,22 +158,33 @@ export function ConfirmDialog({ className, ...props }) {
 
 ---
 
-## Rules
+## Component Rules
 
-See `.agents/rules/` for detailed, path-scoped rules:
+- Target ≤ 100 lines per file. Hard limit: **150 lines** — split if exceeded.
+- Extract sub-component when: JSX block repeats, section has own state/side-effects, named concept emerging, or render branch > 15 lines per side.
+- Extract hook when: multiple `useState`+`useEffect` serve one concern, or logic shared across ≥ 2 components.
+- Naming: `PascalCase` named exports for components, `use<Name>` for hooks, no default exports.
 
-- `typescript.md` — TypeScript + tRPC conventions
-- `supabase.md` — Supabase Auth + DB patterns
-- `drizzle.md` — ORM schema and migration patterns
-- `nextjs.md` — App Router + RSC conventions
-- `ui.md` — shadcn/ui + Tailwind rules
+## Supabase Operational Rules
 
-## graphify
+**Select discipline:** Never use `.select('*')` in queries crossing the RSC → Client Component boundary. Select only columns the client renders.
 
-This project has a graphify knowledge graph at graphify-out/.
+**TanStack mutations:** When `onSuccess` references volatile state (e.g. `currentPage`), capture it inline on `.mutate()`, not in `mutationOptions`:
+```ts
+const page = currentPage
+mutation.mutate(data, { onSuccess: () => queryClient.invalidateQueries(...({ pageNumber: page })) })
+```
 
-Rules:
+**Storage:** Resolve PDF/media URLs server-side via `ctx.supabase.storage.from(bucket).getPublicUrl(path)` — never client-side. Uploads must be client-side only (Vercel 10s timeout). Upload path: `{userId}/{timestamp}_{filename}`.
 
-- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
-- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
-- After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)
+**CLI safety:** If any DB operation or migration fails, stop immediately — no workarounds, no third retry. Report and ask for manual intervention.
+
+## PR Checklist
+
+Before submitting: `yarn lint` + `yarn type-check` pass; tests pass; schema changes have `yarn db:generate` run; no secrets exposed.
+
+## Multi-agent & Rules
+
+This project uses multiple AI agents (Claude Code, VS Code Chat, GitHub Copilot). Central guide: `AGENTS.md`.
+Path-scoped rules in `.agents/rules/` (loaded contextually by VS Code Chat via `chat.agentFilesLocations`).
+Knowledge graph at `graphify-out/` — invoke `/graphify` when needed for deep architecture analysis.

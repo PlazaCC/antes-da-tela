@@ -1,8 +1,7 @@
 ---
 paths:
-  - 'server/**'
+  - 'server/services/**'
   - 'lib/**'
-  - 'components/**'
   - 'trpc/**'
 ---
 

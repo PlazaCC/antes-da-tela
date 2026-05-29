@@ -167,7 +167,7 @@ Files changed: <N> (<list file names>)
 **Ready for PR?** YES / NO — <one sentence reason>
 ```
 
-Always end the report with one of these two VERDICT blocks — no exceptions:
+Always end the report with one of these two verdict blocks.
 
 ```
 ## VERDICT: APPROVED
@@ -181,9 +181,9 @@ or
 - [ ] [FILE:LINE] <what to fix>
 ```
 
-`APPROVED` = zero Critical issues + all validators pass.
-`NEEDS_FIXES` = any Critical issue OR any validator failure.
-Important Issues alone do not block APPROVED, but must be listed.
+APPROVED means zero Critical issues and all validators passed.
+NEEDS_FIXES means at least one Critical issue or a validator failure.
+Important Issues alone do not block approval but must appear in the report.
 
 ---
 
@@ -194,9 +194,9 @@ Important Issues alone do not block APPROVED, but must be listed.
 - **Always** include `[FILE:LINE]` for every issue.
 - If you're unsure whether a pattern is a problem, say "Unverified — needs human review at [FILE:LINE]."
 - Do not invent rules not present in CLAUDE.md or `.claude/rules/`.
-- **Confidence threshold:** Only include in Critical or Important when you are certain (high confidence, traceable to a specific line). When uncertain → downgrade to Minor or write "Unverified — needs human review at [FILE:LINE]."
-- **Diff scope:** Only flag code that appears in `git diff main...HEAD`. Never flag pre-existing code unless it was directly modified in this branch.
-- **No regression:** If a line was not touched by this branch, it is not a finding — even if it looks wrong.
+- **Confidence threshold:** Only mark something as Critical or Important when you can point to the exact line and explain the problem clearly. If uncertain, mark it as Minor or note it as unverified.
+- **Diff scope:** Only flag code that appears in the current diff. Pre-existing code is not in scope unless it was directly changed in this branch.
+- **No regression:** Lines not touched by this branch are not findings, even if they look wrong.
 
 ---
 
@@ -228,16 +228,14 @@ Important Issues alone do not block APPROVED, but must be listed.
 
 ## Integration
 
-**Called after:** `/create-pr` — the PR is opened first, then this skill reviews it.
+**Called after:** `/create-pr` opens the PR, then this skill reviews it.
 
-**PR → Review Cycle:**
+**Review cycle:**
 
-`/create-pr` runs first, then `/code-review` reviews the PR branch.
+`/create-pr` runs first. Then `/code-review` reviews the branch.
 
-If VERDICT is `NEEDS_FIXES`:
-1. Fix every item in the NEEDS_FIXES list.
-2. Run `/create-pr` again (updates the PR with the new commits).
-3. Re-run `/code-review` to validate.
-4. Repeat until VERDICT is `APPROVED`.
-
-The cycle is: create-pr → code-review → fix → create-pr → code-review → … → APPROVED.
+If the verdict is NEEDS_FIXES:
+1. Fix every item in the list.
+2. Run `/create-pr` again to update the PR.
+3. Run `/code-review` again.
+4. Repeat until the verdict is APPROVED.

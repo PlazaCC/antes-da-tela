@@ -101,20 +101,6 @@ className={cn("base-styles", condition && "extra", className)}
 - Use `React.ComponentProps<"element">` for extending base HTML props.
 - Prefer named exports over default exports.
 
-## DRY e Modularização (UI)
-
-- Prefira wrappers e composição a duplicação de markup e estilos.
-- Extraia hooks (`lib/hooks/`) para comportamento reutilizável e coloque a renderização em componentes puros.
-- Centralize tokens visuais e utilitários (`lib/utils`, `design-tokens.ts`) para evitar classes repetidas.
-- Se múltiplos componentes usam a mesma estrutura, crie um componente compartilhado em `components/<domain>/`.
-
-## Refatoração segura
-
-- Ao extrair, mantenha a API do componente simples: props mínimas, forward `className` e `...rest`.
-- Garanta cobertura de testes para hooks/serviços extraídos antes de remover código original.
-
----
-
 ## Accessibility
 
 - Radix UI primitives (dialog, dropdown, menu) handle keyboard navigation and ARIA automatically — prefer them.

@@ -1,3 +1,8 @@
+---
+paths:
+  - 'components/**'
+---
+
 # Component Rules
 
 ## File length

@@ -68,12 +68,4 @@ Purpose: short, actionable guidance for AI coding agents working in this reposit
 
 This file is intentionally minimal — link to existing docs instead of copying them.
 
-## graphify
-
-This project has a graphify knowledge graph at graphify-out/.
-
-Rules:
-
-- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
-- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
-- After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)
+Knowledge graph available at `graphify-out/` — use `/graphify` when needed for deep architecture analysis.

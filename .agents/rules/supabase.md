@@ -153,20 +153,7 @@ createComment.mutate(data, {
 - Use Supabase Realtime channels for live comments via `supabase.channel()`.
 - Always clean up subscriptions with `.unsubscribe()` in `useEffect` cleanup.
 
-## Migrations and Schema Updates
+## Migrations
 
-Always use the scripts defined in `package.json` to ensure consistency:
-
-- **Generate Table Migrations:** `yarn db:generate` (Drizzle Kit).
-- **Apply Table Migrations:** `yarn db:migrate` (Drizzle Kit).
-- **Create Supabase Migration:** `yarn supabase:new <name>` (Supabase CLI).
-- **Push to Remote:** `yarn supabase:push` (Supabase CLI).
-- **Pull from Remote:** `yarn supabase:pull` (Supabase CLI).
-
-**Rules for Migrations:**
-
-1.  **Never bypass the CLI/Package scripts.**
-2.  **User-defined tables** live in `server/db/schema.ts`.
-3.  **Supabase-specific config** (Storage, RLS, Functions) live in `supabase/migrations/`.
-4.  If `yarn supabase:pull` reports a migration history mismatch, **stop and ask the user to repair the history manually** using `supabase migration repair`. Do not attempt to repair it yourself unless explicitly instructed with a verified command.
-5.  Never edit generated migration files retroactively; always create a new migration.
+Scripts: `yarn db:generate` (Drizzle) · `yarn db:migrate` · `yarn supabase:new <name>` · `yarn supabase:push` · `yarn supabase:pull`.
+Never bypass the CLI scripts. User-defined tables in `server/db/schema.ts`; Supabase-specific config in `supabase/migrations/`. Never edit migrations retroactively — create a new one.
