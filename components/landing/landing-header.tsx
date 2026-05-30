@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 const NAV_LINKS = [
@@ -25,11 +26,15 @@ export function LandingHeader() {
     >
       <Link
         href='/'
-        className='font-display text-[19px] text-text-primary no-underline flex items-center gap-2.5'>
-        <span
-          className='rounded-full bg-brand-accent shrink-0 w-[7px] h-[7px] [transform:translateY(-7px)]'
+        className='shrink-0 no-underline flex items-center'>
+        <Image
+          src='/assets/logo.svg'
+          alt='Antes da Tela'
+          className='max-w-full w-100% h-auto'
+          width={196}
+          height={24}
+          priority
         />
-        Antes da Tela
       </Link>
 
       <nav className='hidden md:flex items-center gap-8'>
@@ -44,17 +49,17 @@ export function LandingHeader() {
       </nav>
 
       <div className='flex items-center gap-3'>
-        <a
-          href='#waitlist'
+        <Link
+          href='/auth/login'
           className='hidden md:inline-flex items-center justify-center gap-2.5 rounded-[2px] border border-[rgb(52,52,52)] bg-transparent px-4 h-9 text-[13px] font-semibold tracking-[0.01em] text-[hsl(var(--color-text-primary))] no-underline transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] hover:border-[hsl(var(--color-brand-accent))] hover:text-[hsl(var(--color-brand-accent))] hover:-translate-y-[2px]'>
           Entrar
-        </a>
-        <a
-          href='#waitlist'
+        </Link>
+        <Link
+          href='/auth/login'
           className='group inline-flex h-9 items-center justify-center gap-2.5 rounded-[2px] bg-[hsl(var(--color-brand-accent))] px-4 text-[13px] font-semibold tracking-[0.01em] text-[rgb(14,14,14)] no-underline transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] hover:-translate-y-[2px] hover:shadow-[0_12px_32px_-10px_rgba(232,92,47,0.4)]'>
-          Acesso antecipado
+          Cadastrar
           <span className='transition-transform duration-200 group-hover:translate-x-[4px]'>→</span>
-        </a>
+        </Link>
       </div>
     </header>
   )

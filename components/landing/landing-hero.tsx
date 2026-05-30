@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 export function LandingHero() {
   return (
     <section
@@ -43,11 +45,11 @@ export function LandingHero() {
             Explorar histórias
             <span className='transition-transform duration-200 group-hover:translate-x-[4px]'>→</span>
           </a>
-          <a
-            href='#waitlist'
+          <Link
+            href='/auth/login'
             className='inline-flex h-[52px] items-center justify-center gap-2.5 rounded-[2px] border border-[rgb(52,52,52)] bg-transparent px-[28px] text-[14px] font-semibold tracking-[0.01em] text-[hsl(var(--color-text-primary))] no-underline transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] hover:-translate-y-[2px] hover:border-[hsl(var(--color-brand-accent))] hover:text-[hsl(var(--color-brand-accent))]'>
             Publicar minha história
-          </a>
+          </Link>
         </div>
       </div>
 
