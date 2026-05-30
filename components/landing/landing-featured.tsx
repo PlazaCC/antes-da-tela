@@ -21,12 +21,9 @@ const PATTERNS: Record<string, string> = {
 }
 
 function FeaturedCard({ genre, title, author, pages, rating, color, pattern }: typeof FEATURED[0]) {
-  const [hovered, setHovered] = useState(false)
   return (
     <article
-      className={`land-reveal flex flex-[0_0_300px] flex-col overflow-hidden rounded-[4px] border bg-[rgb(22,22,22)] transition-[transform_0.3s_ease,border-color_0.3s_ease] cursor-pointer snap-center ${hovered ? 'border-[hsl(var(--color-brand-accent))] -translate-y-[6px]' : 'border-[rgb(37,37,37)]'}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}>
+      className={`land-reveal flex flex-[0_0_300px] flex-col overflow-hidden rounded-[4px] border bg-[rgb(22,22,22)] transition-[transform_0.3s_ease,border-color_0.3s_ease] cursor-pointer snap-center  hover:border-[hsl(var(--color-brand-accent))] border-[rgb(37,37,37)]`}>
       <div className='relative flex h-[240px] flex-col justify-between overflow-hidden p-4' style={{ background: color }}>
         <div
           className='absolute inset-0 opacity-35'
@@ -46,7 +43,7 @@ function FeaturedCard({ genre, title, author, pages, rating, color, pattern }: t
           <span className='font-bold text-[hsl(var(--color-brand-accent))]'>★ {rating}</span>
           <span className='text-[rgb(107,104,96)]'>por {author}</span>
         </div>
-        <div className={`flex justify-between border-t border-[rgb(37,37,37)] pt-3 font-mono text-[11px] uppercase tracking-[0.12em] transition-[color_0.2s_ease] ${hovered ? 'text-[hsl(var(--color-brand-accent))]' : 'text-[hsl(var(--color-text-secondary))]'}`}>
+        <div className={`flex justify-between border-t border-[rgb(37,37,37)] pt-3 font-mono text-[11px] uppercase tracking-[0.12em] transition-[color_0.2s_ease] hover:text-[hsl(var(--color-brand-accent))] text-[hsl(var(--color-text-secondary))]`}>
           <span>Leia agora</span>
           <span>→</span>
         </div>
@@ -123,11 +120,11 @@ export function LandingFeatured() {
         </div>
       </div>
 
-      <div className='mt-8 flex justify-center gap-1.5 px-[clamp(24px,6vw,80px)]'>
+      {/* <div className='mt-8 flex justify-center gap-1.5 px-[clamp(24px,6vw,80px)]'>
         {FEATURED.map((_, i) => (
           <span key={i} className={`h-[2px] w-[24px] transition-[background_0.3s_ease] ${i === activeIdx ? 'bg-[hsl(var(--color-brand-accent))]' : 'bg-[rgb(52,52,52)]'}`} />
         ))}
-      </div>
+      </div> */}
     </section>
   )
 }

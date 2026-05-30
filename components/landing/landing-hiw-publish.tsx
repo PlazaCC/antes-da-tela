@@ -87,13 +87,13 @@ export function HiwPublishPreview() {
           ))}
         </div>
 
-        <div className={`mt-2 flex items-center justify-between rounded-[2px] border p-4 transition-[border-color_0.4s_ease,background_0.4s_ease] ${genre ? 'border-[hsl(var(--color-brand-accent))] bg-[rgba(232,92,47,0.12)]' : 'border-[rgb(37,37,37)] bg-[rgb(14,14,14)]'}`}>
+        <div className={`mt-2 flex items-center justify-between rounded-[2px] border md:p-4 p-3 transition-[border-color_0.4s_ease,background_0.4s_ease] ${genre ? 'border-[hsl(var(--color-brand-accent))] bg-[rgba(232,92,47,0.12)]' : 'border-[rgb(37,37,37)] bg-[rgb(14,14,14)]'}`}>
           <div className='flex flex-col gap-1'>
             <span className='font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>Registro de autoria</span>
             <span className='text-[13px] text-[hsl(var(--color-text-primary))]'>{genre ? 'Pronto para publicar' : 'Preenchendo dados...'}</span>
           </div>
           <button
-            className={`group inline-flex h-9 items-center justify-center gap-2.5 rounded-[2px] bg-[hsl(var(--color-brand-accent))] px-4 text-[13px] font-semibold tracking-[0.01em] text-[rgb(14,14,14)] transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] ${genre ? 'opacity-100 cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
+            className={`group inline-flex h-9 items-center justify-center gap-2.5 rounded-[2px] bg-[hsl(var(--color-brand-accent))] md:px-4 px-3 text-[13px] font-semibold tracking-[0.01em] text-[rgb(14,14,14)] transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] ${genre ? 'opacity-100 cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
             disabled={!genre}>
             Publicar <span className='transition-transform duration-200 group-hover:translate-x-[4px]'>→</span>
           </button>

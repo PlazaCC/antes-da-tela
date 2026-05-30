@@ -65,7 +65,7 @@ export function HiwReadPreview() {
   }
 
   return (
-    <div className='grid gap-5 md:grid-cols-[1fr_180px]'>
+    <div className='grid gap-5 lg:grid-cols-[1fr_180px]'>
       <div className='relative rounded-[2px] border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] p-[20px_24px]'>
         <div className='mb-3.5 flex items-center justify-between'>
           <span className='inline-flex items-center rounded-[2px] border border-[rgba(232,92,47,0.4)] bg-[rgba(232,92,47,0.12)] px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--color-brand-accent))]'>
@@ -85,7 +85,7 @@ export function HiwReadPreview() {
                 </span>
               ))}
               {comment.lineIdx === i && (
-                <div className='absolute left-[calc(100%+12px)] top-[-4px] z-10 w-[180px] rounded-[2px] border border-[rgb(37,37,37)] border-l-2 border-l-[hsl(var(--color-brand-accent))] bg-[rgb(30,30,30)] p-[8px_10px] [animation:land-comment-in_0.45s_ease]'>
+                <div className='absolute lg:left-[calc(100%+12px)] left-[calc(100%-150px)] top-[-4px] z-10 w-[180px] rounded-[2px] border border-[rgb(37,37,37)] border-l-2 border-l-[hsl(var(--color-brand-accent))] bg-[rgb(30,30,30)] p-[8px_10px] [animation:land-comment-in_0.45s_ease]'>
                   <div className='mb-[3px] font-mono text-[9px] uppercase tracking-[0.12em] text-[hsl(var(--color-brand-accent))]'>
                     {comment.author}
                   </div>
