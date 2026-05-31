@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 const LINKS = [
   {
     heading: 'Plataforma',
@@ -26,8 +28,14 @@ export function LandingFooter() {
 
           {/* brand column */}
           <div>
-            <div className='font-display text-[22px] leading-none text-[hsl(var(--color-text-primary))] mb-3.5'>
-              Antes da Tela<span className='text-[hsl(var(--color-brand-accent))]'>.</span>
+            <div className='mb-3.5'>
+              <Image
+                src='/assets/logo.svg'
+                alt='Antes da Tela'
+                className='max-w-full w-100% h-auto'
+                width={196}
+                height={24}
+              />
             </div>
             <p className='m-0 mb-6 max-w-[260px] text-[13px] leading-[1.65] text-[rgb(107,104,96)]'>
               Plataforma de publicação, leitura e descoberta de roteiros audiovisuais brasileiros.
