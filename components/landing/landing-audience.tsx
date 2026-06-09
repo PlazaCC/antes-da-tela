@@ -14,13 +14,7 @@ export function LandingAudience() {
     <section id='audience' className='border-t border-[rgb(37,37,37)] px-[clamp(24px,6vw,80px)] py-[clamp(80px,10vw,120px)]'>
       <div className='mx-auto max-w-[1280px]'>
         {/* header */}
-        <div className='grid gap-12 mb-12 md:mb-16 md:gap-20 md:grid-cols-[clamp(140px,200px,200px)_1fr]'>
-          <div className='land-reveal'>
-            <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
-              <span className='mr-1 text-[rgb(107,104,96)]'>03 /</span>
-              Para quem é
-            </span>
-          </div>
+        <div className='mb-12 md:mb-16'>
           <h2
             className='font-display land-reveal m-0 text-[clamp(36px,5.4vw,80px)] leading-[0.98]'
             data-delay='1'>

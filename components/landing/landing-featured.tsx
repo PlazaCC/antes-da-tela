@@ -123,15 +123,9 @@ export function LandingFeatured() {
   }
 
   return (
-    <section id='roteiros' className='border-t border-[rgb(37,37,37)] py-[clamp(80px,10vw,120px)]'>
+    <section  id='roteiros' className='border-t border-[rgb(37,37,37)] max-w-[1280px] mx-auto overflow-visible py-[clamp(80px,10vw,120px)]'>
       <div className='mx-auto max-w-[1280px]'>
         <div className='mb-12 px-[clamp(24px,6vw,80px)]'>
-          <div className='land-reveal mb-3'>
-            <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
-              <span className='mr-1 text-[rgb(107,104,96)]'>05 /</span>
-              Em destaque
-            </span>
-          </div>
           <div className='flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-8'>
             <h2 className='font-display land-reveal m-0 text-[clamp(36px,5.4vw,80px)] leading-[0.98]' data-delay='1'>
               Roteiros que estão<br /><span className='text-brand-accent italic'>ganhando vida agora.</span>
@@ -151,10 +145,10 @@ export function LandingFeatured() {
       </div>
 
       <div className='relative'>
-        <div className='pointer-events-none absolute inset-y-0 right-0 z-[1] w-[80px] bg-[linear-gradient(to_right,transparent,rgb(14,14,14))]' />
+        <div className='pointer-events-none absolute inset-y-0 right-0 z-[1] w-[80px] overflow-visible bg-[linear-gradient(to_right,transparent,rgb(14,14,14))]' />
         <div
           ref={trackRef}
-          className='flex gap-5 px-[clamp(24px,6vw,80px)] overflow-x-auto overflow-y-hidden snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+          className='flex gap-5 px-[clamp(24px,6vw,80px)] overflow-x-scroll snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3'>
           {scripts.map((s) => {
             const indexForStyle = hashStringToIndex(`${s.id}${s.genre ?? ''}`, CARD_COLORS.length)
             const patternIndex = hashStringToIndex(`${s.genre ?? ''}${s.title ?? ''}`, CARD_PATTERNS.length)

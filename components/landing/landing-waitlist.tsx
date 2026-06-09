@@ -35,12 +35,6 @@ export function LandingWaitlist() {
 
           {/* left */}
           <div>
-            <div className='land-reveal mb-3'>
-              <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
-                <span className='mr-1 text-[rgb(107,104,96)]'>06 /</span>
-                Lista de espera
-              </span>
-            </div>
             <h2
               className='font-display land-reveal m-0 mb-7 max-w-[14ch] text-[clamp(36px,5.4vw,72px)] leading-[0.98]'
               data-delay='1'>

@@ -19,13 +19,6 @@ export function LandingFinalCta() {
       </div>
 
       <div className='relative z-[1] mx-auto max-w-[900px]'>
-        <div className='land-reveal mb-5'>
-          <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
-            <span className='mr-1 text-[rgb(107,104,96)]'>07 /</span>
-            Comece agora
-          </span>
-        </div>
-
         <h2
           className='font-display land-reveal m-0 mb-5 text-[clamp(40px,6.5vw,96px)] leading-[0.96]'
           data-delay='1'>

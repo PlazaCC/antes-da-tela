@@ -12,12 +12,7 @@ export function LandingHero() {
       />
 
       <div className='relative z-10 mx-auto w-full max-w-[1280px]'>
-        <div className='land-reveal mb-8'>
-          <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
-            <span className='mr-1 text-[rgb(107,104,96)]'>00 /</span>
-            Plataforma de roteiros
-          </span>
-        </div>
+        
 
         <h1
           className='font-display m-0 mb-8 text-[clamp(56px,11.5vw,120px)] leading-[0.92] tracking-[-0.025em]'>

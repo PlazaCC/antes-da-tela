@@ -34,37 +34,29 @@ export function LandingPillars() {
       className='border-t border-[rgb(37,37,37)] px-[clamp(24px,6vw,80px)] py-[clamp(80px,10vw,120px)]'>
       <div className='mx-auto max-w-[1280px]'>
         {/* header */}
-        <div className='grid gap-12 mb-16 md:mb-20 md:gap-20 md:grid-cols-[clamp(140px,200px,200px)_1fr]'>
-          <div className='land-reveal'>
-            <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
-              <span className='mr-1 text-[rgb(107,104,96)]'>02 /</span>
-              Plataforma
-            </span>
+        <div className='mb-16 md:mb-20'>
+          <h2
+            className='font-display land-reveal m-0 mb-8 max-w-[16ch] text-[clamp(36px,5.4vw,80px)] leading-[0.98]'
+            data-delay='1'>
+            Um <span className='text-brand-accent italic'>novo tipo</span> de plataforma.
+          </h2>
+          <div className='land-reveal mb-7 flex flex-col gap-2' data-delay='2'>
+            {['Não é uma rede social.', 'Não é um depósito de arquivos.', 'Não é só para roteiristas.'].map((t) => (
+              <span
+                key={t}
+                className='font-display italic relative pl-5 text-[clamp(18px,1.6vw,22px)] text-[rgb(107,104,96)]'>
+                <span className='absolute left-0 text-brand-accent not-italic font-bold'>×</span>
+                {t}
+              </span>
+            ))}
           </div>
-          <div>
-            <h2
-              className='font-display land-reveal m-0 mb-8 max-w-[16ch] text-[clamp(36px,5.4vw,80px)] leading-[0.98]'
-              data-delay='1'>
-              Um <span className='text-brand-accent italic'>novo tipo</span> de plataforma.
-            </h2>
-            <div className='land-reveal mb-7 flex flex-col gap-2' data-delay='2'>
-              {['Não é uma rede social.', 'Não é um depósito de arquivos.', 'Não é só para roteiristas.'].map((t) => (
-                <span
-                  key={t}
-                  className='font-display italic relative pl-5 text-[clamp(18px,1.6vw,22px)] text-[rgb(107,104,96)]'>
-                  <span className='absolute left-0 text-brand-accent not-italic font-bold'>×</span>
-                  {t}
-                </span>
-              ))}
-            </div>
-            <p
-              className='land-reveal text-text-secondary max-w-[640px] text-[clamp(15px,1.2vw,18px)] leading-[1.65]'
-              data-delay='3'>
-              É um ambiente feito para que histórias ganhem vida antes de chegar à produção. Um lugar
-              onde criadores publicam, recebem retorno do público, e acompanham dados que ajudam a
-              entender o potencial de cada projeto.
-            </p>
-          </div>
+          <p
+            className='land-reveal text-text-secondary max-w-[640px] text-[clamp(15px,1.2vw,18px)] leading-[1.65]'
+            data-delay='3'>
+            É um ambiente feito para que histórias ganhem vida antes de chegar à produção. Um lugar
+            onde criadores publicam, recebem retorno do público, e acompanham dados que ajudam a
+            entender o potencial de cada projeto.
+          </p>
         </div>
 
         {/* grid */}
