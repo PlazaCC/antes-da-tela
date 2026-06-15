@@ -8,6 +8,10 @@ import { getStorageUrl } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
 
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Navigation } from 'swiper/modules'
+import 'swiper/css'
+
 const PATTERNS: Record<string, string> = {
   diagonal: 'repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,0.04) 14px 16px)',
   dots: 'radial-gradient(rgba(255,255,255,0.06) 1px,transparent 1.5px)',
@@ -52,8 +56,8 @@ function FeaturedCard({ id, genre, title, author, pages, rating, coverUrl, color
   return (
     <Link href={`/scripts/${id}`} className='no-underline flex-[0_0_280px] snap-center'>
       <article
-        className='land-reveal flex flex-col overflow-hidden rounded-[4px] border bg-[rgb(22,22,22)] transition-[transform_0.3s_ease,border-color_0.3s_ease] cursor-pointer hover:border-[hsl(var(--color-brand-accent))] border-[rgb(37,37,37)]'>
-        <div className='relative flex h-[280px] flex-col justify-between overflow-hidden p-4' style={{ background: coverUrl ? undefined : color }}>
+        className='land-reveal flex flex-col  rounded-[4px] border bg-[rgb(22,22,22)] transition-[transform_0.3s_ease,border-color_0.3s_ease] cursor-pointer hover:border-[hsl(var(--color-brand-accent))] border-[rgb(37,37,37)]'>
+        <div className='relative flex h-[280px] flex-col justify-between  p-4' style={{ background: coverUrl ? undefined : color }}>
           {coverUrl ? (
             <Image
               src={coverUrl}
@@ -101,7 +105,8 @@ function FeaturedCard({ id, genre, title, author, pages, rating, coverUrl, color
 }
 
 export function LandingFeatured() {
-  const trackRef = useRef<HTMLDivElement>(null)
+  const prevRef = useRef<HTMLButtonElement>(null)
+  const nextRef = useRef<HTMLButtonElement>(null)
 
   const trpc = useTRPC()
   const { data: recent } = useQuery(trpc.scripts.listRecent.queryOptions({ limit: 7 }))
@@ -114,16 +119,51 @@ export function LandingFeatured() {
     enabled: scriptIds.length > 0,
   })
 
-  const scrollBy = (dir: number) => {
-    const t = trackRef.current
-    if (!t) return
-    const card = t.querySelector('article')
-    if (!card) return
-    t.scrollBy({ left: dir * (card.getBoundingClientRect().width + 20) * 1.2, behavior: 'smooth' })
-  }
+  const slides = useMemo(() => {
+    const items = scripts.map((s) => {
+      const indexForStyle = hashStringToIndex(`${s.id}${s.genre ?? ''}`, CARD_COLORS.length)
+      const patternIndex = hashStringToIndex(`${s.genre ?? ''}${s.title ?? ''}`, CARD_PATTERNS.length)
+      const genre = s.genre ?? 'Roteiro'
+      const author = s.author?.name ?? 'Autor'
+      const pages = s.script_files?.[0]?.page_count ?? null
+      const rating = ratingsMap?.[s.id]?.average ?? null
+      const coverUrl = getStorageUrl('avatars', s.cover_path) ?? null
+
+      return (
+        <SwiperSlide key={s.id} className='!w-[280px]'>
+          <FeaturedCard
+            id={s.id}
+            genre={genre}
+            title={s.title}
+            author={author}
+            pages={pages}
+            rating={rating}
+            coverUrl={coverUrl}
+            color={CARD_COLORS[indexForStyle]!}
+            pattern={CARD_PATTERNS[patternIndex]!}
+          />
+        </SwiperSlide>
+      )
+    })
+
+    items.push(
+      <SwiperSlide key='ver-tudo' className='!w-[180px] flex items-center'>
+        <Link
+          href='/'
+          className='font-display inline-flex items-center gap-2.5 border-b border-[rgb(37,37,37)] pb-1.5 text-[24px] text-[hsl(var(--color-text-primary))] no-underline transition-[color_0.2s_ease,border-color_0.2s_ease] hover:text-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))]'>
+          Ver tudo{' '}
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.4' width={20} height={20}>
+            <path d='M5 12h14M13 6l6 6-6 6' strokeLinecap='round' />
+          </svg>
+        </Link>
+      </SwiperSlide>,
+    )
+
+    return items
+  }, [scripts, ratingsMap])
 
   return (
-    <section  id='roteiros' className='border-t border-[rgb(37,37,37)] max-w-[1280px] mx-auto overflow-visible py-[clamp(80px,10vw,120px)]'>
+    <section  id='roteiros' className='border-t border-[rgb(37,37,37)] max-w-[1280px] mx-auto py-[clamp(80px,10vw,120px)]'>
       <div className='mx-auto max-w-[1280px]'>
         <div className='mb-12 px-[clamp(24px,6vw,80px)]'>
           <div className='flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-8'>
@@ -131,14 +171,18 @@ export function LandingFeatured() {
               Roteiros que estão<br /><span className='text-brand-accent italic'>ganhando vida agora.</span>
             </h2>
             <div className='land-reveal flex gap-2' data-delay='2'>
-              {[-1, 1].map((dir) => (
-                <button key={dir} onClick={() => scrollBy(dir)} aria-label={dir === -1 ? 'Anterior' : 'Próximo'}
-                  className='flex h-12 w-12 items-center justify-center rounded-full border border-[rgb(52,52,52)] bg-transparent text-[hsl(var(--color-text-primary))] transition-[background_0.2s_ease,border-color_0.2s_ease,transform_0.2s_ease] hover:bg-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))] hover:-translate-y-[2px]'>
-                  <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.6' width={20} height={20}>
-                    <path d={dir === -1 ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6'} strokeLinecap='round' />
-                  </svg>
-                </button>
-              ))}
+              <button ref={prevRef} aria-label='Anterior'
+                className='swiper-nav-prev flex h-12 w-12 items-center justify-center rounded-full border border-[rgb(52,52,52)] bg-transparent text-[hsl(var(--color-text-primary))] transition-[background_0.2s_ease,border-color_0.2s_ease,transform_0.2s_ease] hover:bg-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))] hover:-translate-y-[2px]'>
+                <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.6' width={20} height={20}>
+                  <path d='M15 6l-6 6 6 6' strokeLinecap='round' />
+                </svg>
+              </button>
+              <button ref={nextRef} aria-label='Próximo'
+                className='swiper-nav-next flex h-12 w-12 items-center justify-center rounded-full border border-[rgb(52,52,52)] bg-transparent text-[hsl(var(--color-text-primary))] transition-[background_0.2s_ease,border-color_0.2s_ease,transform_0.2s_ease] hover:bg-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))] hover:-translate-y-[2px]'>
+                <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.6' width={20} height={20}>
+                  <path d='M9 6l6 6-6 6' strokeLinecap='round' />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -146,44 +190,27 @@ export function LandingFeatured() {
 
       <div className='relative'>
         <div className='pointer-events-none absolute inset-y-0 right-0 z-[1] w-[80px] overflow-visible bg-[linear-gradient(to_right,transparent,rgb(14,14,14))]' />
-        <div
-          ref={trackRef}
-          className='flex gap-5 px-[clamp(24px,6vw,80px)] overflow-x-scroll snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3'>
-          {scripts.map((s) => {
-            const indexForStyle = hashStringToIndex(`${s.id}${s.genre ?? ''}`, CARD_COLORS.length)
-            const patternIndex = hashStringToIndex(`${s.genre ?? ''}${s.title ?? ''}`, CARD_PATTERNS.length)
-            const genre = s.genre ?? 'Roteiro'
-            const author = s.author?.name ?? 'Autor'
-            const pages = s.script_files?.[0]?.page_count ?? null
-            const rating = ratingsMap?.[s.id]?.average ?? null
-            const coverUrl = getStorageUrl('avatars', s.cover_path) ?? null
-
-            return (
-              <FeaturedCard
-                key={s.id}
-                id={s.id}
-                genre={genre}
-                title={s.title}
-                author={author}
-                pages={pages}
-                rating={rating}
-                coverUrl={coverUrl}
-                color={CARD_COLORS[indexForStyle]!}
-                pattern={CARD_PATTERNS[patternIndex]!}
-              />
-            )
-          })}
-          <div className='flex flex-[0_0_180px] items-center'>
-            <Link
-              href='/'
-              className='font-display inline-flex items-center gap-2.5 border-b border-[rgb(37,37,37)] pb-1.5 text-[24px] text-[hsl(var(--color-text-primary))] no-underline transition-[color_0.2s_ease,border-color_0.2s_ease] hover:text-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))]'>
-              Ver tudo{' '}
-              <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.4' width={20} height={20}>
-                <path d='M5 12h14M13 6l6 6-6 6' strokeLinecap='round' />
-              </svg>
-            </Link>
-          </div>
-        </div>
+        <Swiper
+          modules={[Navigation]}
+          navigation={{
+            prevEl: prevRef.current,
+            nextEl: nextRef.current,
+          }}
+          onInit={(swiper) => {
+            if (swiper.params.navigation && typeof swiper.params.navigation !== 'boolean') {
+              swiper.params.navigation.prevEl = prevRef.current
+              swiper.params.navigation.nextEl = nextRef.current
+              swiper.navigation.init()
+              swiper.navigation.update()
+            }
+          }}
+          slidesPerView='auto'
+          spaceBetween={20}
+          grabCursor
+          className='!px-[clamp(24px,6vw,80px)] !py-3'
+        >
+          {slides}
+        </Swiper>
       </div>
     </section>
   )
