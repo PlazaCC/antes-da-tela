@@ -32,28 +32,20 @@ export function LandingHowItWorks() {
       onMouseLeave={() => setPaused(false)}>
       <div className='mx-auto max-w-[1280px]'>
         {/* header */}
-        <div className='grid gap-12 mb-12 lg:mb-16 lg:gap-20 lg:grid-cols-[clamp(140px,200px,200px)_1fr]'>
-          <div className='land-reveal'>
-            <span className='inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--color-brand-accent))] before:h-[1px] before:w-[28px] before:shrink-0 before:bg-[hsl(var(--color-brand-accent))] before:content-[""]'>
-              <span className='mr-1 text-[rgb(107,104,96)]'>04 /</span>
-              Como funciona
-            </span>
-          </div>
-          <div>
-            <h2
-              className='font-display land-reveal m-0 mb-6 max-w-[16ch] text-[clamp(36px,5.4vw,80px)] leading-[0.98]'
-              data-delay='1'>
-              Da ideia à indústria,
-              <br />
-              <span className='text-brand-accent italic'>em três passos.</span>
-            </h2>
-            <p
-              className='land-reveal text-text-secondary max-w-[560px] text-[clamp(15px,1.2vw,18px)] leading-[1.65]'
-              data-delay='2'>
-              Um fluxo curto que conecta criação, público e indústria. Sem fricção, sem depender de
-              torcida, com dados reais para sustentar cada conversa.
-            </p>
-          </div>
+        <div className='mb-12 lg:mb-16'>
+          <h2
+            className='font-display land-reveal m-0 mb-6 max-w-[16ch] text-[clamp(36px,5.4vw,80px)] leading-[0.98]'
+            data-delay='1'>
+            Da ideia à indústria,
+            <br />
+            <span className='text-brand-accent italic'>em três passos.</span>
+          </h2>
+          <p
+            className='land-reveal text-text-secondary max-w-[560px] text-[clamp(15px,1.2vw,18px)] leading-[1.65]'
+            data-delay='2'>
+            Um fluxo curto que conecta criação, público e indústria. Sem fricção, sem depender de
+            torcida, com dados reais para sustentar cada conversa.
+          </p>
         </div>
 
         {/* layout */}

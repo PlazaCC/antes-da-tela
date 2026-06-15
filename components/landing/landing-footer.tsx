@@ -86,7 +86,7 @@ export function LandingFooter() {
         {/* bottom bar */}
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <span className='font-mono text-[11px] tracking-[0.06em] text-[rgb(52,52,52)]'>
-            © 2026 Antes da Tela. Feito no Brasil com café e roteiros.
+            © 2026 Antes da Tela
           </span>
           <span className='font-mono text-[10px] tracking-[0.1em] text-[rgb(52,52,52)]'>
             v 0.1 · em construção

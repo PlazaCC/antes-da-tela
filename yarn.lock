@@ -5754,6 +5754,7 @@ __metadata:
     server-only: "npm:^0.0.1"
     sonner: "npm:^2.0.7"
     superjson: "npm:^2.2.6"
+    swiper: "npm:^12.2.0"
     tailwind-merge: "npm:^3.3.0"
     tailwindcss: "npm:^3.4.1"
     tailwindcss-animate: "npm:^1.0.7"
@@ -11269,6 +11270,13 @@ __metadata:
     standardwebhooks: "npm:1.0.0"
     uuid: "npm:^10.0.0"
   checksum: 10c0/11d7885ccdfe0b08f978a45afa9b51c4e57c8c63f86d75139e9803f0aa2563c5f7b8f5a20e280ad2850e31ba7c155f2c4c0ab56a0fa4518ae08a40973dedc51d
+  languageName: node
+  linkType: hard
+
+"swiper@npm:^12.2.0":
+  version: 12.2.0
+  resolution: "swiper@npm:12.2.0"
+  checksum: 10c0/459c9621e170130c0a6874b05e24fefd0411529600a17b2d8afc4987dc2e803ab18d42983081b723423819d464568fdb541b6c3f517e558c60888c644dc4ead1
   languageName: node
   linkType: hard
 
