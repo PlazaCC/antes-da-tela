@@ -1,4 +1,5 @@
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
+import { isValidCpf, stripCpf } from '@/lib/utils/cpf'
 import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
@@ -23,10 +24,18 @@ export const usersRouter = createTRPCRouter({
         name: z.string().min(2).max(100).optional(),
         bio: z.string().max(500).nullable().optional(),
         image: z.string().url().optional(),
+        // Accept masked or raw input; normalize to 11 digits (or null to clear).
+        cpf: z
+          .string()
+          .nullable()
+          .optional()
+          .refine((v) => v === null || v === undefined || v === '' || isValidCpf(v), 'CPF inválido'),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      return ctx.usersService.updateProfile(ctx.user!.id, input)
+      const { cpf, ...rest } = input
+      const normalizedCpf = cpf === undefined ? undefined : cpf ? stripCpf(cpf) : null
+      return ctx.usersService.updateProfile(ctx.user!.id, { ...rest, cpf: normalizedCpf })
     }),
 
   isFollowing: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input, ctx }) => {

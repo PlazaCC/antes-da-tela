@@ -23,6 +23,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { usePublishForm } from "@/lib/hooks/use-publish-form";
+import { useCurrentUser } from "@/lib/hooks/use-current-user";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -69,30 +72,29 @@ export function PublishPage({ scriptId }: PublishPageProps) {
     coverUrl,
     status,
     pdfFile,
-    audioFile,
     coverFile,
     bannerFile,
     pitchDeckFile,
     pdfProgress,
-    audioProgress,
     coverProgress,
     bannerProgress,
     pitchDeckProgress,
     pdfError,
-    audioError,
     coverError,
     bannerError,
     pitchDeckError,
     setPdfFile,
-    setAudioFile,
     setCoverFile,
     setBannerFile,
     setPitchDeckFile,
     setPdfError,
-    setAudioError,
     setCoverError,
     setBannerError,
     setPitchDeckError,
+    audioEntries,
+    addAudioEntry,
+    removeAudioEntry,
+    updateAudioEntry,
     isEditing,
     isLoadingScript,
     uploading,
@@ -106,8 +108,26 @@ export function PublishPage({ scriptId }: PublishPageProps) {
     hasUnsavedChanges,
   } = usePublishForm(scriptId);
 
+  const trpc = useTRPC();
+  const { userId } = useCurrentUser();
+  const { data: profile } = useQuery({
+    ...trpc.users.getProfile.queryOptions({ id: userId ?? "" }),
+    enabled: !!userId,
+  });
+
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [visibility, setVisibility] = useState<ScriptVisibility>("public");
+
+  // Publishing requires the author's CPF and the work's BN registration.
+  const publishBlockers = useMemo(() => {
+    const blockers: string[] = [];
+    if (!profile?.cpf) blockers.push("Preencha o CPF no seu perfil");
+    if (!(formValues.bnRegistration ?? "").trim())
+      blockers.push("Informe o registro na Biblioteca Nacional");
+    return blockers;
+  }, [profile?.cpf, formValues.bnRegistration]);
+
+  const publishBlocked = visibility === "public" && publishBlockers.length > 0;
 
   useEffect(() => {
     if (!status) return;
@@ -193,36 +213,34 @@ export function PublishPage({ scriptId }: PublishPageProps) {
               {step === 2 && (
                 <FileStep
                   pdfFile={pdfFile}
-                  audioFile={audioFile}
                   coverFile={coverFile}
                   bannerFile={bannerFile}
                   pitchDeckFile={pitchDeckFile}
                   pdfStoragePath={formValues.pdfStoragePath ?? ""}
-                  audioStoragePath={formValues.audioStoragePath ?? ""}
                   coverStoragePath={formValues.coverStoragePath ?? ""}
                   bannerStoragePath={formValues.bannerStoragePath ?? ""}
                   pitchDeckStoragePath={formValues.pitchDeckStoragePath ?? ""}
                   setValue={setValue}
                   setPdfFile={setPdfFile}
-                  setAudioFile={setAudioFile}
                   setCoverFile={setCoverFile}
                   setBannerFile={setBannerFile}
                   setPitchDeckFile={setPitchDeckFile}
                   pdfProgress={pdfProgress}
-                  audioProgress={audioProgress}
                   coverProgress={coverProgress}
                   bannerProgress={bannerProgress}
                   pitchDeckProgress={pitchDeckProgress}
                   pdfError={pdfError}
-                  audioError={audioError}
                   coverError={coverError}
                   bannerError={bannerError}
                   pitchDeckError={pitchDeckError}
                   onSetPdfError={setPdfError}
-                  onSetAudioError={setAudioError}
                   onSetCoverError={setCoverError}
                   onSetBannerError={setBannerError}
                   onSetPitchDeckError={setPitchDeckError}
+                  audioEntries={audioEntries}
+                  addAudioEntry={addAudioEntry}
+                  removeAudioEntry={removeAudioEntry}
+                  updateAudioEntry={updateAudioEntry}
                   validatePDF={validatePDF}
                   validateAudio={validateAudio}
                   validateImage={validateImage}
@@ -231,6 +249,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
               {step === 3 && (
                 <GenreStep
                   genre={formValues.genre}
+                  subgenres={formValues.subgenres ?? []}
                   ageRating={formValues.ageRating}
                   setValue={setValue}
                 />
@@ -239,7 +258,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                 <ReviewStep
                   values={formValues}
                   pdfFile={pdfFile}
-                  audioFile={audioFile}
+                  audioEntries={audioEntries}
                   coverPreviewUrl={coverPreviewUrl}
                 />
               )}
@@ -280,7 +299,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                         status: visibility === "public" ? "published" : "draft",
                       })
                     }
-                    disabled={uploading || isPending}
+                    disabled={uploading || isPending || publishBlocked}
                     className="bg-brand-accent text-text-primary hover:bg-brand-accent/90 px-8"
                   >
                     {uploading || isPending
@@ -301,10 +320,17 @@ export function PublishPage({ scriptId }: PublishPageProps) {
               <ScriptPreview
                 title={formValues.title ?? ""}
                 genre={formValues.genre ?? ""}
+                subgenres={formValues.subgenres ?? []}
                 ageRating={formValues.ageRating ?? ""}
                 coverPreviewUrl={coverPreviewUrl}
+                audioEntries={audioEntries}
+                pitchDeckFile={pitchDeckFile}
+                pitchDeckStoragePath={formValues.pitchDeckStoragePath ?? ""}
                 visibility={visibility}
                 onVisibilityChange={setVisibility}
+                publishBlockers={
+                  visibility === "public" ? publishBlockers : []
+                }
               />
             </aside>
           </div>
@@ -338,7 +364,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                 status: visibility === "public" ? "published" : "draft",
               })
             }
-            disabled={uploading || isPending}
+            disabled={uploading || isPending || publishBlocked}
           >
             {uploading || isPending
               ? isEditing

@@ -149,7 +149,7 @@ export function LandingFeatured() {
     items.push(
       <SwiperSlide key='ver-tudo' className='!w-[180px] flex items-center'>
         <Link
-          href='/'
+          href='/feed'
           className='font-display inline-flex items-center gap-2.5 border-b border-[rgb(37,37,37)] pb-1.5 text-[24px] text-[hsl(var(--color-text-primary))] no-underline transition-[color_0.2s_ease,border-color_0.2s_ease] hover:text-[hsl(var(--color-brand-accent))] hover:border-[hsl(var(--color-brand-accent))]'>
           Ver tudo{' '}
           <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.4' width={20} height={20}>

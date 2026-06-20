@@ -1,8 +1,10 @@
 import { notifyError } from "@/lib/feedback";
+import { useAudioEntries, type AudioEntry, type UseAudioEntriesResult } from "@/lib/hooks/use-audio-entries";
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { usePublishFiles } from "@/lib/hooks/use-publish-files";
 import { usePublishUpload } from "@/lib/hooks/use-publish-upload";
 import { usePublishUploadProgress } from "@/lib/hooks/use-publish-upload-progress";
+import type { AudioCategory } from "@/lib/constants/scripts";
 import {
     publishFormSchema,
     type PublishFormValues,
@@ -20,9 +22,10 @@ const INITIAL_PUBLISH_FORM_VALUES: PublishFormValues = {
   logline: "",
   synopsis: "",
   genre: "",
+  subgenres: [],
   ageRating: "",
+  bnRegistration: "",
   pdfStoragePath: "",
-  audioStoragePath: "",
   coverStoragePath: "",
   bannerStoragePath: "",
   pitchDeckStoragePath: "",
@@ -41,29 +44,28 @@ export interface UsePublishFormResult {
   status?: "draft" | "published";
   coverUrl: string | null;
   pdfFile: File | null;
-  audioFile: File | null;
   coverFile: File | null;
   bannerFile: File | null;
   pitchDeckFile: File | null;
   pdfError: string;
-  audioError: string;
   coverError: string;
   bannerError: string;
   pitchDeckError: string;
   setPdfFile: (file: File | null) => void;
-  setAudioFile: (file: File | null) => void;
   setCoverFile: (file: File | null) => void;
   setBannerFile: (file: File | null) => void;
   setPitchDeckFile: (file: File | null) => void;
   setPdfError: (value: string) => void;
-  setAudioError: (value: string) => void;
   setCoverError: (value: string) => void;
   setBannerError: (value: string) => void;
   setPitchDeckError: (value: string) => void;
+  audioEntries: AudioEntry[];
+  addAudioEntry: UseAudioEntriesResult["addEntry"];
+  removeAudioEntry: UseAudioEntriesResult["removeEntry"];
+  updateAudioEntry: UseAudioEntriesResult["updateEntry"];
   isEditing: boolean;
   isLoadingScript: boolean;
   pdfProgress: number;
-  audioProgress: number;
   coverProgress: number;
   bannerProgress: number;
   pitchDeckProgress: number;
@@ -89,6 +91,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
 
   const files = usePublishFiles();
   const progress = usePublishUploadProgress();
+  const audio = useAudioEntries();
 
   const [baselineValues, setBaselineValues] = useState<PublishFormValues>(
     INITIAL_PUBLISH_FORM_VALUES,
@@ -122,6 +125,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
     setStep(1);
     files.resetFiles();
     progress.resetProgress();
+    audio.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, scriptId]);
 
@@ -134,10 +138,12 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
       logline: existingScript.logline || "",
       synopsis: existingScript.synopsis || "",
       genre: (existingScript.genre as PublishFormValues["genre"]) || "",
+      subgenres:
+        (existingScript.subgenres as PublishFormValues["subgenres"]) || [],
       ageRating:
         (existingScript.age_rating as PublishFormValues["ageRating"]) || "",
+      bnRegistration: existingScript.bn_registration || "",
       pdfStoragePath: existingScript.script_files[0]?.storage_path || "",
-      audioStoragePath: existingScript.audio_files[0]?.storage_path || "",
       coverStoragePath: (existingScript.cover_path as string) || "",
       bannerStoragePath: (existingScript.banner_path as string) || "",
       pitchDeckStoragePath: (existingScript.pitch_deck_path as string) || "",
@@ -146,6 +152,18 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
     reset(loadedValues);
     setBaselineValues(loadedValues);
     files.resetFiles();
+    audio.setEntries(
+      (existingScript.audio_files ?? []).map((af) => ({
+        id: af.id,
+        file: null,
+        storagePath: af.storage_path,
+        title: af.title as AudioCategory,
+        description: af.description ?? "",
+        durationSeconds: af.duration_seconds ?? undefined,
+        progress: 0,
+        error: "",
+      })),
+    );
   }, [existingScript, isEditing, reset, userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasFormChanges = useMemo(
@@ -156,7 +174,6 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
       values.genre !== baselineValues.genre ||
       values.ageRating !== baselineValues.ageRating ||
       values.pdfStoragePath !== baselineValues.pdfStoragePath ||
-      values.audioStoragePath !== baselineValues.audioStoragePath ||
       values.coverStoragePath !== baselineValues.coverStoragePath ||
       values.bannerStoragePath !== baselineValues.bannerStoragePath,
     [baselineValues, values],
@@ -165,11 +182,11 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
   const hasFileChanges = useMemo(
     () =>
       Boolean(files.pdfFile) ||
-      Boolean(files.audioFile) ||
       Boolean(files.coverFile) ||
       Boolean(files.bannerFile) ||
-      Boolean(files.pitchDeckFile),
-    [files.pdfFile, files.audioFile, files.coverFile, files.bannerFile, files.pitchDeckFile],
+      Boolean(files.pitchDeckFile) ||
+      audio.entries.some((entry) => Boolean(entry.file)),
+    [files.pdfFile, files.coverFile, files.bannerFile, files.pitchDeckFile, audio.entries],
   );
 
   const hasUnsavedChanges = useMemo(
@@ -194,6 +211,10 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
         toast.success("Roteiro publicado com sucesso!");
         router.push(`/scripts/${script.id}`);
       },
+      onError: (error) => {
+        progress.setUploadError(error.message);
+        toast.error(error.message);
+      },
     }),
   );
 
@@ -202,6 +223,10 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
       onSuccess: (script) => {
         toast.success("Roteiro atualizado com sucesso!");
         router.push(`/scripts/${script.id}`);
+      },
+      onError: (error) => {
+        progress.setUploadError(error.message);
+        toast.error(error.message);
       },
     }),
   );
@@ -215,7 +240,6 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
     const desiredStatus = options?.status;
 
     let pdfPath = values.pdfStoragePath;
-    let audioPath = values.audioStoragePath;
     let coverPath = values.coverStoragePath;
     let bannerPath = values.bannerStoragePath;
     let pitchDeckPath = values.pitchDeckStoragePath;
@@ -250,13 +274,6 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
         progress.setPdfProgress,
         "pdfStoragePath",
       );
-      audioPath = await uploadAsset(
-        files.audioFile,
-        audioPath,
-        "audio",
-        progress.setAudioProgress,
-        "audioStoragePath",
-      );
       coverPath = await uploadAsset(
         files.coverFile,
         coverPath,
@@ -279,6 +296,33 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
         "pitchDeckStoragePath",
       );
 
+      // Upload each new audio file, then build the full desired audio set.
+      const audios: {
+        storagePath: string;
+        title: AudioCategory;
+        description?: string;
+        durationSeconds?: number;
+      }[] = [];
+      for (const entry of audio.entries) {
+        let storagePath = entry.storagePath;
+        if (entry.file) {
+          const sanitized = entry.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const key = `audio/${userId}/${Date.now()}_${sanitized}`;
+          await uploadFile(key, entry.file, (pct) =>
+            audio.updateEntry(entry.id, { progress: pct }),
+          );
+          audio.updateEntry(entry.id, { storagePath: key, file: null });
+          storagePath = key;
+        }
+        if (!storagePath) continue;
+        audios.push({
+          storagePath,
+          title: entry.title,
+          description: entry.description || undefined,
+          durationSeconds: entry.durationSeconds,
+        });
+      }
+
       progress.setUploading(false);
 
       if (isEditing) {
@@ -288,14 +332,16 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
           logline: values.logline || undefined,
           synopsis: values.synopsis || undefined,
           genre: values.genre || undefined,
+          subgenres: values.subgenres,
           ageRating: values.ageRating || undefined,
+          bnRegistration: values.bnRegistration || undefined,
           status: desiredStatus,
           storagePath: pdfPath || undefined,
           fileSize: files.pdfFile?.size,
           coverPath: coverPath === "" ? null : coverPath,
           bannerPath: bannerPath === "" ? null : bannerPath,
           pitchDeckPath: pitchDeckPath === "" ? null : pitchDeckPath,
-          audioStoragePath: audioPath || undefined,
+          audios,
         });
       } else {
         createMutation.mutate({
@@ -303,11 +349,13 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
           logline: values.logline || undefined,
           synopsis: values.synopsis || undefined,
           genre: values.genre || undefined,
+          subgenres: values.subgenres,
           ageRating: values.ageRating || undefined,
+          bnRegistration: values.bnRegistration || undefined,
           status: desiredStatus,
           storagePath: pdfPath!,
           fileSize: files.pdfFile?.size,
-          audioStoragePath: audioPath || undefined,
+          audios,
           coverPath: coverPath || undefined,
           bannerPath: bannerPath || undefined,
           pitchDeckPath: pitchDeckPath || undefined,
@@ -352,29 +400,28 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
     status,
     coverUrl,
     pdfFile: files.pdfFile,
-    audioFile: files.audioFile,
     coverFile: files.coverFile,
     bannerFile: files.bannerFile,
     pitchDeckFile: files.pitchDeckFile,
     pdfError: files.pdfError,
-    audioError: files.audioError,
     coverError: files.coverError,
     bannerError: files.bannerError,
     pitchDeckError: files.pitchDeckError,
     setPdfFile: files.setPdfFile,
-    setAudioFile: files.setAudioFile,
     setCoverFile: files.setCoverFile,
     setBannerFile: files.setBannerFile,
     setPitchDeckFile: files.setPitchDeckFile,
     setPdfError: files.setPdfError,
-    setAudioError: files.setAudioError,
     setCoverError: files.setCoverError,
     setBannerError: files.setBannerError,
     setPitchDeckError: files.setPitchDeckError,
+    audioEntries: audio.entries,
+    addAudioEntry: audio.addEntry,
+    removeAudioEntry: audio.removeEntry,
+    updateAudioEntry: audio.updateEntry,
     isEditing,
     isLoadingScript,
     pdfProgress: progress.pdfProgress,
-    audioProgress: progress.audioProgress,
     coverProgress: progress.coverProgress,
     bannerProgress: progress.bannerProgress,
     pitchDeckProgress: progress.pitchDeckProgress,

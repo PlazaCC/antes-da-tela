@@ -15,6 +15,35 @@ import { TRPCError } from "@trpc/server";
 export class ScriptsService {
   constructor(private supabase: SupabaseClient) {}
 
+  /**
+   * Guards publication (status = 'published'). The author must have a CPF on
+   * their profile and the work must carry a Biblioteca Nacional registration.
+   * Cadastro as draft bypasses this entirely.
+   */
+  private async assertPublishable(authorId: string, bnRegistration: string | null) {
+    if (!bnRegistration || bnRegistration.trim().length === 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "Para publicar, informe o registro da obra na Biblioteca Nacional.",
+      });
+    }
+
+    const { data: author } = await this.supabase
+      .from("users")
+      .select("cpf")
+      .eq("id", authorId)
+      .maybeSingle();
+
+    if (!author?.cpf) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "Para publicar, preencha o CPF no seu perfil.",
+      });
+    }
+  }
+
   async create(
     input: ScriptCreateInput,
     userId: string,
@@ -27,11 +56,11 @@ export class ScriptsService {
       fileSize,
       pageCount,
       ageRating,
+      bnRegistration,
       bannerPath,
       coverPath,
       pitchDeckPath,
-      audioStoragePath,
-      audioDurationSeconds,
+      audios,
       ...scriptData
     } = input;
 
@@ -57,13 +86,20 @@ export class ScriptsService {
       });
     }
 
-    // Insert script row
+    // Publishing requires the author's CPF and the work's BN registration.
+    // Cadastro as draft is always allowed.
     const isDraft = status === "draft";
+    if (!isDraft) {
+      await this.assertPublishable(userId, bnRegistration ?? null);
+    }
+
+    // Insert script row
     const { data: script, error: scriptError } = await this.supabase
       .from("scripts")
       .insert({
         ...scriptData,
         age_rating: ageRating ?? null,
+        bn_registration: bnRegistration ?? null,
         banner_path: bannerPath ?? null,
         cover_path: coverPath ?? null,
         pitch_deck_path: pitchDeckPath ?? null,
@@ -100,12 +136,17 @@ export class ScriptsService {
       });
     }
 
-    if (audioStoragePath) {
-      await this.supabase.from("audio_files").insert({
-        script_id: script.id,
-        storage_path: audioStoragePath,
-        duration_seconds: audioDurationSeconds ?? null,
-      });
+    if (audios && audios.length > 0) {
+      await this.supabase.from("audio_files").insert(
+        audios.map((audio, index) => ({
+          script_id: script.id,
+          storage_path: audio.storagePath,
+          title: audio.title,
+          description: audio.description ?? null,
+          sort_order: index,
+          duration_seconds: audio.durationSeconds ?? null,
+        })),
+      );
     }
 
     return script;
@@ -151,8 +192,7 @@ export class ScriptsService {
       fileSize,
       pageCount,
       pitchDeckPath,
-      audioStoragePath,
-      audioDurationSeconds,
+      audios,
       ...updateData
     } = input;
 
@@ -160,7 +200,7 @@ export class ScriptsService {
     const { data: oldData, error: fetchError } = await this.supabase
       .from("scripts")
       .select(
-        "author_id, cover_path, banner_path, script_files(storage_path), audio_files(storage_path)",
+        "author_id, status, bn_registration, cover_path, banner_path, script_files(storage_path), audio_files(id, storage_path)",
       )
       .eq("id", id)
       .single();
@@ -176,14 +216,32 @@ export class ScriptsService {
       });
     }
 
+    // Enforce publish gating when the resulting status is 'published'.
+    const finalStatus = updateData.status ?? oldData.status;
+    if (finalStatus === "published") {
+      const finalBn =
+        updateData.bnRegistration !== undefined
+          ? updateData.bnRegistration
+          : (oldData.bn_registration as string | null);
+      await this.assertPublishable(authorId, finalBn ?? null);
+    }
+
     // Map camelCase to snake_case for Supabase
     const mappedData: Record<string, unknown> = {};
     if (updateData.title) mappedData.title = updateData.title;
     if (updateData.logline) mappedData.logline = updateData.logline;
     if (updateData.synopsis) mappedData.synopsis = updateData.synopsis;
     if (updateData.genre) mappedData.genre = updateData.genre;
+    if (updateData.subgenres !== undefined)
+      mappedData.subgenres = updateData.subgenres;
     if (updateData.ageRating) mappedData.age_rating = updateData.ageRating;
+    if (updateData.bnRegistration !== undefined)
+      mappedData.bn_registration = updateData.bnRegistration;
     if (updateData.status) mappedData.status = updateData.status;
+    // Stamp published_at the first time a script becomes published.
+    if (finalStatus === "published" && oldData.status !== "published") {
+      mappedData.published_at = new Date().toISOString();
+    }
     if (updateData.bannerPath !== undefined)
       mappedData.banner_path = updateData.bannerPath;
     if (updateData.coverPath !== undefined)
@@ -220,12 +278,17 @@ export class ScriptsService {
       );
     }
 
-    // 2. Audio File
-    const oldAudioPath = oldData.audio_files?.[0]?.storage_path;
-    if (audioStoragePath && oldAudioPath && audioStoragePath !== oldAudioPath) {
-      cleanupPromises.push(
-        this.supabase.storage.from("audio").remove([oldAudioPath]),
-      );
+    // 2. Audio Files (replace-set) — remove storage objects no longer referenced.
+    if (audios !== undefined) {
+      const newAudioPaths = new Set(audios.map((a) => a.storagePath));
+      const removedAudioPaths = (oldData.audio_files ?? [])
+        .map((a) => a.storage_path)
+        .filter((path): path is string => !!path && !newAudioPaths.has(path));
+      if (removedAudioPaths.length > 0) {
+        cleanupPromises.push(
+          this.supabase.storage.from("audio").remove(removedAudioPaths),
+        );
+      }
     }
 
     // 3. Cover Image
@@ -308,45 +371,34 @@ export class ScriptsService {
       }
     }
 
-    if (audioStoragePath) {
-      const { data: existingAudioFile, error: existingAudioFileError } =
-        await this.supabase
-          .from("audio_files")
-          .select("id")
-          .eq("script_id", id)
-          .maybeSingle();
+    // Audio files (replace-set): when `audios` is provided, the desired list
+    // fully replaces the current rows. Omitting `audios` leaves them untouched.
+    if (audios !== undefined) {
+      const { error: deleteError } = await this.supabase
+        .from("audio_files")
+        .delete()
+        .eq("script_id", id);
 
-      if (existingAudioFileError) {
+      if (deleteError) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: `Audio lookup failed: ${existingAudioFileError.message}`,
+          message: `Audio reset failed: ${deleteError.message}`,
         });
       }
 
-      const audioPayload = {
-        storage_path: audioStoragePath,
-        duration_seconds: audioDurationSeconds ?? null,
-      };
-
-      if (existingAudioFile) {
+      if (audios.length > 0) {
         const { error: audioError } = await this.supabase
           .from("audio_files")
-          .update(audioPayload)
-          .eq("script_id", id);
-
-        if (audioError) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: `Audio update failed: ${audioError.message}`,
-          });
-        }
-      } else {
-        const { error: audioError } = await this.supabase
-          .from("audio_files")
-          .insert({
-            script_id: id,
-            ...audioPayload,
-          });
+          .insert(
+            audios.map((audio, index) => ({
+              script_id: id,
+              storage_path: audio.storagePath,
+              title: audio.title,
+              description: audio.description ?? null,
+              sort_order: index,
+              duration_seconds: audio.durationSeconds ?? null,
+            })),
+          );
 
         if (audioError) {
           throw new TRPCError({
@@ -438,9 +490,9 @@ export class ScriptsService {
     const { data: script } = await this.supabase
       .from("scripts")
       .select(
-        "id, title, logline, synopsis, genre, age_rating, is_featured, status, published_at, banner_path, cover_path, pitch_deck_path," +
+        "id, title, logline, synopsis, genre, subgenres, age_rating, bn_registration, is_featured, status, published_at, banner_path, cover_path, pitch_deck_path," +
           " script_files(id, storage_path, page_count, file_size)," +
-          " audio_files(id, storage_path, duration_seconds)," +
+          " audio_files(id, storage_path, title, description, sort_order, duration_seconds)," +
           " author:users!author_id(id, name, image, bio)",
       )
       .eq("id", id)
@@ -467,8 +519,16 @@ export class ScriptsService {
     const coverUrl = getAssetUrl(coverPath, "avatars");
     const bannerUrl = getAssetUrl(bannerPath, "avatars");
 
+    // Order attached audios deterministically by sort_order.
+    const audioFiles = Array.isArray(scriptData.audio_files)
+      ? [...(scriptData.audio_files as Array<{ sort_order?: number }>)].sort(
+          (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+        )
+      : scriptData.audio_files;
+
     return {
       ...scriptData,
+      audio_files: audioFiles,
       author: Array.isArray(scriptData.author)
         ? scriptData.author[0]
         : (scriptData.author ?? null),

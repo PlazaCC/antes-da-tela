@@ -1,47 +1,47 @@
 'use client'
 
 import { notifyError } from '@/lib/feedback'
+import type { AudioEntry } from '@/lib/hooks/use-audio-entries'
 import { getStorageUrl } from '@/lib/utils'
 import { validatePdfStructure } from '@/lib/utils/pdf'
 import type { PublishFormValues } from '@/lib/validators/publish'
-import { FileIcon, Image as ImageIcon, Music } from 'lucide-react'
+import { FileIcon, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useMemo } from 'react'
 import type { UseFormSetValue } from 'react-hook-form'
+import { AudioFields } from './audio-fields'
 import { FileUploadField } from './file-upload-field'
 
 interface FileStepProps {
   pdfFile: File | null
-  audioFile: File | null
   coverFile: File | null
   bannerFile: File | null
   pitchDeckFile: File | null
   pdfStoragePath: string
-  audioStoragePath: string
   coverStoragePath: string
   bannerStoragePath: string
   pitchDeckStoragePath: string
   setValue: UseFormSetValue<PublishFormValues>
   setPdfFile: (file: File | null) => void
-  setAudioFile: (file: File | null) => void
   setCoverFile: (file: File | null) => void
   setBannerFile: (file: File | null) => void
   setPitchDeckFile: (file: File | null) => void
   pdfProgress: number
-  audioProgress: number
   coverProgress: number
   bannerProgress: number
   pitchDeckProgress: number
   pdfError: string
-  audioError: string
   coverError: string
   bannerError: string
   pitchDeckError: string
   onSetPdfError: (error: string) => void
-  onSetAudioError: (error: string) => void
   onSetCoverError: (error: string) => void
   onSetBannerError: (error: string) => void
   onSetPitchDeckError: (error: string) => void
+  audioEntries: AudioEntry[]
+  addAudioEntry: () => void
+  removeAudioEntry: (id: string) => void
+  updateAudioEntry: (id: string, patch: Partial<AudioEntry>) => void
   validatePDF: (file: File) => string | null
   validateAudio: (file: File) => string | null
   validateImage: (file: File) => string | null
@@ -49,36 +49,34 @@ interface FileStepProps {
 
 export function FileStep({
   pdfFile,
-  audioFile,
   coverFile,
   bannerFile,
   pitchDeckFile,
   pdfStoragePath,
-  audioStoragePath,
   coverStoragePath,
   bannerStoragePath,
   pitchDeckStoragePath,
   setValue,
   setPdfFile,
-  setAudioFile,
   setCoverFile,
   setBannerFile,
   setPitchDeckFile,
   pdfProgress,
-  audioProgress,
   coverProgress,
   bannerProgress,
   pitchDeckProgress,
   pdfError,
-  audioError,
   coverError,
   bannerError,
   pitchDeckError,
   onSetPdfError,
-  onSetAudioError,
   onSetCoverError,
   onSetBannerError,
   onSetPitchDeckError,
+  audioEntries,
+  addAudioEntry,
+  removeAudioEntry,
+  updateAudioEntry,
   validatePDF,
   validateAudio,
   validateImage,
@@ -187,40 +185,12 @@ export function FileStep({
         }
       />
 
-      <FileUploadField
-        label='Pilotagem / Audio Drama'
-        labelInfo='Opcional'
-        accept={{ 'audio/mpeg': ['.mp3'], 'audio/wav': ['.wav'], 'audio/x-wav': ['.wav'] }}
-        file={audioFile}
-        error={audioError}
-        progress={audioProgress}
-        onFileReject={() => {
-          const msg = 'Apenas MP3 ou WAV são aceitos'
-          onSetAudioError(msg)
-          notifyError(msg)
-        }}
-        onFileDrop={(file) => {
-          const error = validateAudio(file)
-          if (error) {
-            onSetAudioError(error)
-            notifyError(error)
-          } else {
-            setAudioFile(file)
-            onSetAudioError('')
-          }
-        }}
-        onRemove={() => {
-          setAudioFile(null)
-          setValue('audioStoragePath', '')
-        }}
-        infoText='Limite: 20MB. MP3 ou WAV.'
-        showExisting={!audioFile && !!audioStoragePath}
-        existingFileName={renderExistingFileName(audioStoragePath)}
-        preview={
-          <div className='w-10 h-10 rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0'>
-            <Music size={20} />
-          </div>
-        }
+      <AudioFields
+        entries={audioEntries}
+        addEntry={addAudioEntry}
+        removeEntry={removeAudioEntry}
+        updateEntry={updateAudioEntry}
+        validateAudio={validateAudio}
       />
 
       <FileUploadField

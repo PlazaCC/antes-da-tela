@@ -1,19 +1,32 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 
-const LINKS = [
+const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
   {
     heading: 'Plataforma',
-    items: ['Como funciona', 'Em destaque', 'Para criadores', 'Para produtores'],
+    items: [
+      { label: 'Como funciona', href: '/#como-funciona' },
+      { label: 'Em destaque', href: '/feed' },
+      { label: 'FAQ', href: '/faq' },
+    ],
   },
   {
     heading: 'Empresa',
-    items: ['Sobre', 'Blog', 'Imprensa', 'Contato'],
+    items: [
+      { label: 'Sobre', href: '#' },
+      { label: 'Blog', href: '#' },
+      { label: 'Contato', href: '#' },
+    ],
   },
   {
     heading: 'Legal',
-    items: ['Termos de uso', 'Privacidade', 'Direitos autorais'],
+    items: [
+      { label: 'Termos de uso', href: '/termos' },
+      { label: 'Privacidade', href: '/privacidade' },
+      { label: 'LGPD', href: '/lgpd' },
+    ],
   },
 ]
 
@@ -60,12 +73,20 @@ export function LandingFooter() {
               </span>
               <ul className='flex flex-col gap-2.5 list-none m-0 p-0'>
                 {col.items.map((item) => (
-                  <li key={item}>
-                    <a
-                      href='#'
-                      className='text-[14px] text-[rgb(107,104,96)] no-underline transition-[color_0.2s_ease] hover:text-[hsl(var(--color-text-primary))]'>
-                      {item}
-                    </a>
+                  <li key={item.label}>
+                    {item.href.startsWith('/') ? (
+                      <Link
+                        href={item.href}
+                        className='text-[14px] text-[rgb(107,104,96)] no-underline transition-[color_0.2s_ease] hover:text-[hsl(var(--color-text-primary))]'>
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={item.href}
+                        className='text-[14px] text-[rgb(107,104,96)] no-underline transition-[color_0.2s_ease] hover:text-[hsl(var(--color-text-primary))]'>
+                        {item.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

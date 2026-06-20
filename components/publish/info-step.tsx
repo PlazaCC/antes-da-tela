@@ -67,6 +67,19 @@ export function InfoStep({
           className="w-full rounded-sm border border-border-subtle bg-elevated px-3 py-2 text-base text-text-primary focus:outline-none focus:ring-1 focus:ring-brand-accent placeholder:text-text-muted transition-all resize-none"
         />
       </FormField>
+
+      <FormField
+        label="Registro na Biblioteca Nacional"
+        labelInfo="Necessário para publicar"
+        helperText="Número de registro da obra. Você pode cadastrar sem ele, mas precisa informá-lo para publicar."
+        error={errors.bnRegistration?.message as string | undefined}
+      >
+        <Input
+          {...register("bnRegistration")}
+          placeholder="Ex: 123.456 / Livro 789, Folha 10"
+          className="bg-elevated text-base min-h-[44px]"
+        />
+      </FormField>
     </div>
   );
 }

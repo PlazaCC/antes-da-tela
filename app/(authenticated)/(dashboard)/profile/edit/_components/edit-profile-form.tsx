@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAvatarUpload } from '@/lib/hooks/use-avatar-upload'
 import { useProfileForm } from '@/lib/hooks/use-profile-form'
+import { formatCpf, stripCpf } from '@/lib/utils/cpf'
 import { useRouter } from 'next/navigation'
 import { useRef } from 'react'
 
@@ -25,9 +26,13 @@ export function EditProfileForm({ userId }: EditProfileFormProps) {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
+    watch,
     isPending,
     submitProfile,
   } = useProfileForm(userId)
+
+  const cpfValue = watch('cpf') ?? ''
 
   const onSubmit = submitProfile
 
@@ -85,6 +90,21 @@ export function EditProfileForm({ userId }: EditProfileFormProps) {
               placeholder='Uma bio curta (opcional)'
               rows={3}
               className='w-full rounded-sm border border-border-subtle bg-elevated px-3 py-2 font-sans text-[13px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand-accent resize-none transition-colors'
+            />
+          </FormField>
+
+          <FormField
+            label='CPF'
+            error={errors.cpf?.message as string | undefined}
+            helperText='Necessário para publicar roteiros.'>
+            <Input
+              value={formatCpf(cpfValue)}
+              onChange={(e) =>
+                setValue('cpf', stripCpf(e.target.value), { shouldValidate: true, shouldDirty: true })
+              }
+              inputMode='numeric'
+              placeholder='000.000.000-00'
+              className='bg-elevated border-border-subtle focus:border-brand-accent transition-colors'
             />
           </FormField>
         </div>

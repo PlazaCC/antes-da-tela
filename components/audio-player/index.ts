@@ -1,1 +1,1 @@
-export { AudioPlayer } from './audio-player'
+export { AudioPlayer, type AudioTrack } from './audio-player'

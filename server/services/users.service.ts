@@ -26,7 +26,7 @@ export class UsersService {
   async getProfile(id: string): Promise<UserProfile | null> {
     const { data: user } = await this.supabase
       .from('users')
-      .select('id, name, image, bio, created_at')
+      .select('id, name, image, bio, cpf, created_at')
       .eq('id', id)
       .maybeSingle()
     if (!user) return null
@@ -35,11 +35,15 @@ export class UsersService {
       name: user.name,
       image: user.image,
       bio: user.bio,
+      cpf: user.cpf,
       createdAt: user.created_at,
     } as UserProfile
   }
 
-  async updateProfile(id: string, updates: { name?: string; bio?: string | null; image?: string }) {
+  async updateProfile(
+    id: string,
+    updates: { name?: string; bio?: string | null; image?: string; cpf?: string | null },
+  ) {
     const { data: updated, error } = await this.supabase
       .from('users')
       .update(updates)
@@ -48,6 +52,10 @@ export class UsersService {
       .single()
 
     if (error) {
+      // Unique violation on the cpf constraint — surface a friendly message.
+      if (error.code === '23505') {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'CPF já cadastrado.' })
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: error.message,
@@ -60,6 +68,7 @@ export class UsersService {
       name: updated.name,
       image: updated.image,
       bio: updated.bio,
+      cpf: updated.cpf,
       createdAt: updated.created_at,
     } as UserProfile
   }

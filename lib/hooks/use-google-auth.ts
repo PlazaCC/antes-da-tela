@@ -13,9 +13,10 @@ export function useGoogleAuth() {
     try {
       setIsLoading(true)
       const supabase = createClient()
-      const next = searchParams.get('next') ?? '/'
+      // No explicit `next` → the callback route defaults to /feed (the app home).
+      const next = searchParams.get('next')
       const callbackUrl = new URL('/auth/callback', window.location.origin)
-      if (next !== '/') callbackUrl.searchParams.set('next', next)
+      if (next) callbackUrl.searchParams.set('next', next)
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: callbackUrl.toString() },

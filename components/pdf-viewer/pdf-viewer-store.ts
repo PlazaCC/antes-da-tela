@@ -1,23 +1,19 @@
 import { create } from 'zustand'
 
+/**
+ * Global store holding only the page the reader is currently viewing.
+ *
+ * Page-scoped comments (CommentsSidebar) read this. The PDF viewer keeps its
+ * own local state for zoom/total/loading and only the main reader instance
+ * mirrors its visible page here (via the `syncToStore` prop) — the pitch-deck
+ * modal must not move the comments' page.
+ */
 interface PDFViewerState {
   currentPage: number
-  totalPages: number
-  zoom: number
-  isLoading: boolean
   setCurrentPage: (page: number) => void
-  setTotalPages: (total: number) => void
-  setZoom: (zoom: number) => void
-  setLoading: (loading: boolean) => void
 }
 
 export const usePDFViewerStore = create<PDFViewerState>((set) => ({
   currentPage: 1,
-  totalPages: 0,
-  zoom: 1.0,
-  isLoading: false,
   setCurrentPage: (page) => set({ currentPage: page }),
-  setTotalPages: (total) => set({ totalPages: total }),
-  setZoom: (zoom) => set({ zoom }),
-  setLoading: (loading) => set({ isLoading: loading }),
 }))

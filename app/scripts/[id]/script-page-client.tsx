@@ -1,12 +1,11 @@
 'use client'
 
-import { AudioPlayer } from '@/components/audio-player'
+import { AudioPlayer, type AudioTrack } from '@/components/audio-player'
 import { CommentsSheet } from '@/components/comments/comments-sheet'
 import { PDFViewer } from '@/components/pdf-viewer'
+import { PdfFullscreenDialog } from '@/components/pdf-viewer/pdf-fullscreen-dialog'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
-import { BnCalloutCard } from '@/components/script-page/bn-callout-card'
-import { ScriptPageMetadata } from '@/components/script-page/script-page-metadata'
-import { SynopsisSpoiler } from '@/components/synopsis/SynopsisSpoiler'
+import { ScriptReadingBar } from '@/components/script-page/script-reading-bar'
 import type { TagVariant } from '@/components/tag/tag'
 import {
   AlertDialog,
@@ -18,20 +17,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { useScriptRating } from '@/lib/hooks/use-script-rating'
 import { cn } from '@/lib/utils'
 import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
-import { FileText, Film } from 'lucide-react'
-import Image from 'next/image'
+import { Film } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -49,14 +41,14 @@ const GENRE_VARIANT_MAP: Record<string, TagVariant> = {
 interface Props {
   script: ScriptDetail
   pdfUrl: string | null
-  audioUrl: string | null
+  audios: AudioTrack[]
   bannerUrl: string | null
   coverUrl: string | null
   pitchDeckUrl: string | null
   currentUserId: string | null
 }
 
-export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl, pitchDeckUrl, currentUserId }: Props) {
+export function ScriptPageClient({ script, pdfUrl, audios, coverUrl, pitchDeckUrl, currentUserId }: Props) {
   const trpc = useTRPC()
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -110,18 +102,19 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
 
   const genreVariant: TagVariant = GENRE_VARIANT_MAP[script.genre ?? ''] ?? 'default'
   const isOwner = !!currentUserId && currentUserId === script.author?.id
+  const hasAudio = audios.length > 0
 
   const handleDeleteTrigger = () => setDeleteModalOpen(true)
 
   return (
     <div
-      className={cn('bg-bg-base flex flex-col min-h-dvh', audioUrl && 'pb-[calc(54px+env(safe-area-inset-bottom))]')}>
+      className={cn('bg-bg-base flex flex-col min-h-dvh', hasAudio && 'pb-[calc(54px+env(safe-area-inset-bottom))]')}>
       {/* Breadcrumbs */}
       <div className='flex items-center gap-2 px-5 py-3 border-b border-border-subtle bg-bg-base'>
         <Link
-          href='/'
+          href='/feed'
           className='font-mono text-label-mono-small text-text-muted hover:text-text-primary transition-colors'>
-          ← Home
+          ← Início
         </Link>
         <span className='text-text-muted font-mono text-label-mono-small'>/</span>
         <span className='font-mono text-label-mono-small text-text-secondary truncate max-w-[140px] md:max-w-[280px]'>
@@ -129,68 +122,28 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
         </span>
       </div>
 
-      {/* Hero Banner — only rendered when bannerUrl exists */}
-      {bannerUrl && (
-        <div className='relative w-full h-[200px] md:h-[300px] lg:h-[420px] overflow-hidden bg-elevated'>
-          <Image src={bannerUrl} alt={script.title} fill priority className='object-cover object-center' />
-          <div className='absolute inset-0 bg-gradient-to-t from-bg-base via-bg-base/40 to-transparent' />
-          <div className='absolute bottom-0 left-0 right-0 px-5 md:px-12 pb-8 max-w-6xl mx-auto w-full'>
-            <h1 className='font-display text-heading-2 md:text-heading-1 text-text-primary leading-tight line-clamp-2'>
-              {script.title}
-            </h1>
-            {script.logline && (
-              <p className='text-body-default text-text-secondary mt-2 line-clamp-2 max-w-2xl'>{script.logline}</p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Slim reading header — focus stays on the script + comments */}
+      <ScriptReadingBar
+        scriptId={script.id}
+        title={script.title}
+        author={script.author}
+        genre={script.genre}
+        genreVariant={genreVariant}
+        subgenres={script.subgenres}
+        ageRating={script.age_rating}
+        isOwner={isOwner}
+        currentUserId={currentUserId}
+        ratingData={ratingData}
+        userRating={userRating}
+        isRatingPending={isRatingPending}
+        onRate={rate}
+        onDelete={handleDeleteTrigger}
+        pitchDeckUrl={pitchDeckUrl}
+        onOpenPitchDeck={() => setPitchDeckOpen(true)}
+      />
 
-      {/* Script metadata */}
-      <div className='max-w-6xl mx-auto w-full px-5 py-6'>
-        <ScriptPageMetadata
-          script={script}
-          bannerUrl={bannerUrl}
-          coverUrl={coverUrl}
-          genreVariant={genreVariant}
-          isOwner={isOwner}
-          currentUserId={currentUserId}
-          ratingData={ratingData}
-          userRating={userRating}
-          isRatingPending={isRatingPending}
-          onRate={rate}
-          onDelete={handleDeleteTrigger}
-        />
-      </div>
-
-      {/* BN callout — visible only to the script owner */}
-      {isOwner && (
-        <div className='max-w-6xl mx-auto w-full px-5 pb-4'>
-          <BnCalloutCard />
-        </div>
-      )}
-
-      {/* Pitch Deck button */}
-      {pitchDeckUrl && (
-        <div className='max-w-6xl mx-auto w-full px-5 pb-4'>
-          <button
-            onClick={() => setPitchDeckOpen(true)}
-            className='inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-border-subtle bg-surface hover:bg-elevated transition-colors text-body-small text-text-secondary hover:text-text-primary'>
-            <FileText size={15} className='text-brand-accent' />
-            Ver Pitch Deck
-          </button>
-        </div>
-      )}
-
-      {/* Synopsis — visible above the reader when PDF is present */}
-      {pdfUrl && script.synopsis && (
-        <div className='max-w-6xl mx-auto w-full px-5 pb-6 border-t border-border-subtle pt-6'>
-          <h3 className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider mb-3'>Sinopse</h3>
-          <SynopsisSpoiler text={script.synopsis} collapsedHeight={144} />
-        </div>
-      )}
-
-      {/* Audio player — fixed bottom bar on all viewports (Spotify-style) */}
-      {audioUrl && <AudioPlayer src={audioUrl} title={script.title} />}
+      {/* Audio player — fixed bottom bar with track selector (Spotify-style) */}
+      {hasAudio && <AudioPlayer audios={audios} title={script.title} />}
 
       {/* Reader — 25/50/25 grid; left col reserved, center PDF, right comments */}
       {pdfUrl ? (
@@ -200,14 +153,14 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
 
           {/* PDF column — center 50% */}
           <div className='flex-1 min-w-0 lg:w-1/2 min-h-[60vh]'>
-            <PDFViewer url={pdfUrl} />
+            <PDFViewer url={pdfUrl} syncToStore />
           </div>
 
           {/* Comments sidebar — right 25%, fills viewport below navbar */}
           <div
             className={cn(
               'hidden lg:flex flex-col lg:w-1/4 border-l border-border-subtle sticky top-14 self-start',
-              audioUrl ? 'h-[calc(100vh-3.5rem-54px)]' : 'h-[calc(100vh-3.5rem)]',
+              hasAudio ? 'h-[calc(100vh-3.5rem-54px)]' : 'h-[calc(100vh-3.5rem)]',
             )}>
             <CommentsSidebar
               scriptId={script.id}
@@ -248,18 +201,14 @@ export function ScriptPageClient({ script, pdfUrl, audioUrl, bannerUrl, coverUrl
         </div>
       )}
 
-      {/* Pitch Deck modal */}
+      {/* Pitch Deck — full-screen modal reader */}
       {pitchDeckUrl && (
-        <Dialog open={pitchDeckOpen} onOpenChange={setPitchDeckOpen}>
-          <DialogContent className='!max-w-5xl !w-full aspect-video flex flex-col p-0 gap-0 overflow-hidden'>
-            <DialogHeader className='px-5 py-4 border-b border-border-subtle shrink-0'>
-              <DialogTitle className='font-mono text-label-mono-default text-text-primary'>
-                Pitch Deck — {script.title}
-              </DialogTitle>
-            </DialogHeader>
-              <PDFViewer url={pitchDeckUrl} />
-          </DialogContent>
-        </Dialog>
+        <PdfFullscreenDialog
+          open={pitchDeckOpen}
+          onOpenChange={setPitchDeckOpen}
+          url={pitchDeckUrl}
+          title={`Pitch Deck — ${script.title}`}
+        />
       )}
 
       {/* Delete confirmation */}

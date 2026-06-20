@@ -16,7 +16,7 @@ export function NavBar() {
       <div className='px-3 md:px-4 py-2 md:py-0 h-full flex items-center justify-between gap-1'>
         {/* Left: Logo + Nav links */}
         <div className='flex items-center gap-4 md:gap-10'>
-          <Link href='/' className='shrink-0'>
+          <Link href='/feed' className='shrink-0'>
             <Image
               src='/assets/logo.svg'
               alt='Antes da Tela'
