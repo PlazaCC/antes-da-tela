@@ -1,5 +1,6 @@
 "use client";
 
+import { BnDisclaimerCallout } from "@/components/publish/bn-disclaimer-callout";
 import { FormField } from "@/components/shared/form-field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -80,6 +81,8 @@ export function InfoStep({
           className="bg-elevated text-base min-h-[44px]"
         />
       </FormField>
+
+      <BnDisclaimerCallout />
     </div>
   );
 }

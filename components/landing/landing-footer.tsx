@@ -1,7 +1,13 @@
 'use client'
 
+import { LEGAL_TABS } from '@/content/legal/legal-tabs'
 import Image from 'next/image'
 import Link from 'next/link'
+
+const LEGAL_LINKS = Object.values(LEGAL_TABS).map((tab) => ({
+  label: tab.navLabel,
+  href: `/legal/${tab.slug}`,
+}))
 
 const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
   {
@@ -9,7 +15,6 @@ const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
     items: [
       { label: 'Como funciona', href: '/#como-funciona' },
       { label: 'Em destaque', href: '/feed' },
-      { label: 'FAQ', href: '/faq' },
     ],
   },
   {
@@ -22,11 +27,7 @@ const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
   },
   {
     heading: 'Legal',
-    items: [
-      { label: 'Termos de uso', href: '/termos' },
-      { label: 'Privacidade', href: '/privacidade' },
-      { label: 'LGPD', href: '/lgpd' },
-    ],
+    items: LEGAL_LINKS,
   },
 ]
 

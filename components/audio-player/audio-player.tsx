@@ -57,7 +57,7 @@ export function AudioPlayer({ audios, title }: Props) {
 
   return (
     <div
-      className='fixed bottom-0 left-0 right-0 z-30 bg-surface/95 backdrop-blur-md border-t border-border-subtle'
+      className='w-full shrink-0 bg-surface/95 backdrop-blur-md border-t border-border-subtle'
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}>

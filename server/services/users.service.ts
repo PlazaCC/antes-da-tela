@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { UserProfile, ProfileStats } from '@/lib/types'
+import type { FollowUser, UserProfile, ProfileStats } from '@/lib/types'
 
 export class UsersService {
   constructor(private supabase: SupabaseClient) {}
@@ -124,5 +124,41 @@ export class UsersService {
       scripts: stats.scriptsCount,
       avgRating: stats.averageRating === 0 ? null : stats.averageRating,
     }
+  }
+
+  /** Users who follow `userId`. */
+  async listFollowers(userId: string): Promise<FollowUser[]> {
+    const { data, error } = await this.supabase
+      .from('user_follows')
+      .select('created_at, follower:users!follower_id(id, name, image, bio)')
+      .eq('followee_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+
+    return (data ?? [])
+      .map((row) => {
+        const r = row as Record<string, unknown> & { follower?: unknown }
+        return Array.isArray(r.follower) ? r.follower[0] : r.follower
+      })
+      .filter(Boolean) as FollowUser[]
+  }
+
+  /** Users that `userId` follows. */
+  async listFollowing(userId: string): Promise<FollowUser[]> {
+    const { data, error } = await this.supabase
+      .from('user_follows')
+      .select('created_at, followee:users!followee_id(id, name, image, bio)')
+      .eq('follower_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+
+    return (data ?? [])
+      .map((row) => {
+        const r = row as Record<string, unknown> & { followee?: unknown }
+        return Array.isArray(r.followee) ? r.followee[0] : r.followee
+      })
+      .filter(Boolean) as FollowUser[]
   }
 }

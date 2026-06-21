@@ -5,3 +5,9 @@ export const PDFViewer = dynamic(() => import('./pdf-viewer').then((m) => m.PDFV
   ssr: false,
   loading: () => <div className='animate-pulse rounded-sm bg-elevated h-[600px]' />,
 })
+
+// Composable pieces — use these to place controls/canvas wherever you want:
+//   <PdfViewerProvider url={url}><PdfControls /><PdfCanvas /></PdfViewerProvider>
+export { PdfViewerProvider, usePdfViewer } from './pdf-viewer-context'
+export { PdfControls } from './pdf-controls'
+export { PdfCanvas } from './pdf-canvas'

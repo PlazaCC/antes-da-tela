@@ -117,6 +117,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
 
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [visibility, setVisibility] = useState<ScriptVisibility>("public");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Publishing requires the author's CPF and the work's BN registration.
   const publishBlockers = useMemo(() => {
@@ -128,6 +129,8 @@ export function PublishPage({ scriptId }: PublishPageProps) {
   }, [profile?.cpf, formValues.bnRegistration]);
 
   const publishBlocked = visibility === "public" && publishBlockers.length > 0;
+  // Public content additionally requires accepting the platform's policies.
+  const termsBlocked = visibility === "public" && !termsAccepted;
 
   useEffect(() => {
     if (!status) return;
@@ -260,6 +263,8 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                   pdfFile={pdfFile}
                   audioEntries={audioEntries}
                   coverPreviewUrl={coverPreviewUrl}
+                  termsAccepted={termsAccepted}
+                  onTermsAcceptedChange={setTermsAccepted}
                 />
               )}
 
@@ -299,7 +304,9 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                         status: visibility === "public" ? "published" : "draft",
                       })
                     }
-                    disabled={uploading || isPending || publishBlocked}
+                    disabled={
+                      uploading || isPending || publishBlocked || termsBlocked
+                    }
                     className="bg-brand-accent text-text-primary hover:bg-brand-accent/90 px-8"
                   >
                     {uploading || isPending
@@ -364,7 +371,9 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                 status: visibility === "public" ? "published" : "draft",
               })
             }
-            disabled={uploading || isPending || publishBlocked}
+            disabled={
+              uploading || isPending || publishBlocked || termsBlocked
+            }
           >
             {uploading || isPending
               ? isEditing

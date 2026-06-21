@@ -12,6 +12,7 @@ import { LandingPillars } from '@/components/landing/landing-pillars'
 import { createClient } from '@/lib/supabase/server'
 import { HydrateClient, getQueryClient, trpc } from '@/trpc/server'
 import type { Metadata } from 'next'
+import './landing/landing.css'
 
 export const metadata: Metadata = {
   title: {

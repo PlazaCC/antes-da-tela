@@ -1,6 +1,7 @@
 "use client";
 
 import { BnDisclaimerCallout } from "@/components/publish/bn-disclaimer-callout";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatAgeRating } from "@/lib/constants/scripts";
 import type { AudioEntry } from "@/lib/hooks/use-audio-entries";
 import type { PublishFormValues } from "@/lib/validators/publish";
@@ -12,6 +13,8 @@ interface ReviewStepProps {
   pdfFile: File | null;
   audioEntries: AudioEntry[];
   coverPreviewUrl?: string | null;
+  termsAccepted: boolean;
+  onTermsAcceptedChange: (accepted: boolean) => void;
 }
 
 export function ReviewStep({
@@ -19,6 +22,8 @@ export function ReviewStep({
   pdfFile,
   audioEntries,
   coverPreviewUrl,
+  termsAccepted,
+  onTermsAcceptedChange,
 }: ReviewStepProps) {
   const readyAudios = audioEntries.filter((entry) => entry.file || entry.storagePath);
   return (
@@ -135,6 +140,32 @@ export function ReviewStep({
       </div>
 
       <BnDisclaimerCallout />
+
+      {/* Terms acceptance — required to publish the content publicly */}
+      <div className="flex items-start gap-3 p-4 bg-elevated border border-border-subtle rounded-sm">
+        <Checkbox
+          id="terms-accept"
+          checked={termsAccepted}
+          onCheckedChange={(checked) => onTermsAcceptedChange(checked === true)}
+          className="mt-0.5"
+        />
+        <label
+          htmlFor="terms-accept"
+          className="text-body-small text-text-secondary leading-relaxed cursor-pointer"
+        >
+          Li e concordo com a{" "}
+          <a
+            href="/legal/publicacao-e-confidencialidade"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-brand-accent underline underline-offset-2 hover:text-brand-accent/80"
+          >
+            Política de Publicação, Propriedade Intelectual e Confidencialidade
+          </a>{" "}
+          e autorizo a disponibilização pública deste conteúdo na plataforma.
+        </label>
+      </div>
     </div>
   );
 }

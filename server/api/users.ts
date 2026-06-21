@@ -56,4 +56,12 @@ export const usersRouter = createTRPCRouter({
   getProfileStats: publicProcedure.input(z.object({ userId: z.string().uuid() })).query(async ({ input, ctx }) => {
     return ctx.usersService.getProfileStats(input.userId)
   }),
+
+  listFollowers: publicProcedure.input(z.object({ userId: z.string().uuid() })).query(async ({ input, ctx }) => {
+    return ctx.usersService.listFollowers(input.userId)
+  }),
+
+  listFollowing: publicProcedure.input(z.object({ userId: z.string().uuid() })).query(async ({ input, ctx }) => {
+    return ctx.usersService.listFollowing(input.userId)
+  }),
 })

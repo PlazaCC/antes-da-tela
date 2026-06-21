@@ -2,11 +2,14 @@
 
 import { AudioPlayer, type AudioTrack } from '@/components/audio-player'
 import { CommentsSheet } from '@/components/comments/comments-sheet'
-import { PDFViewer } from '@/components/pdf-viewer'
-import { PdfFullscreenDialog } from '@/components/pdf-viewer/pdf-fullscreen-dialog'
+import {
+  PdfCanvas,
+  PdfControls,
+  PdfViewerProvider,
+} from '@/components/pdf-viewer'
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
-import { ScriptReadingBar } from '@/components/script-page/script-reading-bar'
-import type { TagVariant } from '@/components/tag/tag'
+import { PdfFullscreenDialog } from '@/components/pdf-viewer/pdf-fullscreen-dialog'
+import { ScriptPageSubHeader } from '@/components/script-page/script-page-sub-header'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,26 +20,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { useScriptRating } from '@/lib/hooks/use-script-rating'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
-import { Film } from 'lucide-react'
-import Link from 'next/link'
+import { Film, MessageCircleMore } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
 type RouterOutput = inferRouterOutputs<AppRouter>
 type ScriptDetail = RouterOutput['scripts']['getById']
-
-const GENRE_VARIANT_MAP: Record<string, TagVariant> = {
-  drama: 'drama',
-  thriller: 'thriller',
-  comédia: 'comédia',
-}
 
 interface Props {
   script: ScriptDetail
@@ -48,24 +44,20 @@ interface Props {
   currentUserId: string | null
 }
 
-export function ScriptPageClient({ script, pdfUrl, audios, coverUrl, pitchDeckUrl, currentUserId }: Props) {
+export function ScriptPageClient({
+  script,
+  pdfUrl,
+  audios,
+  pitchDeckUrl,
+  currentUserId,
+}: Props) {
   const trpc = useTRPC()
   const router = useRouter()
   const queryClient = useQueryClient()
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [pitchDeckOpen, setPitchDeckOpen] = useState(false)
-
-  const averageOpts = trpc.ratings.getAverage.queryOptions({ scriptId: script?.id ?? '' })
-  const userRatingOpts = trpc.ratings.getUserRating.queryOptions({
-    scriptId: script?.id ?? '',
-    userId: currentUserId ?? '',
-  })
-
-  const { data: ratingData } = useQuery({ ...averageOpts, enabled: !!script })
-  const { data: userRating } = useQuery({ ...userRatingOpts, enabled: !!script && !!currentUserId })
-
-  const { rate, isPending: isRatingPending } = useScriptRating(script?.id ?? '', currentUserId)
+  const [commentsOpen, setCommentsOpen] = useState(true)
 
   const deleteMutation = useMutation(
     trpc.scripts.delete.mutationOptions({
@@ -73,17 +65,20 @@ export function ScriptPageClient({ script, pdfUrl, audios, coverUrl, pitchDeckUr
         toast.success('Roteiro excluído com sucesso')
         queryClient.invalidateQueries(trpc.scripts.listFeatured.queryFilter())
         queryClient.invalidateQueries(trpc.scripts.listRecent.queryFilter())
-        queryClient.invalidateQueries(trpc.scripts.listByAuthor.queryFilter({ authorId: currentUserId ?? '' }))
+        queryClient.invalidateQueries(
+          trpc.scripts.listByAuthor.queryFilter({
+            authorId: currentUserId ?? '',
+          })
+        )
         router.push('/profile/dashboard')
       },
-      onError: (error) => {
-        toast.error('Erro ao excluir roteiro: ' + error.message)
-      },
+      onError: (error) =>
+        toast.error('Erro ao excluir roteiro: ' + error.message),
       onSettled: () => {
         setIsDeleting(false)
         setDeleteModalOpen(false)
       },
-    }),
+    })
   )
 
   const handleDelete = () => {
@@ -94,112 +89,100 @@ export function ScriptPageClient({ script, pdfUrl, audios, coverUrl, pitchDeckUr
 
   if (!script) {
     return (
-      <div className='min-h-dvh bg-bg-base flex items-center justify-center'>
-        <p className='text-state-error font-mono text-label-mono-default'>Roteiro não encontrado.</p>
+      <div className="flex min-h-dvh items-center justify-center bg-bg-base">
+        <p className="font-mono text-label-mono-default text-state-error">
+          Roteiro não encontrado.
+        </p>
       </div>
     )
   }
 
-  const genreVariant: TagVariant = GENRE_VARIANT_MAP[script.genre ?? ''] ?? 'default'
   const isOwner = !!currentUserId && currentUserId === script.author?.id
   const hasAudio = audios.length > 0
 
-  const handleDeleteTrigger = () => setDeleteModalOpen(true)
+  const subHeaderProps = {
+    scriptId: script.id,
+    title: script.title,
+    isOwner,
+    hasPitchDeck: !!pitchDeckUrl,
+    isDeleting,
+    onOpenPitchDeck: () => setPitchDeckOpen(true),
+    onDelete: () => setDeleteModalOpen(true),
+  }
 
   return (
-    <div
-      className={cn('bg-bg-base flex flex-col min-h-dvh', hasAudio && 'pb-[calc(54px+env(safe-area-inset-bottom))]')}>
-      {/* Breadcrumbs */}
-      <div className='flex items-center gap-2 px-5 py-3 border-b border-border-subtle bg-bg-base'>
-        <Link
-          href='/feed'
-          className='font-mono text-label-mono-small text-text-muted hover:text-text-primary transition-colors'>
-          ← Início
-        </Link>
-        <span className='text-text-muted font-mono text-label-mono-small'>/</span>
-        <span className='font-mono text-label-mono-small text-text-secondary truncate max-w-[140px] md:max-w-[280px]'>
-          {script.title}
-        </span>
-      </div>
+    // Full viewport below the global navbar (h-14); only inner regions scroll.
+    <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden bg-bg-base">
+      {pdfUrl ? (
+        <PdfViewerProvider url={pdfUrl} syncToStore>
+          <ScriptPageSubHeader
+            {...subHeaderProps}
+            extra={
+              <PdfControls className="static border-b-0 bg-transparent p-0 backdrop-blur-none" />
+            }
+          />
 
-      {/* Slim reading header — focus stays on the script + comments */}
-      <ScriptReadingBar
-        scriptId={script.id}
-        title={script.title}
-        author={script.author}
-        genre={script.genre}
-        genreVariant={genreVariant}
-        subgenres={script.subgenres}
-        ageRating={script.age_rating}
-        isOwner={isOwner}
-        currentUserId={currentUserId}
-        ratingData={ratingData}
-        userRating={userRating}
-        isRatingPending={isRatingPending}
-        onRate={rate}
-        onDelete={handleDeleteTrigger}
-        pitchDeckUrl={pitchDeckUrl}
-        onOpenPitchDeck={() => setPitchDeckOpen(true)}
-      />
+          {/* Main — the only area that grows; PDF + comments scroll internally */}
+          <div className="relative flex min-h-0 flex-1 justify-center">
+            <PdfCanvas className="h-full w-full lg:w-1/2" />
 
-      {/* Audio player — fixed bottom bar with track selector (Spotify-style) */}
+            {/* Floating toggle — stays put so the panel can be reopened when closed */}
+            <Button
+              variant="secondary"
+              size="icon-sm"
+              className="absolute right-4 top-4 z-30 hidden rounded-full shadow-md lg:inline-flex"
+              aria-pressed={commentsOpen}
+              aria-label={
+                commentsOpen ? 'Fechar comentários' : 'Abrir comentários'
+              }
+              onClick={() => setCommentsOpen((open) => !open)}
+            >
+              <MessageCircleMore />
+            </Button>
+
+            {/* Comments — slides in/out from the right */}
+            <aside
+              aria-hidden={!commentsOpen}
+              className={cn(
+                'absolute right-0 top-0 z-40 hidden h-full min-h-0 w-[340px] shrink-0 overflow-hidden p-3 transition-transform duration-300 ease-in-out lg:block xl:w-1/4',
+                commentsOpen ? 'translate-x-0' : 'translate-x-full'
+              )}
+            >
+              <div className="h-full w-full overflow-hidden rounded-xl border border-border-subtle">
+                <CommentsSidebar
+                  scriptId={script.id}
+                  currentUserId={currentUserId}
+                  onClose={() => setCommentsOpen(false)}
+                />
+              </div>
+            </aside>
+          </div>
+        </PdfViewerProvider>
+      ) : (
+        <>
+          <ScriptPageSubHeader {...subHeaderProps} />
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-5 py-12 text-center">
+              <Film className="h-12 w-12 text-text-muted" />
+              <p className="font-mono text-label-mono-caps uppercase tracking-wider text-text-muted">
+                PDF não disponível
+              </p>
+              <p className="max-w-sm text-body-small text-text-secondary">
+                O arquivo deste roteiro não está disponível para leitura no
+                momento.
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Audio bar — controlled height, in-flow at the bottom */}
       {hasAudio && <AudioPlayer audios={audios} title={script.title} />}
 
-      {/* Reader — 25/50/25 grid; left col reserved, center PDF, right comments */}
-      {pdfUrl ? (
-        <div className='flex flex-col lg:flex-row border-t border-border-subtle'>
-          {/* Left column — reserved, no functionality for now */}
-          <div className='hidden lg:block lg:w-1/4 border-r border-border-subtle' />
-
-          {/* PDF column — center 50% */}
-          <div className='flex-1 min-w-0 lg:w-1/2 min-h-[60vh]'>
-            <PDFViewer url={pdfUrl} syncToStore />
-          </div>
-
-          {/* Comments sidebar — right 25%, fills viewport below navbar */}
-          <div
-            className={cn(
-              'hidden lg:flex flex-col lg:w-1/4 border-l border-border-subtle sticky top-14 self-start',
-              hasAudio ? 'h-[calc(100vh-3.5rem-54px)]' : 'h-[calc(100vh-3.5rem)]',
-            )}>
-            <CommentsSidebar
-              scriptId={script.id}
-              currentUserId={currentUserId}
-              title={script.title}
-              synopsis={script.synopsis ?? null}
-              logline={script.logline ?? null}
-              coverUrl={coverUrl ?? null}
-            />
-          </div>
-
-          {/* Comments — mobile sheet */}
-          <div className='lg:hidden'>
-            <CommentsSheet scriptId={script.id} currentUserId={currentUserId} />
-          </div>
-        </div>
-      ) : (
-        /* No PDF state */
-        <div className='flex-1 max-w-4xl mx-auto w-full px-5 py-12'>
-          {script.synopsis && (
-            <div className='mb-10'>
-              <h2 className='font-mono text-label-mono-caps text-text-secondary uppercase tracking-wider mb-3'>
-                Sinopse
-              </h2>
-              <p className='text-body-default text-text-primary leading-relaxed'>{script.synopsis}</p>
-            </div>
-          )}
-
-          <div className='rounded-sm border border-border-subtle bg-surface p-8 flex flex-col items-center gap-4 text-center'>
-            <Film className='w-12 h-12 text-text-muted' />
-            <p className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>
-              PDF não disponível
-            </p>
-            <p className='text-body-small text-text-secondary max-w-sm'>
-              O arquivo deste roteiro não está disponível para leitura no momento.
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Comments — mobile sheet (floating trigger + drawer) */}
+      <div className="lg:hidden">
+        <CommentsSheet scriptId={script.id} currentUserId={currentUserId} />
+      </div>
 
       {/* Pitch Deck — full-screen modal reader */}
       {pitchDeckUrl && (
@@ -218,19 +201,23 @@ export function ScriptPageClient({ script, pdfUrl, audios, coverUrl, pitchDeckUr
             <AlertDialogHeader>
               <AlertDialogTitle>Excluir roteiro</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja excluir o roteiro <strong>{script.title}</strong>? Esta ação não pode ser
-                desfeita e todos os arquivos associados serão removidos.
+                Tem certeza que deseja excluir o roteiro{' '}
+                <strong>{script.title}</strong>? Esta ação não pode ser desfeita
+                e todos os arquivos associados serão removidos.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+              <AlertDialogCancel disabled={isDeleting}>
+                Cancelar
+              </AlertDialogCancel>
               <AlertDialogAction
-                className='bg-state-error hover:bg-state-error/90 text-white'
+                className="bg-state-error text-white hover:bg-state-error/90"
                 disabled={isDeleting}
                 onClick={(e) => {
                   e.preventDefault()
                   handleDelete()
-                }}>
+                }}
+              >
                 {isDeleting ? 'Excluindo...' : 'Excluir Roteiro'}
               </AlertDialogAction>
             </AlertDialogFooter>

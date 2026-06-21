@@ -1,62 +1,135 @@
 'use client'
 
+import { cn } from '@/lib/utils'
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpenText,
+  LucideIcon,
+  Minus,
+  Plus,
+  Search,
+} from 'lucide-react'
+import type { ReactNode } from 'react'
+import { Button } from '../ui/button'
+import { usePdfViewer } from './pdf-viewer-context'
+
 interface PdfControlsProps {
-  currentPage: number
-  totalPages: number
-  zoom: number
-  onPrev: () => void
-  onNext: () => void
-  onZoomIn: () => void
-  onZoomOut: () => void
+  className?: string
 }
 
-export function PdfControls({ currentPage, totalPages, zoom, onPrev, onNext, onZoomIn, onZoomOut }: PdfControlsProps) {
+/** Page navigation + zoom controls. Reads everything from context, so it can be
+ * placed anywhere inside a <PdfViewerProvider> (e.g. a dialog header). */
+export function PdfControls({ className }: PdfControlsProps) {
+  const { currentPage, totalPages, zoom, goToPage, zoomIn, zoomOut } =
+    usePdfViewer()
+
   return (
     <div
-      id='pdf-toolbar'
-      className='sticky top-0 z-10 flex items-center gap-2 px-3 py-2 bg-bg-base/90 backdrop-blur-sm border-b border-border-subtle'>
+      id="pdf-toolbar"
+      className={cn(
+        'sticky top-0 z-10 flex h-full items-center gap-2 border-b border-border-subtle bg-bg-base/90 py-2 backdrop-blur-sm',
+        className
+      )}
+    >
       {/* Page navigation — scrolls to the previous/next page */}
-      <div className='bg-elevated border border-border-subtle rounded-sm flex items-center'>
-        <button
-          type='button'
-          onClick={onPrev}
-          disabled={currentPage <= 1}
-          aria-label='Página anterior'
-          className='px-3 py-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary disabled:opacity-30 transition-colors'>
-          ←
-        </button>
-        <span className='font-mono text-label-mono-small text-text-secondary tabular-nums px-2 select-none'>
+      <StepperControl
+        icon={BookOpenText}
+        prevIcon={<ArrowLeft />}
+        nextIcon={<ArrowRight />}
+        prevLabel="Página anterior"
+        nextLabel="Próxima página"
+        onPrev={() => goToPage(currentPage - 1)}
+        onNext={() => goToPage(currentPage + 1)}
+        prevDisabled={currentPage <= 1}
+        nextDisabled={currentPage >= totalPages}
+        hasBorder
+      >
+        <span className="select-none px-2 font-mono text-label-mono-small tabular-nums text-text-secondary">
           {currentPage} / {totalPages || '—'}
         </span>
-        <button
-          type='button'
-          onClick={onNext}
-          disabled={currentPage >= totalPages}
-          aria-label='Próxima página'
-          className='px-3 py-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary disabled:opacity-30 transition-colors'>
-          →
-        </button>
-      </div>
+      </StepperControl>
 
       {/* Zoom */}
-      <div className='bg-elevated border border-border-subtle rounded-sm flex items-center'>
-        <button
-          type='button'
-          onClick={onZoomOut}
-          aria-label='Reduzir zoom'
-          className='px-3 py-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary font-medium transition-colors'>
-          −
-        </button>
-        <span className='font-mono text-label-mono-small text-text-muted w-10 text-center tabular-nums select-none'>
+      <StepperControl
+        icon={Search}
+        prevIcon={<Minus />}
+        nextIcon={<Plus />}
+        prevLabel="Reduzir zoom"
+        nextLabel="Aumentar zoom"
+        onPrev={zoomOut}
+        onNext={zoomIn}
+      >
+        <span className="w-10 select-none text-center font-mono text-label-mono-small tabular-nums text-text-muted">
           {Math.round(zoom * 100)}%
         </span>
-        <button
-          type='button'
-          onClick={onZoomIn}
-          aria-label='Aumentar zoom'
-          className='px-3 py-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary font-medium transition-colors'>
-          +
-        </button>
+      </StepperControl>
+    </div>
+  )
+}
+
+interface StepperControlProps {
+  /** Leading icon describing what is being stepped. */
+  icon: LucideIcon
+  prevIcon: ReactNode
+  nextIcon: ReactNode
+  prevLabel: string
+  nextLabel: string
+  onPrev: () => void
+  onNext: () => void
+  prevDisabled?: boolean
+  nextDisabled?: boolean
+  /** Middle content rendered between the two buttons (e.g. the current value). */
+  children: ReactNode
+  hasBorder?: boolean
+}
+
+// Icon + decrement/increment buttons around an arbitrary value display.
+function StepperControl({
+  icon,
+  prevIcon,
+  nextIcon,
+  prevLabel,
+  nextLabel,
+  onPrev,
+  onNext,
+  prevDisabled,
+  nextDisabled,
+  children,
+  hasBorder,
+}: StepperControlProps) {
+  const Icon = icon
+
+  return (
+    <div
+      className={cn(
+        'flex h-full items-center gap-3 pl-3',
+        hasBorder && 'border-r border-border-subtle pr-3'
+      )}
+    >
+      <Icon className="size-5 text-border-subtle" />
+      <div className="flex items-center">
+        <Button
+          type="button"
+          onClick={onPrev}
+          disabled={prevDisabled}
+          aria-label={prevLabel}
+          variant="secondary"
+          size="icon-xs"
+        >
+          {prevIcon}
+        </Button>
+        {children}
+        <Button
+          type="button"
+          onClick={onNext}
+          disabled={nextDisabled}
+          aria-label={nextLabel}
+          variant="secondary"
+          size="icon-xs"
+        >
+          {nextIcon}
+        </Button>
       </div>
     </div>
   )

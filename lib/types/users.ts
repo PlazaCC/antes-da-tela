@@ -14,3 +14,10 @@ export interface ProfileStats {
   scripts: number
   avgRating: number | null
 }
+
+export interface FollowUser {
+  id: string
+  name: string
+  image: string | null
+  bio: string | null
+}
