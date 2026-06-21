@@ -35,7 +35,13 @@ export default async function HomePage() {
   return (
     <HydrateClient>
       <LandingClientShell>
-        {!isAuthenticated && <LandingHeader />}
+        {!isAuthenticated && (
+          <>
+            {/* Guests use the landing's own header — suppress the global app NavBar */}
+            <style>{`header[aria-label="Principal"] { display: none !important; }`}</style>
+            <LandingHeader />
+          </>
+        )}
         <main>
           <LandingHero />
           <LandingMarquee />
