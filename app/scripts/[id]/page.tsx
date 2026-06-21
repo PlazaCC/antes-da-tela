@@ -17,7 +17,9 @@ const getPageData = cache(async (id: string) => {
   const [script, { data: authData }] = await Promise.all([caller.scripts.getById({ id }), ctx.supabase.auth.getUser()])
 
   const pdfUrl = getAssetUrl(script?.script_files?.[0]?.storage_path, 'scripts')
-  const audioUrl = getAssetUrl(script?.audio_files?.[0]?.storage_path, 'audio')
+  const audios = (script?.audio_files ?? [])
+    .map((a) => ({ url: getAssetUrl(a.storage_path, 'audio'), title: a.title, description: a.description }))
+    .filter((a): a is { url: string; title: string; description: string | null } => !!a.url)
   const bannerUrl = getAssetUrl(script?.banner_path, 'avatars')
   const coverUrl = getAssetUrl(script?.cover_path, 'avatars')
   const pitchDeckUrl = getAssetUrl(script?.pitch_deck_path, 'scripts')
@@ -25,7 +27,7 @@ const getPageData = cache(async (id: string) => {
   return {
     script,
     pdfUrl,
-    audioUrl,
+    audios,
     bannerUrl,
     coverUrl,
     pitchDeckUrl,
@@ -68,7 +70,7 @@ export default async function ScriptPage({ params }: Props) {
     notFound()
   }
 
-  const { script, pdfUrl, audioUrl, bannerUrl, coverUrl, pitchDeckUrl, currentUserId } =
+  const { script, pdfUrl, audios, bannerUrl, coverUrl, pitchDeckUrl, currentUserId } =
     await getPageData(id)
 
   return (
@@ -76,7 +78,7 @@ export default async function ScriptPage({ params }: Props) {
       <ScriptPageClient
         script={script}
         pdfUrl={pdfUrl}
-        audioUrl={audioUrl}
+        audios={audios}
         bannerUrl={bannerUrl}
         coverUrl={coverUrl}
         pitchDeckUrl={pitchDeckUrl}

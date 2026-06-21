@@ -1,7 +1,7 @@
 'use client'
 
 import { AGE_RATINGS, GENRES } from '@/lib/constants/scripts'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 
 export type Genre = (typeof GENRES)[number]
@@ -15,6 +15,7 @@ function parseParam<T extends string>(param: string | null, valid: readonly T[])
 export function useFilterParams() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const pathname = usePathname()
 
   const genres = parseParam(searchParams.get('genre'), GENRES)
   const ageRatings = parseParam(searchParams.get('age_rating'), AGE_RATINGS)
@@ -27,9 +28,9 @@ export function useFilterParams() {
       if (nextAgeRatings.length > 0) params.set('age_rating', nextAgeRatings.join(','))
       else params.delete('age_rating')
       const qs = params.toString()
-      router.replace(qs ? `/?${qs}` : '/')
+      router.replace(qs ? `${pathname}?${qs}` : pathname)
     },
-    [searchParams, router],
+    [searchParams, router, pathname],
   )
 
   const toggleGenre = useCallback(

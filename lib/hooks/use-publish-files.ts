@@ -26,22 +26,18 @@ export function validateImage(file: File): string | null {
 
 interface UsePublishFilesResult {
   pdfFile: File | null
-  audioFile: File | null
   coverFile: File | null
   bannerFile: File | null
   pitchDeckFile: File | null
   pdfError: string
-  audioError: string
   coverError: string
   bannerError: string
   pitchDeckError: string
   setPdfFile: (file: File | null) => void
-  setAudioFile: (file: File | null) => void
   setCoverFile: (file: File | null) => void
   setBannerFile: (file: File | null) => void
   setPitchDeckFile: (file: File | null) => void
   setPdfError: (value: string) => void
-  setAudioError: (value: string) => void
   setCoverError: (value: string) => void
   setBannerError: (value: string) => void
   setPitchDeckError: (value: string) => void
@@ -53,24 +49,20 @@ interface UsePublishFilesResult {
 
 export function usePublishFiles(): UsePublishFilesResult {
   const [pdfFile, setPdfFile] = useState<File | null>(null)
-  const [audioFile, setAudioFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null)
   const [pdfError, setPdfError] = useState('')
-  const [audioError, setAudioError] = useState('')
   const [coverError, setCoverError] = useState('')
   const [bannerError, setBannerError] = useState('')
   const [pitchDeckError, setPitchDeckError] = useState('')
 
   const resetFiles = () => {
     setPdfFile(null)
-    setAudioFile(null)
     setCoverFile(null)
     setBannerFile(null)
     setPitchDeckFile(null)
     setPdfError('')
-    setAudioError('')
     setCoverError('')
     setBannerError('')
     setPitchDeckError('')
@@ -78,22 +70,18 @@ export function usePublishFiles(): UsePublishFilesResult {
 
   return {
     pdfFile,
-    audioFile,
     coverFile,
     bannerFile,
     pitchDeckFile,
     pdfError,
-    audioError,
     coverError,
     bannerError,
     pitchDeckError,
     setPdfFile,
-    setAudioFile,
     setCoverFile,
     setBannerFile,
     setPitchDeckFile,
     setPdfError,
-    setAudioError,
     setCoverError,
     setBannerError,
     setPitchDeckError,

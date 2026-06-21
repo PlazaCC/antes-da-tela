@@ -26,6 +26,17 @@ export const AGE_RATINGS = ['livre', '10', '12', '14', '16', '18'] as const
 
 export type AgeRating = (typeof AGE_RATINGS)[number]
 
+/** Maximum number of subgenres a script may have (item 4). */
+export const MAX_SUBGENRES = 3
+
+/** Preset categories for an attached audio file (item 3). */
+export const AUDIO_CATEGORIES = ['Podcast', 'Roteiro falado', 'Entrevista', 'Trilha', 'Outro'] as const
+
+export type AudioCategory = (typeof AUDIO_CATEGORIES)[number]
+
+/** Default category applied to audio rows created before the multi-audio migration (item 10). */
+export const DEFAULT_AUDIO_CATEGORY: AudioCategory = 'Roteiro falado'
+
 export function formatAgeRating(r: AgeRating): string {
   return r === 'livre' ? 'Livre' : `${r} anos`
 }

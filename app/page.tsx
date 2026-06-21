@@ -1,47 +1,53 @@
-import { HomeSkeleton } from '@/components/skeletons'
+import { LandingAudience } from '@/components/landing/landing-audience'
+import { LandingClientShell } from '@/components/landing/landing-client-shell'
+import { LandingFeatured } from '@/components/landing/landing-featured'
+import { LandingFinalCta } from '@/components/landing/landing-final-cta'
+import { LandingFooter } from '@/components/landing/landing-footer'
+import { LandingHeader } from '@/components/landing/landing-header'
+import { LandingHero } from '@/components/landing/landing-hero'
+import { LandingHowItWorks } from '@/components/landing/landing-how-it-works'
+import { LandingManifesto } from '@/components/landing/landing-manifesto'
+import { LandingMarquee } from '@/components/landing/landing-marquee'
+import { LandingPillars } from '@/components/landing/landing-pillars'
+import { createClient } from '@/lib/supabase/server'
 import { HydrateClient, getQueryClient, trpc } from '@/trpc/server'
 import type { Metadata } from 'next'
-import { Suspense } from 'react'
-import { HomeClient } from './home-client'
+import './landing/landing.css'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
+    absolute: 'Antes da Tela — Publique, leia e descubra roteiros',
   },
-  description:
-    'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
-  openGraph: {
-    title: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
-    description:
-      'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
-    images: [{ url: '/antes-da-tela-og.png', width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
-    description:
-      'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
-    images: ['/antes-da-tela-og.png'],
-  },
+  description: 'Plataforma de publicação, leitura e descoberta de roteiros audiovisuais brasileiros.',
 }
 
-async function PrefetchedHome() {
+export default async function HomePage() {
   const queryClient = getQueryClient()
-  await Promise.all([
-    queryClient.prefetchQuery(trpc.scripts.listRecent.queryOptions({ limit: 12 })),
-    queryClient.prefetchQuery(trpc.scripts.listFeatured.queryOptions()),
+  const supabase = await createClient()
+  const [, { data: claims }] = await Promise.all([
+    queryClient.prefetchQuery(trpc.scripts.listRecent.queryOptions({ limit: 7 })),
+    supabase.auth.getClaims(),
   ])
+
+  // Logged-in users already have the global NavBar — skip the landing menu.
+  const isAuthenticated = !!claims?.claims
+
   return (
     <HydrateClient>
-      <HomeClient />
+      <LandingClientShell>
+        {!isAuthenticated && <LandingHeader />}
+        <main>
+          <LandingHero />
+          <LandingMarquee />
+          <LandingManifesto />
+          <LandingPillars />
+          <LandingAudience />
+          <LandingHowItWorks />
+          <LandingFeatured />
+          <LandingFinalCta />
+        </main>
+        <LandingFooter />
+      </LandingClientShell>
     </HydrateClient>
-  )
-}
-
-export default function HomePage() {
-  return (
-    <Suspense fallback={<HomeSkeleton />}>
-      <PrefetchedHome />
-    </Suspense>
   )
 }

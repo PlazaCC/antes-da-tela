@@ -20,7 +20,7 @@ import { NextResponse } from 'next/server'
 async function handler(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
+  const next = searchParams.get('next') ?? '/feed'
   const error = searchParams.get('error')
 
   if (error) {
@@ -80,7 +80,7 @@ async function handler(request: Request) {
         },
       )
 
-    const destination = next.startsWith('/') ? next : '/'
+    const destination = next.startsWith('/') ? next : '/feed'
     return NextResponse.redirect(`${origin}${destination}`)
   } catch (err) {
     // Report to Sentry and redirect to error page

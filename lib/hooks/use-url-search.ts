@@ -26,8 +26,9 @@ export function useUrlSearch(debounceMs = 400) {
       const genre = searchParams.get('genre')
       if (genre) params.set('genre', genre)
       const query = params.toString()
-      const target = query ? `/?${query}` : '/'
-      if (pathname === '/') {
+      // Search results live on the feed, not on the landing root.
+      const target = query ? `/feed?${query}` : '/feed'
+      if (pathname === '/feed') {
         router.replace(target)
       } else {
         router.push(target)

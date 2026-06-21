@@ -2,7 +2,8 @@
 
 import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { MessageCircleMore } from 'lucide-react'
 import { useState } from 'react'
 
 interface CommentsSheetProps {
@@ -16,20 +17,23 @@ export function CommentsSheet({ scriptId, currentUserId }: CommentsSheetProps) {
   return (
     <>
       {/* Mobile: FAB + Sheet */}
-      <div className='lg:hidden fixed bottom-[68px] right-4 z-20'>
+      <div className="fixed bottom-[68px] right-4 z-20 lg:hidden">
         <Button
           onClick={() => setCommentsOpen(true)}
-          className='flex items-center gap-1.5 px-4 min-h-[44px] bg-surface border border-border-subtle font-mono text-label-mono-small text-text-secondary'
-          variant='outline'>
-          💬 Comentários
+          className="flex min-h-[44px] items-center gap-1.5 border border-border-subtle bg-surface px-4 font-mono text-label-mono-small text-text-secondary"
+          variant="secondary"
+        >
+          <MessageCircleMore />
         </Button>
       </div>
       <Sheet open={commentsOpen} onOpenChange={setCommentsOpen}>
-        <SheetContent side='bottom' className='h-[80vh] p-0'>
-          <SheetHeader className='sr-only'>
-            <SheetTitle>Comentários</SheetTitle>
-          </SheetHeader>
-          <CommentsSidebar scriptId={scriptId} currentUserId={currentUserId} />
+        <SheetContent side="bottom" className="h-[80vh] p-0">
+          <CommentsSidebar
+            scriptId={scriptId}
+            currentUserId={currentUserId}
+            onClose={() => setCommentsOpen(false)}
+            hideClose
+          />
         </SheetContent>
       </Sheet>
     </>

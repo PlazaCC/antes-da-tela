@@ -24,6 +24,9 @@ export const users = pgTable(
     email: text('email').notNull().unique(),
     image: text('image'),
     bio: text('bio'),
+    // CPF stored as 11 digits only (no dots/dashes); unique across users. Nullable
+    // because a profile can exist without a CPF — it is only required to publish.
+    cpf: text('cpf').unique(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   () => [
@@ -57,7 +60,12 @@ export const scripts = pgTable(
     logline: text('logline'),
     synopsis: text('synopsis'),
     genre: text('genre'),
+    // Up to MAX_SUBGENRES additional genres drawn from the same GENRES list.
+    subgenres: text('subgenres').array(),
     ageRating: text('age_rating'),
+    // Registration number of the work at the Biblioteca Nacional. Required to
+    // publish (status = 'published'), optional for drafts/cadastro.
+    bnRegistration: text('bn_registration'),
     isFeatured: boolean('is_featured').default(false).notNull(),
     status: scriptStatusEnum('status').default('published').notNull(),
     authorId: uuid('author_id')
@@ -128,11 +136,16 @@ export const audioFiles = pgTable(
       .notNull()
       .references(() => scripts.id, { onDelete: 'cascade' }),
     storagePath: text('storage_path').notNull(),
+    // Preset category (see AUDIO_CATEGORIES). Default backfills rows created
+    // before the multi-audio migration (item 10); new rows always set it.
+    title: text('title').notNull().default('Roteiro falado'),
+    description: text('description'),
+    sortOrder: integer('sort_order').default(0).notNull(),
     durationSeconds: integer('duration_seconds'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
-  (table) => [
-    uniqueIndex('audio_files_script_id_unique').on(table.scriptId),
+  // A script may now have multiple audio files — no unique index on script_id.
+  () => [
     pgPolicy('Audio files are publicly readable', {
       as: 'permissive',
       to: 'public',

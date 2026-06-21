@@ -1,7 +1,9 @@
 "use client";
 
 import { BnDisclaimerCallout } from "@/components/publish/bn-disclaimer-callout";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatAgeRating } from "@/lib/constants/scripts";
+import type { AudioEntry } from "@/lib/hooks/use-audio-entries";
 import type { PublishFormValues } from "@/lib/validators/publish";
 import { FileIcon, Info, Music, Tag } from "lucide-react";
 import Image from "next/image";
@@ -9,16 +11,21 @@ import Image from "next/image";
 interface ReviewStepProps {
   values: PublishFormValues;
   pdfFile: File | null;
-  audioFile: File | null;
+  audioEntries: AudioEntry[];
   coverPreviewUrl?: string | null;
+  termsAccepted: boolean;
+  onTermsAcceptedChange: (accepted: boolean) => void;
 }
 
 export function ReviewStep({
   values,
   pdfFile,
-  audioFile,
+  audioEntries,
   coverPreviewUrl,
+  termsAccepted,
+  onTermsAcceptedChange,
 }: ReviewStepProps) {
+  const readyAudios = audioEntries.filter((entry) => entry.file || entry.storagePath);
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="bg-elevated border border-border-subtle rounded-sm p-6 flex flex-col gap-8">
@@ -71,11 +78,15 @@ export function ReviewStep({
                     "Não selecionado"}
                 </span>
               </div>
-              {audioFile && (
-                <div className="flex items-center gap-2 text-body-small text-text-secondary">
-                  <Music size={14} className="text-brand-accent" />
-                  <span className="font-medium text-text-primary">Áudio:</span>
-                  <span>{audioFile.name}</span>
+              {readyAudios.length > 0 && (
+                <div className="flex items-start gap-2 text-body-small text-text-secondary">
+                  <Music size={14} className="text-brand-accent mt-0.5" />
+                  <span className="font-medium text-text-primary">
+                    Áudios ({readyAudios.length}):
+                  </span>
+                  <span>
+                    {readyAudios.map((entry) => entry.title).join(", ")}
+                  </span>
                 </div>
               )}
             </div>
@@ -98,6 +109,14 @@ export function ReviewStep({
                   {values.genre || "Não definido"}
                 </span>
               </div>
+              {values.subgenres.length > 0 && (
+                <div className="flex items-center gap-1.5 text-body-small">
+                  <span className="text-text-muted">Subgêneros:</span>
+                  <span className="text-text-primary font-medium">
+                    {values.subgenres.join(", ")}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-1.5 text-body-small">
                 <span className="text-text-muted">Classificação:</span>
                 <span className="text-text-primary font-medium">
@@ -121,6 +140,32 @@ export function ReviewStep({
       </div>
 
       <BnDisclaimerCallout />
+
+      {/* Terms acceptance — required to publish the content publicly */}
+      <div className="flex items-start gap-3 p-4 bg-elevated border border-border-subtle rounded-sm">
+        <Checkbox
+          id="terms-accept"
+          checked={termsAccepted}
+          onCheckedChange={(checked) => onTermsAcceptedChange(checked === true)}
+          className="mt-0.5"
+        />
+        <label
+          htmlFor="terms-accept"
+          className="text-body-small text-text-secondary leading-relaxed cursor-pointer"
+        >
+          Li e concordo com a{" "}
+          <a
+            href="/legal/publicacao-e-confidencialidade"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-brand-accent underline underline-offset-2 hover:text-brand-accent/80"
+          >
+            Política de Publicação, Propriedade Intelectual e Confidencialidade
+          </a>{" "}
+          e autorizo a disponibilização pública deste conteúdo na plataforma.
+        </label>
+      </div>
     </div>
   );
 }

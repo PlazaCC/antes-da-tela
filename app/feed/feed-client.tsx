@@ -16,7 +16,7 @@ import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-export function HomeClient() {
+export function FeedClient() {
   const trpc = useTRPC()
   const searchParams = useSearchParams()
   const [previewId, setPreviewId] = useState<string | null>(null)

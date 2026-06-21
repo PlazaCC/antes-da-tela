@@ -21,6 +21,9 @@ export interface ScriptFile {
 export interface AudioFile {
   id: string;
   storage_path: string;
+  title: string;
+  description: string | null;
+  sort_order: number;
   duration_seconds: number | null;
 }
 
@@ -30,7 +33,9 @@ export interface ScriptDetail {
   logline: string | null;
   synopsis: string | null;
   genre: string | null;
+  subgenres: string[] | null;
   age_rating: string | null;
+  bn_registration: string | null;
   is_featured: boolean;
   status: ScriptStatus;
   published_at: string | null;

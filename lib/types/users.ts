@@ -4,6 +4,7 @@ export interface UserProfile {
   email: string | null
   image: string | null
   bio: string | null
+  cpf: string | null
   createdAt: string
 }
 
@@ -12,4 +13,11 @@ export interface ProfileStats {
   following: number
   scripts: number
   avgRating: number | null
+}
+
+export interface FollowUser {
+  id: string
+  name: string
+  image: string | null
+  bio: string | null
 }

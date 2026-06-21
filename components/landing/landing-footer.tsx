@@ -1,19 +1,33 @@
 'use client'
 
+import { LEGAL_TABS } from '@/content/legal/legal-tabs'
 import Image from 'next/image'
+import Link from 'next/link'
 
-const LINKS = [
+const LEGAL_LINKS = Object.values(LEGAL_TABS).map((tab) => ({
+  label: tab.navLabel,
+  href: `/legal/${tab.slug}`,
+}))
+
+const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
   {
     heading: 'Plataforma',
-    items: ['Como funciona', 'Em destaque', 'Para criadores', 'Para produtores'],
+    items: [
+      { label: 'Como funciona', href: '/#como-funciona' },
+      { label: 'Em destaque', href: '/feed' },
+    ],
   },
   {
     heading: 'Empresa',
-    items: ['Sobre', 'Blog', 'Imprensa', 'Contato'],
+    items: [
+      { label: 'Sobre', href: '#' },
+      { label: 'Blog', href: '#' },
+      { label: 'Contato', href: '#' },
+    ],
   },
   {
     heading: 'Legal',
-    items: ['Termos de uso', 'Privacidade', 'Direitos autorais'],
+    items: LEGAL_LINKS,
   },
 ]
 
@@ -60,12 +74,20 @@ export function LandingFooter() {
               </span>
               <ul className='flex flex-col gap-2.5 list-none m-0 p-0'>
                 {col.items.map((item) => (
-                  <li key={item}>
-                    <a
-                      href='#'
-                      className='text-[14px] text-[rgb(107,104,96)] no-underline transition-[color_0.2s_ease] hover:text-[hsl(var(--color-text-primary))]'>
-                      {item}
-                    </a>
+                  <li key={item.label}>
+                    {item.href.startsWith('/') ? (
+                      <Link
+                        href={item.href}
+                        className='text-[14px] text-[rgb(107,104,96)] no-underline transition-[color_0.2s_ease] hover:text-[hsl(var(--color-text-primary))]'>
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={item.href}
+                        className='text-[14px] text-[rgb(107,104,96)] no-underline transition-[color_0.2s_ease] hover:text-[hsl(var(--color-text-primary))]'>
+                        {item.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

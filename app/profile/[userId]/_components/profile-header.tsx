@@ -2,21 +2,46 @@
 
 import { Avatar } from '@/components/avatar'
 import { FollowButton } from '@/components/follow-button'
+import { FollowListDialog, type FollowListVariant } from '@/components/profile/follow-list-dialog'
 import Link from 'next/link'
+import { useState } from 'react'
 import type { UserProfile, ProfileStats } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
-function StatItem({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
-  return (
-    <div className='flex flex-col gap-0.5'>
+function StatItem({
+  value,
+  label,
+  accent,
+  onClick,
+}: {
+  value: string
+  label: string
+  accent?: boolean
+  onClick?: () => void
+}) {
+  const content = (
+    <>
       <span
         className={cn('font-display text-[18px] leading-[1.37]', accent ? 'text-brand-accent' : 'text-text-primary')}>
         {value}
       </span>
       <span className='font-mono text-label-mono-small text-text-muted uppercase tracking-[0.04em]'>{label}</span>
-    </div>
+    </>
   )
+
+  if (onClick) {
+    return (
+      <button
+        type='button'
+        onClick={onClick}
+        className='flex flex-col gap-0.5 text-left transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded-sm'>
+        {content}
+      </button>
+    )
+  }
+
+  return <div className='flex flex-col gap-0.5'>{content}</div>
 }
 
 interface ProfileHeaderProps {
@@ -28,6 +53,7 @@ interface ProfileHeaderProps {
 export function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps) {
   const userName = user.name?.trim() || 'Usuário'
   const handle = `@${userName.toLowerCase().replace(/\s+/g, '')} · Roteirista`
+  const [followList, setFollowList] = useState<FollowListVariant | null>(null)
 
   return (
     <>
@@ -87,8 +113,16 @@ export function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps)
             {/* Stats row */}
             <div className='flex flex-wrap items-start gap-x-8 gap-y-4 md:gap-14 mt-7 md:mt-5 border-t border-border-subtle/50 pt-5 md:border-t-0 md:pt-0'>
               <StatItem value={String(stats.scripts)} label='Roteiros' />
-              <StatItem value={String(stats.followers)} label='Seguidores' />
-              <StatItem value={String(stats.following)} label='Seguindo' />
+              <StatItem
+                value={String(stats.followers)}
+                label='Seguidores'
+                onClick={() => setFollowList('followers')}
+              />
+              <StatItem
+                value={String(stats.following)}
+                label='Seguindo'
+                onClick={() => setFollowList('following')}
+              />
               {stats.avgRating !== null && (
                 <StatItem value={`★ ${stats.avgRating.toFixed(1)}`} label='Avaliação média' accent />
               )}
@@ -97,6 +131,14 @@ export function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps)
         </div>
       </div>
 
+      {followList && (
+        <FollowListDialog
+          userId={user.id}
+          variant={followList}
+          open={followList !== null}
+          onOpenChange={(open) => !open && setFollowList(null)}
+        />
+      )}
     </>
   )
 }

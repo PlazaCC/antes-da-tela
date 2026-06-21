@@ -1,10 +1,22 @@
 'use client'
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useAudio } from '@/lib/hooks/use-audio'
 import { useProgressScrubber } from '@/lib/hooks/use-progress-scrubber'
 import { cn } from '@/lib/utils'
-import { PauseIcon, PlayIcon, RotateCcw, RotateCw, Volume2 } from 'lucide-react'
+import { ChevronDown, PauseIcon, PlayIcon, RotateCcw, RotateCw, Volume2 } from 'lucide-react'
 import { useState } from 'react'
+
+export interface AudioTrack {
+  url: string
+  title: string
+  description?: string | null
+}
 
 function formatTime(s: number) {
   if (!isFinite(s) || isNaN(s)) return '0:00'
@@ -14,11 +26,13 @@ function formatTime(s: number) {
 }
 
 interface Props {
-  src: string
+  audios: AudioTrack[]
   title?: string
 }
 
-export function AudioPlayer({ src, title }: Props) {
+export function AudioPlayer({ audios, title }: Props) {
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const current = audios[Math.min(selectedIndex, audios.length - 1)]
   const {
     audioRef,
     playing,
@@ -32,20 +46,22 @@ export function AudioPlayer({ src, title }: Props) {
     seekTo,
     seekBy,
     setVolume,
-  } = useAudio()
+  } = useAudio(current?.url)
   const { barRef, onMouseDown, onTouchStart, onTouchMove } = useProgressScrubber(seekTo)
   const [hovered, setHovered] = useState(false)
 
   // Expand only on hover — playing state does NOT expand the bar
   const expanded = hovered
 
+  if (!current) return null
+
   return (
     <div
-      className='fixed bottom-0 left-0 right-0 z-30 bg-surface/95 backdrop-blur-md border-t border-border-subtle'
+      className='w-full shrink-0 bg-surface/95 backdrop-blur-md border-t border-border-subtle'
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}>
-      <audio ref={audioRef} src={src} preload='metadata' />
+      <audio ref={audioRef} src={current.url} preload='metadata' />
 
       {/* Scrubber */}
       <div
@@ -82,16 +98,38 @@ export function AudioPlayer({ src, title }: Props) {
           'grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 w-full max-w-4xl mx-auto transition-[padding] duration-300 delay-100',
           expanded ? 'py-3' : 'py-1.5',
         )}>
-        {/* Left: title */}
+        {/* Left: track selector */}
         <div className='flex flex-col min-w-0 overflow-hidden'>
           <span
             className={cn(
               'font-mono text-[9px] uppercase tracking-widest text-text-muted leading-none transition-all duration-300 delay-100 whitespace-nowrap overflow-hidden',
               expanded ? 'max-h-4 opacity-100 mb-0.5' : 'max-h-0 opacity-0',
             )}>
-            Escuta guiada
+            {title ?? 'Escuta guiada'}
           </span>
-          {title && <span className='font-display text-[13px] text-text-primary truncate leading-snug'>{title}</span>}
+          {audios.length > 1 ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className='flex items-center gap-1 min-w-0 text-text-primary hover:text-brand-accent transition-colors'>
+                <span className='font-display text-[13px] truncate leading-snug'>{current.title}</span>
+                <ChevronDown className='w-3.5 h-3.5 shrink-0' />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='start' side='top' className='max-w-[280px]'>
+                {audios.map((track, index) => (
+                  <DropdownMenuItem
+                    key={`${track.url}-${index}`}
+                    onSelect={() => setSelectedIndex(index)}
+                    className={cn('flex flex-col items-start gap-0.5', index === selectedIndex && 'text-brand-accent')}>
+                    <span className='text-[13px] font-medium'>{track.title}</span>
+                    {track.description ? (
+                      <span className='text-[11px] text-text-muted line-clamp-2'>{track.description}</span>
+                    ) : null}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <span className='font-display text-[13px] text-text-primary truncate leading-snug'>{current.title}</span>
+          )}
         </div>
 
         {/* Center: always-visible controls — fixed layout so play button never shifts */}

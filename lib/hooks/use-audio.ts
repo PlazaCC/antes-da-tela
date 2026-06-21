@@ -3,13 +3,20 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export const AUDIO_SPEEDS = [0.75, 1, 1.25, 1.5, 2] as const
 export type AudioSpeed = (typeof AUDIO_SPEEDS)[number]
 
-export function useAudio() {
+export function useAudio(src?: string) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [speedIndex, setSpeedIndex] = useState(1)
   const [volume, setVolumeState] = useState(1)
+
+  // Reset transport state when the selected track changes.
+  useEffect(() => {
+    setCurrentTime(0)
+    setDuration(0)
+    setPlaying(false)
+  }, [src])
 
   useEffect(() => {
     const audio = audioRef.current

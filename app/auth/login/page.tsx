@@ -1,11 +1,24 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 
 import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { createClient } from '@/lib/supabase/server'
 
-export default function LoginPage() {
+type Props = { searchParams: Promise<{ next?: string }> }
+
+export default async function LoginPage({ searchParams }: Props) {
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getClaims()
+
+  // Already authenticated — no reason to show the login screen.
+  if (data?.claims) {
+    const { next } = await searchParams
+    redirect(next && next.startsWith('/') ? next : '/feed')
+  }
+
   return (
     <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col gap-8">

@@ -16,6 +16,8 @@ interface UseProfileFormResult {
   register: ReturnType<typeof useForm<ProfileFormValues>>['register']
   handleSubmit: ReturnType<typeof useForm<ProfileFormValues>>['handleSubmit']
   formState: ReturnType<typeof useForm<ProfileFormValues>>['formState']
+  setValue: ReturnType<typeof useForm<ProfileFormValues>>['setValue']
+  watch: ReturnType<typeof useForm<ProfileFormValues>>['watch']
   submitProfile: (values: ProfileFormValues) => void
 }
 
@@ -42,18 +44,26 @@ export function useProfileForm(userId: string): UseProfileFormResult {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: '', bio: undefined },
+    defaultValues: { name: '', bio: undefined, cpf: '' },
   })
 
-  const { register, handleSubmit, reset, formState } = form
+  const { register, handleSubmit, reset, formState, setValue, watch } = form
 
   useEffect(() => {
     if (!profileQuery.data) return
-    reset({ name: profileQuery.data.name, bio: profileQuery.data.bio ?? undefined })
+    reset({
+      name: profileQuery.data.name,
+      bio: profileQuery.data.bio ?? undefined,
+      cpf: profileQuery.data.cpf ?? '',
+    })
   }, [profileQuery.data, reset])
 
   const submitProfile = (values: ProfileFormValues) => {
-    updateProfileMutation.mutate({ name: values.name, bio: values.bio || null })
+    updateProfileMutation.mutate({
+      name: values.name,
+      bio: values.bio || null,
+      cpf: values.cpf ? values.cpf : null,
+    })
   }
 
   return {
@@ -63,6 +73,8 @@ export function useProfileForm(userId: string): UseProfileFormResult {
     register,
     handleSubmit,
     formState,
+    setValue,
+    watch,
     submitProfile,
   }
 }

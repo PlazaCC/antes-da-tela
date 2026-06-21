@@ -2,5 +2,6 @@
   // Enables custom chat instructions from .agents/rules, .agents/skills, and .agents
   "chat.agentFilesLocations": {
     ".agents": true
-  }
+  },
+  "prettier.prettierPath": "./node_modules/prettier"
 }

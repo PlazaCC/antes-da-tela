@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Film } from 'lucide-react'
+import { FileText, Film } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -14,10 +14,19 @@ interface SidebarProps {
   }
   publishedAtFormatted: string | null
   coverUrl?: string
+  pitchDeckUrl?: string
+  onOpenPitchDeck?: () => void
   onClose: () => void
 }
 
-export function ModalSidebar({ script, publishedAtFormatted, coverUrl, onClose }: SidebarProps) {
+export function ModalSidebar({
+  script,
+  publishedAtFormatted,
+  coverUrl,
+  pitchDeckUrl,
+  onOpenPitchDeck,
+  onClose,
+}: SidebarProps) {
   return (
     <aside className='hidden md:flex flex-col w-64 shrink-0 border-r border-border-subtle p-6 gap-6'>
       {/* Cover Image or Placeholder */}
@@ -61,7 +70,21 @@ export function ModalSidebar({ script, publishedAtFormatted, coverUrl, onClose }
       </dl>
 
       {/* CTA — anchored at bottom */}
-      <div className='mt-auto'>
+      <div className='mt-auto flex flex-col gap-2'>
+        {pitchDeckUrl && onOpenPitchDeck && (
+          <button
+            type='button'
+            onClick={onOpenPitchDeck}
+            className={cn(
+              'flex items-center justify-center gap-2 w-full py-2.5 rounded-sm',
+              'border border-border-subtle text-text-secondary font-medium text-body-small',
+              'hover:text-text-primary hover:border-border-default transition-colors',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base',
+            )}>
+            <FileText className='w-4 h-4' />
+            Pitch Deck
+          </button>
+        )}
         <Link
           href={`/scripts/${script.id}`}
           className={cn(
