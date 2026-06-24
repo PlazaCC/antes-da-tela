@@ -2,6 +2,17 @@
 
 import { Avatar } from '@/components/avatar'
 import { ReactionBar } from '@/components/comments/reaction-bar'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { REACTION_EMOJIS, type ReactionEmoji } from '@/lib/constants/reactions'
 import { useCommentActions } from '@/lib/hooks/use-comment-actions'
@@ -9,7 +20,7 @@ import type { CommentWithAuthor, ReactionSummary } from '@/lib/types'
 import { formatPublishedDate } from '@/lib/utils/format-date'
 import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
-import { X } from 'lucide-react'
+import { Trash2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { usePDFViewerStore } from './pdf-viewer-store'
@@ -61,7 +72,7 @@ export function CommentsSidebar({
     enabled: !!currentPage,
   })
 
-  const { createComment, toggleReaction, isCreating, isToggling } =
+  const { createComment, toggleReaction, deleteComment, isCreating, isToggling, isDeleting } =
     useCommentActions(scriptId, currentUserId)
 
   return (
@@ -115,6 +126,37 @@ export function CommentsSidebar({
               <span className="ml-auto shrink-0 font-mono text-label-mono-small text-text-muted">
                 {c.created_at ? formatPublishedDate(c.created_at) : '—'}
               </span>
+              {c.author?.id === currentUserId && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      disabled={isDeleting}
+                      className="shrink-0 text-text-muted hover:text-destructive"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent size="sm">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Excluir comentário</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir este comentário? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteComment(c.id, currentPage)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Excluir
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
             <p className="text-body-small leading-relaxed text-text-secondary">
               {c.content}

@@ -9,6 +9,7 @@ import {
   Minus,
   Plus,
   Search,
+  XIcon,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Button } from '../ui/button'
@@ -16,11 +17,12 @@ import { usePdfViewer } from './pdf-viewer-context'
 
 interface PdfControlsProps {
   className?: string
+  onClose?: () => void
 }
 
 /** Page navigation + zoom controls. Reads everything from context, so it can be
  * placed anywhere inside a <PdfViewerProvider> (e.g. a dialog header). */
-export function PdfControls({ className }: PdfControlsProps) {
+export function PdfControls({ className, onClose }: PdfControlsProps) {
   const { currentPage, totalPages, zoom, goToPage, zoomIn, zoomOut } =
     usePdfViewer()
 
@@ -64,6 +66,21 @@ export function PdfControls({ className }: PdfControlsProps) {
           {Math.round(zoom * 100)}%
         </span>
       </StepperControl>
+
+      {/* Close */}
+      {onClose && (
+        <div className="ml-auto flex items-center border-l border-border-subtle pl-3">
+          <Button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar"
+            variant="secondary"
+            size="icon-xs"
+          >
+            <XIcon />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

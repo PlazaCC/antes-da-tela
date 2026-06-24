@@ -168,7 +168,7 @@ export function AudioPlayer({ audios, title }: Props) {
         {/* Right: volume + time + speed */}
         <div className='flex items-center gap-2 justify-end'>
           {/* Volume — hidden below sm */}
-          <div className='hidden sm:flex items-center gap-1.5'>
+          <div className='hidden md:flex items-center gap-1.5'>
             <Volume2 className='w-3.5 h-3.5 text-text-muted shrink-0' />
             <input
               type='range'

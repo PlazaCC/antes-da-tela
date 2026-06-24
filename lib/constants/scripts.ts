@@ -37,7 +37,7 @@ export type AudioCategory = (typeof AUDIO_CATEGORIES)[number]
 /** Default category applied to audio rows created before the multi-audio migration (item 10). */
 export const DEFAULT_AUDIO_CATEGORY: AudioCategory = 'Roteiro falado'
 
-export function formatAgeRating(r: AgeRating): string {
+export function formatAgeRating(r: string): string {
   return r === 'livre' ? 'Livre' : `${r} anos`
 }
 
