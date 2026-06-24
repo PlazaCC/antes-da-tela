@@ -11,10 +11,13 @@ import { NextResponse, type NextRequest } from 'next/server'
  *   2. Forward the request pathname as the `x-pathname` request header so
  *      the authenticated route-group layout (`app/(authenticated)/layout.tsx`)
  *      can build an accurate `?next=` redirect URL without `usePathname()`.
+ *   3. Redirect authenticated users away from the landing page (/) to /feed.
+ *      Done at the middleware level so no React component ever renders for
+ *      this case — avoids flash-of-error from global-error boundary.
  *
- * Route protection is NOT done here — it lives in
- * `app/(authenticated)/layout.tsx` where the exact pathname is always
- * available and the redirect URL can be built accurately.
+ * Route protection for authenticated-only routes lives in
+ * `app/(authenticated)/layout.tsx`, not here — keeping it in a Server
+ * Component gives accurate pathname access and keeps this file focused.
  *
  * Uses only the anon/publishable key — no service role key required.
  */
@@ -50,7 +53,25 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: use getUser() — not getClaims() — to trigger a token refresh
   // when the access token is about to expire. getClaims() only reads the JWT
   // locally and never reaches the Supabase Auth server.
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Redirect authenticated users from landing page to feed.
+  // Done here (middleware-level, before React renders) to avoid the
+  // global-error.tsx flash that a Server Component redirect() can cause.
+  if (user && request.nextUrl.pathname === '/') {
+    const feedUrl = request.nextUrl.clone()
+    feedUrl.pathname = '/feed'
+    feedUrl.search = '' // strip any query params from landing page
+    const response = NextResponse.redirect(feedUrl)
+    // Forward any cookies that were set during the token refresh (handled
+    // by setAll above) so the browser receives the rotated tokens.
+    supabaseResponse.headers.forEach((value, key) => {
+      if (key.toLowerCase() === 'set-cookie') {
+        response.headers.append('set-cookie', value)
+      }
+    })
+    return response
+  }
 
   return supabaseResponse
 }

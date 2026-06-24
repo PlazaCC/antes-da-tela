@@ -65,16 +65,13 @@ export function LandingPillars() {
             <article
               key={p.verb}
               data-delay={i + 1}
-              className='land-reveal group flex flex-col gap-3 bg-[rgb(14,14,14)] p-[36px_28px_40px] transition-[background_0.3s_ease] cursor-default hover:bg-[rgb(22,22,22)]'>
-              <div className='mb-6 flex items-center justify-between'>
-                <span className='font-mono text-[11px] tracking-[0.14em] text-[rgb(107,104,96)]'>
-                  0{i + 1}
-                </span>
+              className='land-reveal group flex flex-col gap-3 bg-[rgb(14,14,14)] p-6 transition-[background_0.3s_ease] cursor-default hover:bg-[rgb(22,22,22)]'>
+              <div className='mb-2 flex items-center justify-between'>
+                <span className='font-display italic text-brand-accent text-[14px] tracking-[0.02em]'>{p.verb}</span>
                 <span className='text-text-secondary transition-[color_0.3s_ease,transform_0.3s_ease] w-[28px] h-[28px]'>
                   {p.icon}
                 </span>
               </div>
-              <span className='font-display italic text-brand-accent text-[13px] tracking-[0.02em]'>{p.verb}</span>
               <h3 className='font-display text-text-primary m-0 text-[clamp(20px,1.8vw,24px)] leading-[1.15]'>{p.title}</h3>
               <p className='text-text-secondary text-[14px] leading-[1.6]'>{p.body}</p>
             </article>

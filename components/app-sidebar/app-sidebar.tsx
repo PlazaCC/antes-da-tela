@@ -33,7 +33,7 @@ export function AppSidebar() {
               key={item.id}
               href={item.href}
               className={cn(
-                'flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-1 md:px-3 h-full md:h-10 rounded-sm font-sans text-[10px] md:text-[13px] font-medium transition-all duration-200',
+                'group flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-1 md:px-3 h-full md:h-10 rounded-sm font-sans text-[10px] md:text-[13px] font-medium transition-all duration-200',
                 isActive
                   ? 'text-text-primary md:bg-elevated md:border-l-[3px] border-t-[2px] md:border-t-0 border-brand-accent'
                   : item.highlighted
@@ -42,9 +42,11 @@ export function AppSidebar() {
               )}>
               <Icon
                 className={cn(
-                  'w-5 h-5 md:w-4 md:h-4 shrink-0 transition-transform duration-200',
+                  'w-5 h-5 md:w-4 md:h-4 shrink-0 transition-all duration-200',
                   isActive && 'scale-110',
-                  isActive || item.highlighted ? 'text-brand-accent' : 'text-text-muted',
+                  isActive || item.highlighted
+                    ? 'text-brand-accent group-hover:text-text-primary'
+                    : 'text-text-muted group-hover:text-text-primary',
                 )}
               />
               <span className='truncate max-w-full text-center md:text-left'>{item.label}</span>

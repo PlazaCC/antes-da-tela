@@ -109,21 +109,29 @@ export function FeedClient() {
                   <button
                     onClick={() => setPreviewId(script.id)}
                     className='group relative w-full h-[300px] md:h-[552px] overflow-hidden bg-bg-elevated transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent'>
-                    {script.banner_path ? (
-                      <Image
-                        src={getStorageUrl('avatars', script.banner_path)!}
-                        alt={script.title}
-                        fill
-                        priority
-                        className='object-cover transition-transform duration-700 group-hover:scale-105'
-                      />
-                    ) : (
-                      <div className='flex items-center justify-center h-full opacity-10'>
-                        <span className='font-mono text-heading-1 uppercase tracking-[0.3em] rotate-[-2deg]'>
-                          {script.title}
-                        </span>
-                      </div>
-                    )}
+                    {(() => {
+                      const bannerUrl = script.banner_path
+                        ? getStorageUrl('avatars', script.banner_path)
+                        : null
+                      if (!bannerUrl) {
+                        return (
+                          <div className='flex items-center justify-center h-full opacity-10'>
+                            <span className='font-mono text-heading-1 uppercase tracking-[0.3em] rotate-[-2deg]'>
+                              {script.title}
+                            </span>
+                          </div>
+                        )
+                      }
+                      return (
+                        <Image
+                          src={bannerUrl}
+                          alt={script.title}
+                          fill
+                          priority
+                          className='object-cover transition-transform duration-700 group-hover:scale-105'
+                        />
+                      )
+                    })()}
                     {/* Gradient Overlay */}
                     <div className='absolute inset-0 bg-gradient-to-t from-bg-base via-bg-base/20 to-transparent' />
 

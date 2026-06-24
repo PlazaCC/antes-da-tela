@@ -49,9 +49,14 @@ export function NavBar() {
 }
 
 async function NavBarRightSection() {
-  const supabase = await createClient()
-  const { data } = await supabase.auth.getClaims()
-  const user = data?.claims
+  let user: Record<string, unknown> | null = null
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getClaims()
+    user = data?.claims as Record<string, unknown> | null
+  } catch {
+    // Auth check failed — show login view as fallback
+  }
 
   if (!user) {
     return (
@@ -67,11 +72,12 @@ async function NavBarRightSection() {
     )
   }
 
+  const meta = user.user_metadata as Record<string, unknown> | undefined
   const userId = user.sub as string
   const userName = getUserDisplayName(user)
   const userImage =
-    (user.user_metadata?.avatar_url as string | undefined) ??
-    (user.user_metadata?.picture as string | undefined) ??
+    (meta?.avatar_url as string | undefined) ??
+    (meta?.picture as string | undefined) ??
     null
 
   return (
