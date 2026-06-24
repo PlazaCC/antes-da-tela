@@ -12,7 +12,7 @@ interface EmptyScriptsStateProps {
 export function EmptyScriptsState({
   title = 'Nenhum roteiro encontrado',
   description = 'Você ainda não publicou nenhum roteiro. Comece agora mesmo!',
-  actionLabel = 'Publicar meu primeiro roteiro',
+  actionLabel = 'Publicar roteiro',
   actionHref = '/publish',
 }: EmptyScriptsStateProps) {
   return (

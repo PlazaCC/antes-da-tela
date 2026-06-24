@@ -164,7 +164,7 @@ export function FeedClient() {
       <div className='w-full px-4 flex flex-col gap-8 md:gap-12 pb-16 pt-8'>
         {/* Genre filter pills + filter trigger */}
         <div
-          className='flex items-center gap-1.5 md:gap-2 py-2 overflow-x-auto md:flex-wrap md:overflow-hidden pb-1 md:pb-0 snap-x snap-mandatory'
+          className='flex items-center gap-1.5 md:gap-2 py-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none] md:flex-wrap md:overflow-hidden pb-1 md:pb-0 snap-x snap-mandatory'
           role='group'
           aria-label='Filtrar por gênero'>
           <button
