@@ -17,18 +17,9 @@ export class ScriptsService {
 
   /**
    * Guards publication (status = 'published'). The author must have a CPF on
-   * their profile and the work must carry a Biblioteca Nacional registration.
-   * Cadastro as draft bypasses this entirely.
+   * their profile. Cadastro as draft bypasses this entirely.
    */
   private async assertPublishable(authorId: string, bnRegistration: string | null) {
-    if (!bnRegistration || bnRegistration.trim().length === 0) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message:
-          "Para publicar, informe o registro da obra na Biblioteca Nacional.",
-      });
-    }
-
     const { data: author } = await this.supabase
       .from("users")
       .select("cpf")
