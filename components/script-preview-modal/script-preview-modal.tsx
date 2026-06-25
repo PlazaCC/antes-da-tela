@@ -211,7 +211,7 @@ export function ScriptPreviewModal({
                       <span className="font-mono text-[10px] uppercase tracking-[0.05em] text-brand-accent">
                         Sinopse
                       </span>
-                      <p className="line-clamp-6 text-body-small leading-relaxed text-text-secondary md:text-body-default">
+                      <p className="text-body-small leading-relaxed text-text-secondary md:text-body-default">
                         {script.synopsis}
                       </p>
                     </div>

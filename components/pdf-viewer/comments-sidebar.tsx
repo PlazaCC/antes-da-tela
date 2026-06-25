@@ -94,7 +94,7 @@ export function CommentsSidebar({
         {(comments as CommentWithAuthor[]).map((c) => (
           <div
             key={c.id}
-            className="flex flex-col gap-2 rounded-sm border border-border-subtle bg-elevated p-3"
+            className="min-w-0 flex flex-col gap-2 rounded-sm border border-border-subtle bg-elevated p-3"
           >
             <div className="flex items-center gap-2">
               {c.author?.id ? (
@@ -158,7 +158,7 @@ export function CommentsSidebar({
                 </AlertDialog>
               )}
             </div>
-            <p className="text-body-small leading-relaxed text-text-secondary">
+            <p className="break-words text-body-small leading-relaxed text-text-secondary">
               {c.content}
             </p>
             <ReactionBar
