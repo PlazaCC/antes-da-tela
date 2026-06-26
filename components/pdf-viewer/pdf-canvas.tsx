@@ -42,10 +42,19 @@ export function PdfCanvas({ className }: PdfCanvasProps) {
   const containerWidth = useContainerWidth(containerRef)
   const renderedRef = useRef<Set<string>>(new Set())
   const ratiosRef = useRef<Map<number, number>>(new Map())
-  const renderTasksRef = useRef<Map<number, ReturnType<PdfjsLib.PDFPageProxy['render']>>>(new Map())
+  const renderTasksRef = useRef<
+    Map<number, ReturnType<PdfjsLib.PDFPageProxy['render']>>
+  >(new Map())
 
   useEffect(() => {
-    if (!isDocumentReady || totalPages <= 0 || !baseDims || containerWidth <= 0 || !containerRef.current) return
+    if (
+      !isDocumentReady ||
+      totalPages <= 0 ||
+      !baseDims ||
+      containerWidth <= 0 ||
+      !containerRef.current
+    )
+      return
 
     // Zoom / width changed — everything must re-render at the new scale.
     const renderTasks = renderTasksRef.current
@@ -92,7 +101,10 @@ export function PdfCanvas({ className }: PdfCanvasProps) {
         for (const entry of entries) {
           const n = Number((entry.target as HTMLElement).dataset.page)
           if (!n) continue
-          ratiosRef.current.set(n, entry.isIntersecting ? entry.intersectionRatio : 0)
+          ratiosRef.current.set(
+            n,
+            entry.isIntersecting ? entry.intersectionRatio : 0
+          )
           if (entry.isIntersecting) void renderPage(n)
         }
         let bestPage = 0
@@ -105,7 +117,11 @@ export function PdfCanvas({ className }: PdfCanvasProps) {
         })
         if (bestPage > 0) setCurrentPage(bestPage)
       },
-      { root: containerRef.current, rootMargin: '400px 0px', threshold: INTERSECTION_THRESHOLDS },
+      {
+        root: containerRef.current,
+        rootMargin: '400px 0px',
+        threshold: INTERSECTION_THRESHOLDS,
+      }
     )
 
     pageElRefs.current.forEach((el) => observer.observe(el))
@@ -115,28 +131,46 @@ export function PdfCanvas({ className }: PdfCanvasProps) {
       renderTasks.forEach((task) => task.cancel())
       renderTasks.clear()
     }
-  }, [isDocumentReady, totalPages, zoom, containerWidth, baseDims, docRef, pageElRefs, canvasRefs, setCurrentPage])
+  }, [
+    isDocumentReady,
+    totalPages,
+    zoom,
+    containerWidth,
+    baseDims,
+    docRef,
+    pageElRefs,
+    canvasRefs,
+    setCurrentPage,
+  ])
 
   if (error) {
     return (
       <ErrorFallback
-        title='Erro ao carregar PDF'
+        title="Erro ao carregar PDF"
         message={`Não foi possível carregar o PDF. ${error.message}`}
         reset={resetError}
-        className='min-h-[600px]'
+        className="min-h-[600px]"
       />
     )
   }
 
-  const pageHeight = baseDims && containerWidth > 0 ? (containerWidth / baseDims.width) * baseDims.height * zoom : 0
+  const pageHeight =
+    baseDims && containerWidth > 0
+      ? (containerWidth / baseDims.width) * baseDims.height * zoom
+      : 0
 
   return (
-    <div ref={containerRef} className={cn('relative w-full overflow-auto bg-bg-secondary', className)}>
+    <div
+      ref={containerRef}
+      className={cn('bg-bg-secondary relative w-full overflow-auto', className)}
+    >
       {isLoading && (
-        <div className='absolute inset-0 z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm'>
-          <div className='flex flex-col items-center gap-3'>
-            <div className='w-8 h-8 rounded-full border-2 border-border-subtle border-t-brand-accent animate-spin' />
-            <span className='font-mono text-label-mono-caps text-text-muted uppercase tracking-wider'>Carregando…</span>
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-bg-base/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-brand-accent" />
+            <span className="font-mono text-label-mono-caps uppercase tracking-wider text-text-muted">
+              Carregando…
+            </span>
           </div>
         </div>
       )}
@@ -150,13 +184,14 @@ export function PdfCanvas({ className }: PdfCanvasProps) {
             else pageElRefs.current.delete(n)
           }}
           style={pageHeight ? { minHeight: pageHeight } : undefined}
-          className='flex justify-center py-2'>
+          className="flex justify-center py-2"
+        >
           <canvas
             ref={(el) => {
               if (el) canvasRefs.current.set(n, el)
               else canvasRefs.current.delete(n)
             }}
-            className='block max-w-full shadow-sm bg-white'
+            className="block bg-white shadow-sm"
           />
         </div>
       ))}

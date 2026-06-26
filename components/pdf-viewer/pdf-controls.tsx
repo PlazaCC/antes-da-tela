@@ -30,44 +30,48 @@ export function PdfControls({ className, onClose }: PdfControlsProps) {
     <div
       id="pdf-toolbar"
       className={cn(
-        'sticky top-0 z-10 flex h-full items-center gap-2 border-b border-border-subtle bg-bg-base/90 py-2 backdrop-blur-sm',
+        'sticky top-0 z-10 flex h-full flex-wrap items-center gap-1.5 border-b border-border-subtle bg-bg-base/90 py-2 backdrop-blur-sm sm:flex-nowrap sm:gap-2',
         className
       )}
     >
-      {/* Page navigation — scrolls to the previous/next page */}
-      <StepperControl
-        icon={BookOpenText}
-        prevIcon={<ArrowLeft />}
-        nextIcon={<ArrowRight />}
-        prevLabel="Página anterior"
-        nextLabel="Próxima página"
-        onPrev={() => goToPage(currentPage - 1)}
-        onNext={() => goToPage(currentPage + 1)}
-        prevDisabled={currentPage <= 1}
-        nextDisabled={currentPage >= totalPages}
-        hasBorder
-      >
-        <span className="select-none px-2 font-mono text-label-mono-small tabular-nums text-text-secondary">
-          {currentPage} / {totalPages || '—'}
-        </span>
-      </StepperControl>
+      {/* Page navigation — hidden on mobile */}
+      <div className="hidden sm:items-center md:flex">
+        <StepperControl
+          icon={BookOpenText}
+          prevIcon={<ArrowLeft />}
+          nextIcon={<ArrowRight />}
+          prevLabel="Página anterior"
+          nextLabel="Próxima página"
+          onPrev={() => goToPage(currentPage - 1)}
+          onNext={() => goToPage(currentPage + 1)}
+          prevDisabled={currentPage <= 1}
+          nextDisabled={currentPage >= totalPages}
+          hasBorder
+        >
+          <span className="select-none px-2 font-mono text-label-mono-small tabular-nums text-text-secondary">
+            {currentPage} / {totalPages || '—'}
+          </span>
+        </StepperControl>
+      </div>
 
-      {/* Zoom */}
-      <StepperControl
-        icon={Search}
-        prevIcon={<Minus />}
-        nextIcon={<Plus />}
-        prevLabel="Reduzir zoom"
-        nextLabel="Aumentar zoom"
-        onPrev={zoomOut}
-        onNext={zoomIn}
-      >
-        <span className="w-10 select-none text-center font-mono text-label-mono-small tabular-nums text-text-muted">
-          {Math.round(zoom * 100)}%
-        </span>
-      </StepperControl>
+      {/* Zoom — hidden on mobile */}
+      <div className="hidden sm:items-center md:flex">
+        <StepperControl
+          icon={Search}
+          prevIcon={<Minus />}
+          nextIcon={<Plus />}
+          prevLabel="Reduzir zoom"
+          nextLabel="Aumentar zoom"
+          onPrev={zoomOut}
+          onNext={zoomIn}
+        >
+          <span className="w-10 select-none text-center font-mono text-label-mono-small tabular-nums text-text-muted">
+            {Math.round(zoom * 100)}%
+          </span>
+        </StepperControl>
+      </div>
 
-      {/* Close */}
+      {/* Close — always visible */}
       {onClose && (
         <div className="ml-auto flex items-center border-l border-border-subtle pl-3">
           <Button
@@ -120,8 +124,8 @@ function StepperControl({
   return (
     <div
       className={cn(
-        'flex h-full items-center gap-3 pl-3',
-        hasBorder && 'border-r border-border-subtle pr-3'
+        'flex h-full items-center gap-1.5 pl-2 sm:gap-3 sm:pl-3',
+        hasBorder && 'border-r border-border-subtle pr-2 sm:pr-3'
       )}
     >
       <Icon className="size-5 text-border-subtle" />

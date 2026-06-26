@@ -32,7 +32,7 @@ export function PdfFullscreenDialog({
       <DialogContent
         showCloseButton={false}
         className={cn(
-          'h-dvh w-screen !max-w-none grid-rows-[auto_1fr] gap-0 overflow-hidden rounded-none p-0',
+          'flex h-dvh w-screen !max-w-none flex-col gap-0 rounded-none p-0',
           className
         )}
       >
@@ -48,7 +48,7 @@ export function PdfFullscreenDialog({
                 className="static h-full border-b-0 bg-transparent p-0 backdrop-blur-none"
               />
             </DialogHeader>
-            <PdfCanvas className="h-full min-h-0" />
+            <PdfCanvas className="min-h-0 flex-1" />
           </PdfViewerProvider>
         ) : null}
       </DialogContent>

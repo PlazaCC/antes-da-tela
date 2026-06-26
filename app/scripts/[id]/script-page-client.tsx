@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
 import { Film, MessageCircleMore } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -81,10 +81,43 @@ export function ScriptPageClient({
     })
   )
 
+  // ---- Rating ----
+  const { data: ratingData } = useQuery(
+    trpc.ratings.getAverage.queryOptions({ scriptId: script!.id })
+  )
+
+  const { data: userRating } = useQuery({
+    ...trpc.ratings.getUserRating.queryOptions({
+      scriptId: script!.id,
+      userId: currentUserId ?? '',
+    }),
+    enabled: !!currentUserId,
+  })
+
+  const rateMutation = useMutation(
+    trpc.ratings.upsert.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(
+          trpc.ratings.getAverage.queryFilter({ scriptId: script!.id })
+        )
+        queryClient.invalidateQueries(
+          trpc.ratings.getUserRating.queryFilter({
+            scriptId: script!.id,
+            userId: currentUserId ?? '',
+          })
+        )
+      },
+      onError: (error) => toast.error('Erro ao avaliar: ' + error.message),
+    })
+  )
+
+  const handleRate = (value: number) => {
+    rateMutation.mutate({ scriptId: script!.id, score: value })
+  }
+
   const handleDelete = () => {
-    if (!script) return
     setIsDeleting(true)
-    deleteMutation.mutate({ id: script.id })
+    deleteMutation.mutate({ id: script!.id })
   }
 
   if (!script) {
@@ -101,13 +134,21 @@ export function ScriptPageClient({
   const hasAudio = audios.length > 0
 
   const subHeaderProps = {
-    scriptId: script.id,
-    title: script.title,
+    scriptId: script!.id,
+    title: script!.title,
     isOwner,
     hasPitchDeck: !!pitchDeckUrl,
     isDeleting,
     onOpenPitchDeck: () => setPitchDeckOpen(true),
     onDelete: () => setDeleteModalOpen(true),
+    rating: {
+      isOwner,
+      ratingData: ratingData ?? undefined,
+      userRating: userRating ?? null,
+      isRatingPending: rateMutation.isPending,
+      currentUserId,
+      onRate: handleRate,
+    },
   }
 
   return (
