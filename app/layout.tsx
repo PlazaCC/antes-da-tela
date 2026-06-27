@@ -37,7 +37,6 @@ export const metadata: Metadata = {
     title: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
     description:
       'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
-    images: [{ url: '/antes-da-tela-og.png', width: 1200, height: 630 }],
     type: 'website',
   },
   twitter: {
@@ -45,7 +44,6 @@ export const metadata: Metadata = {
     title: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
     description:
       'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
-    images: ['/antes-da-tela-og.png'],
   },
 }
 
