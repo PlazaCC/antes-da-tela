@@ -57,7 +57,7 @@ function FeaturedCard({ id, genre, title, author, pages, rating, coverUrl, color
     <Link href={`/scripts/${id}`} className='no-underline flex-[0_0_280px] snap-center'>
       <article
         className='land-reveal flex flex-col  rounded-[4px] border bg-[rgb(22,22,22)] transition-[transform_0.3s_ease,border-color_0.3s_ease] cursor-pointer hover:border-[hsl(var(--color-brand-accent))] border-[rgb(37,37,37)]'>
-        <div className='relative flex h-[280px] flex-col justify-between  p-4' style={{ background: coverUrl ? undefined : color }}>
+        <div className='relative flex h-[280px] flex-col justify-end p-4' style={{ background: coverUrl ? undefined : color }}>
           {coverUrl ? (
             <Image
               src={coverUrl}
@@ -77,14 +77,6 @@ function FeaturedCard({ id, genre, title, author, pages, rating, coverUrl, color
             />
           )}
           <div className='absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgba(0,0,0,0.55)_100%)]' />
-          <div className='relative z-[1] flex justify-between'>
-            <span className='inline-flex items-center rounded-[2px] border border-[rgba(232,92,47,0.4)] bg-[rgba(232,92,47,0.12)] px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--color-brand-accent))]'>
-              {genre.toUpperCase()}
-            </span>
-            <span className='font-mono text-[11px] text-[hsl(var(--color-text-primary))]'>
-              {pages ? `${pages}p` : '—'}
-            </span>
-          </div>
           <span className='relative z-[1] font-display text-[24px] leading-[1.05] text-[hsl(var(--color-text-primary))]'>
             {title}
           </span>

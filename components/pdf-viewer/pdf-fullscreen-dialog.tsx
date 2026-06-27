@@ -30,21 +30,25 @@ export function PdfFullscreenDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        showCloseButton={false}
         className={cn(
-          'h-dvh w-screen !max-w-none grid-rows-[auto_1fr] gap-0 overflow-hidden rounded-none p-0',
+          'flex h-dvh w-screen !max-w-none flex-col gap-0 rounded-none p-0',
           className
         )}
       >
         {open ? (
           <PdfViewerProvider url={url}>
             <DialogHeader className="flex shrink-0 flex-row items-center justify-between gap-3 space-y-0 border-b border-border-subtle px-5 py-3">
-              <DialogTitle className="truncate pr-8 font-mono text-label-mono-default text-text-primary">
+              <DialogTitle className="truncate font-mono text-label-mono-default text-text-primary">
                 {title}
               </DialogTitle>
               {/* Controls composed into the header, outside the canvas */}
-              <PdfControls className="static h-full border-b-0 bg-transparent p-0 pr-10 backdrop-blur-none" />
+              <PdfControls
+                onClose={() => onOpenChange(false)}
+                className="static h-full border-b-0 bg-transparent p-0 backdrop-blur-none"
+              />
             </DialogHeader>
-            <PdfCanvas className="h-full min-h-0" />
+            <PdfCanvas className="min-h-0 flex-1" />
           </PdfViewerProvider>
         ) : null}
       </DialogContent>

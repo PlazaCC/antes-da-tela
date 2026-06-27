@@ -1,3 +1,4 @@
+import { RatingBox } from '@/components/script-page/rating-box'
 import { ScriptPageOwnerActions } from '@/components/script-page/script-page-owner-actions'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, FileText } from 'lucide-react'
@@ -14,6 +15,15 @@ interface ScriptPageSubHeaderProps {
   onDelete: () => void
   /** PDF page/zoom controls rendered alongside the header actions. */
   extra?: ReactNode
+  /** Rating — rendered alongside owner actions */
+  rating?: {
+    isOwner: boolean
+    ratingData: { average: number; total: number } | undefined
+    userRating: number | null | undefined
+    isRatingPending: boolean
+    currentUserId: string | null
+    onRate: (value: number) => void
+  }
 }
 
 // Sub-header shell — controlled height; `extra` holds the PDF page/zoom controls.
@@ -26,6 +36,7 @@ export function ScriptPageSubHeader({
   onOpenPitchDeck,
   onDelete,
   extra,
+  rating,
 }: ScriptPageSubHeaderProps) {
   return (
     <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-border-subtle bg-bg-base px-4">
@@ -43,8 +54,17 @@ export function ScriptPageSubHeader({
           {title}
         </span>
       </div>
+
+      {/* Mobile rating — always visible when rating is available */}
+      {rating ? (
+        <div className="flex shrink-0 items-center lg:hidden">
+          <RatingBox {...rating} />
+        </div>
+      ) : null}
+
       <div className="hidden h-full shrink-0 items-center gap-3 lg:flex">
         <div className="flex h-full items-center gap-3 border-r border-border-subtle pr-3">
+          {rating ? <RatingBox {...rating} /> : null}
           {hasPitchDeck ? (
             <Button onClick={onOpenPitchDeck} size="xs">
               <FileText />

@@ -1,5 +1,6 @@
 import type { TagVariant } from '@/components/tag/tag'
 import { Tag } from '@/components/tag/tag'
+import { formatAgeRating } from '@/lib/constants/scripts'
 import { Film } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -98,7 +99,7 @@ export function ScriptPageMetadata({
       <div className='flex flex-col gap-4 flex-1 min-w-0'>
         <div className='flex flex-wrap items-center gap-2'>
           {script.genre ? <Tag variant={genreVariant}>{script.genre}</Tag> : null}
-          {script.age_rating ? <Tag variant='default'>{script.age_rating}</Tag> : null}
+          {script.age_rating ? <Tag variant='default'>{formatAgeRating(script.age_rating)}</Tag> : null}
         </div>
 
         <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>

@@ -10,11 +10,20 @@ import { createClient } from '@/lib/supabase/server'
 type Props = { searchParams: Promise<{ next?: string }> }
 
 export default async function LoginPage({ searchParams }: Props) {
-  const supabase = await createClient()
-  const { data } = await supabase.auth.getClaims()
+  // Check if already authenticated before rendering the login form.
+  // getClaims() internally calls getSession() which makes a network request
+  // to Supabase Auth — wrap in try-catch to avoid crashing on transient
+  // failures. redirect() stays outside so NEXT_REDIRECT is not swallowed.
+  let isAuthenticated = false
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getClaims()
+    isAuthenticated = !!data?.claims
+  } catch {
+    // Auth check failed — show login form as fallback
+  }
 
-  // Already authenticated — no reason to show the login screen.
-  if (data?.claims) {
+  if (isAuthenticated) {
     const { next } = await searchParams
     redirect(next && next.startsWith('/') ? next : '/feed')
   }
@@ -24,7 +33,7 @@ export default async function LoginPage({ searchParams }: Props) {
       <div className="w-full max-w-sm flex flex-col gap-8">
         <div className="flex justify-center">
           <Link href="/">
-            <Image src="/assets/logo.svg" alt="Antes da Tela" width={83} height={19} priority />
+            <Image src="/assets/logo.svg" alt="Antes da Tela" width={187} height={43} priority />
           </Link>
         </div>
 

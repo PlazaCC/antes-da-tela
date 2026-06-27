@@ -48,12 +48,12 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
               <Link
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-2.5 px-2 py-2 cursor-pointer text-sm rounded-sm transition-colors outline-none',
+                  'group flex items-center gap-2.5 px-2 py-2 cursor-pointer text-sm rounded-sm transition-colors outline-none',
                   isHighlighted
                     ? 'text-brand-accent bg-brand-accent/5 hover:bg-brand-accent/10'
                     : 'text-text-secondary hover:text-text-primary hover:bg-elevated',
                 )}>
-                <Icon className={cn('w-4 h-4', isHighlighted ? 'text-brand-accent' : 'text-text-muted')} />
+                <Icon className={cn('w-4 h-4', isHighlighted ? 'text-brand-accent group-hover:text-text-primary' : 'text-text-muted group-hover:text-text-primary')} />
                 {item.label}
               </Link>
             </DropdownMenuItem>

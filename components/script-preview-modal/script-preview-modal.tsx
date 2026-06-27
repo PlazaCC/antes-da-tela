@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { cn, getStorageUrl } from '@/lib/utils'
 import { formatPublishedDate } from '@/lib/utils/format-date'
+import { formatAgeRating } from '@/lib/constants/scripts'
 import { useTRPC } from '@/trpc/client'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
@@ -176,7 +177,7 @@ export function ScriptPreviewModal({
                           variant="privado"
                           className="px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider md:text-[10px]"
                         >
-                          {script.age_rating}
+                          {formatAgeRating(script.age_rating)}
                         </Tag>
                       )}
                     </div>
@@ -210,7 +211,7 @@ export function ScriptPreviewModal({
                       <span className="font-mono text-[10px] uppercase tracking-[0.05em] text-brand-accent">
                         Sinopse
                       </span>
-                      <p className="line-clamp-6 text-body-small leading-relaxed text-text-secondary md:text-body-default">
+                      <p className="text-body-small leading-relaxed text-text-secondary md:text-body-default">
                         {script.synopsis}
                       </p>
                     </div>
@@ -226,7 +227,7 @@ export function ScriptPreviewModal({
               </div>
 
               {/* Fixed CTA at bottom on mobile */}
-              <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col gap-2 border-t border-border-subtle bg-surface/80 p-5 backdrop-blur-md md:hidden">
+              <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col gap-2 border-t border-border-subtle bg-surface/80 p-2 backdrop-blur-md md:hidden">
                 {pitchDeckUrl && (
                   <button
                     type="button"
@@ -254,6 +255,14 @@ export function ScriptPreviewModal({
                 >
                   Ler Roteiro
                 </Link>
+                 {audios.length > 0 && (
+                  <div className="flex flex-col">
+                    <div className=" rounded-sm border border-border-subtle">
+                      <AudioPlayer audios={audios} title={script.title} />
+                    </div>
+                  </div>
+                )}
+                
               </div>
             </div>
           )}

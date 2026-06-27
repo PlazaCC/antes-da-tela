@@ -102,10 +102,7 @@ export function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps)
                     </Button>
                   </>
                 ) : (
-                  <>
-                    <FollowButton authorId={user.id} />
-                    <Button variant='outline' className='flex-1 md:flex-none h-9 px-4 text-xs md:text-sm'>Mensagem</Button>
-                  </>
+                  <FollowButton authorId={user.id} />
                 )}
               </div>
             </div>

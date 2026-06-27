@@ -15,6 +15,7 @@ export function useCommentActions(scriptId: string, currentUserId: string | null
 
   const createCommentMutation = useMutation(trpc.comments.create.mutationOptions())
   const toggleReactionMutation = useMutation(trpc.comments.toggleReaction.mutationOptions())
+  const deleteCommentMutation = useMutation(trpc.comments.delete.mutationOptions())
 
   function createComment(pageNumber: number, content: string): Promise<void> {
     const trimmed = content.trim()
@@ -66,10 +67,32 @@ export function useCommentActions(scriptId: string, currentUserId: string | null
     )
   }
 
+  function deleteComment(commentId: string, pageNumber: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      deleteCommentMutation.mutate(
+        { commentId },
+        {
+          onSuccess: () => {
+            void queryClient.invalidateQueries({
+              queryKey: trpc.comments.list.queryOptions({ scriptId, pageNumber }).queryKey,
+            })
+            resolve()
+          },
+          onError: (err) => {
+            toast.error(err.message)
+            reject(err)
+          },
+        },
+      )
+    })
+  }
+
   return {
     createComment,
     toggleReaction,
+    deleteComment,
     isCreating: createCommentMutation.isPending,
     isToggling: toggleReactionMutation.isPending,
+    isDeleting: deleteCommentMutation.isPending,
   }
 }
