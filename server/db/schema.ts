@@ -28,6 +28,7 @@ export const users = pgTable(
     // because a profile can exist without a CPF — it is only required to publish.
     cpf: text('cpf').unique(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
+    deactivatedAt: timestamp('deactivated_at'),
   },
   () => [
     pgPolicy('Users can view and update their own data', {

@@ -1,7 +1,8 @@
 'use client'
 
+import { SubgenreSelector } from '@/components/publish/subgenre-selector'
 import { FormField } from '@/components/shared/form-field'
-import { AGE_RATINGS, formatAgeRating, GENRES, MAX_SUBGENRES } from '@/lib/constants/scripts'
+import { AGE_RATINGS, formatAgeRating, GENRES, MACRO_GENRES, MAX_SUBGENRES } from '@/lib/constants/scripts'
 import { cn } from '@/lib/utils'
 import type { PublishFormValues } from '@/lib/validators/publish'
 import type { UseFormSetValue } from 'react-hook-form'
@@ -14,14 +15,17 @@ interface GenreStepProps {
 }
 
 export function GenreStep({ genre, subgenres, ageRating, setValue }: GenreStepProps) {
+  const selectPrimary = (item: (typeof MACRO_GENRES)[number]) => {
+    setValue('genre', item)
+    if (subgenres.includes(item)) {
+      setValue('subgenres', subgenres.filter((s) => s !== item), { shouldDirty: true })
+    }
+  }
+
   const toggleSubgenre = (item: (typeof GENRES)[number]) => {
     const isSelected = subgenres.includes(item)
     if (isSelected) {
-      setValue(
-        'subgenres',
-        subgenres.filter((s) => s !== item),
-        { shouldDirty: true },
-      )
+      setValue('subgenres', subgenres.filter((s) => s !== item), { shouldDirty: true })
       return
     }
     if (subgenres.length >= MAX_SUBGENRES) return
@@ -30,62 +34,45 @@ export function GenreStep({ genre, subgenres, ageRating, setValue }: GenreStepPr
 
   return (
     <div className='flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300'>
-      <FormField label='Gênero Predominante'>
-        <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
-          {GENRES.map((item) => (
-            <button
-              key={item}
-              type='button'
-              onClick={() => {
-                setValue('genre', item)
-                // A subgenre can't duplicate the primary genre.
-                if (subgenres.includes(item)) {
-                  setValue(
-                    'subgenres',
-                    subgenres.filter((s) => s !== item),
-                    { shouldDirty: true },
-                  )
-                }
-              }}
-              className={cn(
-                'h-10 px-4 rounded-sm border text-xs font-medium transition-all text-left truncate',
-                genre === item
-                  ? 'border-brand-accent bg-brand-accent/5 text-brand-accent ring-1 ring-brand-accent'
-                  : 'border-border-subtle bg-elevated text-text-muted hover:border-text-muted hover:text-text-secondary',
-              )}>
-              {item}
-            </button>
-          ))}
-        </div>
-      </FormField>
-
-      <FormField
-        label='Subgêneros'
-        labelInfo={`Até ${MAX_SUBGENRES}`}
-        helperText={`Selecionados: ${subgenres.length}/${MAX_SUBGENRES}`}>
-        <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
-          {GENRES.filter((item) => item !== genre).map((item) => {
-            const isSelected = subgenres.includes(item)
-            const isDisabled = !isSelected && subgenres.length >= MAX_SUBGENRES
-            return (
+      <FormField label='Gênero Principal'>
+        {!genre ? (
+          <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
+            {MACRO_GENRES.map((item) => (
               <button
                 key={item}
                 type='button'
-                disabled={isDisabled}
-                onClick={() => toggleSubgenre(item)}
-                className={cn(
-                  'h-10 px-4 rounded-sm border text-xs font-medium transition-all text-left truncate',
-                  isSelected
-                    ? 'border-brand-accent bg-brand-accent/5 text-brand-accent ring-1 ring-brand-accent'
-                    : 'border-border-subtle bg-elevated text-text-muted hover:border-text-muted hover:text-text-secondary',
-                  isDisabled && 'opacity-40 cursor-not-allowed hover:border-border-subtle hover:text-text-muted',
-                )}>
+                onClick={() => selectPrimary(item)}
+                className='h-10 px-4 rounded-sm border border-border-subtle bg-elevated text-xs font-medium text-text-muted transition-all text-left truncate hover:border-text-muted hover:text-text-secondary capitalize'>
                 {item}
               </button>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className='flex items-center gap-3'>
+            <span className='h-10 px-4 rounded-sm border border-brand-accent bg-brand-accent/5 text-brand-accent ring-1 ring-brand-accent text-xs font-medium flex items-center capitalize'>
+              {genre}
+            </span>
+            <button
+              type='button'
+              onClick={() => {
+                setValue('genre', '')
+                setValue('subgenres', [], { shouldDirty: true })
+              }}
+              className='text-xs text-text-muted hover:text-text-secondary underline underline-offset-2'>
+              Trocar
+            </button>
+          </div>
+        )}
       </FormField>
+
+      {genre && (
+        <FormField
+          label='Subgêneros'
+          labelInfo={`Até ${MAX_SUBGENRES}`}
+          helperText={`Selecionados: ${subgenres.length}/${MAX_SUBGENRES}`}>
+          <SubgenreSelector genre={genre} subgenres={subgenres} onToggle={toggleSubgenre} />
+        </FormField>
+      )}
 
       <FormField label='Classificação Indicativa'>
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2'>

@@ -6,7 +6,7 @@ import { ScriptPreviewModal } from '@/components/script-preview-modal'
 import { SearchSkeleton } from '@/components/skeletons'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { Skeleton } from '@/components/ui/skeleton'
-import { GENRES } from '@/lib/constants/scripts'
+import { MACRO_GENRES } from '@/lib/constants/scripts'
 import { useFilterParams } from '@/lib/hooks/use-filter-params'
 import { cn, getStorageUrl } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
@@ -191,7 +191,7 @@ export function FeedClient() {
             Todos
           </button>
 
-          {GENRES.map((g) => (
+          {MACRO_GENRES.map((g) => (
             <button
               key={g}
               onClick={() => toggleGenre(g)}

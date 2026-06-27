@@ -64,4 +64,12 @@ export const usersRouter = createTRPCRouter({
   listFollowing: publicProcedure.input(z.object({ userId: z.string().uuid() })).query(async ({ input, ctx }) => {
     return ctx.usersService.listFollowing(input.userId)
   }),
+
+  deactivateAccount: authenticatedProcedure.mutation(async ({ ctx }) => {
+    return ctx.usersService.deactivateAccount(ctx.user!.id)
+  }),
+
+  deleteAccount: authenticatedProcedure.mutation(async ({ ctx }) => {
+    return ctx.usersService.deleteAccount(ctx.user!.id)
+  }),
 })

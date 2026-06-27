@@ -12,17 +12,19 @@ import { useEffect, useMemo, useState } from 'react'
  * Pages inside `(authenticated)/` will always resolve a non-null userId
  * after loading — the layout auth-check guarantees it.
  */
-export function useCurrentUser(): { userId: string | null; isLoading: boolean } {
+export function useCurrentUser(): { userId: string | null; email: string | null; isLoading: boolean } {
   const supabase = useMemo(() => createClient(), [])
   const [userId, setUserId] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUserId(data.user?.id ?? null)
+      setEmail(data.user?.email ?? null)
       setIsLoading(false)
     })
   }, [supabase])
 
-  return { userId, isLoading }
+  return { userId, email, isLoading }
 }

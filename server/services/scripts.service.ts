@@ -19,7 +19,7 @@ export class ScriptsService {
    * Guards publication (status = 'published'). The author must have a CPF on
    * their profile. Cadastro as draft bypasses this entirely.
    */
-  private async assertPublishable(authorId: string, bnRegistration: string | null) {
+  private async assertPublishable(authorId: string) {
     const { data: author } = await this.supabase
       .from("users")
       .select("cpf")
@@ -81,7 +81,7 @@ export class ScriptsService {
     // Cadastro as draft is always allowed.
     const isDraft = status === "draft";
     if (!isDraft) {
-      await this.assertPublishable(userId, bnRegistration ?? null);
+      await this.assertPublishable(userId);
     }
 
     // Insert script row
@@ -210,11 +210,7 @@ export class ScriptsService {
     // Enforce publish gating when the resulting status is 'published'.
     const finalStatus = updateData.status ?? oldData.status;
     if (finalStatus === "published") {
-      const finalBn =
-        updateData.bnRegistration !== undefined
-          ? updateData.bnRegistration
-          : (oldData.bn_registration as string | null);
-      await this.assertPublishable(authorId, finalBn ?? null);
+      await this.assertPublishable(authorId);
     }
 
     // Map camelCase to snake_case for Supabase

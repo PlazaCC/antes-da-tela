@@ -1,7 +1,7 @@
 'use client'
 
-import { LoadingState } from '@/components/shared/loading-state'
 import { FormField } from '@/components/shared/form-field'
+import { LoadingState } from '@/components/shared/loading-state'
 import { PageShell } from '@/components/shared/page-shell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -93,6 +93,7 @@ export default function AccountPage() {
           {isPending ? 'Salvando…' : 'Salvar alterações'}
         </Button>
       </form>
+
     </PageShell>
   )
 }

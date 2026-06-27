@@ -52,7 +52,7 @@ interface FeaturedCardProps {
   pattern: keyof typeof PATTERNS
 }
 
-function FeaturedCard({ id, genre, title, author, pages, rating, coverUrl, color, pattern }: FeaturedCardProps) {
+function FeaturedCard({ id, title, author, rating, coverUrl, color, pattern }: FeaturedCardProps) {
   return (
     <Link href={`/scripts/${id}`} className='no-underline flex-[0_0_280px] snap-center'>
       <article

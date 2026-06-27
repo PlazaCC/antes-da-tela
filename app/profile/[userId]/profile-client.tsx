@@ -84,6 +84,8 @@ export function ProfileClient({ user, scripts, stats }: Props) {
         {activeTab === 'activity' && (
           <p className='text-text-muted font-mono text-label-mono-caps py-12'>Atividade em breve.</p>
         )}
+
+
       </div>
     </div>
   )
