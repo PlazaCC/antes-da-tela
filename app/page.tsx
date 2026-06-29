@@ -17,9 +17,11 @@ import './landing/landing.css'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Antes da Tela — Publique, leia e descubra roteiros',
+    absolute:
+      'Antes da Tela — Publique, leia e descubra propriedades intelectuais',
   },
-  description: 'Plataforma de publicação, leitura e descoberta de roteiros audiovisuais brasileiros.',
+  description:
+    'Plataforma de publicação, leitura e descoberta de propriedades intelectuais audiovisuais.',
 }
 
 export default async function HomePage() {
@@ -42,7 +44,9 @@ export default async function HomePage() {
   }
 
   const queryClient = getQueryClient()
-  await queryClient.prefetchQuery(trpc.scripts.listRecent.queryOptions({ limit: 7 }))
+  await queryClient.prefetchQuery(
+    trpc.scripts.listRecent.queryOptions({ limit: 7 })
+  )
 
   return (
     <HydrateClient>
