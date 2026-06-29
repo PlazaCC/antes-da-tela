@@ -35,16 +35,15 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     (
       <div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative' }}>
         {/* Banner */}
-        <div
+        <img
+          src={bannerUrl}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `url(${bannerUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
           }}
         />
         {/* Gradient overlay for depth */}

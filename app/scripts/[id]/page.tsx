@@ -43,13 +43,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const { script } = await getPageData(id)
-  const title = script?.title ?? 'Roteiro'
-  const description = script?.logline ?? 'Leia e discuta roteiros audiovisuais.'
   return {
-    title,
-    description,
-    openGraph: { title, description },
-    twitter: { card: 'summary_large_image', title, description },
+    title: script?.title ?? 'Roteiro',
+    description: script?.logline ?? 'Leia e discuta roteiros audiovisuais.',
   }
 }
 
