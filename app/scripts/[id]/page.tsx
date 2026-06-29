@@ -57,10 +57,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: script?.title ?? 'Roteiro',
     description: script?.logline ?? 'Leia e discuta roteiros audiovisuais.',
     openGraph: {
-      type: 'article',
+      type: 'website',
       title: script?.title,
       description: script?.logline || '',
-      authors: script?.author?.name || '',
+      // authors: script?.author?.name || '',
     },
     twitter: {
       title: script?.title,
