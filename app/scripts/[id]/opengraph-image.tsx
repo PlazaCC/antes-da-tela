@@ -87,7 +87,7 @@ export default async function Image({
           }}
         />
       </div>,
-      { width: 1200, height: 630 }
+      { width: 1200, height: 1200 }
     )
   } catch (err) {
     console.log('errooooooooo----------------', err)
