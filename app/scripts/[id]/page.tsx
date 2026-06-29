@@ -14,12 +14,22 @@ type Props = { params: Promise<{ id: string }> }
 const getPageData = cache(async (id: string) => {
   const ctx = await createTRPCContext({ headers: await headers() })
   const caller = appRouter.createCaller(ctx)
-  const [script, { data: authData }] = await Promise.all([caller.scripts.getById({ id }), ctx.supabase.auth.getUser()])
+  const [script, { data: authData }] = await Promise.all([
+    caller.scripts.getById({ id }),
+    ctx.supabase.auth.getUser(),
+  ])
 
   const pdfUrl = getAssetUrl(script?.script_files?.[0]?.storage_path, 'scripts')
   const audios = (script?.audio_files ?? [])
-    .map((a) => ({ url: getAssetUrl(a.storage_path, 'audio'), title: a.title, description: a.description }))
-    .filter((a): a is { url: string; title: string; description: string | null } => !!a.url)
+    .map((a) => ({
+      url: getAssetUrl(a.storage_path, 'audio'),
+      title: a.title,
+      description: a.description,
+    }))
+    .filter(
+      (a): a is { url: string; title: string; description: string | null } =>
+        !!a.url
+    )
   const bannerUrl = getAssetUrl(script?.banner_path, 'avatars')
   const coverUrl = getAssetUrl(script?.cover_path, 'avatars')
   const pitchDeckUrl = getAssetUrl(script?.pitch_deck_path, 'scripts')
@@ -46,6 +56,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: script?.title ?? 'Roteiro',
     description: script?.logline ?? 'Leia e discuta roteiros audiovisuais.',
+    openGraph: {
+      type: 'article',
+      title: script?.title,
+      description: script?.logline || '',
+      authors: script?.author?.name || '',
+    },
+    twitter: {
+      title: script?.title,
+      description: script?.logline || '',
+    },
   }
 }
 
@@ -56,8 +76,15 @@ export default async function ScriptPage({ params }: Props) {
     notFound()
   }
 
-  const { script, pdfUrl, audios, bannerUrl, coverUrl, pitchDeckUrl, currentUserId } =
-    await getPageData(id)
+  const {
+    script,
+    pdfUrl,
+    audios,
+    bannerUrl,
+    coverUrl,
+    pitchDeckUrl,
+    currentUserId,
+  } = await getPageData(id)
 
   return (
     <Suspense fallback={<ScriptPageSkeleton />}>
