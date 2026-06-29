@@ -42,24 +42,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound()
   }
 
-  const { script, bannerUrl } = await getPageData(id)
+  const { script } = await getPageData(id)
   const title = script?.title ?? 'Roteiro'
   const description = script?.logline ?? 'Leia e discuta roteiros audiovisuais.'
-  const image = bannerUrl ?? '/antes-da-tela-og.png'
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      images: [{ url: image }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [image],
-    },
+    openGraph: { title, description },
+    twitter: { card: 'summary_large_image', title, description },
   }
 }
 
