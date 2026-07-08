@@ -1,11 +1,9 @@
 import { AppToaster } from '@/components/app-toaster/app-toaster'
 import { NavBar } from '@/components/navbar'
-import { PostHogProvider } from '@/components/posthog-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
 import type { Metadata } from 'next'
 import { DM_Mono, DM_Serif_Display, Inter } from 'next/font/google'
-import { Suspense } from 'react'
 import './globals.css'
 
 const defaultUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.antesdatela.com.br'
@@ -86,17 +84,13 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${dmSerifDisplay.variable} ${dmMono.variable} antialiased`}
       >
-        <Suspense fallback={null}>
-          <PostHogProvider>
-            <TRPCReactProvider>
-              <ThemeProvider>
-                <NavBar />
-                {children}
-                <AppToaster />
-              </ThemeProvider>
-            </TRPCReactProvider>
-          </PostHogProvider>
-        </Suspense>
+        <TRPCReactProvider>
+          <ThemeProvider>
+            <NavBar />
+            {children}
+            <AppToaster />
+          </ThemeProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   )

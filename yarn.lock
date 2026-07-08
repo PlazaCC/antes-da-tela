@@ -2102,10 +2102,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@posthog/core@npm:^1.39.6":
+  version: 1.39.6
+  resolution: "@posthog/core@npm:1.39.6"
+  dependencies:
+    "@posthog/types": "npm:^1.392.0"
+  checksum: 10c0/ae11815dd3de8583c1638b7c02ba5fbe31becff07aed3c2f5e48042b56fe67563b1dea39b225a64bc69e2486af677e7690c5eaa052572d79b0a808cfd043cefc
+  languageName: node
+  linkType: hard
+
 "@posthog/types@npm:^1.390.2":
   version: 1.390.2
   resolution: "@posthog/types@npm:1.390.2"
   checksum: 10c0/8119f4af573e44b8f35a1d11a64b7ec7c8b3f8134651394a0410e136e9fabd0eb61df8d16ab334f2cb1c8dc6053e917eaecdf83c78e18eb7f65af513a1d1a2d5
+  languageName: node
+  linkType: hard
+
+"@posthog/types@npm:^1.392.0, @posthog/types@npm:^1.392.1":
+  version: 1.392.1
+  resolution: "@posthog/types@npm:1.392.1"
+  checksum: 10c0/d91f573a9affae860c3ee179e697beb355f72f3034164f9b725df706b3182a4b6bf0930f50ac2ae006f6f652e328120728db87f1c7df1228e92973db9c8c45a9
   languageName: node
   linkType: hard
 
@@ -5102,7 +5118,7 @@ __metadata:
     pdfjs-dist: "npm:5.4.296"
     postcss: "npm:^8"
     postgres: "npm:^3.4.9"
-    posthog-js: "npm:^1.368.0"
+    posthog-js: "npm:^1.398.7"
     posthog-node: "npm:^5.29.2"
     prettier: "npm:3.8.4"
     prettier-plugin-organize-attributes: "npm:^1.0.0"
@@ -5777,7 +5793,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.38.1":
+"core-js@npm:^3.49.0":
   version: 3.49.0
   resolution: "core-js@npm:3.49.0"
   checksum: 10c0/2e42edb47eda38fd5368380131623c8aa5d4a6b42164125b17744bdc08fa5ebbbdd06b4b4aa6ca3663470a560b0f2fba48e18f142dfe264b0039df85bc625694
@@ -9212,19 +9228,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"posthog-js@npm:^1.368.0":
-  version: 1.391.2
-  resolution: "posthog-js@npm:1.391.2"
+"posthog-js@npm:^1.398.7":
+  version: 1.398.7
+  resolution: "posthog-js@npm:1.398.7"
   dependencies:
-    "@posthog/core": "npm:^1.35.3"
-    "@posthog/types": "npm:^1.390.2"
-    core-js: "npm:^3.38.1"
+    "@posthog/core": "npm:^1.39.6"
+    "@posthog/types": "npm:^1.392.1"
+    core-js: "npm:^3.49.0"
     dompurify: "npm:^3.3.2"
     fflate: "npm:^0.4.8"
-    preact: "npm:^10.29.2"
+    preact: "npm:^10.29.3"
     query-selector-shadow-dom: "npm:^1.0.1"
     web-vitals: "npm:^5.3.0"
-  checksum: 10c0/c8efabdc33f398eeb36ad36db52cf461d8063f426aee3b9a6a467fa51299d427db429d7b3b25156383b1873d127fea3d377756b73afc2d632228e81b2e31734b
+  checksum: 10c0/29c5618a463be9d108e6035f5292d1d67c421f9c1069e3afc0e1923e464241d22a0d898094538aab4616b91b997aec73de11cbb6c45c4c1b686748f0ea34b67e
   languageName: node
   linkType: hard
 
@@ -9242,10 +9258,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.29.2":
-  version: 10.29.2
-  resolution: "preact@npm:10.29.2"
-  checksum: 10c0/2ee161274e475804524608d42bba8c79920636b322293248796a9e5bf4c3332336f8c0eca1b1566ed09cdee95e408eb20b5b7613d95820ea6b6eb8fc090ef60a
+"preact@npm:^10.29.3":
+  version: 10.29.7
+  resolution: "preact@npm:10.29.7"
+  peerDependencies:
+    preact-render-to-string: ">=5"
+  peerDependenciesMeta:
+    preact-render-to-string:
+      optional: true
+  checksum: 10c0/c16df6d83d1f1d7117f5e27c64121989c317c54561535a98d1cce874406b7edcd68c2230dc4d440ef8509f29638d7a6fcb1ae0f974e9f71852aee17d90ccc87b
   languageName: node
   linkType: hard
 
