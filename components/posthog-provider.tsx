@@ -3,6 +3,7 @@
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
 import { useEffect, useState } from 'react'
+import { PostHogPageView } from './posthog-pageview'
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false)
@@ -18,9 +19,11 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
 
     posthog.init(token, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
+      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
       capture_pageview: false, // Pageviews are handled by the PostHogPageView component
       persistence: 'localStorage+cookie',
+      capture_exceptions: true,
+      defaults: '2026-01-30',
     })
 
     setReady(true)
@@ -28,5 +31,10 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   if (!ready) return <>{children}</>
 
-  return <PHProvider client={posthog}>{children}</PHProvider>
+  return (
+    <PHProvider client={posthog}>
+      <PostHogPageView />
+      {children}
+    </PHProvider>
+  )
 }

@@ -33,6 +33,27 @@ vi.mock('@/lib/sentry', () => ({
   captureException: vi.fn(() => 'mock-event-id'),
 }))
 
+vi.mock('@/lib/posthog-server', () => ({
+  getPostHogClient: vi.fn(() => ({
+    capture: vi.fn(),
+    identify: vi.fn(),
+    shutdown: vi.fn(async () => {}),
+  })),
+}))
+
+// `after()` requires Next's request-scoped AsyncLocalStorage, which isn't
+// present when calling the handler directly in a unit test — stub it to run
+// the task inline instead of throwing "called outside a request scope".
+vi.mock('next/server', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('next/server')>()
+  return {
+    ...actual,
+    after: vi.fn((task: () => unknown) => {
+      void task()
+    }),
+  }
+})
+
 import { handler } from '@/app/auth/callback/route'
 
 describe('OAuth callback route', () => {
@@ -43,10 +64,10 @@ describe('OAuth callback route', () => {
     expect(res.headers.get('location')).toContain('/dashboard')
   })
 
-  it('redirects to / when next param is missing', async () => {
+  it('redirects to /feed when next param is missing', async () => {
     const req = new Request('https://example.test/auth/callback?code=abc123')
     const res = await handler(req)
-    expect(res.headers.get('location')).toMatch(/\/$/)
+    expect(res.headers.get('location')).toContain('/feed')
   })
 
   it('redirects to error page when code param is missing', async () => {

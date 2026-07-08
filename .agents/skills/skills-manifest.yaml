@@ -108,3 +108,6 @@ skills:
   - name: create-pr
     description: Analyze changes and generate a professional PR description following conventional standards.
     path: create-pr/SKILL.md
+  - name: integration-nextjs-app-router
+    description: PostHog integration for Next.js App Router applications — event tracking, identify, error tracking best practices.
+    path: integration-nextjs-app-router/SKILL.md

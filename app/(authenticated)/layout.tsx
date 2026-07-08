@@ -1,3 +1,4 @@
+import { PostHogUserIdentifier } from '@/components/posthog-user-identifier'
 import { createClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -36,5 +37,14 @@ async function AuthCheck({ children }: { children: React.ReactNode }) {
     redirect(`/auth/login?next=${encodeURIComponent(pathname)}`)
   }
 
-  return <>{children}</>
+  return (
+    <>
+      <PostHogUserIdentifier
+        userId={data.user.id}
+        email={data.user.email}
+        name={data.user.user_metadata?.full_name as string | undefined}
+      />
+      {children}
+    </>
+  )
 }

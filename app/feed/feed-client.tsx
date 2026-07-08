@@ -7,13 +7,14 @@ import { SearchSkeleton } from '@/components/skeletons'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MACRO_GENRES } from '@/lib/constants/scripts'
-import { useFilterParams } from '@/lib/hooks/use-filter-params'
+import { useFilterParams, type Genre } from '@/lib/hooks/use-filter-params'
 import { cn, getStorageUrl } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { SlidersHorizontalIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import posthog from 'posthog-js'
 import { useEffect, useRef, useState } from 'react'
 
 export function FeedClient() {
@@ -23,6 +24,16 @@ export function FeedClient() {
   const [filterOpen, setFilterOpen] = useState(false)
 
   const { genres, ageRatings, toggleGenre, clearFilters, apply } = useFilterParams()
+
+  const handlePreviewOpen = (scriptId: string) => {
+    setPreviewId(scriptId)
+    posthog.capture('script_preview_opened', { script_id: scriptId })
+  }
+
+  const handleGenreFilter = (genre: Genre) => {
+    toggleGenre(genre)
+    posthog.capture('feed_genre_filtered', { genre, is_active: !genres.includes(genre) })
+  }
 
   const search = searchParams.get('q') ?? ''
   const isSearchActive = !!(search || genres.length > 0 || ageRatings.length > 0)
@@ -107,7 +118,7 @@ export function FeedClient() {
               {trendingBanners.map((script) => (
                 <CarouselItem key={script.id}>
                   <button
-                    onClick={() => setPreviewId(script.id)}
+                    onClick={() => handlePreviewOpen(script.id)}
                     className='group relative w-full h-[300px] md:h-[552px] overflow-hidden bg-bg-elevated transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent'>
                     {(() => {
                       const bannerUrl = script.banner_path
@@ -194,7 +205,7 @@ export function FeedClient() {
           {MACRO_GENRES.map((g) => (
             <button
               key={g}
-              onClick={() => toggleGenre(g)}
+              onClick={() => handleGenreFilter(g)}
               aria-pressed={genres.includes(g)}
               className={cn(
                 'px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-body-small border font-mono font-medium transition-colors capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base shrink-0 snap-start',
@@ -222,7 +233,7 @@ export function FeedClient() {
                   ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                   pages={script.script_files?.[0]?.page_count ?? null}
                   coverUrl={getStorageUrl('avatars', script.cover_path)}
-                  onPreview={() => setPreviewId(script.id)}
+                  onPreview={() => handlePreviewOpen(script.id)}
                 />
               ))}
             </div>
@@ -247,7 +258,7 @@ export function FeedClient() {
                     ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                     pages={script.script_files?.[0]?.page_count ?? null}
                     coverUrl={getStorageUrl('avatars', script.cover_path)}
-                    onPreview={() => setPreviewId(script.id)}
+                    onPreview={() => handlePreviewOpen(script.id)}
                   />
                 ))}
               </div>

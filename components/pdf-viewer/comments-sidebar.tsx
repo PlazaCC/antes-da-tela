@@ -22,6 +22,7 @@ import { useTRPC } from '@/trpc/client'
 import { useQuery } from '@tanstack/react-query'
 import { Trash2, X } from 'lucide-react'
 import Link from 'next/link'
+import posthog from 'posthog-js'
 import { useState } from 'react'
 import { usePDFViewerStore } from './pdf-viewer-store'
 
@@ -165,13 +166,14 @@ export function CommentsSidebar({
               disabled={c.author?.id === currentUserId}
               loading={isToggling}
               reactions={buildReactionBarItems(c.id, reactionsMap)}
-              onSelect={(index) =>
-                toggleReaction(
-                  c.id,
-                  REACTION_EMOJIS[index] as ReactionEmoji,
-                  currentPage
-                )
-              }
+              onSelect={(index) => {
+                toggleReaction(c.id, REACTION_EMOJIS[index] as ReactionEmoji, currentPage)
+                posthog.capture('comment_reaction_toggled', {
+                  script_id: scriptId,
+                  page_number: currentPage,
+                  emoji: REACTION_EMOJIS[index],
+                })
+              }}
             />
           </div>
         ))}
@@ -190,6 +192,11 @@ export function CommentsSidebar({
             onSubmit={async (e) => {
               e.preventDefault()
               await createComment(currentPage, content)
+              posthog.capture('comment_submitted', {
+                script_id: scriptId,
+                page_number: currentPage,
+                content_length: content.length,
+              })
               setContent('')
             }}
             className="flex flex-col gap-2"
