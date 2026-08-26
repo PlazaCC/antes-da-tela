@@ -52,7 +52,7 @@ export default async function HomePage() {
     <HydrateClient>
       <LandingClientShell>
         {/* Suppress the global app NavBar on the landing page */}
-        <style>{`header[aria-label="Principal"] { display: none !important; }`}</style>
+        <style>{`header[aria-label="Principal"] { display: none !important; } footer[aria-label="Rodapé"] { display: none !important; }`}</style>
         <LandingHeader />
         <main>
           <LandingHero />

@@ -41,7 +41,7 @@ Design system — arquivos de referência
 - Guia Figma: `docs/FIGMA.md`
 - Tokens CSS: `app/globals.css` (variáveis HSL em `:root` e `.dark`)
 - Tokens Tailwind: `tailwind.config.ts` (keys: `surface`, `elevated`, `brand.*`, `state.*`, etc.)
-- Fontes: Inter (sans), DM Serif Display (display), DM Mono (mono) — carregadas em `app/layout.tsx`
+- Fontes: Inter (sans), Clash Grotesk (display), DM Mono (mono) — carregadas em `app/layout.tsx`
 
 Componentes UI disponíveis em `components/ui/`:
 avatar, badge, button, card, checkbox, comment, dialog, drag-zone, dropdown-menu, info, input, label, metric-card, nav-bar, navigation, progress, radio-box, reaction-bar, script-card, skeleton, star-rating, switch, tabs, tag, tooltip
