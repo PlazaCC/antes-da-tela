@@ -28,6 +28,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
 import { Film, MessageCircleMore } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import posthog from 'posthog-js'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -62,6 +63,7 @@ export function ScriptPageClient({
   const deleteMutation = useMutation(
     trpc.scripts.delete.mutationOptions({
       onSuccess: () => {
+        posthog.capture('script_deleted', { script_id: script!.id })
         toast.success('Roteiro excluído com sucesso')
         queryClient.invalidateQueries(trpc.scripts.listFeatured.queryFilter())
         queryClient.invalidateQueries(trpc.scripts.listRecent.queryFilter())
@@ -113,6 +115,7 @@ export function ScriptPageClient({
 
   const handleRate = (value: number) => {
     rateMutation.mutate({ scriptId: script!.id, score: value })
+    posthog.capture('script_rated', { script_id: script!.id, score: value })
   }
 
   const handleDelete = () => {
@@ -139,7 +142,10 @@ export function ScriptPageClient({
     isOwner,
     hasPitchDeck: !!pitchDeckUrl,
     isDeleting,
-    onOpenPitchDeck: () => setPitchDeckOpen(true),
+    onOpenPitchDeck: () => {
+      setPitchDeckOpen(true)
+      posthog.capture('pitch_deck_opened', { script_id: script!.id })
+    },
     onDelete: () => setDeleteModalOpen(true),
     rating: {
       isOwner,

@@ -13,6 +13,7 @@ import { useTRPC } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, type UseFormSetValue } from "react-hook-form";
 import { toast } from "sonner";
@@ -342,6 +343,13 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
           bannerPath: bannerPath === "" ? null : bannerPath,
           pitchDeckPath: pitchDeckPath === "" ? null : pitchDeckPath,
           audios,
+        }, {
+          onSuccess: (script) => {
+            posthog.capture('script_updated', {
+              script_id: script.id,
+              genre: values.genre || undefined,
+            })
+          },
         });
       } else {
         createMutation.mutate({
@@ -359,6 +367,13 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
           coverPath: coverPath || undefined,
           bannerPath: bannerPath || undefined,
           pitchDeckPath: pitchDeckPath || undefined,
+        }, {
+          onSuccess: (script) => {
+            posthog.capture(desiredStatus === 'published' ? 'script_published' : 'script_draft_saved', {
+              script_id: script.id,
+              genre: values.genre || undefined,
+            })
+          },
         });
       }
     } catch (error) {

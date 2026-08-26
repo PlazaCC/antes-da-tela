@@ -5,6 +5,7 @@ import { profileSchema, type ProfileFormValues } from '@/lib/validators/profile'
 import { useTRPC } from '@/trpc/client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import posthog from 'posthog-js'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -34,6 +35,7 @@ export function useProfileForm(userId: string): UseProfileFormResult {
     trpc.users.updateProfile.mutationOptions({
       onSuccess: () => {
         toast.success('Perfil atualizado.')
+        posthog.capture('profile_updated')
         void queryClient.invalidateQueries(trpc.users.getProfile.queryFilter({ id: userId }))
       },
       onError: (error) => {

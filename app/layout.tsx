@@ -1,7 +1,6 @@
 import { AppToaster } from '@/components/app-toaster/app-toaster'
 import { Footer } from '@/components/footer/footer'
 import { NavBar } from '@/components/navbar'
-import { PostHogProvider } from '@/components/posthog-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
 import type { Metadata } from 'next'
@@ -45,15 +44,15 @@ export const metadata: Metadata = {
     title: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
     description:
       'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
-    images: [{ url: '/antes-da-tela-og.png', width: 1200, height: 630 }],
     type: 'website',
+    images: ['/opengraph-image.png'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
+    images: ['/opengraph-image.png'],
     description:
       'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
-    images: ['/antes-da-tela-og.png'],
   },
 }
 

@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js'
 import { TRPCError } from '@trpc/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { FollowUser, UserProfile, ProfileStats } from '@/lib/types'
@@ -142,6 +143,57 @@ export class UsersService {
         return Array.isArray(r.follower) ? r.follower[0] : r.follower
       })
       .filter(Boolean) as FollowUser[]
+  }
+
+  async deactivateAccount(userId: string) {
+    const { error } = await this.supabase
+      .from('users')
+      .update({ deactivated_at: new Date().toISOString() })
+      .eq('id', userId)
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    return { success: true }
+  }
+
+  async deleteAccount(userId: string) {
+    // 1. Fetch all scripts with their storage file paths
+    const { data: scripts } = await this.supabase
+      .from('scripts')
+      .select('cover_path, banner_path, script_files(storage_path), audio_files(storage_path)')
+      .eq('author_id', userId)
+
+    // 2. Delete storage files for each script (non-critical — never throw)
+    for (const script of scripts ?? []) {
+      const pdfPaths = (script.script_files ?? []).map((f) => f.storage_path).filter(Boolean) as string[]
+      if (pdfPaths.length) await this.supabase.storage.from('scripts').remove(pdfPaths).catch(() => {})
+
+      const audioPaths = (script.audio_files ?? []).map((f) => f.storage_path).filter(Boolean) as string[]
+      if (audioPaths.length) await this.supabase.storage.from('audio').remove(audioPaths).catch(() => {})
+
+      if (script.cover_path) await this.supabase.storage.from('avatars').remove([script.cover_path]).catch(() => {})
+      if (script.banner_path) await this.supabase.storage.from('avatars').remove([script.banner_path]).catch(() => {})
+    }
+
+    // 3. Delete user avatar files from avatars/{userId}/ folder
+    const { data: avatarFiles } = await this.supabase.storage.from('avatars').list(userId)
+    if (avatarFiles?.length) {
+      const paths = avatarFiles.map((f) => `${userId}/${f.name}`)
+      await this.supabase.storage.from('avatars').remove(paths).catch(() => {})
+    }
+
+    // 4. Delete user row — cascades scripts, comments, ratings, follows, reactions
+    const { error: deleteError } = await this.supabase.from('users').delete().eq('id', userId)
+    if (deleteError) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: deleteError.message })
+
+    // 5. Delete Supabase Auth user (requires service role key)
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } },
+    )
+    const { error: authError } = await admin.auth.admin.deleteUser(userId)
+    if (authError) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: authError.message })
+
+    return { success: true }
   }
 
   /** Users that `userId` follows. */

@@ -17,10 +17,11 @@ import './landing/landing.css'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Antes da Tela — Publique, leia e descubra roteiros',
+    absolute:
+      'Antes da Tela — Publique, leia e descubra propriedades intelectuais',
   },
   description:
-    'Plataforma de publicação, leitura e descoberta de roteiros audiovisuais brasileiros.',
+    'Plataforma de publicação, leitura e descoberta de propriedades intelectuais audiovisuais.',
 }
 
 export default async function HomePage() {

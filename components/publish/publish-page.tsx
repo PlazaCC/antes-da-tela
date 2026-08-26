@@ -119,14 +119,12 @@ export function PublishPage({ scriptId }: PublishPageProps) {
   const [visibility, setVisibility] = useState<ScriptVisibility>("public");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  // Publishing requires the author's CPF and the work's BN registration.
+  // Publishing requires the author's CPF.
   const publishBlockers = useMemo(() => {
     const blockers: string[] = [];
     if (!profile?.cpf) blockers.push("Preencha o CPF no seu perfil");
-    if (!(formValues.bnRegistration ?? "").trim())
-      blockers.push("Informe o registro na Biblioteca Nacional");
     return blockers;
-  }, [profile?.cpf, formValues.bnRegistration]);
+  }, [profile?.cpf]);
 
   const publishBlocked = visibility === "public" && publishBlockers.length > 0;
   // Public content additionally requires accepting the platform's policies.

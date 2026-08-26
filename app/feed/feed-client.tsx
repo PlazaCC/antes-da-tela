@@ -12,14 +12,15 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { Skeleton } from '@/components/ui/skeleton'
-import { GENRES } from '@/lib/constants/scripts'
-import { useFilterParams } from '@/lib/hooks/use-filter-params'
+import { MACRO_GENRES } from '@/lib/constants/scripts'
+import { useFilterParams, type Genre } from '@/lib/hooks/use-filter-params'
 import { cn, getStorageUrl } from '@/lib/utils'
 import { useTRPC } from '@/trpc/client'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { SlidersHorizontalIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import posthog from 'posthog-js'
 import { useEffect, useRef, useState } from 'react'
 
 export function FeedClient() {
@@ -30,6 +31,16 @@ export function FeedClient() {
 
   const { genres, ageRatings, toggleGenre, clearFilters, apply } =
     useFilterParams()
+
+  const handlePreviewOpen = (scriptId: string) => {
+    setPreviewId(scriptId)
+    posthog.capture('script_preview_opened', { script_id: scriptId })
+  }
+
+  const handleGenreFilter = (genre: Genre) => {
+    toggleGenre(genre)
+    posthog.capture('feed_genre_filtered', { genre, is_active: !genres.includes(genre) })
+  }
 
   const search = searchParams.get('q') ?? ''
   const isSearchActive = !!(
@@ -209,10 +220,10 @@ export function FeedClient() {
             Todos
           </button>
 
-          {GENRES.map((g) => (
+          {MACRO_GENRES.map((g) => (
             <button
               key={g}
-              onClick={() => toggleGenre(g)}
+              onClick={() => handleGenreFilter(g)}
               aria-pressed={genres.includes(g)}
               className={cn(
                 'shrink-0 snap-start border px-2.5 py-1 font-mono text-[11px] font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base md:px-3 md:py-1.5 md:text-body-small',
@@ -243,7 +254,7 @@ export function FeedClient() {
                   ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                   pages={script.script_files?.[0]?.page_count ?? null}
                   coverUrl={getStorageUrl('avatars', script.cover_path)}
-                  onPreview={() => setPreviewId(script.id)}
+                  onPreview={() => handlePreviewOpen(script.id)}
                 />
               ))}
             </div>
@@ -272,7 +283,7 @@ export function FeedClient() {
                     ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                     pages={script.script_files?.[0]?.page_count ?? null}
                     coverUrl={getStorageUrl('avatars', script.cover_path)}
-                    onPreview={() => setPreviewId(script.id)}
+                    onPreview={() => handlePreviewOpen(script.id)}
                   />
                 ))}
               </div>

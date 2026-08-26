@@ -97,7 +97,7 @@ className={cn("base-styles", condition && "extra", className)}
 ## Component Conventions
 
 - Client Components that use hooks or events: add `"use client"` at the top.
-- Keep components focused — extract sub-components when a file exceeds ~100 lines.
+- Keep components focused — target 100 lines per file (hard limit 150). See `components.md` for detailed rules on extraction criteria.
 - Use `React.ComponentProps<"element">` for extending base HTML props.
 - Prefer named exports over default exports.
 

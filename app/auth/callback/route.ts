@@ -1,7 +1,8 @@
 import withErrorHandler from '@/lib/api/withErrorHandler'
+import { getPostHogClient } from '@/lib/posthog-server'
 import { captureException } from '@/lib/sentry'
 import { createRouteHandlerClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { after, NextResponse } from 'next/server'
 
 /**
  * OAuth callback route — receives the authorization code from Supabase's
@@ -79,6 +80,36 @@ async function handler(request: Request) {
           console.error('Failed to upsert user after OAuth exchange', err)
         },
       )
+
+    // Track sign-in and identify the user server-side. Scheduled via `after()`
+    // so it runs once the redirect response has already been sent — a slow or
+    // unreachable PostHog can then never delay the redirect or turn a
+    // successful login into an `/auth/error` redirect (posthog-node's
+    // `shutdown()` rejects on its internal 30s timeout, which would otherwise
+    // be caught by this function's own try/catch below).
+    after(async () => {
+      const posthog = getPostHogClient()
+      const isNewUser = new Date(user.created_at).getTime() > Date.now() - 60_000
+      posthog.capture({
+        distinctId: user.id,
+        event: 'user_signed_in',
+        properties: {
+          provider: 'google',
+          is_new_user: isNewUser,
+        },
+      })
+      posthog.identify({
+        distinctId: user.id,
+        properties: {
+          name: String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'User').slice(0, 100),
+          email: user.email,
+        },
+      })
+      // posthog-node queues captures for async delivery and does not manage
+      // its own lifecycle — without draining here, the events could be lost
+      // once the function instance is frozen/recycled.
+      await posthog.shutdown()
+    })
 
     const destination = next.startsWith('/') ? next : '/feed'
     return NextResponse.redirect(`${origin}${destination}`)

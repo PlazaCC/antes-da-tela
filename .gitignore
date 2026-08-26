@@ -58,6 +58,10 @@ skills-lock.json
 # MCP Files
 .playwright-mcp
 
+# PostHog wizard scratch file — transient plan coordination between wizard
+# steps, meant to be removed by the wizard itself once it finishes
+.posthog-events.json
+
 # keep graph outputs, skip heavy/local-only files
 graphify-out/cache/
 graphify-out/manifest.json
