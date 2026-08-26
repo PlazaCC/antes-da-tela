@@ -108,16 +108,14 @@ export default function RootLayout({
         className={`${inter.variable} ${clashGrotesk.variable} ${dmMono.variable} antialiased`}
       >
         <Suspense fallback={null}>
-          <PostHogProvider>
-            <TRPCReactProvider>
-              <ThemeProvider>
-                <NavBar />
-                {children}
-                <Footer />
-                <AppToaster />
-              </ThemeProvider>
-            </TRPCReactProvider>
-          </PostHogProvider>
+          <TRPCReactProvider>
+            <ThemeProvider>
+              <NavBar />
+              {children}
+              <Footer />
+              <AppToaster />
+            </ThemeProvider>
+          </TRPCReactProvider>
         </Suspense>
       </body>
     </html>
