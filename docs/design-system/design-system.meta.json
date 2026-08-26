@@ -2,7 +2,7 @@
   "meta": {
     "source": "Figma MCP API — Framelink",
     "description": "Design system extracted from the Antes da Tela Figma file. Source of truth: the three canonical sections (Fluxo principal 186:1388, Fluxo cadastro roteiro 186:1350, Perfil 186:2075). Colors and layout specs confirmed against live Figma globalVars.",
-    "version": 4,
+    "version": 6,
     "generatedAt": "2026-04-17T00:00:00Z"
   },
 
@@ -10,42 +10,196 @@
     "colors": {
       "note": "Hex values confirmed from Figma globalVars fill tokens. HSL approximations for Tailwind CSS vars.",
       "palette": [
-        { "name": "bg/base",          "hex": "#0E0E0E", "hsl": "hsl(0 0% 5.5%)",   "usage": "Root background, screen canvas" },
-        { "name": "bg/surface",       "hex": "#161616", "hsl": "hsl(0 0% 8.6%)",   "usage": "Header, cards, nav background" },
-        { "name": "bg/elevated",      "hex": "#1E1E1E", "hsl": "hsl(0 0% 11.8%)",  "usage": "Modals, dropdowns, elevated surfaces" },
-        { "name": "border/subtle",    "hex": "#343434", "hsl": "hsl(0 0% 20.4%)",  "usage": "Low-contrast separators, inactive state borders" },
-        { "name": "border/default",   "hex": "#252525", "hsl": "hsl(0 0% 14.5%)",  "usage": "Card borders, input outlines, dividers" },
-        { "name": "text/primary",     "hex": "#F0EDE6", "hsl": "hsl(42 20% 92%)",  "usage": "Headings, body text" },
-        { "name": "text/secondary",   "hex": "#B7B4B0", "hsl": "hsl(40 3% 69%)",   "usage": "Metadata, captions, secondary labels" },
-        { "name": "text/muted",       "hex": "#6B6860", "hsl": "hsl(36 4% 40%)",   "usage": "Placeholders, disabled text, tertiary labels" },
-        { "name": "brand/accent",     "hex": "#E85C2F", "hsl": "hsl(15 79% 55%)",  "usage": "Primary CTAs, active states, highlights" },
-        { "name": "brand/lime",       "hex": "#C8E87A", "hsl": "hsl(78 71% 69%)",  "usage": "Secondary highlights, tags, progress indicators" },
-        { "name": "state/error",      "hex": "#EF4545", "hsl": "hsl(0 84% 60%)",   "usage": "Error states, destructive actions" },
-        { "name": "state/success",    "hex": "#3CBF7E", "hsl": "hsl(150 52% 49%)", "usage": "Success states, published status" },
-        { "name": "state/warning",    "hex": "#F0C040", "hsl": "hsl(45 87% 59%)",  "usage": "Warning states (design implied, not yet confirmed in Figma fills)" }
+        {
+          "name": "bg/base",
+          "hex": "#161616",
+          "hsl": "hsl(0 0% 8.6%)",
+          "usage": "Root background, screen canvas"
+        },
+        {
+          "name": "bg/surface",
+          "hex": "#1E1E1E",
+          "hsl": "hsl(0 0% 11.8%)",
+          "usage": "Header, cards, nav background"
+        },
+        {
+          "name": "bg/elevated",
+          "hex": "#262626",
+          "hsl": "hsl(0 0% 14.9%)",
+          "usage": "Modals, dropdowns, elevated surfaces"
+        },
+        {
+          "name": "border/subtle",
+          "hex": "#343434",
+          "hsl": "hsl(0 0% 20.4%)",
+          "usage": "Low-contrast separators, inactive state borders"
+        },
+        {
+          "name": "border/default",
+          "hex": "#2A2A2A",
+          "hsl": "hsl(0 0% 16.5%)",
+          "usage": "Card borders, input outlines, dividers"
+        },
+        {
+          "name": "text/primary",
+          "hex": "#FFF3D2",
+          "hsl": "hsl(44 100% 91%)",
+          "usage": "Headings, body text"
+        },
+        {
+          "name": "text/secondary",
+          "hex": "#CAC5B8",
+          "hsl": "hsl(44 12% 78%)",
+          "usage": "Metadata, captions, secondary labels"
+        },
+        {
+          "name": "text/muted",
+          "hex": "#999383",
+          "hsl": "hsl(44 10% 58%)",
+          "usage": "Placeholders, disabled text, tertiary labels"
+        },
+        {
+          "name": "brand/accent",
+          "hex": "#1C72D7",
+          "hsl": "hsl(212 77% 48%)",
+          "usage": "Primary CTAs, active states, highlights"
+        },
+        {
+          "name": "brand/lime",
+          "hex": "#C8E87A",
+          "hsl": "hsl(78 71% 69%)",
+          "usage": "Secondary highlights, tags, progress indicators"
+        },
+        {
+          "name": "brand/blue",
+          "hex": "#1C72D7",
+          "hsl": "hsl(212 77% 48%)",
+          "usage": "Brand blue — primary CTAs, links, highlights"
+        },
+        {
+          "name": "brand/cream",
+          "hex": "#FFF3D2",
+          "hsl": "hsl(44 100% 91%)",
+          "usage": "Brand cream — light accents, badges, highlights"
+        },
+        {
+          "name": "state/error",
+          "hex": "#EF4545",
+          "hsl": "hsl(0 84% 60%)",
+          "usage": "Error states, destructive actions"
+        },
+        {
+          "name": "state/success",
+          "hex": "#3CBF7E",
+          "hsl": "hsl(150 52% 49%)",
+          "usage": "Success states, published status"
+        },
+        {
+          "name": "state/warning",
+          "hex": "#F0C040",
+          "hsl": "hsl(45 87% 59%)",
+          "usage": "Warning states (design implied, not yet confirmed in Figma fills)"
+        }
       ]
     },
     "typography": {
-      "fontFamilies": ["Inter", "DM Serif Display", "DM Mono"],
+      "fontFamilies": ["Inter", "Clash Grotesk", "DM Mono"],
       "note": "Named styles confirmed from Figma globalVars. Others inferred from existing design-system v3.",
       "scales": [
-        { "name": "Display/Hero",       "fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 72, "lineHeight": "1.06em" },
-        { "name": "Display/Hero-Italic","fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 72, "lineHeight": "1.06em", "fontStyle": "italic" },
-        { "name": "Heading/1",          "fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 48, "lineHeight": "1.08em" },
-        { "name": "Heading/2",          "fontFamily": "DM Serif Display", "fontWeight": 400, "fontSize": 32, "lineHeight": "1.125em", "confirmed": true },
-        { "name": "Heading/3",          "fontFamily": "Inter",            "fontWeight": 600, "fontSize": 24, "lineHeight": "1.25em" },
-        { "name": "Body/Large",         "fontFamily": "Inter",            "fontWeight": 400, "fontSize": 18, "lineHeight": "1.56em" },
-        { "name": "Body/Default",       "fontFamily": "Inter",            "fontWeight": 400, "fontSize": 16, "lineHeight": "1.5em",  "confirmed": true },
-        { "name": "Body/Small",         "fontFamily": "Inter",            "fontWeight": 400, "fontSize": 14, "lineHeight": "1.14em", "confirmed": true },
-        { "name": "Label/Mono-Default", "fontFamily": "DM Mono",          "fontWeight": 400, "fontSize": 13, "lineHeight": "1.38em" },
-        { "name": "Label/Mono-Caps",    "fontFamily": "DM Mono",          "fontWeight": 500, "fontSize": 11, "lineHeight": "1.45em" },
-        { "name": "Label/Mono-Small",   "fontFamily": "DM Mono",          "fontWeight": 500, "fontSize": 10, "lineHeight": "1.4em" }
+        {
+          "name": "Display/Hero",
+          "fontFamily": "Clash Grotesk",
+          "fontWeight": 400,
+          "fontSize": 72,
+          "lineHeight": "1.06em"
+        },
+        {
+          "name": "Display/Hero-Italic",
+          "fontFamily": "Clash Grotesk",
+          "fontWeight": 400,
+          "fontSize": 72,
+          "lineHeight": "1.06em",
+          "fontStyle": "italic"
+        },
+        {
+          "name": "Heading/1",
+          "fontFamily": "Clash Grotesk",
+          "fontWeight": 400,
+          "fontSize": 48,
+          "lineHeight": "1.08em"
+        },
+        {
+          "name": "Heading/2",
+          "fontFamily": "Clash Grotesk",
+          "fontWeight": 400,
+          "fontSize": 32,
+          "lineHeight": "1.125em",
+          "confirmed": true
+        },
+        {
+          "name": "Heading/3",
+          "fontFamily": "Inter",
+          "fontWeight": 600,
+          "fontSize": 24,
+          "lineHeight": "1.25em"
+        },
+        {
+          "name": "Body/Large",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "fontSize": 18,
+          "lineHeight": "1.56em"
+        },
+        {
+          "name": "Body/Default",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "fontSize": 16,
+          "lineHeight": "1.5em",
+          "confirmed": true
+        },
+        {
+          "name": "Body/Small",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "fontSize": 14,
+          "lineHeight": "1.14em",
+          "confirmed": true
+        },
+        {
+          "name": "Label/Mono-Default",
+          "fontFamily": "DM Mono",
+          "fontWeight": 400,
+          "fontSize": 13,
+          "lineHeight": "1.38em"
+        },
+        {
+          "name": "Label/Mono-Caps",
+          "fontFamily": "DM Mono",
+          "fontWeight": 500,
+          "fontSize": 11,
+          "lineHeight": "1.45em"
+        },
+        {
+          "name": "Label/Mono-Small",
+          "fontFamily": "DM Mono",
+          "fontWeight": 500,
+          "fontSize": 10,
+          "lineHeight": "1.4em"
+        }
       ]
     },
     "spacing": {
       "scale": [4, 8, 10, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64],
       "system": "4px base unit",
-      "confirmedGaps": ["8px (component internal)", "10px (search input gap)", "16px (header padding)", "28px (nav items gap)", "32px (user section gap)", "40px (navigation gap)"]
+      "confirmedGaps": [
+        "8px (component internal)",
+        "10px (search input gap)",
+        "16px (header padding)",
+        "28px (nav items gap)",
+        "32px (user section gap)",
+        "40px (navigation gap)"
+      ]
     },
     "radius": {
       "default": 2,
@@ -76,7 +230,21 @@
       "figmaNodeId": "13:95",
       "description": "Semantic pill tags for genre, status, rating severity.",
       "props": ["color", "icon", "label"],
-      "variants": ["default", "success", "warning", "error", "crítico", "importante", "neutro", "publicado", "rascunho", "privado", "drama", "thriller", "comédia"],
+      "variants": [
+        "default",
+        "success",
+        "warning",
+        "error",
+        "crítico",
+        "importante",
+        "neutro",
+        "publicado",
+        "rascunho",
+        "privado",
+        "drama",
+        "thriller",
+        "comédia"
+      ],
       "states": ["default"]
     },
     {
@@ -93,14 +261,29 @@
       "figmaNodeId": "100:622",
       "description": "Extended input variants used in the upload/publish flow (profile, tagline, description, etc.).",
       "props": ["type", "placeholder", "value", "error", "helper"],
-      "variants": ["input-selected", "input-base", "input-profile", "input-tagline", "input-description"]
+      "variants": [
+        "input-selected",
+        "input-base",
+        "input-profile",
+        "input-tagline",
+        "input-description"
+      ]
     },
     {
       "name": "ScriptCard",
       "type": "component",
       "figmaNodeId": "48:644",
       "description": "Card for a script in lists. Hover border brand-accent. Shows title, author, genre tag, star rating, page count.",
-      "props": ["title", "author", "genre", "rating", "pages", "coverUrl", "href", "onPreview"],
+      "props": [
+        "title",
+        "author",
+        "genre",
+        "rating",
+        "pages",
+        "coverUrl",
+        "href",
+        "onPreview"
+      ],
       "states": ["default", "hover"]
     },
     {
@@ -285,9 +468,9 @@
     },
     "bestPractices": {
       "do": [
-        "Use brand/accent (#E85C2F) only for primary CTAs and active states — one per context.",
+        "Use brand/accent (#1C72D7) only for primary CTAs and active states — one per context.",
         "Use DM Mono for all numerical metadata, page counts, ratings, and code-like labels.",
-        "Use DM Serif Display for headings and display copy.",
+        "Use Clash Grotesk for headings and display copy.",
         "Use bg/surface (#161616) for the Header and elevated containers.",
         "Use 1px solid #252525 (border/default) for card and input borders.",
         "Minimum 44px touch target for all interactive elements.",
@@ -305,30 +488,30 @@
 
   "exportContext": {
     "cssVars": {
-      "--color-bg-base":        "0 0% 5.5%",
-      "--color-bg-surface":     "0 0% 8.6%",
-      "--color-bg-elevated":    "0 0% 11.8%",
-      "--color-border-subtle":  "0 0% 20.4%",
+      "--color-bg-base": "0 0% 5.5%",
+      "--color-bg-surface": "0 0% 8.6%",
+      "--color-bg-elevated": "0 0% 11.8%",
+      "--color-border-subtle": "0 0% 20.4%",
       "--color-border-default": "0 0% 14.5%",
-      "--color-text-primary":   "42 20% 92%",
+      "--color-text-primary": "42 20% 92%",
       "--color-text-secondary": "40 3% 69%",
-      "--color-text-muted":     "36 4% 40%",
-      "--color-brand-accent":   "15 79% 55%",
-      "--color-brand-lime":     "78 71% 69%",
-      "--color-state-error":    "0 84% 60%",
-      "--color-state-success":  "150 52% 49%",
-      "--color-state-warning":  "45 87% 59%"
+      "--color-text-muted": "36 4% 40%",
+      "--color-brand-accent": "15 79% 55%",
+      "--color-brand-lime": "78 71% 69%",
+      "--color-state-error": "0 84% 60%",
+      "--color-state-success": "150 52% 49%",
+      "--color-state-warning": "45 87% 59%"
     },
     "tailwindMapping": {
-      "bg/base":       "bg-base",
-      "bg/surface":    "surface",
-      "bg/elevated":   "elevated",
-      "text/primary":  "text-primary",
-      "text/muted":    "text-muted",
-      "brand/accent":  "brand-accent",
-      "brand/lime":    "brand-lime",
+      "bg/base": "bg-base",
+      "bg/surface": "surface",
+      "bg/elevated": "elevated",
+      "text/primary": "text-primary",
+      "text/muted": "text-muted",
+      "brand/accent": "brand-accent",
+      "brand/lime": "brand-lime",
       "state/success": "state-success",
-      "state/error":   "state-error"
+      "state/error": "state-error"
     },
     "componentAudit": [
       {
@@ -497,7 +680,16 @@
         "route": "/",
         "figmaNodeId": "51:562",
         "section": "Fluxo principal",
-        "requiredComponents": ["Header", "ScriptCard", "Tag", "RatingBox", "Avatar", "Input", "Button", "FollowButton"],
+        "requiredComponents": [
+          "Header",
+          "ScriptCard",
+          "Tag",
+          "RatingBox",
+          "Avatar",
+          "Input",
+          "Button",
+          "FollowButton"
+        ],
         "status": "partial",
         "notes": "Basic listing implemented. Missing: FollowButton on author cards, search input in Header, RatingBox as standalone component."
       },
@@ -506,9 +698,22 @@
         "route": "/ (overlay)",
         "figmaNodeId": "51:718",
         "section": "Fluxo principal",
-        "requiredComponents": ["Button", "CloseButton", "Tag", "Comment", "Avatar", "FollowButton", "RatingInfo"],
+        "requiredComponents": [
+          "Button",
+          "CloseButton",
+          "Tag",
+          "Comment",
+          "Avatar",
+          "FollowButton",
+          "RatingInfo"
+        ],
         "status": "partial",
-        "deferred": ["cover thumbnail", "Player (audio)", "RatingInfo breakdown", "FollowButton"],
+        "deferred": [
+          "cover thumbnail",
+          "Player (audio)",
+          "RatingInfo breakdown",
+          "FollowButton"
+        ],
         "implementedAt": "components/script-preview-modal/script-preview-modal.tsx"
       },
       {
@@ -516,7 +721,13 @@
         "route": "/ (bottom sheet)",
         "figmaNodeId": "51:820",
         "section": "Fluxo principal",
-        "requiredComponents": ["Input", "Filter Section Header", "Checkbox", "Checkbox Input", "Button"],
+        "requiredComponents": [
+          "Input",
+          "Filter Section Header",
+          "Checkbox",
+          "Checkbox Input",
+          "Button"
+        ],
         "status": "missing"
       },
       {
@@ -524,7 +735,13 @@
         "route": "/filter",
         "figmaNodeId": "51:930",
         "section": "Fluxo principal",
-        "requiredComponents": ["Header", "Avatar", "Input", "ScriptCard", "Button"],
+        "requiredComponents": [
+          "Header",
+          "Avatar",
+          "Input",
+          "ScriptCard",
+          "Button"
+        ],
         "status": "missing"
       },
       {
@@ -532,7 +749,17 @@
         "route": "/scripts/[id]",
         "figmaNodeId": "51:1007",
         "section": "Fluxo principal",
-        "requiredComponents": ["Header", "Avatar", "Page Controller", "Zoom Controller", "Player", "ReactionBar", "Reaction", "Comment", "Button"],
+        "requiredComponents": [
+          "Header",
+          "Avatar",
+          "Page Controller",
+          "Zoom Controller",
+          "Player",
+          "ReactionBar",
+          "Reaction",
+          "Comment",
+          "Button"
+        ],
         "status": "partial",
         "notes": "PDFViewer implemented. Missing: Player, ReactionBar, Reaction components. Comments sidebar partially done."
       },
@@ -541,7 +768,14 @@
         "route": "/publish",
         "figmaNodeId": "115:1008",
         "section": "Fluxo de cadastro de roteiro",
-        "requiredComponents": ["Header", "Avatar", "Input", "Input (form)", "Button", "Progress"],
+        "requiredComponents": [
+          "Header",
+          "Avatar",
+          "Input",
+          "Input (form)",
+          "Button",
+          "Progress"
+        ],
         "status": "partial",
         "notes": "Basic form exists. Missing: Progress step indicator, correct Input (form) variants."
       },
@@ -550,7 +784,13 @@
         "route": "/publish (step 2)",
         "figmaNodeId": "115:1075",
         "section": "Fluxo de cadastro de roteiro",
-        "requiredComponents": ["Header", "Avatar", "Drag", "Button", "Progress"],
+        "requiredComponents": [
+          "Header",
+          "Avatar",
+          "Drag",
+          "Button",
+          "Progress"
+        ],
         "status": "partial",
         "notes": "DragZone exists but audio variant missing."
       },
@@ -559,7 +799,14 @@
         "route": "/publish (step 3)",
         "figmaNodeId": "125:1430",
         "section": "Fluxo de cadastro de roteiro",
-        "requiredComponents": ["Header", "Avatar", "Input", "Checkbox", "Button", "Progress"],
+        "requiredComponents": [
+          "Header",
+          "Avatar",
+          "Input",
+          "Checkbox",
+          "Button",
+          "Progress"
+        ],
         "status": "missing"
       },
       {
@@ -575,7 +822,15 @@
         "route": "/profile/[username]",
         "figmaNodeId": "186:1834",
         "section": "Perfil do usuário",
-        "requiredComponents": ["Header", "Avatar", "Button", "FollowButton", "ScriptCard", "Tag", "RatingBox"],
+        "requiredComponents": [
+          "Header",
+          "Avatar",
+          "Button",
+          "FollowButton",
+          "ScriptCard",
+          "Tag",
+          "RatingBox"
+        ],
         "status": "missing"
       },
       {
@@ -591,7 +846,13 @@
         "route": "/dashboard",
         "figmaNodeId": "186:1963",
         "section": "Perfil do usuário",
-        "requiredComponents": ["Header", "Avatar", "MetricCard", "ScriptCard", "Tag"],
+        "requiredComponents": [
+          "Header",
+          "Avatar",
+          "MetricCard",
+          "ScriptCard",
+          "Tag"
+        ],
         "status": "missing"
       }
     ]

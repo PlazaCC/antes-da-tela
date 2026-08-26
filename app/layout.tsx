@@ -1,16 +1,20 @@
 import { AppToaster } from '@/components/app-toaster/app-toaster'
+import { Footer } from '@/components/footer/footer'
 import { NavBar } from '@/components/navbar'
 import { PostHogProvider } from '@/components/posthog-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
 import type { Metadata } from 'next'
-import { DM_Mono, DM_Serif_Display, Inter } from 'next/font/google'
+import { DM_Mono, Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import { Suspense } from 'react'
 import './globals.css'
 
 const defaultUrl =
   process.env.NEXT_PUBLIC_APP_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000')
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
@@ -21,15 +25,19 @@ export const metadata: Metadata = {
   description:
     'Publique, leia e proteja suas propriedades intelectuais audiovisuais. Roteiros, pitches e obras registradas em um só lugar.',
   icons: {
-    icon: [
-      { url: '/favicon/favicon.ico', sizes: 'any' },
-      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
+    // New favicon is served automatically from app/favicon.ico (Next.js App Router)
     apple: '/favicon/apple-touch-icon.png',
     other: [
-      { rel: 'android-chrome', url: '/favicon/android-chrome-192x192.png', sizes: '192x192' },
-      { rel: 'android-chrome', url: '/favicon/android-chrome-512x512.png', sizes: '512x512' },
+      {
+        rel: 'android-chrome',
+        url: '/favicon/android-chrome-192x192.png',
+        sizes: '192x192',
+      },
+      {
+        rel: 'android-chrome',
+        url: '/favicon/android-chrome-512x512.png',
+        sizes: '512x512',
+      },
     ],
   },
   manifest: '/favicon/site.webmanifest',
@@ -56,11 +64,31 @@ const inter = Inter({
   weight: ['400', '600'],
 })
 
-const dmSerifDisplay = DM_Serif_Display({
+const clashGrotesk = localFont({
+  src: [
+    {
+      path: '../fonts/ClashGrotesk-Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/ClashGrotesk-Medium.woff2',
+      weight: '500',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/ClashGrotesk-Semibold.woff2',
+      weight: '600',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/ClashGrotesk-Bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
   variable: '--font-display',
   display: 'swap',
-  subsets: ['latin'],
-  weight: ['400'],
 })
 
 const dmMono = DM_Mono({
@@ -76,14 +104,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en' suppressHydrationWarning className='dark'>
-      <body className={`${inter.variable} ${dmSerifDisplay.variable} ${dmMono.variable} antialiased`}>
+    <html lang="en" suppressHydrationWarning className="dark">
+      <body
+        className={`${inter.variable} ${clashGrotesk.variable} ${dmMono.variable} antialiased`}
+      >
         <Suspense fallback={null}>
           <PostHogProvider>
             <TRPCReactProvider>
               <ThemeProvider>
                 <NavBar />
                 {children}
+                <Footer />
                 <AppToaster />
               </ThemeProvider>
             </TRPCReactProvider>

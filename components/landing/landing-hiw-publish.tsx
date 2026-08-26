@@ -39,45 +39,68 @@ export function HiwPublishPreview() {
   }, [title])
 
   return (
-    <div className='grid gap-7 md:grid-cols-[140px_1fr]'>
-      <div className='flex flex-col gap-1 font-mono text-[11px] uppercase tracking-[0.08em]'>
+    <div className="grid gap-7 md:grid-cols-[140px_1fr]">
+      <div className="flex flex-col gap-1 font-mono text-[11px] uppercase tracking-[0.08em]">
         {['Detalhes', 'Capa', 'Cenas', 'Registro', 'Publicar'].map((item) => (
-          <div key={item} className={`px-3 py-[10px] ${item === 'Detalhes' ? 'text-[hsl(var(--color-text-primary))] border-l-2 border-[hsl(var(--color-brand-accent))]' : 'text-[rgb(107,104,96)] border-l-2 border-transparent'}`}>
-            {item === 'Detalhes' && <span className='text-[hsl(var(--color-brand-accent))] mr-1'>●</span>}
+          <div
+            key={item}
+            className={`px-3 py-[10px] ${item === 'Detalhes' ? 'border-l-2 border-[hsl(var(--color-brand-accent))] text-[hsl(var(--color-text-primary))]' : 'border-l-2 border-transparent text-[rgb(107,104,96)]'}`}
+          >
+            {item === 'Detalhes' && (
+              <span className="mr-1 text-[hsl(var(--color-brand-accent))]">
+                ●
+              </span>
+            )}
             {item}
           </div>
         ))}
       </div>
 
-      <div className='flex flex-col gap-5'>
-        <div className='flex flex-col gap-2'>
-          <span className='font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>Título do roteiro</span>
-          <div className='flex min-h-[50px] items-center rounded-[2px] border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] px-[14px] py-[12px] font-display text-[20px] leading-[1.2] text-[hsl(var(--color-text-primary))]'>
-            {title}<span className='ml-[2px] inline-block h-[1em] w-[1px] align-middle bg-[hsl(var(--color-brand-accent))] [animation:land-caret_1s_steps(2)_infinite]' />
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]">
+            Título do roteiro
+          </span>
+          <div className="flex min-h-[50px] items-center rounded-[2px] border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] px-[14px] py-[12px] font-display text-[20px] leading-[1.2] text-[hsl(var(--color-text-primary))]">
+            {title}
+            <span className="ml-[2px] inline-block h-[1em] w-[1px] bg-[hsl(var(--color-brand-accent))] align-middle [animation:land-caret_1s_steps(2)_infinite]" />
           </div>
         </div>
 
-        <div className='flex flex-col gap-2'>
-          <span className='font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>Logline</span>
-          <div className='flex min-h-[72px] items-start rounded-[2px] border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] px-[14px] pt-[14px] pb-[12px] font-sans text-[13px] leading-[1.5] text-[hsl(var(--color-text-primary))]'>
+        <div className="flex flex-col gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]">
+            Logline
+          </span>
+          <div className="flex min-h-[72px] items-start rounded-[2px] border border-[rgb(37,37,37)] bg-[rgb(14,14,14)] px-[14px] pb-[12px] pt-[14px] font-sans text-[13px] leading-[1.5] text-[hsl(var(--color-text-primary))]">
             {logline}
             {logline.length > 0 && logline.length < TARGET_LOGLINE.length && (
-              <span className='ml-[2px] inline-block h-[1em] w-[1px] align-middle bg-[hsl(var(--color-brand-accent))] [animation:land-caret_1s_steps(2)_infinite]' />
+              <span className="ml-[2px] inline-block h-[1em] w-[1px] bg-[hsl(var(--color-brand-accent))] align-middle [animation:land-caret_1s_steps(2)_infinite]" />
             )}
           </div>
         </div>
 
-        <div className='grid gap-4 md:grid-cols-2'>
-          {[{ label: 'Formato', chips: ['Curta', 'Longa', 'Série'], active: 'Longa' },
-            { label: 'Gênero', chips: ['Drama', 'Thriller', 'Mistério'], active: genre ? 'Drama' : null }
+        <div className="grid gap-4 md:grid-cols-2">
+          {[
+            {
+              label: 'Formato',
+              chips: ['Curta', 'Longa', 'Série'],
+              active: 'Longa',
+            },
+            {
+              label: 'Gênero',
+              chips: ['Drama', 'Thriller', 'Mistério'],
+              active: genre ? 'Drama' : null,
+            },
           ].map((f) => (
-            <div key={f.label} className='flex flex-col gap-2'>
-              <span className='font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>{f.label}</span>
-              <div className='flex flex-wrap gap-1.5'>
+            <div key={f.label} className="flex flex-col gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]">
+                {f.label}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
                 {f.chips.map((c) => (
                   <span
                     key={c}
-                    className={`inline-flex items-center rounded-[2px] border px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] ${c === f.active ? 'text-[hsl(var(--color-brand-accent))] border-[rgba(232,92,47,0.4)] bg-[rgba(232,92,47,0.12)]' : 'text-[hsl(var(--color-text-secondary))] border-[rgb(37,37,37)] bg-[rgb(22,22,22)]'}`}
+                    className={`inline-flex items-center rounded-[2px] border px-[9px] py-[5px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] ${c === f.active ? 'border-[rgba(28,114,215,0.4)] bg-[rgba(28,114,215,0.12)] text-[hsl(var(--color-brand-accent))]' : 'border-[rgb(37,37,37)] bg-[rgb(22,22,22)] text-[hsl(var(--color-text-secondary))]'}`}
                   >
                     {c}
                   </span>
@@ -87,15 +110,25 @@ export function HiwPublishPreview() {
           ))}
         </div>
 
-        <div className={`mt-2 flex items-center justify-between rounded-[2px] border md:p-4 p-3 transition-[border-color_0.4s_ease,background_0.4s_ease] ${genre ? 'border-[hsl(var(--color-brand-accent))] bg-[rgba(232,92,47,0.12)]' : 'border-[rgb(37,37,37)] bg-[rgb(14,14,14)]'}`}>
-          <div className='flex flex-col gap-1'>
-            <span className='font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]'>Registro de autoria</span>
-            <span className='text-[13px] text-[hsl(var(--color-text-primary))]'>{genre ? 'Pronto para publicar' : 'Preenchendo dados...'}</span>
+        <div
+          className={`mt-2 flex items-center justify-between rounded-[2px] border p-3 transition-[border-color_0.4s_ease,background_0.4s_ease] md:p-4 ${genre ? 'border-[hsl(var(--color-brand-accent))] bg-[rgba(28,114,215,0.12)]' : 'border-[rgb(37,37,37)] bg-[rgb(14,14,14)]'}`}
+        >
+          <div className="flex flex-col gap-1">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[rgb(107,104,96)]">
+              Registro de autoria
+            </span>
+            <span className="text-[13px] text-[hsl(var(--color-text-primary))]">
+              {genre ? 'Pronto para publicar' : 'Preenchendo dados...'}
+            </span>
           </div>
           <button
-            className={`group inline-flex h-9 items-center justify-center gap-2.5 rounded-[2px] bg-[hsl(var(--color-brand-accent))] md:px-4 px-3 text-[13px] font-semibold tracking-[0.01em] text-[rgb(14,14,14)] transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] ${genre ? 'opacity-100 cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
-            disabled={!genre}>
-            Publicar <span className='transition-transform duration-200 group-hover:translate-x-[4px]'>→</span>
+            className={`group inline-flex h-9 items-center justify-center gap-2.5 rounded-[2px] bg-[hsl(var(--color-brand-accent))] px-3 text-[13px] font-semibold tracking-[0.01em] text-[rgb(14,14,14)] transition-[transform_0.2s_ease,background_0.2s_ease,border-color_0.2s_ease,color_0.2s_ease,box-shadow_0.2s_ease] md:px-4 ${genre ? 'cursor-pointer opacity-100' : 'cursor-not-allowed opacity-40'}`}
+            disabled={!genre}
+          >
+            Publicar{' '}
+            <span className="transition-transform duration-200 group-hover:translate-x-[4px]">
+              →
+            </span>
           </button>
         </div>
       </div>

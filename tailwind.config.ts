@@ -40,6 +40,8 @@ export default {
         brand: {
           accent: 'hsl(var(--color-brand-accent))',
           lime: 'hsl(var(--color-brand-lime))',
+          blue: 'hsl(var(--color-brand-blue))',
+          cream: 'hsl(var(--color-brand-cream))',
         },
         state: {
           error: 'hsl(var(--color-state-error))',
@@ -59,13 +61,13 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['DM Serif Display', 'serif'],
+        display: ['Clash Grotesk', 'Inter', 'sans-serif'],
         mono: ['DM Mono', 'monospace'],
       },
       fontSize: {
         'display-hero': ['72px', { lineHeight: '1.06' }],
         'display-hero-italic': ['72px', { lineHeight: '1.06' }],
-        'display': ['56px', { lineHeight: '1.37' }],
+        display: ['56px', { lineHeight: '1.37' }],
         'heading-1': ['48px', { lineHeight: '1.08' }],
         'heading-2': ['32px', { lineHeight: '1.13' }],
         'heading-3': ['24px', { lineHeight: '1.25' }],

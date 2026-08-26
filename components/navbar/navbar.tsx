@@ -1,3 +1,4 @@
+import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/server'
 import { getUserDisplayName } from '@/lib/utils/auth'
@@ -8,21 +9,23 @@ import { NavLinks } from './nav-links'
 import { NavBarMobileControls } from './navbar-mobile-controls'
 import { NavBarSearch } from './navbar-search'
 import { UserMenu } from './user-menu'
-import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 
 export function NavBar() {
   return (
-    <header aria-label='Principal' className='sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-border-default md:h-14 transition-all duration-300'>
-      <div className='px-3 md:px-4 py-2 md:py-0 h-full flex items-center justify-between gap-1'>
+    <header
+      aria-label="Principal"
+      className="sticky top-0 z-50 bg-surface/80 backdrop-blur-md transition-all duration-300 md:h-16"
+    >
+      <div className="flex h-full items-center justify-between gap-1 px-3 py-2 md:px-4 md:py-0">
         {/* Left: Logo + Nav links */}
-        <div className='flex items-center gap-4 md:gap-10'>
-          <Link href='/feed' className='shrink-0'>
+        <div className="flex items-center gap-4 md:gap-10">
+          <Link href="/feed" className="shrink-0">
             <Image
-              src='/assets/logo.svg'
-              alt='Antes da Tela'
-              className='max-w-full w-100% h-auto'
-              width={196}
-              height={24}
+              src="/logo-white.svg"
+              alt="Antes da Tela"
+              className="h-9 w-auto max-w-full md:h-10"
+              width={475}
+              height={87}
               priority
             />
           </Link>
@@ -32,15 +35,16 @@ export function NavBar() {
         {/* Right: Search container + Profile */}
         <Suspense
           fallback={
-            <div className='flex items-center gap-8'>
-              <div className='hidden md:flex items-center gap-2.5'>
-                <Skeleton className='h-8 w-[352px] bg-elevated' />
-                <Skeleton className='h-8 w-[120px] bg-elevated' />
+            <div className="flex items-center gap-8">
+              <div className="hidden items-center gap-2.5 md:flex">
+                <Skeleton className="h-8 w-[352px] bg-elevated" />
+                <Skeleton className="h-8 w-[120px] bg-elevated" />
               </div>
-              <Skeleton className='h-7 w-7 rounded bg-elevated md:hidden' />
-              <Skeleton className='h-7 w-7 rounded bg-elevated' />
+              <Skeleton className="h-7 w-7 rounded bg-elevated md:hidden" />
+              <Skeleton className="h-7 w-7 rounded bg-elevated" />
             </div>
-          }>
+          }
+        >
           <NavBarRightSection />
         </Suspense>
       </div>
@@ -60,14 +64,17 @@ async function NavBarRightSection() {
 
   if (!user) {
     return (
-      <div className='flex items-center gap-4 justify-between'>
-        <div className='hidden md:block w-[352px]'>
+      <div className="flex items-center justify-between gap-4">
+        <div className="hidden w-[352px] md:block">
           <Suspense>
             <NavBarSearch />
           </Suspense>
         </div>
         <NavBarMobileControls />
-        <GoogleAuthButton label='Login' className='w-auto h-8 px-4 text-sm rounded-sm' />
+        <GoogleAuthButton
+          label="Login"
+          className="h-8 w-auto rounded-sm px-4 text-sm"
+        />
       </div>
     )
   }
@@ -81,10 +88,10 @@ async function NavBarRightSection() {
     null
 
   return (
-    <div className='flex items-center gap-4 md:gap-8 justify-between'>
+    <div className="flex items-center justify-between gap-4 md:gap-8">
       {/* Desktop: search input + CTA */}
-      <div className='hidden md:flex items-center gap-2.5 w-full'>
-        <div className='w-full max-w-[352px]'>
+      <div className="hidden w-full items-center gap-2.5 md:flex">
+        <div className="w-full max-w-[352px]">
           <Suspense>
             <NavBarSearch />
           </Suspense>

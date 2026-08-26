@@ -19,7 +19,8 @@ export const metadata: Metadata = {
   title: {
     absolute: 'Antes da Tela — Publique, leia e descubra roteiros',
   },
-  description: 'Plataforma de publicação, leitura e descoberta de roteiros audiovisuais brasileiros.',
+  description:
+    'Plataforma de publicação, leitura e descoberta de roteiros audiovisuais brasileiros.',
 }
 
 export default async function HomePage() {
@@ -42,13 +43,15 @@ export default async function HomePage() {
   }
 
   const queryClient = getQueryClient()
-  await queryClient.prefetchQuery(trpc.scripts.listRecent.queryOptions({ limit: 7 }))
+  await queryClient.prefetchQuery(
+    trpc.scripts.listRecent.queryOptions({ limit: 7 })
+  )
 
   return (
     <HydrateClient>
       <LandingClientShell>
         {/* Suppress the global app NavBar on the landing page */}
-        <style>{`header[aria-label="Principal"] { display: none !important; }`}</style>
+        <style>{`header[aria-label="Principal"] { display: none !important; } footer[aria-label="Rodapé"] { display: none !important; }`}</style>
         <LandingHeader />
         <main>
           <LandingHero />
