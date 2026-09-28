@@ -8,12 +8,25 @@
     opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
     transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.land-reveal.in { opacity: 1; transform: none; }
-.land-reveal[data-delay="1"] { transition-delay: 0.08s; }
-.land-reveal[data-delay="2"] { transition-delay: 0.16s; }
-.land-reveal[data-delay="3"] { transition-delay: 0.24s; }
-.land-reveal[data-delay="4"] { transition-delay: 0.32s; }
-.land-reveal[data-delay="5"] { transition-delay: 0.4s; }
+.land-reveal.in {
+  opacity: 1;
+  transform: none;
+}
+.land-reveal[data-delay='1'] {
+  transition-delay: 0.08s;
+}
+.land-reveal[data-delay='2'] {
+  transition-delay: 0.16s;
+}
+.land-reveal[data-delay='3'] {
+  transition-delay: 0.24s;
+}
+.land-reveal[data-delay='4'] {
+  transition-delay: 0.32s;
+}
+.land-reveal[data-delay='5'] {
+  transition-delay: 0.4s;
+}
 
 /* ---- Root wrapper ---- */
 .land-root {
@@ -24,7 +37,7 @@
   overflow-x: hidden;
 }
 .land-root::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
@@ -33,49 +46,151 @@
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.85'/></svg>");
   mix-blend-mode: overlay;
 }
-.land-root::-webkit-scrollbar { width: 10px; }
-.land-root::-webkit-scrollbar-track { background: rgb(14, 14, 14); }
-.land-root::-webkit-scrollbar-thumb { background: rgb(52, 52, 52); border-radius: 0; }
-.land-root::-webkit-scrollbar-thumb:hover { background: rgb(107, 104, 96); }
+.land-root::-webkit-scrollbar {
+  width: 10px;
+}
+.land-root::-webkit-scrollbar-track {
+  background: rgb(14, 14, 14);
+}
+.land-root::-webkit-scrollbar-thumb {
+  background: rgb(52, 52, 52);
+  border-radius: 0;
+}
+.land-root::-webkit-scrollbar-thumb:hover {
+  background: rgb(107, 104, 96);
+}
+
+/* ---- Section tones (theme-independent) ---- */
+/*
+  The app is dark-forced (`.dark` on <html>), so theme tokens
+  (`--color-text-primary`, `--color-bg-base`, …) flip between themes.
+  The landing page alternates dark → cream → blue sections, so each
+  section declares its own fixed palette through `--land-*` variables
+  and components read those instead of theme tokens.
+*/
+.land-tone {
+  position: relative;
+  background-color: var(--land-bg);
+  color: var(--land-fg);
+}
+
+.land-tone-dark {
+  --land-bg: #161616;
+  --land-fg: #fff3d2;
+  --land-fg-2: #cac5b8;
+  --land-fg-3: #999383;
+  --land-border: #2a2a2a;
+  --land-border-strong: #343434;
+  --land-card: #1e1e1e;
+  --land-card-2: #262626;
+}
+
+.land-tone-cream {
+  --land-bg: #fff3d2;
+  --land-fg: #161616;
+  --land-fg-2: #57534b;
+  --land-fg-3: #77705f;
+  --land-border: #e7dbb8;
+  --land-border-strong: #d8c99c;
+  --land-card: #fff8e0;
+  --land-card-2: #fffdf5;
+  /* Paper grain strength — the single knob to tune the texture. */
+  --land-paper-opacity: 0.4;
+  /*
+    The paper photo is merged with the cream base using `multiply`, so the
+    photo's luminance modulates the cream instead of veiling it. A flat
+    translucent overlay (the previous approach) only washes the photo out and
+    keeps its grey cast; `multiply` darkens the cream along the creases, which
+    is what makes it read as paper.
+
+    `isolation` scopes the blend to this section, and the pseudo-element sits at
+    `z-index: -1` so it paints above the section background but below the
+    content — text and cards stay crisp.
+  */
+  isolation: isolate;
+}
+
+.land-tone-cream::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url('/paperTexture.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  mix-blend-mode: multiply;
+  opacity: var(--land-paper-opacity);
+}
+
+.land-tone-blue {
+  --land-bg: #1c72d7;
+  --land-fg: #ffffff;
+  --land-fg-2: #dceafb;
+  --land-fg-3: #b9d3f4;
+  --land-border: rgba(255, 255, 255, 0.22);
+  --land-border-strong: rgba(255, 255, 255, 0.4);
+  --land-card: #ffffff;
+  --land-card-2: #f4f9ff;
+}
 
 /* ---- Animations ---- */
 @keyframes land-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-33.33%); }
-}
-
-@keyframes land-scroll-pulse {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.33%);
+  }
 }
 
 @keyframes land-caret {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes land-react-pop {
-  0% { opacity: 0; transform: translateY(8px) scale(0.6); }
-  15% { opacity: 1; transform: translateY(0) scale(1.1); }
-  100% { opacity: 0; transform: translateY(-40px) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1);
+  }
 }
 
 @keyframes land-comment-in {
-  from { opacity: 0; transform: translateX(-12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes land-pulse-bar {
-  from { transform: scaleY(0.6); }
-  to { transform: scaleY(1); }
+  from {
+    transform: scaleY(0.6);
+  }
+  to {
+    transform: scaleY(1);
+  }
 }
 
 @keyframes land-hiw-progress {
-  from { width: 0%; }
-  to { width: 100%; }
-}
-
-@keyframes land-success-pop {
-  0% { transform: scale(0); opacity: 0; }
-  60% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }

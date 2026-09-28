@@ -14,10 +14,17 @@ const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
   {
     heading: 'Plataforma',
     items: [
-      { label: 'Manifesto', href: '/#manifesto' },
-      { label: 'A plataforma', href: '/#plataforma' },
-      { label: 'Como funciona', href: '/#como-funciona' },
-      { label: 'Roteiros', href: '/#roteiros' },
+      { label: 'Histórias', href: '/#roteiros' },
+      { label: 'Publicar', href: '/#como-funciona' },
+      { label: 'Conteúdos', href: '/#plataforma' },
+      { label: 'Sobre', href: '/#audience' },
+    ],
+  },
+  {
+    heading: 'Conta',
+    items: [
+      { label: 'Login', href: '/auth/login' },
+      { label: 'Criar conta', href: '/auth/login' },
     ],
   },
   {
@@ -28,7 +35,7 @@ const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-[rgb(37,37,37)] bg-[rgb(10,10,10)] px-[clamp(24px,6vw,80px)] pb-8 pt-[clamp(48px,7vw,80px)]">
+    <footer className="border-t border-border-subtle bg-[rgb(10,10,10)] px-[clamp(24px,6vw,80px)] pb-8 pt-[clamp(48px,7vw,80px)]">
       <div className="mx-auto max-w-[1280px]">
         {/* main grid */}
         <div className="mb-12 grid gap-10 lg:grid-cols-[1.4fr_repeat(3,1fr)] lg:gap-12">

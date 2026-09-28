@@ -6,8 +6,6 @@ import { LandingFooter } from '@/components/landing/landing-footer'
 import { LandingHeader } from '@/components/landing/landing-header'
 import { LandingHero } from '@/components/landing/landing-hero'
 import { LandingHowItWorks } from '@/components/landing/landing-how-it-works'
-import { LandingManifesto } from '@/components/landing/landing-manifesto'
-import { LandingMarquee } from '@/components/landing/landing-marquee'
 import { LandingPillars } from '@/components/landing/landing-pillars'
 import { createClient } from '@/lib/supabase/server'
 import { HydrateClient, getQueryClient, trpc } from '@/trpc/server'
@@ -56,8 +54,6 @@ export default async function HomePage() {
         <LandingHeader />
         <main>
           <LandingHero />
-          <LandingMarquee />
-          <LandingManifesto />
           <LandingPillars />
           <LandingAudience />
           <LandingHowItWorks />
