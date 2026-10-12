@@ -73,9 +73,9 @@ $$;
 - Depois do corte, o ramo `else` pode ser removido.
 - Todas as policies do `server/db/schema.ts` trocam `auth.uid()` por `(select public.current_user_id())`
   (o `select` envolvendo faz o Postgres avaliar uma vez por query, não por linha).
-- As policies de `storage.objects` (`drizzle/0008`, `0009`) usam `auth.uid()::text`. Os uploads hoje vão
-  pelo S3 com presign (`app/api/upload/presign/route.ts`); confirmar se os buckets do Supabase Storage ainda
-  são usados — se sim, atualizar para `public.current_user_id()::text`; se não, dropar essas policies.
+- As policies de `storage.objects` (`drizzle/0008`, `0009`) usam `auth.uid()::text`. Todos os arquivos estão no
+  S3 (presign em `app/api/upload/presign/route.ts`), então essas policies são legado e serão dropadas na Fase 4.
+  Atenção: `UsersService.deleteAccount` ainda chama `supabase.storage` — migrar para o S3 junto.
 
 ### 2.3 Mudanças no código
 
@@ -102,7 +102,7 @@ $$;
 ### 2.4 Configuração externa (fora do código)
 
 1. Clerk: criar app, habilitar só Google, ativar a **integração Supabase** (adiciona `role: authenticated` ao token).
-2. Clerk **produção**: configurar domínio próprio (CNAMEs no DNS) — é isso que tira o `supabase.co` da tela.
+2. Clerk **produção**: domínio `antesdatela.com` (CNAMEs `clerk.`/`accounts.` no DNS) — é isso que tira o `supabase.co` da tela.
 3. Google Cloud: criar OAuth Client próprio, redirect URI do Clerk, tela de consentimento com nome/logo
    "Antes da Tela" e links de privacidade/termos (`app/(legal)`). Submeter para verificação da marca.
 4. Supabase: adicionar Clerk em Third-Party Auth (domínio do Clerk).
@@ -184,7 +184,7 @@ Cada fase é um PR independente, na ordem.
 
 | Fase | Entrega | Risco | Rollback |
 | :--- | :------ | :---- | :------- |
-| **0 — Hotfix LGPD** (já) | `getProfile` para de retornar `cpf` para terceiros; retorna só para o dono. Tirar `cpf` da leitura pública (view ou grant por coluna até a Fase 1). | Baixo | Revert |
+| **0 — Hotfix LGPD** ✅ | `drizzle/0014_protect_user_pii.sql`: `cpf` sai do SELECT de `anon`/`authenticated` (grant por coluna); dono lê via RPC `get_my_cpf()`. `getProfile` não retorna mais `cpf`; novo `users.getMyCpf`. **`email` continua legível** (os upserts usam `EXCLUDED.email`) — fecha na Fase 3. | Baixo | Revert |
 | **1 — Documentos** | Tabela `user_documents` + backfill do CPF + validadores + UI + guard de publicação. Independe do Clerk; usa `auth.uid()` por enquanto. | Médio (migração de dados) | Manter `users.cpf` até o "contract" |
 | **2 — Base do Clerk (sem trocar login)** | `users.clerk_id`, função `current_user_id()` com dois ramos, todas as policies migradas. Login continua Supabase — a função cobre os dois tokens. | Médio (RLS) — testar cada policy com token real | Migration reversa restaura `auth.uid()` |
 | **3 — Corte para o Clerk** | Config externa (§2.4), `@clerk/nextjs`, webhook, `proxy.ts`, clients Supabase com `accessToken`, todos os call-sites. Deploy em preview com Clerk dev antes. | Alto | Supabase Google provider continua ligado por ~2 semanas; revert do deploy volta o login antigo, dados intactos |
@@ -209,9 +209,13 @@ Cada fase é um PR independente, na ordem.
   Desvantagem: só cobre Google; Clerk dá UI pronta, outros provedores, gestão de usuários e MFA.
   Vale prototipar em 1 dia antes da Fase 3 se o custo/esforço do Clerk pesar.
 
-## 6. Questões em aberto
+## 6. Questões
 
-1. Qual domínio de produção usaremos para o Clerk (precisamos controlar o DNS)?
-2. Os buckets do Supabase Storage ainda são usados ou tudo foi para o S3?
-3. CNPJ entra no POC ou fica para depois?
-4. Queremos oferecer login por e-mail (magic link) além do Google, já que o Clerk dá isso de graça?
+Respondidas:
+- Domínio: `antesdatela.com` (temos acesso ao DNS).
+- Storage: tudo no S3; policies de `storage.objects` são legado.
+
+Em aberto:
+1. CNPJ: só faz sentido se uma produtora (pessoa jurídica) for a titular dos direitos e quiser publicar em nome
+   da empresa. Para autor pessoa física não é necessário — proposta: fora do POC.
+2. Queremos oferecer login por e-mail (magic link) além do Google, já que o Clerk dá isso de graça?

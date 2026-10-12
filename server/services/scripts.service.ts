@@ -16,17 +16,14 @@ export class ScriptsService {
   constructor(private supabase: SupabaseClient) {}
 
   /**
-   * Guards publication (status = 'published'). The author must have a CPF on
-   * their profile. Cadastro as draft bypasses this entirely.
+   * Guards publication (status = 'published'). The author (the session user)
+   * must have a CPF on their profile. Cadastro as draft bypasses this entirely.
+   * `cpf` is not selectable on `users`; `get_my_cpf` returns the caller's own.
    */
-  private async assertPublishable(authorId: string) {
-    const { data: author } = await this.supabase
-      .from("users")
-      .select("cpf")
-      .eq("id", authorId)
-      .maybeSingle();
+  private async assertPublishable() {
+    const { data: cpf } = await this.supabase.rpc("get_my_cpf");
 
-    if (!author?.cpf) {
+    if (!cpf) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message:
@@ -81,7 +78,7 @@ export class ScriptsService {
     // Cadastro as draft is always allowed.
     const isDraft = status === "draft";
     if (!isDraft) {
-      await this.assertPublishable(userId);
+      await this.assertPublishable();
     }
 
     // Insert script row
@@ -210,7 +207,7 @@ export class ScriptsService {
     // Enforce publish gating when the resulting status is 'published'.
     const finalStatus = updateData.status ?? oldData.status;
     if (finalStatus === "published") {
-      await this.assertPublishable(authorId);
+      await this.assertPublishable();
     }
 
     // Map camelCase to snake_case for Supabase

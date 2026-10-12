@@ -15,6 +15,9 @@ import {
 } from 'drizzle-orm/pg-core'
 
 // ── Users ────────────────────────────────────────────────────────────────────
+// SELECT on `users` is granted per column to anon/authenticated (everything
+// except `cpf`, see drizzle/0014_protect_user_pii.sql). A new column is NOT
+// readable by the app until a migration grants SELECT on it explicitly.
 
 export const users = pgTable(
   'users',
