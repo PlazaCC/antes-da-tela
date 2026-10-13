@@ -18,6 +18,11 @@ export const usersRouter = createTRPCRouter({
     return ctx.usersService.getProfile(input.id)
   }),
 
+  // Private: only the caller's own CPF. Never part of the public profile.
+  getMyCpf: authenticatedProcedure.query(async ({ ctx }) => {
+    return { cpf: await ctx.usersService.getMyCpf() }
+  }),
+
   updateProfile: authenticatedProcedure
     .input(
       z.object({

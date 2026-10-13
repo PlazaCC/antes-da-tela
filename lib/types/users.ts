@@ -4,7 +4,6 @@ export interface UserProfile {
   email: string | null
   image: string | null
   bio: string | null
-  cpf: string | null
   createdAt: string
 }
 

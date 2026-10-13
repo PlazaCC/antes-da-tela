@@ -38,7 +38,7 @@ const MOCK_SCRIPT = {
 }
 
 /** Build a minimal Supabase mock for a given table operation chain. */
-function makeSupabaseMock(overrides: Record<string, unknown> = {}): SupabaseClient {
+function makeSupabaseMock(overrides: Record<string, unknown> = {}, myCpf: string | null = '52998224725'): SupabaseClient {
   const upsert = vi.fn(() => Promise.resolve({ error: null, count: null, status: 200, statusText: 'OK' }))
   const selectAfterInsert = vi.fn(() => ({
     single: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null, count: null, status: 200, statusText: 'OK' })),
@@ -67,6 +67,8 @@ function makeSupabaseMock(overrides: Record<string, unknown> = {}): SupabaseClie
 
   return {
     from: vi.fn((table: string) => fromMap[table] ?? {}),
+    // get_my_cpf: the publish guard reads the caller's own CPF via RPC.
+    rpc: vi.fn(async () => ({ data: myCpf, error: null })),
     auth: {
       getUser: vi.fn(async () => ({ data: { user: MOCK_USER }, error: null })),
     },
@@ -124,6 +126,15 @@ describe('scriptsRouter.create', () => {
     await expect(
       caller.scripts.create({ title: 'Roteiro', storagePath: 'scripts/user-1/f.pdf' }),
     ).rejects.toThrow(TRPCError)
+  })
+
+  it('refuses to publish when the author has no CPF', async () => {
+    supabase = makeSupabaseMock({}, null)
+    const caller = router.createCaller(makeCtx(supabase))
+    await expect(
+      caller.scripts.create({ title: 'Roteiro', storagePath: 'scripts/user-1/f.pdf' }),
+    ).rejects.toMatchObject({ code: 'BAD_REQUEST' })
+    expect(supabase.rpc).toHaveBeenCalledWith('get_my_cpf')
   })
 
   it('rolls back the script and throws when script_files insert fails', async () => {

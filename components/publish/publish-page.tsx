@@ -110,8 +110,8 @@ export function PublishPage({ scriptId }: PublishPageProps) {
 
   const trpc = useTRPC();
   const { userId } = useCurrentUser();
-  const { data: profile } = useQuery({
-    ...trpc.users.getProfile.queryOptions({ id: userId ?? "" }),
+  const { data: myCpf } = useQuery({
+    ...trpc.users.getMyCpf.queryOptions(),
     enabled: !!userId,
   });
 
@@ -122,9 +122,9 @@ export function PublishPage({ scriptId }: PublishPageProps) {
   // Publishing requires the author's CPF.
   const publishBlockers = useMemo(() => {
     const blockers: string[] = [];
-    if (!profile?.cpf) blockers.push("Preencha o CPF no seu perfil");
+    if (!myCpf?.cpf) blockers.push("Preencha o CPF no seu perfil");
     return blockers;
-  }, [profile?.cpf]);
+  }, [myCpf?.cpf]);
 
   const publishBlocked = visibility === "public" && publishBlockers.length > 0;
   // Public content additionally requires accepting the platform's policies.

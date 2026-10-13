@@ -30,6 +30,7 @@ export function useProfileForm(userId: string): UseProfileFormResult {
     ...trpc.users.getProfile.queryOptions({ id: userId }),
     enabled: !!userId,
   })
+  const cpfQuery = useQuery({ ...trpc.users.getMyCpf.queryOptions(), enabled: !!userId })
 
   const updateProfileMutation = useMutation(
     trpc.users.updateProfile.mutationOptions({
@@ -37,6 +38,7 @@ export function useProfileForm(userId: string): UseProfileFormResult {
         toast.success('Perfil atualizado.')
         posthog.capture('profile_updated')
         void queryClient.invalidateQueries(trpc.users.getProfile.queryFilter({ id: userId }))
+        void queryClient.invalidateQueries(trpc.users.getMyCpf.queryFilter())
       },
       onError: (error) => {
         toast.error(error.message)
@@ -52,13 +54,13 @@ export function useProfileForm(userId: string): UseProfileFormResult {
   const { register, handleSubmit, reset, formState, setValue, watch } = form
 
   useEffect(() => {
-    if (!profileQuery.data) return
+    if (!profileQuery.data || !cpfQuery.isFetched) return
     reset({
       name: profileQuery.data.name,
       bio: profileQuery.data.bio ?? undefined,
-      cpf: profileQuery.data.cpf ?? '',
+      cpf: cpfQuery.data?.cpf ?? '',
     })
-  }, [profileQuery.data, reset])
+  }, [profileQuery.data, cpfQuery.isFetched, cpfQuery.data, reset])
 
   const submitProfile = (values: ProfileFormValues) => {
     updateProfileMutation.mutate({
@@ -70,7 +72,7 @@ export function useProfileForm(userId: string): UseProfileFormResult {
 
   return {
     profile: profileQuery.data ?? null,
-    isLoadingProfile: profileQuery.isLoading,
+    isLoadingProfile: profileQuery.isLoading || cpfQuery.isLoading,
     isPending: updateProfileMutation.isPending,
     register,
     handleSubmit,

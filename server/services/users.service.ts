@@ -10,7 +10,7 @@ export class UsersService {
     const { data: user, error } = await this.supabase
       .from('users')
       .insert({ id, name, email })
-      .select()
+      .select('id, name, email, image, bio, created_at')
       .single()
 
     if (error?.code === '23505') return null
@@ -27,7 +27,7 @@ export class UsersService {
   async getProfile(id: string): Promise<UserProfile | null> {
     const { data: user } = await this.supabase
       .from('users')
-      .select('id, name, image, bio, cpf, created_at')
+      .select('id, name, image, bio, created_at')
       .eq('id', id)
       .maybeSingle()
     if (!user) return null
@@ -36,7 +36,6 @@ export class UsersService {
       name: user.name,
       image: user.image,
       bio: user.bio,
-      cpf: user.cpf,
       createdAt: user.created_at,
     } as UserProfile
   }
@@ -49,7 +48,7 @@ export class UsersService {
       .from('users')
       .update(updates)
       .eq('id', id)
-      .select()
+      .select('id, name, image, bio, created_at')
       .single()
 
     if (error) {
@@ -69,9 +68,19 @@ export class UsersService {
       name: updated.name,
       image: updated.image,
       bio: updated.bio,
-      cpf: updated.cpf,
       createdAt: updated.created_at,
     } as UserProfile
+  }
+
+  /**
+   * The caller's own CPF. `cpf` is not selectable on `users` (column privilege,
+   * see drizzle/0014_protect_user_pii.sql), so it is read through an RPC that
+   * only ever returns the row of `auth.uid()`.
+   */
+  async getMyCpf(): Promise<string | null> {
+    const { data, error } = await this.supabase.rpc('get_my_cpf')
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    return (data as string | null) ?? null
   }
 
   async isFollowing(followerId: string, followeeId: string) {
