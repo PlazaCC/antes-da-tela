@@ -2,7 +2,7 @@
 
 | Campo   | Valor                    |
 | :------ | :----------------------- |
-| Status  | Proposta                 |
+| Status  | Em execução — fases 0, 2 e 3 em produção (2026-10-13) |
 | Data    | 2026-10-12               |
 | Escopo  | Auth, schema `users`, perfil, publicação |
 
@@ -192,15 +192,15 @@ export const userDocuments = pgTable(
 
 ## 4. Plano de execução
 
-Cada fase é um PR independente, na ordem.
+Cada fase é uma entrega independente, na ordem.
 
 | Fase | Entrega | Risco | Rollback |
 | :--- | :------ | :---- | :------- |
 | **0 — Hotfix LGPD** ✅ | `drizzle/0014_protect_user_pii.sql`: `cpf` sai do SELECT de `anon`/`authenticated` (grant por coluna); dono lê via RPC `get_my_cpf()`. `getProfile` não retorna mais `cpf`; novo `users.getMyCpf`. **`email` continua legível** (os upserts usam `EXCLUDED.email`) — fecha na Fase 3. | Baixo | Revert |
-| **1 — Documentos** | Tabela `user_documents` + backfill do CPF + validadores + UI + guard de publicação. Independe do Clerk; usa `auth.uid()` por enquanto. | Médio (migração de dados) | Manter `users.cpf` até o "contract" |
-| **2 — Base do Clerk (sem trocar login)** 🔨 | Migrations `0015`–`0017`: `users.clerk_id`, função `current_user_id()` com dois ramos, todas as policies migradas. Login continua Supabase — a função cobre os dois tokens. | Médio (RLS) — testar cada policy com token real | Migration reversa restaura `auth.uid()` |
-| **3 — Corte para o Clerk** 🔨 | Config externa (§2.4), `@clerk/nextjs`, webhook, `proxy.ts`, clients Supabase com `accessToken`, todos os call-sites. Avatar passa para o S3; remoção de arquivos substituídos apaga do S3 ou do Supabase conforme a origem. Deploy em preview com Clerk dev antes. | Alto | Supabase Google provider continua ligado por ~2 semanas; revert do deploy volta o login antigo, dados intactos |
-| **4 — Limpeza** | Revogar SELECT de `users.email` (nenhum upsert do cliente usa mais `EXCLUDED.email`; `getAppUser` passa a ler o e-mail do Clerk), ramo legado da função, `@supabase/ssr` (se nada mais usar), desligar Google no Supabase Auth, `drop column users.cpf`, atualizar docs/ADR. | Baixo | — |
+| **1 — Documentos** | Tabela `user_documents` + backfill do CPF + validadores + UI + guard de publicação. Policies e RPCs usam `(select public.current_user_id())` (o Clerk já está em produção; `auth.uid()` falha com o token do Clerk). | Médio (migração de dados) | Manter `users.cpf` até o "contract" |
+| **2 — Base do Clerk (sem trocar login)** ✅ | Migrations `0015`–`0017`: `users.clerk_id`, função `current_user_id()` com dois ramos, todas as policies migradas. Login continua Supabase — a função cobre os dois tokens. | Médio (RLS) — testar cada policy com token real | Migration reversa restaura `auth.uid()` |
+| **3 — Corte para o Clerk** ✅ (2026-10-13, #33) | Config externa (§2.4), `@clerk/nextjs`, webhook, `proxy.ts`, clients Supabase com `accessToken`, todos os call-sites. Avatar passa para o S3; remoção de arquivos substituídos apaga do S3 ou do Supabase conforme a origem. Deploy em preview com Clerk dev antes. | Alto | Supabase Google provider continua ligado por ~2 semanas; revert do deploy volta o login antigo, dados intactos |
+| **4 — Limpeza** | Revogar SELECT de `users.email` (nenhum upsert do cliente usa mais `EXCLUDED.email`; `getAppUser` passa a ler o e-mail do Clerk), ramo legado da função, `@supabase/ssr` (se nada mais usar), desligar Google no Supabase Auth e pedir ao parceiro para excluir o OAuth Client antigo (projeto GCP dele, usado só pelo Supabase Auth), `drop column users.cpf` (depois do backfill da Fase 1), atualizar docs/ADR. Revogar `email` e remover o ramo legado encerram o rollback da Fase 3. | Baixo | — |
 
 ### Critérios de aceite
 
@@ -224,7 +224,8 @@ Cada fase é um PR independente, na ordem.
 ## 6. Questões
 
 Respondidas:
-- Domínio: `antesdatela.com` (temos acesso ao DNS).
+- Domínio: `antesdatela.com` (temos acesso ao DNS). `antesdatela.com.br` redireciona para o `.com` (mantém query string); não usar `.com.br` em webhook/OAuth.
+- Google OAuth: o client de produção do Clerk fica num projeto GCP **da Plaza**. O client antigo (projeto do parceiro) segue só para o Supabase Auth até a Fase 4.
 - Storage: novos uploads de roteiro vão para o S3; conteúdo antigo continua no Supabase Storage (sem migração por ora).
 - CNPJ: fora do escopo.
 
