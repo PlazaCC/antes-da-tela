@@ -116,6 +116,11 @@ $$;
 4. Supabase: adicionar Clerk em Third-Party Auth (domínio do Clerk).
 5. Clerk: registrar o webhook `https://<dominio>/api/webhooks/clerk` (eventos `user.*`).
 
+Os passos 1 e 4 valem **por instância** do Clerk: a de dev tem domínio próprio (`*.clerk.accounts.dev`),
+que também precisa estar no Third-Party Auth do Supabase. Sem isso, o login no Clerk funciona mas o Supabase
+recusa o token e o app não resolve o usuário. Passo a passo para dev local (chaves, service role obrigatória,
+webhook dispensável): `docs/SETUP.md` → "Clerk (local login)".
+
 ---
 
 ## 3. Parte 2 — Outros documentos de identificação
@@ -193,9 +198,9 @@ Cada fase é um PR independente, na ordem.
 | :--- | :------ | :---- | :------- |
 | **0 — Hotfix LGPD** ✅ | `drizzle/0014_protect_user_pii.sql`: `cpf` sai do SELECT de `anon`/`authenticated` (grant por coluna); dono lê via RPC `get_my_cpf()`. `getProfile` não retorna mais `cpf`; novo `users.getMyCpf`. **`email` continua legível** (os upserts usam `EXCLUDED.email`) — fecha na Fase 3. | Baixo | Revert |
 | **1 — Documentos** | Tabela `user_documents` + backfill do CPF + validadores + UI + guard de publicação. Independe do Clerk; usa `auth.uid()` por enquanto. | Médio (migração de dados) | Manter `users.cpf` até o "contract" |
-| **2 — Base do Clerk (sem trocar login)** | `users.clerk_id`, função `current_user_id()` com dois ramos, todas as policies migradas. Login continua Supabase — a função cobre os dois tokens. | Médio (RLS) — testar cada policy com token real | Migration reversa restaura `auth.uid()` |
-| **3 — Corte para o Clerk** | Config externa (§2.4), `@clerk/nextjs`, webhook, `proxy.ts`, clients Supabase com `accessToken`, todos os call-sites. Deploy em preview com Clerk dev antes. | Alto | Supabase Google provider continua ligado por ~2 semanas; revert do deploy volta o login antigo, dados intactos |
-| **4 — Limpeza** | Remover `app/auth/callback`, ramo legado da função, `@supabase/ssr` (se nada mais usar), desligar Google no Supabase Auth, `drop column users.cpf`, atualizar docs/ADR. | Baixo | — |
+| **2 — Base do Clerk (sem trocar login)** 🔨 | Migrations `0015`–`0017`: `users.clerk_id`, função `current_user_id()` com dois ramos, todas as policies migradas. Login continua Supabase — a função cobre os dois tokens. | Médio (RLS) — testar cada policy com token real | Migration reversa restaura `auth.uid()` |
+| **3 — Corte para o Clerk** 🔨 | Config externa (§2.4), `@clerk/nextjs`, webhook, `proxy.ts`, clients Supabase com `accessToken`, todos os call-sites. Avatar passa para o S3; remoção de arquivos substituídos apaga do S3 ou do Supabase conforme a origem. Deploy em preview com Clerk dev antes. | Alto | Supabase Google provider continua ligado por ~2 semanas; revert do deploy volta o login antigo, dados intactos |
+| **4 — Limpeza** | Revogar SELECT de `users.email` (nenhum upsert do cliente usa mais `EXCLUDED.email`; `getAppUser` passa a ler o e-mail do Clerk), ramo legado da função, `@supabase/ssr` (se nada mais usar), desligar Google no Supabase Auth, `drop column users.cpf`, atualizar docs/ADR. | Baixo | — |
 
 ### Critérios de aceite
 

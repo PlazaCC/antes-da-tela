@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useTRPC } from '@/trpc/client'
+import { useClerk } from '@clerk/nextjs'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -25,11 +26,16 @@ interface DeleteAccountDialogProps {
 export function DeleteAccountDialog({ email }: DeleteAccountDialogProps) {
   const trpc = useTRPC()
   const router = useRouter()
+  const { signOut } = useClerk()
   const [confirmation, setConfirmation] = useState('')
 
   const { mutate, isPending } = useMutation(
     trpc.users.deleteAccount.mutationOptions({
-      onSuccess: () => router.replace('/'),
+      onSuccess: async () => {
+        // The Clerk user is gone server-side; clear the local session too.
+        await signOut().catch(() => {})
+        router.replace('/')
+      },
       onError: (err) => toast.error(err.message),
     }),
   )

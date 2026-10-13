@@ -1,16 +1,16 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
+import { useClerk } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import posthog from 'posthog-js'
 import { toast } from 'sonner'
 
 export function useLogout() {
   const router = useRouter()
+  const { signOut } = useClerk()
   return async () => {
-    const supabase = createClient()
     try {
-      await supabase.auth.signOut()
+      await signOut()
       posthog.reset()
       router.replace('/')
     } catch (err) {

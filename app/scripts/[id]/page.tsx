@@ -1,4 +1,5 @@
 import { ScriptPageSkeleton } from '@/components/skeletons'
+import { getAppUser } from '@/lib/auth/app-user'
 import { getAssetUrl } from '@/lib/storage/url'
 import { validateUUID } from '@/lib/validators/uuid'
 import { appRouter } from '@/server/api/root'
@@ -14,10 +15,7 @@ type Props = { params: Promise<{ id: string }> }
 const getPageData = cache(async (id: string) => {
   const ctx = await createTRPCContext({ headers: await headers() })
   const caller = appRouter.createCaller(ctx)
-  const [script, { data: authData }] = await Promise.all([
-    caller.scripts.getById({ id }),
-    ctx.supabase.auth.getUser(),
-  ])
+  const [script, appUser] = await Promise.all([caller.scripts.getById({ id }), getAppUser()])
 
   const pdfUrl = getAssetUrl(script?.script_files?.[0]?.storage_path, 'scripts')
   const audios = (script?.audio_files ?? [])
@@ -41,7 +39,7 @@ const getPageData = cache(async (id: string) => {
     bannerUrl,
     coverUrl,
     pitchDeckUrl,
-    currentUserId: authData.user?.id ?? null,
+    currentUserId: appUser?.id ?? null,
   }
 })
 

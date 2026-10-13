@@ -7,7 +7,7 @@ import { LandingHeader } from '@/components/landing/landing-header'
 import { LandingHero } from '@/components/landing/landing-hero'
 import { LandingHowItWorks } from '@/components/landing/landing-how-it-works'
 import { LandingPillars } from '@/components/landing/landing-pillars'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
 import { HydrateClient, getQueryClient, trpc } from '@/trpc/server'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
@@ -23,16 +23,14 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  // Check auth BEFORE any data prefetch. getClaims() internally calls
-  // getSession() which makes a network request to Supabase Auth — if that
-  // request fails (timeout, network error), we catch it gracefully and show
-  // the landing page instead of crashing. The redirect() call stays outside
-  // the try-catch so NEXT_REDIRECT is not swallowed.
+  // Signed-in users are normally redirected to /feed by proxy.ts already;
+  // this is the fallback. Check BEFORE any data prefetch. Failures fall back
+  // to the landing page; redirect() stays outside the try so NEXT_REDIRECT is
+  // not swallowed.
   let isAuthenticated = false
   try {
-    const supabase = await createClient()
-    const { data: claims } = await supabase.auth.getClaims()
-    isAuthenticated = !!claims?.claims
+    const { userId } = await auth()
+    isAuthenticated = !!userId
   } catch {
     // Auth check failed — show landing page as fallback
   }

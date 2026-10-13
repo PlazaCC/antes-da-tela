@@ -30,6 +30,9 @@ export const users = pgTable(
     // CPF stored as 11 digits only (no dots/dashes); unique across users. Nullable
     // because a profile can exist without a CPF — it is only required to publish.
     cpf: text('cpf').unique(),
+    // Clerk user id (`user_...`). Null for accounts not yet linked to Clerk;
+    // public.current_user_id() maps the Clerk JWT `sub` to `users.id` through it.
+    clerkId: text('clerk_id').unique(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     deactivatedAt: timestamp('deactivated_at'),
   },
@@ -38,8 +41,8 @@ export const users = pgTable(
       as: 'permissive',
       to: 'authenticated',
       for: 'all',
-      using: sql`auth.uid() = id`,
-      withCheck: sql`auth.uid() = id`,
+      using: sql`(select public.current_user_id()) = id`,
+      withCheck: sql`(select public.current_user_id()) = id`,
     }),
     pgPolicy('Users are publicly readable', {
       as: 'permissive',
@@ -92,8 +95,8 @@ export const scripts = pgTable(
       as: 'permissive',
       to: 'authenticated',
       for: 'all',
-      using: sql`auth.uid() = author_id`,
-      withCheck: sql`auth.uid() = author_id`,
+      using: sql`(select public.current_user_id()) = author_id`,
+      withCheck: sql`(select public.current_user_id()) = author_id`,
     }),
   ],
 )
@@ -118,14 +121,14 @@ export const scriptFiles = pgTable(
       as: 'permissive',
       to: 'public',
       for: 'select',
-      using: sql`exists(select 1 from scripts where id = script_id and (status = 'published' or auth.uid() = author_id))`,
+      using: sql`exists(select 1 from scripts where id = script_id and (status = 'published' or (select public.current_user_id()) = author_id))`,
     }),
     pgPolicy('Authors manage their script files', {
       as: 'permissive',
       to: 'authenticated',
       for: 'all',
-      using: sql`auth.uid() = (select author_id from scripts where id = script_id)`,
-      withCheck: sql`auth.uid() = (select author_id from scripts where id = script_id)`,
+      using: sql`(select public.current_user_id()) = (select author_id from scripts where id = script_id)`,
+      withCheck: sql`(select public.current_user_id()) = (select author_id from scripts where id = script_id)`,
     }),
   ],
 )
@@ -160,8 +163,8 @@ export const audioFiles = pgTable(
       as: 'permissive',
       to: 'authenticated',
       for: 'all',
-      using: sql`auth.uid() = (select author_id from scripts where id = script_id)`,
-      withCheck: sql`auth.uid() = (select author_id from scripts where id = script_id)`,
+      using: sql`(select public.current_user_id()) = (select author_id from scripts where id = script_id)`,
+      withCheck: sql`(select public.current_user_id()) = (select author_id from scripts where id = script_id)`,
     }),
   ],
 )
@@ -195,14 +198,14 @@ export const comments = pgTable(
       as: 'permissive',
       to: 'authenticated',
       for: 'insert',
-      withCheck: sql`auth.uid() = author_id`,
+      withCheck: sql`(select public.current_user_id()) = author_id`,
     }),
     pgPolicy('Authors manage their own comments', {
       as: 'permissive',
       to: 'authenticated',
       for: 'all',
-      using: sql`auth.uid() = author_id`,
-      withCheck: sql`auth.uid() = author_id`,
+      using: sql`(select public.current_user_id()) = author_id`,
+      withCheck: sql`(select public.current_user_id()) = author_id`,
     }),
   ],
 )
@@ -235,8 +238,8 @@ export const ratings = pgTable(
       as: 'permissive',
       to: 'authenticated',
       for: 'all',
-      using: sql`auth.uid() = user_id`,
-      withCheck: sql`auth.uid() = user_id`,
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id`,
     }),
   ],
 )
@@ -266,8 +269,8 @@ export const userFollows = pgTable(
       as: 'permissive',
       to: 'authenticated',
       for: 'all',
-      using: sql`auth.uid() = follower_id`,
-      withCheck: sql`auth.uid() = follower_id`,
+      using: sql`(select public.current_user_id()) = follower_id`,
+      withCheck: sql`(select public.current_user_id()) = follower_id`,
     }),
   ],
 )
@@ -299,8 +302,8 @@ export const commentReactions = pgTable(
       as: 'permissive',
       to: 'authenticated',
       for: 'all',
-      using: sql`auth.uid() = user_id`,
-      withCheck: sql`auth.uid() = user_id`,
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id`,
     }),
   ],
 )

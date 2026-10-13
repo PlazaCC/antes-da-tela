@@ -1,4 +1,9 @@
-const S3_PREFIXES = ['scripts/', 'audio/', 'covers/', 'banners/', 'pitch-decks/']
+const S3_PREFIXES = ['scripts/', 'audio/', 'covers/', 'banners/', 'pitch-decks/', 'avatars/']
+
+/** True for keys uploaded to S3; legacy Supabase Storage paths have no folder prefix. */
+export function isS3Key(key: string): boolean {
+  return S3_PREFIXES.some((prefix) => key.startsWith(prefix))
+}
 
 /**
  * Resolves a stored asset key/path to a public URL.
@@ -12,9 +17,7 @@ const S3_PREFIXES = ['scripts/', 'audio/', 'covers/', 'banners/', 'pitch-decks/'
 export function getAssetUrl(key: string | null | undefined, supabaseBucket?: string): string | null {
   if (!key) return null
 
-  const isS3Key = S3_PREFIXES.some((prefix) => key.startsWith(prefix))
-
-  if (isS3Key) {
+  if (isS3Key(key)) {
     const base = process.env.NEXT_PUBLIC_S3_PUBLIC_URL?.replace(/\/$/, '')
     if (!base) return null
     return `${base}/${key}`

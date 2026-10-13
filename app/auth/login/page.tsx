@@ -5,20 +5,17 @@ import { Suspense } from 'react'
 
 import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
 
 type Props = { searchParams: Promise<{ next?: string }> }
 
 export default async function LoginPage({ searchParams }: Props) {
-  // Check if already authenticated before rendering the login form.
-  // getClaims() internally calls getSession() which makes a network request
-  // to Supabase Auth — wrap in try-catch to avoid crashing on transient
-  // failures. redirect() stays outside so NEXT_REDIRECT is not swallowed.
+  // Already signed in → skip the login form. redirect() stays outside the
+  // try so NEXT_REDIRECT is not swallowed.
   let isAuthenticated = false
   try {
-    const supabase = await createClient()
-    const { data } = await supabase.auth.getClaims()
-    isAuthenticated = !!data?.claims
+    const { userId } = await auth()
+    isAuthenticated = !!userId
   } catch {
     // Auth check failed — show login form as fallback
   }

@@ -1,5 +1,5 @@
 import { PostHogUserIdentifier } from '@/components/posthog-user-identifier'
-import { createClient } from '@/lib/supabase/server'
+import { getAppUser } from '@/lib/auth/app-user'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import React from 'react'
@@ -12,10 +12,8 @@ import React from 'react'
  * stays `/account`, etc.
  *
  * Strategy:
- *   - getUser() contacts the Supabase Auth server to verify the token is still
- *     valid. This is intentionally chosen over getClaims() (which only decodes
- *     the JWT locally) because proxy.ts silently falls through on errors, so a
- *     locally-decodable but server-expired token would pass a getClaims() check.
+ *   - getAppUser() resolves the Clerk session to the `users` row (creating or
+ *     linking it on first sign-in); signed out → redirect to login.
  *   - The proxy forwards the request pathname via `x-pathname` so we can build
  *     an accurate `?next=` redirect URL without usePathname().
  */
@@ -28,10 +26,9 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 }
 
 async function AuthCheck({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data } = await supabase.auth.getUser()
+  const user = await getAppUser()
 
-  if (!data?.user) {
+  if (!user) {
     const h = await headers()
     const pathname = h.get('x-pathname') ?? '/'
     redirect(`/auth/login?next=${encodeURIComponent(pathname)}`)
@@ -40,9 +37,9 @@ async function AuthCheck({ children }: { children: React.ReactNode }) {
   return (
     <>
       <PostHogUserIdentifier
-        userId={data.user.id}
-        email={data.user.email}
-        name={data.user.user_metadata?.full_name as string | undefined}
+        userId={user.id}
+        email={user.email}
+        name={user.name}
       />
       {children}
     </>

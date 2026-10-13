@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 export const scriptsRouter = createTRPCRouter({
   create: authenticatedProcedure.input(scriptCreateSchema).mutation(async ({ input, ctx }) => {
-    return ctx.scriptsService.create(input, ctx.user!.id, ctx.user!.user_metadata || null, ctx.user!.email ?? null)
+    return ctx.scriptsService.create(input, ctx.user!.id)
   }),
 
   addAudioFile: authenticatedProcedure

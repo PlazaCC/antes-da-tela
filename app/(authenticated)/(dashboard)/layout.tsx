@@ -1,15 +1,12 @@
 import { AppSidebar } from '@/components/app-sidebar/app-sidebar'
-import { createClient } from '@/lib/supabase/server'
+import { getAppUser } from '@/lib/auth/app-user'
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAppUser()
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-bg-base pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:h-[calc(100vh-56px)] md:flex-row md:pb-0">

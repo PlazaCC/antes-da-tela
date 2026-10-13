@@ -1,7 +1,6 @@
 import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { createClient } from '@/lib/supabase/server'
-import { getUserDisplayName } from '@/lib/utils/auth'
+import { getAppUser, type AppUser } from '@/lib/auth/app-user'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -53,11 +52,9 @@ export function NavBar() {
 }
 
 async function NavBarRightSection() {
-  let user: Record<string, unknown> | null = null
+  let user: AppUser | null = null
   try {
-    const supabase = await createClient()
-    const { data } = await supabase.auth.getClaims()
-    user = data?.claims as Record<string, unknown> | null
+    user = await getAppUser()
   } catch {
     // Auth check failed — show login view as fallback
   }
@@ -79,13 +76,9 @@ async function NavBarRightSection() {
     )
   }
 
-  const meta = user.user_metadata as Record<string, unknown> | undefined
-  const userId = user.sub as string
-  const userName = getUserDisplayName(user)
-  const userImage =
-    (meta?.avatar_url as string | undefined) ??
-    (meta?.picture as string | undefined) ??
-    null
+  const userId = user.id
+  const userName = user.name
+  const userImage = user.image
 
   return (
     <div className="flex items-center justify-between gap-4 md:gap-8">

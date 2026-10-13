@@ -1,4 +1,5 @@
 import { getAssetUrl } from "@/lib/storage/url";
+import { removeAssets } from "@/lib/storage/remove";
 import type {
   DashboardMetrics,
   ScriptDetail,
@@ -35,8 +36,6 @@ export class ScriptsService {
   async create(
     input: ScriptCreateInput,
     userId: string,
-    userMetadata: Record<string, unknown> | null,
-    userEmail: string | null,
   ) {
     const {
       status,
@@ -52,27 +51,8 @@ export class ScriptsService {
       ...scriptData
     } = input;
 
-    // Ensure the author's profile exists
-    const authorName =
-      userMetadata?.full_name ??
-      (userEmail ? String(userEmail).split("@")[0] : "User");
-    const { error: upsertError } = await this.supabase
-      .from("users")
-      .upsert(
-        {
-          id: userId,
-          name: String(authorName).slice(0, 100),
-          email: userEmail,
-        },
-        { onConflict: "id" },
-      );
-
-    if (upsertError) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: `Failed to ensure author profile: ${upsertError.message}`,
-      });
-    }
+    // The author's `users` row is guaranteed by authenticatedProcedure
+    // (getAppUser creates/links it on first sign-in).
 
     // Publishing requires the author's CPF and the work's BN registration.
     // Cadastro as draft is always allowed.
@@ -252,13 +232,13 @@ export class ScriptsService {
 
     // ── Storage Cleanup ───────────────────────────────────────────────────────
     // Delete old files from storage buckets only if they were replaced by new ones
-    const cleanupPromises: Promise<unknown>[] = [];
+    const cleanupPromises: Promise<void>[] = [];
 
     // 1. PDF File
     const oldPdfPath = oldData.script_files?.[0]?.storage_path;
     if (storagePath && oldPdfPath && storagePath !== oldPdfPath) {
       cleanupPromises.push(
-        this.supabase.storage.from("scripts").remove([oldPdfPath]),
+        removeAssets(this.supabase, "scripts", [oldPdfPath]),
       );
     }
 
@@ -270,7 +250,7 @@ export class ScriptsService {
         .filter((path): path is string => !!path && !newAudioPaths.has(path));
       if (removedAudioPaths.length > 0) {
         cleanupPromises.push(
-          this.supabase.storage.from("audio").remove(removedAudioPaths),
+          removeAssets(this.supabase, "audio", removedAudioPaths),
         );
       }
     }
@@ -282,7 +262,7 @@ export class ScriptsService {
       updateData.coverPath !== oldData.cover_path
     ) {
       cleanupPromises.push(
-        this.supabase.storage.from("avatars").remove([oldData.cover_path]),
+        removeAssets(this.supabase, "avatars", [oldData.cover_path]),
       );
     }
 
@@ -293,7 +273,7 @@ export class ScriptsService {
       updateData.bannerPath !== oldData.banner_path
     ) {
       cleanupPromises.push(
-        this.supabase.storage.from("avatars").remove([oldData.banner_path]),
+        removeAssets(this.supabase, "avatars", [oldData.banner_path]),
       );
     }
 

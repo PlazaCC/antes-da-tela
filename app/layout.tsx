@@ -1,8 +1,11 @@
 import { AppToaster } from '@/components/app-toaster/app-toaster'
+import { DevSignOut } from '@/components/dev/dev-sign-out'
 import { Footer } from '@/components/footer/footer'
 import { NavBar } from '@/components/navbar'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
+import { ptBR } from '@clerk/localizations'
+import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from 'next'
 import { DM_Mono, Inter } from 'next/font/google'
 import localFont from 'next/font/local'
@@ -108,14 +111,17 @@ export default function RootLayout({
         className={`${inter.variable} ${clashGrotesk.variable} ${dmMono.variable} antialiased`}
       >
         <Suspense fallback={null}>
+          <ClerkProvider localization={ptBR} signInUrl="/auth/login" signUpUrl="/auth/login">
           <TRPCReactProvider>
             <ThemeProvider>
               <NavBar />
               {children}
               <Footer />
               <AppToaster />
+              {process.env.NODE_ENV === 'development' && <DevSignOut />}
             </ThemeProvider>
           </TRPCReactProvider>
+          </ClerkProvider>
         </Suspense>
       </body>
     </html>

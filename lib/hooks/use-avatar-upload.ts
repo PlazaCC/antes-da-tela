@@ -1,21 +1,24 @@
 'use client'
 
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { usePublishUpload } from '@/lib/hooks/use-publish-upload'
+import { getAssetUrl } from '@/lib/storage/url'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 
 /**
- * Encapsulates avatar upload to Supabase Storage + profile image update via tRPC.
- * Extracted from account/page.tsx and profile/edit/page.tsx (was duplicated).
+ * Encapsulates avatar upload to S3 (presigned PUT) + profile image update via tRPC.
  *
  * Uploads remain client-side to avoid Vercel's 10s timeout on API routes.
+ * Key: `avatars/{userId}/{timestamp}_avatar.{ext}`.
  */
 export function useAvatarUpload() {
-  const supabase = useMemo(() => createClient(), [])
   const trpc = useTRPC()
   const queryClient = useQueryClient()
+  const { userId } = useCurrentUser()
+  const { uploadFile } = usePublishUpload()
   const [isUploading, setIsUploading] = useState(false)
 
   const updateProfile = useMutation(trpc.users.updateProfile.mutationOptions())
@@ -23,38 +26,20 @@ export function useAvatarUpload() {
   async function upload(file: File): Promise<void> {
     setIsUploading(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Usuário não autenticado.')
+      if (!userId) throw new Error('Usuário não autenticado.')
 
       const ext = file.name.split('.').pop() ?? 'png'
-      const path = `${user.id}/${Date.now()}_avatar.${ext}`
+      const key = `avatars/${userId}/${Date.now()}_avatar.${ext}`
+      await uploadFile(key, file, () => {})
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(path, file, { upsert: true })
-      if (uploadError) throw uploadError
+      const publicUrl = getAssetUrl(key)
+      if (!publicUrl) throw new Error('Não foi possível gerar URL do avatar.')
 
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
-      if (!urlData?.publicUrl) throw new Error('Não foi possível gerar URL do avatar.')
-
-      await new Promise<void>((resolve, reject) => {
-        updateProfile.mutate(
-          { image: urlData.publicUrl },
-          {
-            onSuccess: () => {
-              void queryClient.invalidateQueries({
-                queryKey: trpc.users.getProfile.queryOptions({ id: user.id }).queryKey,
-              })
-              toast.success('Avatar atualizado.')
-              resolve()
-            },
-            onError: (err) => {
-              toast.error(err.message)
-              reject(err)
-            },
-          },
-        )
+      await updateProfile.mutateAsync({ image: publicUrl })
+      void queryClient.invalidateQueries({
+        queryKey: trpc.users.getProfile.queryOptions({ id: userId }).queryKey,
       })
+      toast.success('Avatar atualizado.')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Upload falhou.')
     } finally {
