@@ -4,17 +4,6 @@ import { isValidCpf, stripCpf } from '@/lib/utils/cpf'
 import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
-  createProfile: authenticatedProcedure
-    .input(
-      z.object({
-        name: z.string().min(2).max(100),
-        email: z.string().email(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      return ctx.usersService.createProfile(ctx.user!.id, input.name, input.email)
-    }),
-
   // The signed-in user's `users.id` (uuid), or null when signed out.
   me: publicProcedure.query(async () => {
     const me = await getAppUser()

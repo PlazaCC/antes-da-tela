@@ -29,15 +29,16 @@ export const getAppUser = cache(async (): Promise<AppUser | null> => {
   const { userId: clerkId } = await auth()
   if (!clerkId) return null
 
+  // The e-mail comes from Clerk: users.email is not readable by the client roles.
+  const clerkUser = await currentUser()
+  const primaryEmail = clerkUser?.primaryEmailAddress
+  if (!clerkUser || !primaryEmail) return null
+
   const supabase = await createClient()
   const { data: resolvedId } = await supabase.rpc('current_user_id')
   let id = resolvedId as string | null
 
   if (!id) {
-    const clerkUser = await currentUser()
-    if (!clerkUser) return null
-    const primaryEmail = clerkUser.primaryEmailAddress
-    if (!primaryEmail) return null
     id = await syncClerkUser({
       clerkId,
       email: primaryEmail.emailAddress,
@@ -47,7 +48,7 @@ export const getAppUser = cache(async (): Promise<AppUser | null> => {
     })
   }
 
-  const { data: row } = await supabase.from('users').select('id, name, email, image').eq('id', id).maybeSingle()
+  const { data: row } = await supabase.from('users').select('id, name, image').eq('id', id).maybeSingle()
   if (!row) return null
-  return { id: row.id, clerkId, name: row.name, email: row.email, image: row.image }
+  return { id: row.id, clerkId, name: row.name, email: primaryEmail.emailAddress, image: row.image }
 })

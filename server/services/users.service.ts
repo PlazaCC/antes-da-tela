@@ -7,24 +7,6 @@ import type { FollowUser, UserProfile, ProfileStats } from '@/lib/types'
 export class UsersService {
   constructor(private supabase: SupabaseClient) {}
 
-  async createProfile(id: string, name: string, email: string) {
-    const { data: user, error } = await this.supabase
-      .from('users')
-      .insert({ id, name, email })
-      .select('id, name, email, image, bio, created_at')
-      .single()
-
-    if (error?.code === '23505') return null
-    if (error) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: error.message,
-      })
-    }
-
-    return user ?? null
-  }
-
   async getProfile(id: string): Promise<UserProfile | null> {
     const { data: user } = await this.supabase
       .from('users')
