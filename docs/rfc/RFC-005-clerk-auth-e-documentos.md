@@ -73,9 +73,17 @@ $$;
 - Depois do corte, o ramo `else` pode ser removido.
 - Todas as policies do `server/db/schema.ts` trocam `auth.uid()` por `(select public.current_user_id())`
   (o `select` envolvendo faz o Postgres avaliar uma vez por query, não por linha).
-- As policies de `storage.objects` (`drizzle/0008`, `0009`) usam `auth.uid()::text`. Todos os arquivos estão no
-  S3 (presign em `app/api/upload/presign/route.ts`), então essas policies são legado e serão dropadas na Fase 4.
-  Atenção: `UsersService.deleteAccount` ainda chama `supabase.storage` — migrar para o S3 junto.
+- As policies de `storage.objects` (`drizzle/0008`, `0009`) usam `auth.uid()::text`. Novos uploads de roteiro vão
+  para o S3 (presign em `app/api/upload/presign/route.ts`), mas **o conteúdo antigo continua no Supabase Storage**
+  (buckets públicos, leitura não depende de policy). Com o token do Clerk, `auth.uid()` dá erro, então:
+  - **Leitura** de arquivos antigos segue funcionando (bucket público).
+  - **Remoção** (`ScriptsService.update` ao trocar PDF/áudio/capa, `UsersService.deleteAccount`) passa pelas policies
+    de escrita → trocar `auth.uid()::text` por `public.current_user_id()::text` nessas policies na Fase 2.
+  - **`lib/hooks/use-avatar-upload.ts` ainda faz upload no bucket `avatars` do Supabase** — migrar para o presign
+    do S3 antes da Fase 3 (o upload direto do browser usa a sessão do Supabase, que deixa de existir).
+  - As remoções de arquivos substituídos só chamam `supabase.storage.remove`; para chaves do S3 isso não apaga nada
+    (arquivos órfãos no S3). Corrigir junto: remover do S3 ou do Supabase conforme a origem do path.
+  - Migrar o conteúdo antigo para o S3 é opcional e pode ficar para depois do Clerk.
 
 ### 2.3 Mudanças no código
 
@@ -120,7 +128,6 @@ $$;
 | `passport` | Estrangeiros ou brasileiros no exterior | Alfanumérico 6–9, normalizado em maiúsculas | Obrigatório (ISO 3166-1 alfa-2) |
 | `crnm` | Estrangeiros residentes no Brasil (Carteira de Registro Nacional Migratório, antigo RNE) | Alfanumérico, normalizado | BR fixo |
 | `foreign_national_id` | Documento nacional de outro país (DNI, cédula, etc.) | Alfanumérico 4–20, normalizado | Obrigatório |
-| `cnpj` *(opcional)* | Produtoras / pessoa jurídica que detém os direitos | Dígito verificador **no formato alfanumérico** (em vigor desde jul/2026) | BR fixo |
 
 **Não recomendo RG**: numeração não é única nacionalmente (varia por estado) e a nova CIN usa o próprio CPF.
 
@@ -133,7 +140,7 @@ Tabela separada, **não** colunas em `users` — porque `users` é publicamente 
 
 ```ts
 // server/db/schema.ts
-export const documentTypeEnum = pgEnum('document_type', ['cpf', 'passport', 'crnm', 'foreign_national_id', 'cnpj'])
+export const documentTypeEnum = pgEnum('document_type', ['cpf', 'passport', 'crnm', 'foreign_national_id'])
 
 export const userDocuments = pgTable(
   'user_documents',
@@ -142,7 +149,7 @@ export const userDocuments = pgTable(
     type: documentTypeEnum('type').notNull(),
     // Normalizado: só dígitos (cpf) ou alfanumérico maiúsculo sem separadores (demais)
     number: text('number').notNull(),
-    // ISO 3166-1 alfa-2; 'BR' para cpf/crnm/cnpj
+    // ISO 3166-1 alfa-2; 'BR' para cpf/crnm
     country: text('country').notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -213,9 +220,8 @@ Cada fase é um PR independente, na ordem.
 
 Respondidas:
 - Domínio: `antesdatela.com` (temos acesso ao DNS).
-- Storage: tudo no S3; policies de `storage.objects` são legado.
+- Storage: novos uploads de roteiro vão para o S3; conteúdo antigo continua no Supabase Storage (sem migração por ora).
+- CNPJ: fora do escopo.
 
 Em aberto:
-1. CNPJ: só faz sentido se uma produtora (pessoa jurídica) for a titular dos direitos e quiser publicar em nome
-   da empresa. Para autor pessoa física não é necessário — proposta: fora do POC.
-2. Queremos oferecer login por e-mail (magic link) além do Google, já que o Clerk dá isso de graça?
+1. Queremos oferecer login por e-mail (magic link) além do Google, já que o Clerk dá isso de graça?
