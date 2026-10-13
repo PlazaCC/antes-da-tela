@@ -48,6 +48,26 @@ This document provides the official step-by-step instructions to set up the Ante
    - `NEXT_PUBLIC_S3_PUBLIC_URL` — S3 bucket public base URL, e.g. `https://antes-da-tela-dev.s3.sa-east-1.amazonaws.com` (used by `next/image` remotePatterns and asset URL resolution)
    - `SENTRY_AUTH_TOKEN`
 
+### Clerk (local login)
+
+Use the Clerk **Development** instance locally. Each Clerk instance (dev/prod) has its own domain, and Supabase must trust the one you log in with.
+
+1. **Clerk dashboard → API keys**: copy `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (`pk_test_…`) and `CLERK_SECRET_KEY` (`sk_test_…`). Note the **Frontend API URL** (`https://<name>.clerk.accounts.dev`).
+2. **Clerk → Configure → SSO connections**: enable Google only.
+3. **Clerk → Integrations → Supabase**: activate it (adds `role: authenticated` to the session token).
+4. **Supabase → Authentication → Sign In / Providers → Third-Party Auth**: add Clerk with the dev Frontend API URL from step 1.
+5. `.env`: set the two Clerk keys, `SUPABASE_SERVICE_ROLE_KEY` (**required** — the first login creates/links the `users` row with it), and `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `NEXT_PUBLIC_CLERK_SIGN_UP_URL` = `/auth/login`.
+6. Apply migrations (`yarn db:migrate`) — `0015`–`0017` add `users.clerk_id` and `current_user_id()`.
+7. Restart `yarn dev` after changing `.env`.
+
+`CLERK_WEBHOOK_SIGNING_SECRET` is **not** needed locally: `getAppUser()` creates/links the user on the first request if the webhook has not run.
+
+Troubleshooting:
+
+- **Login works but no data / navbar still shows "Login"**: Supabase is rejecting the Clerk token (steps 3–4) or `SUPABASE_SERVICE_ROLE_KEY` is missing.
+- **Stuck signed in**: in development a **"[dev] Encerrar sessão"** button (bottom-left) ends the Clerk session. Alternatively clear site data for `localhost:3000`.
+- Logging in locally against a shared database links that `users` row to the **dev** Clerk user id; it must be relinked when the production Clerk instance goes live.
+
 ### Sentry environment variables
 
 - `SENTRY_DSN` — server-side DSN for Sentry (set in Production/Preview environments). Required for server error collection.

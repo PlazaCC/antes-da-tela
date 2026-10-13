@@ -1,4 +1,5 @@
 import { AppToaster } from '@/components/app-toaster/app-toaster'
+import { DevSignOut } from '@/components/dev/dev-sign-out'
 import { Footer } from '@/components/footer/footer'
 import { NavBar } from '@/components/navbar'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -117,6 +118,7 @@ export default function RootLayout({
               {children}
               <Footer />
               <AppToaster />
+              {process.env.NODE_ENV === 'development' && <DevSignOut />}
             </ThemeProvider>
           </TRPCReactProvider>
           </ClerkProvider>

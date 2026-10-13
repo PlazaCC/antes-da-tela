@@ -116,6 +116,11 @@ $$;
 4. Supabase: adicionar Clerk em Third-Party Auth (domínio do Clerk).
 5. Clerk: registrar o webhook `https://<dominio>/api/webhooks/clerk` (eventos `user.*`).
 
+Os passos 1 e 4 valem **por instância** do Clerk: a de dev tem domínio próprio (`*.clerk.accounts.dev`),
+que também precisa estar no Third-Party Auth do Supabase. Sem isso, o login no Clerk funciona mas o Supabase
+recusa o token e o app não resolve o usuário. Passo a passo para dev local (chaves, service role obrigatória,
+webhook dispensável): `docs/SETUP.md` → "Clerk (local login)".
+
 ---
 
 ## 3. Parte 2 — Outros documentos de identificação
