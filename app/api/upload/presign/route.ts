@@ -1,5 +1,5 @@
 import { s3, S3_BUCKET } from '@/lib/storage/s3-client'
-import { createRouteHandlerClient } from '@/lib/supabase/server'
+import { getAppUser } from '@/lib/auth/app-user'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { NextResponse } from 'next/server'
@@ -16,11 +16,10 @@ const ALLOWED_CONTENT_TYPES = new Set([
   'image/webp',
 ])
 
-const FOLDER_PREFIXES = ['scripts/', 'audio/', 'covers/', 'banners/', 'pitch-decks/']
+const FOLDER_PREFIXES = ['scripts/', 'audio/', 'covers/', 'banners/', 'pitch-decks/', 'avatars/']
 
 export async function POST(request: Request) {
-  const supabase = await createRouteHandlerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAppUser()
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

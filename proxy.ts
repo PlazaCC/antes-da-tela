@@ -1,39 +1,42 @@
-import { captureException } from '@/lib/sentry'
-import { updateSession } from '@/lib/supabase/middleware'
-import { NextResponse, type NextRequest } from 'next/server'
+import { clerkMiddleware } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
 /**
  * Next.js Proxy (Edge) — runs before every matched request.
  *
- * Delegates to `updateSession` in `lib/middleware.ts` which:
- *   1. Refreshes the Supabase access token (rotates via Set-Cookie) so Server
- *      Components always read a non-expired session.
+ *   1. `clerkMiddleware` makes the Clerk session available to `auth()` in
+ *      Server Components, Route Handlers and tRPC.
  *   2. Forwards the request pathname as `x-pathname` so the authenticated
  *      route-group layout can build the `?next=` redirect URL without
  *      `usePathname()`.
+ *   3. Redirects signed-in users from the landing page (/) to /feed before any
+ *      React renders (avoids the global-error flash of a Server Component
+ *      redirect).
  *
- * Route protection lives in `app/(authenticated)/layout.tsx`, not here —
- * keeping it in a Server Component gives accurate pathname access and keeps
- * this file focused on a single responsibility.
+ * Route protection lives in `app/(authenticated)/layout.tsx`, not here.
  *
  * Note: In Next.js 16+ the proxy file convention replaces middleware.ts.
  * The export must be named `proxy` (not `middleware`).
  */
-export async function proxy(request: NextRequest) {
-  try {
-    return await updateSession(request)
-  } catch (err) {
-    // Do not block the request on session proxy errors; report and continue.
-    try {
-      captureException(err, { url: request.url })
-    } catch (e) {
-      console.error('proxy handler error (sentry failed)', e)
+export const proxy = clerkMiddleware(async (auth, request) => {
+  if (request.nextUrl.pathname === '/') {
+    const { userId } = await auth()
+    if (userId) {
+      const feedUrl = request.nextUrl.clone()
+      feedUrl.pathname = '/feed'
+      feedUrl.search = ''
+      return NextResponse.redirect(feedUrl)
     }
-    console.error('proxy handler error', err)
-    return NextResponse.next()
   }
-}
+
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+  return NextResponse.next({ request: { headers: requestHeaders } })
+})
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2?|ico|webmanifest)$).*)',
+    '/(api|trpc)(.*)',
+  ],
 }

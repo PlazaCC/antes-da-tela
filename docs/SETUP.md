@@ -34,8 +34,10 @@ This document provides the official step-by-step instructions to set up the Ante
    ```
 2. Fill in all required values from your Supabase, PostHog, Resend, and Sentry dashboards:
    - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — used by auth flows, session middleware, and tRPC context
-   - `SUPABASE_SERVICE_ROLE_KEY` _(server-only, optional)_ — only needed for privileged operations that bypass RLS (admin scripts, background jobs). **Not required** for normal auth, session refresh, or API calls.
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — used by every Supabase client (carries the Clerk session token)
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` — Clerk (login). Dashboard setup: RFC-005 §2.4
+   - `CLERK_WEBHOOK_SIGNING_SECRET` — Clerk webhook (`/api/webhooks/clerk`) that creates/links `users` rows
+   - `SUPABASE_SERVICE_ROLE_KEY` _(server-only)_ — privileged operations that bypass RLS: Clerk user sync and account deletion. Never used for regular data access.
      - Never expose this value to the browser or commit it to source control.
      - Do not prefix with `NEXT_PUBLIC_`.
      - If set in Vercel: add it under Settings > Environment Variables for **Preview** and **Production** targets only.

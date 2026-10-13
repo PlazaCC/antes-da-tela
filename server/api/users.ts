@@ -1,3 +1,4 @@
+import { getAppUser } from '@/lib/auth/app-user'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { isValidCpf, stripCpf } from '@/lib/utils/cpf'
 import { z } from 'zod'
@@ -13,6 +14,12 @@ export const usersRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return ctx.usersService.createProfile(ctx.user!.id, input.name, input.email)
     }),
+
+  // The signed-in user's `users.id` (uuid), or null when signed out.
+  me: publicProcedure.query(async () => {
+    const me = await getAppUser()
+    return me ? { id: me.id, email: me.email } : null
+  }),
 
   getProfile: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input, ctx }) => {
     return ctx.usersService.getProfile(input.id)
@@ -44,10 +51,9 @@ export const usersRouter = createTRPCRouter({
     }),
 
   isFollowing: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input, ctx }) => {
-    const { data } = await ctx.supabase.auth.getClaims()
-    if (!data?.claims) return { following: false }
-    const userId = data.claims.sub as string
-    return ctx.usersService.isFollowing(userId, input.authorId)
+    const me = await getAppUser()
+    if (!me) return { following: false }
+    return ctx.usersService.isFollowing(me.id, input.authorId)
   }),
 
   follow: authenticatedProcedure.input(z.object({ authorId: z.string().uuid() })).mutation(async ({ input, ctx }) => {
@@ -75,6 +81,6 @@ export const usersRouter = createTRPCRouter({
   }),
 
   deleteAccount: authenticatedProcedure.mutation(async ({ ctx }) => {
-    return ctx.usersService.deleteAccount(ctx.user!.id)
+    return ctx.usersService.deleteAccount(ctx.user!.id, ctx.user!.clerkId)
   }),
 })

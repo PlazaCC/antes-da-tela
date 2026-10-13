@@ -3,6 +3,10 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
+  resolve: {
+    // `server-only` throws outside the react-server condition; it is a no-op guard in tests.
+    alias: { 'server-only': new URL('./test/mocks/server-only.ts', import.meta.url).pathname },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

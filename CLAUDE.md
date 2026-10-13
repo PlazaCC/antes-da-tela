@@ -14,7 +14,7 @@ See `package.json` for available scripts.
 | Camada      | Tecnologia                                                |
 | :---------- | :-------------------------------------------------------- |
 | Framework   | Next.js (App Router) — TypeScript                         |
-| Auth        | Supabase Auth via `@supabase/ssr`                         |
+| Auth        | Clerk (`@clerk/nextjs`) + Supabase third-party auth       |
 | API         | tRPC v11 + Zod                                            |
 | ORM         | Drizzle ORM (migrations only) + Supabase JS SDK (runtime) |
 | Banco       | Supabase Postgres                                         |
@@ -71,21 +71,24 @@ yarn skills:force      # Rebuild synced agent skills from scratch
 
 ## Critical Patterns
 
-### Supabase Auth (SSR)
+### Auth (Clerk + Supabase third-party auth)
 
-- Always use `createServerClient` from `@supabase/ssr` in Server Components / API routes.
-- Always use `createBrowserClient` in Client Components.
-- Session refresh happens in `middleware.ts` — do not bypass it.
-- Use `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for all server-side auth clients (callback route, tRPC context, session middleware). After `exchangeCodeForSession` the client carries the user JWT — no elevated key needed.
-- `SUPABASE_SERVICE_ROLE_KEY` is for privileged server operations only (bypassing RLS). Never use it for auth flows, session reads, or tRPC context.
-- Never expose `SUPABASE_SERVICE_ROLE_KEY` to the client or prefix it with `NEXT_PUBLIC_`.
+See `docs/rfc/RFC-005-clerk-auth-e-documentos.md`.
+
+- Clerk owns sign-in and sessions (`clerkMiddleware` in `proxy.ts`). Never use `supabase.auth.*` — the Supabase clients carry the Clerk session token and have no Supabase Auth session.
+- Two ids: Clerk `user_...` and `users.id` (uuid). **Everything in the app (tables, RLS, S3 paths, tRPC `ctx.user.id`) uses `users.id`.** Get it with `getAppUser()` (`lib/auth/app-user.ts`, server) or `useCurrentUser()` (client).
+- RLS policies use `(select public.current_user_id())`, never `auth.uid()` — `auth.uid()` errors on Clerk tokens.
+- Server Supabase client: `createClient()` from `@/lib/supabase/server` (Clerk token + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`).
+- `users` rows are created/linked by `syncClerkUser` (Clerk webhook `app/api/webhooks/clerk/route.ts`, plus a fallback in `getAppUser`). Pre-Clerk accounts are linked by verified e-mail.
+- `SUPABASE_SERVICE_ROLE_KEY` (`createAdminClient()` in `lib/supabase/admin.ts`) is for privileged server operations only (user sync, account deletion). Never use it for regular data access.
+- Never expose `SUPABASE_SERVICE_ROLE_KEY` or `CLERK_SECRET_KEY` to the client or prefix them with `NEXT_PUBLIC_`.
 
 ### tRPC
 
 - Context: `createTRPCContext` accepts `{ headers: Headers }` from the request.
 - Use `Awaited<ReturnType<typeof createTRPCContext>>` as the generic for `initTRPC.context<>()`.
-- `ctx.supabase` — authenticated Supabase client available in all procedures. Use it for all data queries; RLS is enforced automatically via the user JWT.
-- `ctx.user` — populated only in `authenticatedProcedure` (lazily calls `getUser()`). Null in `publicProcedure` — do not call `getUser()` in context, only in `authenticatedProcedure`.
+- `ctx.supabase` — Supabase client with the Clerk session token, available in all procedures. Use it for all data queries; RLS is enforced automatically via the JWT.
+- `ctx.user` — populated only in `authenticatedProcedure` (lazily calls `getAppUser()`); `ctx.user.id` is `users.id`. Null in `publicProcedure` — do not resolve the user in context.
 - Server-side prefetch: use `trpc` and `HydrateClient` from `@/trpc/server`.
 - Client hook: `useTRPC()` from `@/trpc/client`.
 

@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
+import { removeAssets, removeS3Prefix } from '@/lib/storage/remove'
+import { clerkClient } from '@clerk/nextjs/server'
 import { TRPCError } from '@trpc/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { FollowUser, UserProfile, ProfileStats } from '@/lib/types'
@@ -163,44 +164,39 @@ export class UsersService {
     return { success: true }
   }
 
-  async deleteAccount(userId: string) {
+  async deleteAccount(userId: string, clerkId: string) {
     // 1. Fetch all scripts with their storage file paths
     const { data: scripts } = await this.supabase
       .from('scripts')
-      .select('cover_path, banner_path, script_files(storage_path), audio_files(storage_path)')
+      .select('cover_path, banner_path, pitch_deck_path, script_files(storage_path), audio_files(storage_path)')
       .eq('author_id', userId)
 
-    // 2. Delete storage files for each script (non-critical — never throw)
+    // 2. Delete stored files (S3 or legacy Supabase Storage; never throws)
     for (const script of scripts ?? []) {
       const pdfPaths = (script.script_files ?? []).map((f) => f.storage_path).filter(Boolean) as string[]
-      if (pdfPaths.length) await this.supabase.storage.from('scripts').remove(pdfPaths).catch(() => {})
-
       const audioPaths = (script.audio_files ?? []).map((f) => f.storage_path).filter(Boolean) as string[]
-      if (audioPaths.length) await this.supabase.storage.from('audio').remove(audioPaths).catch(() => {})
-
-      if (script.cover_path) await this.supabase.storage.from('avatars').remove([script.cover_path]).catch(() => {})
-      if (script.banner_path) await this.supabase.storage.from('avatars').remove([script.banner_path]).catch(() => {})
+      const imagePaths = [script.cover_path, script.banner_path].filter(Boolean) as string[]
+      await Promise.all([
+        removeAssets(this.supabase, 'scripts', [...pdfPaths, ...(script.pitch_deck_path ? [script.pitch_deck_path] : [])]),
+        removeAssets(this.supabase, 'audio', audioPaths),
+        removeAssets(this.supabase, 'avatars', imagePaths),
+      ])
     }
 
-    // 3. Delete user avatar files from avatars/{userId}/ folder
+    // 3. Delete avatar files: S3 avatars/{userId}/ and legacy avatars bucket {userId}/
+    await removeS3Prefix(`avatars/${userId}/`)
     const { data: avatarFiles } = await this.supabase.storage.from('avatars').list(userId)
     if (avatarFiles?.length) {
-      const paths = avatarFiles.map((f) => `${userId}/${f.name}`)
-      await this.supabase.storage.from('avatars').remove(paths).catch(() => {})
+      await removeAssets(this.supabase, 'avatars', avatarFiles.map((f) => `${userId}/${f.name}`))
     }
 
     // 4. Delete user row — cascades scripts, comments, ratings, follows, reactions
     const { error: deleteError } = await this.supabase.from('users').delete().eq('id', userId)
     if (deleteError) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: deleteError.message })
 
-    // 5. Delete Supabase Auth user (requires service role key)
-    const admin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } },
-    )
-    const { error: authError } = await admin.auth.admin.deleteUser(userId)
-    if (authError) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: authError.message })
+    // 5. Delete the Clerk user (ends every session)
+    const clerk = await clerkClient()
+    await clerk.users.deleteUser(clerkId)
 
     return { success: true }
   }

@@ -1,30 +1,23 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-import { useEffect, useMemo, useState } from 'react'
+import { useTRPC } from '@/trpc/client'
+import { useAuth } from '@clerk/nextjs'
+import { useQuery } from '@tanstack/react-query'
 
 /**
- * Returns the currently authenticated user's ID.
- *
- * Centralises the `useEffect + useState` pattern for obtaining `userId`
- * that was previously duplicated in account, profile/edit, and publish pages.
+ * Returns the signed-in user's `users.id` (uuid, not the Clerk id) and e-mail.
  *
  * Pages inside `(authenticated)/` will always resolve a non-null userId
  * after loading — the layout auth-check guarantees it.
  */
 export function useCurrentUser(): { userId: string | null; email: string | null; isLoading: boolean } {
-  const supabase = useMemo(() => createClient(), [])
-  const [userId, setUserId] = useState<string | null>(null)
-  const [email, setEmail] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const trpc = useTRPC()
+  const { isLoaded, isSignedIn } = useAuth()
+  const meQuery = useQuery({ ...trpc.users.me.queryOptions(), enabled: !!isSignedIn, staleTime: Infinity })
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUserId(data.user?.id ?? null)
-      setEmail(data.user?.email ?? null)
-      setIsLoading(false)
-    })
-  }, [supabase])
-
-  return { userId, email, isLoading }
+  return {
+    userId: meQuery.data?.id ?? null,
+    email: meQuery.data?.email ?? null,
+    isLoading: !isLoaded || (!!isSignedIn && meQuery.isLoading),
+  }
 }

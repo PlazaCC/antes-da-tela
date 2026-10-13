@@ -12,8 +12,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
 import { useTRPC } from '@/trpc/client'
+import { useClerk } from '@clerk/nextjs'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -21,12 +21,12 @@ import { toast } from 'sonner'
 export function DeactivateAccountDialog() {
   const trpc = useTRPC()
   const router = useRouter()
+  const { signOut } = useClerk()
 
   const { mutate, isPending } = useMutation(
     trpc.users.deactivateAccount.mutationOptions({
       onSuccess: async () => {
-        const supabase = createClient()
-        await supabase.auth.signOut()
+        await signOut()
         router.replace('/')
       },
       onError: (err) => toast.error(err.message),

@@ -14,6 +14,11 @@ const remotePatterns: NonNullable<NextConfig['images']>['remotePatterns'] = [
     protocol: 'https',
     hostname: 'rbesxenumiuijosbntzp.supabase.co',
   },
+  {
+    // Profile images of users created through Clerk
+    protocol: 'https',
+    hostname: 'img.clerk.com',
+  },
 ]
 
 // Only add S3 pattern if the env var is configured

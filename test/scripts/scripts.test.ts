@@ -18,9 +18,15 @@ const SCRIPT_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22'
 
 const MOCK_USER = {
   id: USER_ID,
+  clerkId: 'user_test',
   email: 'author@example.com',
-  user_metadata: { full_name: 'Test Author' },
+  name: 'Test Author',
 }
+
+// authenticatedProcedure resolves the session through getAppUser (Clerk).
+vi.mock('@/lib/auth/app-user', () => ({
+  getAppUser: vi.fn(async () => ({ ...MOCK_USER, image: null })),
+}))
 
 const MOCK_SCRIPT = {
   id: SCRIPT_ID,
@@ -39,7 +45,6 @@ const MOCK_SCRIPT = {
 
 /** Build a minimal Supabase mock for a given table operation chain. */
 function makeSupabaseMock(overrides: Record<string, unknown> = {}, myCpf: string | null = '52998224725'): SupabaseClient {
-  const upsert = vi.fn(() => Promise.resolve({ error: null, count: null, status: 200, statusText: 'OK' }))
   const selectAfterInsert = vi.fn(() => ({
     single: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null, count: null, status: 200, statusText: 'OK' })),
   }))
@@ -48,7 +53,6 @@ function makeSupabaseMock(overrides: Record<string, unknown> = {}, myCpf: string
   const deleteScript = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null, count: null, status: 204, statusText: 'No Content' })) }))
 
   const fromMap: Record<string, unknown> = {
-    users: { upsert },
     scripts: {
       insert: insertScript,
       delete: deleteScript,
@@ -109,23 +113,6 @@ describe('scriptsRouter.create', () => {
     })
     expect(result.id).toBe(SCRIPT_ID)
     expect(result.title).toBe('Meu Roteiro')
-  })
-
-  it('upserts the author profile before inserting the script', async () => {
-    const caller = router.createCaller(makeCtx(supabase))
-    await caller.scripts.create({ title: 'Roteiro', storagePath: 'scripts/user-1/f.pdf' })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fromMock = supabase.from as any
-    expect(fromMock).toHaveBeenCalledWith('users')
-  })
-
-  it('throws INTERNAL_SERVER_ERROR when author upsert fails', async () => {
-    const badUpsert = vi.fn(() => Promise.resolve({ error: { message: 'upsert failed' } }))
-    supabase = makeSupabaseMock({ users: { upsert: badUpsert } })
-    const caller = router.createCaller(makeCtx(supabase))
-    await expect(
-      caller.scripts.create({ title: 'Roteiro', storagePath: 'scripts/user-1/f.pdf' }),
-    ).rejects.toThrow(TRPCError)
   })
 
   it('refuses to publish when the author has no CPF', async () => {

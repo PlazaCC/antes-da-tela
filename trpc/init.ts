@@ -1,9 +1,9 @@
 import { AppError, formatErrorForClient } from '@/lib/errors'
+import { getAppUser } from '@/lib/auth/app-user'
 import { createClient as createSupabaseClient } from '@/lib/supabase/server'
 import * as Sentry from '@sentry/nextjs'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { initTRPC, TRPCError } from '@trpc/server'
-import { cookies } from 'next/headers'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
 import { RatingsService } from '@/server/services/ratings.service'
@@ -12,9 +12,11 @@ import { ScriptsService } from '@/server/services/scripts.service'
 import { CommentsService } from '@/server/services/comments.service'
 
 export type TRPCUser = {
+  /** `users.id` (uuid) — not the Clerk user id. */
   id: string
-  email?: string | null
-  user_metadata?: Record<string, unknown> | null
+  clerkId: string
+  email: string
+  name: string
 }
 
 export const createTRPCContext = async (opts: {
@@ -29,41 +31,11 @@ export const createTRPCContext = async (opts: {
   commentsService: CommentsService
 }> => {
   const headersObj = await opts.headers
-  // CookieStore shape used by Supabase client
-  type CookieEntry = { name: string; value: string; options?: Record<string, unknown> }
-  type CookieStore = {
-    getAll(): CookieEntry[]
-    setAll?(cookies: CookieEntry[]): void
-  }
 
-  // Prefer Next.js cookie store when available; otherwise derive from headers.
-  let cookieStore: CookieStore | null = null
-  try {
-    // cookies() is Next.js server API; it may throw in non-Next test environments
-    cookieStore = await cookies()
-  } catch {
-    cookieStore = null
-  }
-
-  if (!cookieStore) {
-    const cookieHeader = headersObj?.get?.('cookie') ?? ''
-    cookieStore = {
-      getAll() {
-        if (!cookieHeader) return []
-        return cookieHeader.split('; ').map((pair) => {
-          const [name, ...rest] = pair.split('=')
-          return { name, value: rest.join('='), options: {} }
-        })
-      },
-      // setAll is a no-op when we only have header cookies
-      setAll() {},
-    }
-  }
-
-  // Create the authenticated Supabase client but do NOT call getUser() here.
-  // Public procedures don't need auth and shouldn't pay for a network round-trip.
-  // getUser() is called lazily by authenticatedProcedure below.
-  const supabase = await createSupabaseClient(cookieStore)
+  // Supabase client carrying the Clerk session token (anon when signed out).
+  // The user is NOT resolved here — public procedures shouldn't pay for it;
+  // authenticatedProcedure resolves it lazily below.
+  const supabase = await createSupabaseClient()
 
   return {
     headers: headersObj,
@@ -137,26 +109,17 @@ const appErrorMiddleware = t.middleware(async ({ next }) => {
 export const publicProcedure = t.procedure.use(appErrorMiddleware)
 
 /**
- * Authenticated procedure — calls getUser() to verify the session with the
- * Supabase Auth server and throws UNAUTHORIZED if no valid session exists.
- *
- * getUser() is intentionally deferred here (not in createTRPCContext) so that
- * public procedures do not pay for the extra network round-trip.
+ * Authenticated procedure — resolves the Clerk session to the `users` row
+ * (`getAppUser`, creating/linking it on first sign-in) and throws
+ * UNAUTHORIZED when signed out. `ctx.user.id` is the `users.id` uuid.
  */
 export const authenticatedProcedure = t.procedure.use(appErrorMiddleware).use(async ({ ctx, next }) => {
-  const {
-    data: { user },
-  } = await ctx.supabase.auth.getUser()
+  const appUser = await getAppUser()
 
-  if (!user) {
+  if (!appUser) {
     throw new TRPCError({ code: 'UNAUTHORIZED' })
   }
 
-  const normalizedUser: TRPCUser = {
-    id: user.id,
-    email: user.email ?? null,
-    user_metadata: (user.user_metadata ?? null) as Record<string, unknown> | null,
-  }
-
-  return next({ ctx: { ...ctx, user: normalizedUser } })
+  const user: TRPCUser = { id: appUser.id, clerkId: appUser.clerkId, email: appUser.email, name: appUser.name }
+  return next({ ctx: { ...ctx, user } })
 })
