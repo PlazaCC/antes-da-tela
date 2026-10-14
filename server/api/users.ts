@@ -1,6 +1,6 @@
 import { getAppUser } from '@/lib/auth/app-user'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
-import { isValidCpf, stripCpf } from '@/lib/utils/cpf'
+import { documentSchema } from '@/lib/validators/document'
 import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
@@ -14,9 +14,13 @@ export const usersRouter = createTRPCRouter({
     return ctx.usersService.getProfile(input.id)
   }),
 
-  // Private: only the caller's own CPF. Never part of the public profile.
-  getMyCpf: authenticatedProcedure.query(async ({ ctx }) => {
-    return { cpf: await ctx.usersService.getMyCpf() }
+  // Private: the caller's own identity document, masked. Never part of the public profile.
+  getMyDocument: authenticatedProcedure.query(async ({ ctx }) => {
+    return ctx.usersService.getMyDocument(ctx.user!.id)
+  }),
+
+  upsertDocument: authenticatedProcedure.input(documentSchema).mutation(async ({ input, ctx }) => {
+    return ctx.usersService.upsertDocument(ctx.user!.id, input)
   }),
 
   updateProfile: authenticatedProcedure
@@ -25,18 +29,10 @@ export const usersRouter = createTRPCRouter({
         name: z.string().min(2).max(100).optional(),
         bio: z.string().max(500).nullable().optional(),
         image: z.string().url().optional(),
-        // Accept masked or raw input; normalize to 11 digits (or null to clear).
-        cpf: z
-          .string()
-          .nullable()
-          .optional()
-          .refine((v) => v === null || v === undefined || v === '' || isValidCpf(v), 'CPF inválido'),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { cpf, ...rest } = input
-      const normalizedCpf = cpf === undefined ? undefined : cpf ? stripCpf(cpf) : null
-      return ctx.usersService.updateProfile(ctx.user!.id, { ...rest, cpf: normalizedCpf })
+      return ctx.usersService.updateProfile(ctx.user!.id, input)
     }),
 
   isFollowing: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input, ctx }) => {

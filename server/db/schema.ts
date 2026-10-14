@@ -27,8 +27,8 @@ export const users = pgTable(
     email: text('email').notNull().unique(),
     image: text('image'),
     bio: text('bio'),
-    // CPF stored as 11 digits only (no dots/dashes); unique across users. Nullable
-    // because a profile can exist without a CPF — it is only required to publish.
+    // Deprecated: replaced by user_documents (RFC-005 §3). Kept until the
+    // contract migration drops it; the app no longer reads or writes it.
     cpf: text('cpf').unique(),
     // Clerk user id (`user_...`). Null for accounts not yet linked to Clerk;
     // public.current_user_id() maps the Clerk JWT `sub` to `users.id` through it.
@@ -49,6 +49,38 @@ export const users = pgTable(
       to: 'public',
       for: 'select',
       using: sql`true`,
+    }),
+  ],
+)
+
+// ── User Documents ───────────────────────────────────────────────────────────
+// Identity document required to publish (RFC-005 §3). Kept out of `users`,
+// which is publicly readable: only the owner can read or write their row, and
+// the app only ever returns it masked. One document per user.
+
+export const documentTypeEnum = pgEnum('document_type', ['cpf', 'passport', 'crnm', 'foreign_national_id'])
+
+export const userDocuments = pgTable(
+  'user_documents',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: documentTypeEnum('type').notNull(),
+    // Normalized: digits only (cpf) or uppercase alphanumerics without separators.
+    number: text('number').notNull(),
+    // ISO 3166-1 alpha-2; 'BR' for cpf and crnm.
+    country: text('country').notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('user_documents_type_country_number_unique').on(table.type, table.country, table.number),
+    pgPolicy('Owners manage their own document', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id`,
     }),
   ],
 )

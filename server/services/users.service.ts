@@ -3,6 +3,15 @@ import { clerkClient } from '@clerk/nextjs/server'
 import { TRPCError } from '@trpc/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { FollowUser, UserProfile, ProfileStats } from '@/lib/types'
+import {
+  documentCountry,
+  maskDocument,
+  normalizeDocument,
+  type DocumentType,
+} from '@/lib/utils/documents'
+import type { DocumentFormValues } from '@/lib/validators/document'
+
+export type MyDocument = { type: DocumentType; country: string; masked: string }
 
 export class UsersService {
   constructor(private supabase: SupabaseClient) {}
@@ -25,7 +34,7 @@ export class UsersService {
 
   async updateProfile(
     id: string,
-    updates: { name?: string; bio?: string | null; image?: string; cpf?: string | null },
+    updates: { name?: string; bio?: string | null; image?: string },
   ) {
     const { data: updated, error } = await this.supabase
       .from('users')
@@ -34,16 +43,7 @@ export class UsersService {
       .select('id, name, image, bio, created_at')
       .single()
 
-    if (error) {
-      // Unique violation on the cpf constraint — surface a friendly message.
-      if (error.code === '23505') {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: 'CPF já cadastrado.' })
-      }
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: error.message,
-      })
-    }
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
 
     if (!updated) return null
     return {
@@ -56,14 +56,36 @@ export class UsersService {
   }
 
   /**
-   * The caller's own CPF. `cpf` is not selectable on `users` (column privilege,
-   * see drizzle/0014_protect_user_pii.sql), so it is read through an RPC that
-   * only ever returns the row of `auth.uid()`.
+   * The caller's identity document, masked. `user_documents` is only readable
+   * by its owner (RLS) and the full number never leaves the server.
    */
-  async getMyCpf(): Promise<string | null> {
-    const { data, error } = await this.supabase.rpc('get_my_cpf')
+  async getMyDocument(userId: string): Promise<MyDocument | null> {
+    const { data, error } = await this.supabase
+      .from('user_documents')
+      .select('type, number, country')
+      .eq('user_id', userId)
+      .maybeSingle()
     if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    return (data as string | null) ?? null
+    if (!data) return null
+    const type = data.type as DocumentType
+    return { type, country: data.country, masked: maskDocument(type, data.number) }
+  }
+
+  /** Creates or replaces the caller's identity document (input already validated). */
+  async upsertDocument(userId: string, input: DocumentFormValues): Promise<MyDocument> {
+    const number = normalizeDocument(input.type, input.number)
+    const country = documentCountry(input.type, input.country)
+    const { error } = await this.supabase
+      .from('user_documents')
+      .upsert(
+        { user_id: userId, type: input.type, number, country, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' },
+      )
+    if (error?.code === '23505') {
+      throw new TRPCError({ code: 'CONFLICT', message: 'Este documento já está cadastrado em outra conta.' })
+    }
+    if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    return { type: input.type, country, masked: maskDocument(input.type, number) }
   }
 
   async isFollowing(followerId: string, followeeId: string) {

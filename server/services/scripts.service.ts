@@ -18,17 +18,21 @@ export class ScriptsService {
 
   /**
    * Guards publication (status = 'published'). The author (the session user)
-   * must have a CPF on their profile. Cadastro as draft bypasses this entirely.
-   * `cpf` is not selectable on `users`; `get_my_cpf` returns the caller's own.
+   * must have an identity document on their profile. Cadastro as draft
+   * bypasses this entirely. RLS only exposes the caller's own document.
    */
-  private async assertPublishable() {
-    const { data: cpf } = await this.supabase.rpc("get_my_cpf");
+  private async assertPublishable(userId: string) {
+    const { data: document } = await this.supabase
+      .from("user_documents")
+      .select("user_id")
+      .eq("user_id", userId)
+      .maybeSingle();
 
-    if (!cpf) {
+    if (!document) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message:
-          "Para publicar, preencha o CPF no seu perfil.",
+          "Para publicar, cadastre um documento de identificação no seu perfil.",
       });
     }
   }
@@ -54,11 +58,11 @@ export class ScriptsService {
     // The author's `users` row is guaranteed by authenticatedProcedure
     // (getAppUser creates/links it on first sign-in).
 
-    // Publishing requires the author's CPF and the work's BN registration.
+    // Publishing requires the author's identity document.
     // Cadastro as draft is always allowed.
     const isDraft = status === "draft";
     if (!isDraft) {
-      await this.assertPublishable();
+      await this.assertPublishable(userId);
     }
 
     // Insert script row
@@ -187,7 +191,7 @@ export class ScriptsService {
     // Enforce publish gating when the resulting status is 'published'.
     const finalStatus = updateData.status ?? oldData.status;
     if (finalStatus === "published") {
-      await this.assertPublishable();
+      await this.assertPublishable(authorId);
     }
 
     // Map camelCase to snake_case for Supabase

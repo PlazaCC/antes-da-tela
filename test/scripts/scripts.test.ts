@@ -44,7 +44,7 @@ const MOCK_SCRIPT = {
 }
 
 /** Build a minimal Supabase mock for a given table operation chain. */
-function makeSupabaseMock(overrides: Record<string, unknown> = {}, myCpf: string | null = '52998224725'): SupabaseClient {
+function makeSupabaseMock(overrides: Record<string, unknown> = {}, hasDocument = true): SupabaseClient {
   const selectAfterInsert = vi.fn(() => ({
     single: vi.fn(() => Promise.resolve({ data: MOCK_SCRIPT, error: null, count: null, status: 200, statusText: 'OK' })),
   }))
@@ -66,13 +66,19 @@ function makeSupabaseMock(overrides: Record<string, unknown> = {}, myCpf: string
       })),
     },
     script_files: { insert: insertFile },
+    // The publish guard reads the caller's own identity document (RLS-scoped).
+    user_documents: {
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          maybeSingle: vi.fn(() => Promise.resolve({ data: hasDocument ? { user_id: 'user-1' } : null, error: null })),
+        })),
+      })),
+    },
     ...overrides,
   }
 
   return {
     from: vi.fn((table: string) => fromMap[table] ?? {}),
-    // get_my_cpf: the publish guard reads the caller's own CPF via RPC.
-    rpc: vi.fn(async () => ({ data: myCpf, error: null })),
     auth: {
       getUser: vi.fn(async () => ({ data: { user: MOCK_USER }, error: null })),
     },
@@ -115,13 +121,13 @@ describe('scriptsRouter.create', () => {
     expect(result.title).toBe('Meu Roteiro')
   })
 
-  it('refuses to publish when the author has no CPF', async () => {
-    supabase = makeSupabaseMock({}, null)
+  it('refuses to publish when the author has no identity document', async () => {
+    supabase = makeSupabaseMock({}, false)
     const caller = router.createCaller(makeCtx(supabase))
     await expect(
       caller.scripts.create({ title: 'Roteiro', storagePath: 'scripts/user-1/f.pdf' }),
     ).rejects.toMatchObject({ code: 'BAD_REQUEST' })
-    expect(supabase.rpc).toHaveBeenCalledWith('get_my_cpf')
+    expect(supabase.from).toHaveBeenCalledWith('user_documents')
   })
 
   it('rolls back the script and throws when script_files insert fails', async () => {

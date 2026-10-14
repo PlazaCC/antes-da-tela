@@ -26,7 +26,7 @@ interface ScriptPreviewProps {
   pitchDeckStoragePath: string;
   visibility: ScriptVisibility;
   onVisibilityChange: (visibility: ScriptVisibility) => void;
-  /** Reasons publishing is currently blocked (CPF / BN registration missing). */
+  /** Reasons publishing is currently blocked (e.g. identity document missing). */
   publishBlockers?: string[];
   className?: string;
 }

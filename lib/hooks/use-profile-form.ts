@@ -17,8 +17,6 @@ interface UseProfileFormResult {
   register: ReturnType<typeof useForm<ProfileFormValues>>['register']
   handleSubmit: ReturnType<typeof useForm<ProfileFormValues>>['handleSubmit']
   formState: ReturnType<typeof useForm<ProfileFormValues>>['formState']
-  setValue: ReturnType<typeof useForm<ProfileFormValues>>['setValue']
-  watch: ReturnType<typeof useForm<ProfileFormValues>>['watch']
   submitProfile: (values: ProfileFormValues) => void
 }
 
@@ -30,7 +28,6 @@ export function useProfileForm(userId: string): UseProfileFormResult {
     ...trpc.users.getProfile.queryOptions({ id: userId }),
     enabled: !!userId,
   })
-  const cpfQuery = useQuery({ ...trpc.users.getMyCpf.queryOptions(), enabled: !!userId })
 
   const updateProfileMutation = useMutation(
     trpc.users.updateProfile.mutationOptions({
@@ -38,7 +35,6 @@ export function useProfileForm(userId: string): UseProfileFormResult {
         toast.success('Perfil atualizado.')
         posthog.capture('profile_updated')
         void queryClient.invalidateQueries(trpc.users.getProfile.queryFilter({ id: userId }))
-        void queryClient.invalidateQueries(trpc.users.getMyCpf.queryFilter())
       },
       onError: (error) => {
         toast.error(error.message)
@@ -48,37 +44,33 @@ export function useProfileForm(userId: string): UseProfileFormResult {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: '', bio: undefined, cpf: '' },
+    defaultValues: { name: '', bio: undefined },
   })
 
-  const { register, handleSubmit, reset, formState, setValue, watch } = form
+  const { register, handleSubmit, reset, formState } = form
 
   useEffect(() => {
-    if (!profileQuery.data || !cpfQuery.isFetched) return
+    if (!profileQuery.data) return
     reset({
       name: profileQuery.data.name,
       bio: profileQuery.data.bio ?? undefined,
-      cpf: cpfQuery.data?.cpf ?? '',
     })
-  }, [profileQuery.data, cpfQuery.isFetched, cpfQuery.data, reset])
+  }, [profileQuery.data, reset])
 
   const submitProfile = (values: ProfileFormValues) => {
     updateProfileMutation.mutate({
       name: values.name,
       bio: values.bio || null,
-      cpf: values.cpf ? values.cpf : null,
     })
   }
 
   return {
     profile: profileQuery.data ?? null,
-    isLoadingProfile: profileQuery.isLoading || cpfQuery.isLoading,
+    isLoadingProfile: profileQuery.isLoading,
     isPending: updateProfileMutation.isPending,
     register,
     handleSubmit,
     formState,
-    setValue,
-    watch,
     submitProfile,
   }
 }

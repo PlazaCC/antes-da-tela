@@ -110,8 +110,8 @@ export function PublishPage({ scriptId }: PublishPageProps) {
 
   const trpc = useTRPC();
   const { userId } = useCurrentUser();
-  const { data: myCpf } = useQuery({
-    ...trpc.users.getMyCpf.queryOptions(),
+  const { data: myDocument, isLoading: isLoadingDocument } = useQuery({
+    ...trpc.users.getMyDocument.queryOptions(),
     enabled: !!userId,
   });
 
@@ -119,12 +119,13 @@ export function PublishPage({ scriptId }: PublishPageProps) {
   const [visibility, setVisibility] = useState<ScriptVisibility>("public");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  // Publishing requires the author's CPF.
+  // Publishing requires the author's identity document.
   const publishBlockers = useMemo(() => {
     const blockers: string[] = [];
-    if (!myCpf?.cpf) blockers.push("Preencha o CPF no seu perfil");
+    if (!isLoadingDocument && !myDocument)
+      blockers.push("Cadastre um documento de identificação no seu perfil");
     return blockers;
-  }, [myCpf?.cpf]);
+  }, [isLoadingDocument, myDocument]);
 
   const publishBlocked = visibility === "public" && publishBlockers.length > 0;
   // Public content additionally requires accepting the platform's policies.
