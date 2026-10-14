@@ -7,8 +7,6 @@ export default function LandingLayout({
 }) {
   return (
     <>
-      {/* suppress the global app NavBar on the landing page */}
-      <style>{`header[aria-label="Principal"] { display: none !important; } footer[aria-label="Rodapé"] { display: none !important; }`}</style>
       {children}
     </>
   )

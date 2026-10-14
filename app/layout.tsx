@@ -2,6 +2,7 @@ import { AppToaster } from '@/components/app-toaster/app-toaster'
 import { DevSignOut } from '@/components/dev/dev-sign-out'
 import { Footer } from '@/components/footer/footer'
 import { NavBar } from '@/components/navbar'
+import { HideOnLanding } from '@/components/navbar/hide-on-landing'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
 import { clerkAppearance } from '@/lib/auth/clerk-appearance'
@@ -115,9 +116,13 @@ export default function RootLayout({
           <ClerkProvider localization={clerkLocalization} appearance={clerkAppearance} signInUrl="/auth/login" signUpUrl="/auth/sign-up">
           <TRPCReactProvider>
             <ThemeProvider>
-              <NavBar />
+              <HideOnLanding>
+                <NavBar />
+              </HideOnLanding>
               {children}
-              <Footer />
+              <HideOnLanding>
+                <Footer />
+              </HideOnLanding>
               <AppToaster />
               {process.env.NODE_ENV === 'development' && <DevSignOut />}
             </ThemeProvider>
