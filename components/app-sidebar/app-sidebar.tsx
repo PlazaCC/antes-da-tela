@@ -9,7 +9,7 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className='fixed bottom-0 left-0 right-0 z-[100] md:sticky md:top-0 md:h-screen md:w-[240px] shrink-0 bg-surface/80 backdrop-blur-md border-t md:border-t-0 md:border-r border-border-default pb-[env(safe-area-inset-bottom)] md:pb-0 transition-all duration-300'>
+    <aside className='fixed bottom-0 left-0 right-0 z-[100] md:sticky md:top-16 md:h-[calc(100dvh-4rem)] md:w-[240px] shrink-0 bg-surface/80 backdrop-blur-md border-t md:border-t-0 md:border-r border-border-default pb-[env(safe-area-inset-bottom)] md:pb-0 transition-all duration-300'>
       <nav className='flex flex-row md:flex-col h-[64px] md:h-full md:py-6 gap-0 md:gap-1 md:px-3'>
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href

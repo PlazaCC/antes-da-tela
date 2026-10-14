@@ -9,9 +9,11 @@ export default async function DashboardLayout({
   const user = await getAppUser()
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-bg-base pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:h-[calc(100vh-56px)] md:flex-row md:pb-0">
+    // One scroll (the page's): the sidebar sticks under the 64px NavBar instead
+    // of the content getting its own scroll area above the footer.
+    <div className="flex flex-1 flex-col bg-bg-base pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:min-h-[calc(100dvh-4rem)] md:flex-row md:pb-0">
       {!!user && <AppSidebar />}
-      <main className="h-full flex-1 overflow-auto">{children}</main>
+      <main className="min-w-0 flex-1">{children}</main>
     </div>
   )
 }
