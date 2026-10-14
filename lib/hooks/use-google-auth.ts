@@ -1,8 +1,8 @@
 'use client'
 
 import { notifyError } from '@/lib/feedback'
+import { useAuthDestination } from '@/lib/hooks/use-auth-destination'
 import { useSignIn } from '@clerk/nextjs'
-import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 const ERROR_MESSAGE = 'Erro ao tentar autenticar com Google. Tente novamente.'
@@ -13,14 +13,12 @@ const ERROR_MESSAGE = 'Erro ao tentar autenticar com Google. Tente novamente.'
  * (default /feed).
  */
 export function useGoogleAuth() {
-  const searchParams = useSearchParams()
   const { signIn } = useSignIn()
+  const { destination } = useAuthDestination()
   const [isLoading, setIsLoading] = useState(false)
 
   const authenticate = async () => {
     setIsLoading(true)
-    const next = searchParams.get('next')
-    const destination = next && next.startsWith('/') ? next : '/feed'
     const callbackUrl = `/auth/sso-callback?next=${encodeURIComponent(destination)}`
 
     try {

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 
+import { EmailAuth } from '@/components/auth/email-auth'
 import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { auth } from '@clerk/nextjs/server'
@@ -26,7 +27,7 @@ export default async function LoginPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-bg-base p-6">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-bg-base p-6">
       <div className="flex w-full max-w-sm flex-col gap-8">
         <div className="flex justify-center">
           <Link href="/">
@@ -41,18 +42,28 @@ export default async function LoginPage({ searchParams }: Props) {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-6 rounded-sm border border-border-subtle bg-surface p-8">
+        <div className="flex flex-col gap-6 rounded-sm border border-border-subtle bg-surface p-6 sm:p-8">
           <div className="flex flex-col gap-1.5">
             <h1 className="font-display text-heading-3 text-text-primary">
               Entrar
             </h1>
             <p className="text-body-small text-text-secondary">
-              Use sua conta Google para continuar
+              Use sua conta Google ou seu e-mail
             </p>
           </div>
 
           <Suspense fallback={<Skeleton className="h-10 w-full bg-elevated" />}>
-            <GoogleAuthButton label="Entrar com Google" />
+            <GoogleAuthButton label="Entrar com Google" className="h-11" />
+          </Suspense>
+
+          <div className="flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-border-subtle" />
+            <span className="text-label-mono-caps uppercase text-text-muted">ou</span>
+            <span className="h-px flex-1 bg-border-subtle" />
+          </div>
+
+          <Suspense fallback={<Skeleton className="h-64 w-full bg-elevated" />}>
+            <EmailAuth />
           </Suspense>
         </div>
 

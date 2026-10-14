@@ -1,7 +1,8 @@
-import { GoogleAuthButton } from '@/components/auth/google-auth-button'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getAppUser, type AppUser } from '@/lib/auth/app-user'
 import { captureException } from '@/lib/sentry'
+import { headers } from 'next/headers'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -62,6 +63,8 @@ async function NavBarRightSection() {
   }
 
   if (!user) {
+    const pathname = (await headers()).get('x-pathname') ?? '/'
+    const loginHref = pathname.startsWith('/auth') ? '/auth/login' : `/auth/login?next=${encodeURIComponent(pathname)}`
     return (
       <div className="flex items-center justify-between gap-4">
         <div className="hidden w-[352px] md:block">
@@ -70,10 +73,9 @@ async function NavBarRightSection() {
           </Suspense>
         </div>
         <NavBarMobileControls />
-        <GoogleAuthButton
-          label="Login"
-          className="h-8 w-auto rounded-sm px-4 text-sm"
-        />
+        <Button asChild variant="outline" className="h-8 rounded-sm border-subtle bg-elevated px-4 text-sm text-primary hover:bg-surface">
+          <Link href={loginHref}>Login</Link>
+        </Button>
       </div>
     )
   }
