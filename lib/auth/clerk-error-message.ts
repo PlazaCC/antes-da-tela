@@ -6,7 +6,6 @@ const MESSAGES: Record<string, string> = {
   form_identifier_exists: 'Já existe uma conta com esse e-mail. Entre ou use "Esqueci minha senha".',
   form_password_pwned: 'Essa senha apareceu em um vazamento de dados. Escolha outra.',
   form_password_compromised: 'Essa senha apareceu em um vazamento de dados. Redefina em "Esqueci minha senha".',
-  form_password_length_too_short: 'A senha precisa ter pelo menos 8 caracteres.',
   form_password_validation_failed: 'Senha incorreta. Tente de novo ou use "Esqueci minha senha".',
   form_param_format_invalid: 'Confira o e-mail digitado.',
   form_code_incorrect: 'Código incorreto.',
@@ -21,10 +20,17 @@ const FALLBACK = 'Não foi possível concluir. Tente novamente.'
 
 /** pt-BR message for an error returned by a Clerk custom-flow call. */
 export function clerkErrorMessage(error: unknown): string {
-  if (isClerkAPIResponseError(error)) {
-    const code = error.errors[0]?.code
-    if (code && MESSAGES[code]) return MESSAGES[code]
-    if (code?.startsWith('form_password')) return 'Senha inválida. Use pelo menos 8 caracteres.'
+  if (!isClerkAPIResponseError(error)) return FALLBACK
+  const apiError = error.errors[0]
+  if (!apiError) return FALLBACK
+  if (MESSAGES[apiError.code]) return MESSAGES[apiError.code]
+
+  const clerkMessage = apiError.longMessage || apiError.message
+  if (apiError.code === 'form_password_length_too_short') {
+    // The minimum is an instance setting (dev and prod differ) — read it from Clerk's message.
+    const minLength = clerkMessage?.match(/\d+/)?.[0]
+    return minLength ? `A senha precisa ter pelo menos ${minLength} caracteres.` : 'A senha é curta demais.'
   }
-  return FALLBACK
+  // Unmapped code: Clerk's own (English) message is more useful than a generic one.
+  return clerkMessage || FALLBACK
 }

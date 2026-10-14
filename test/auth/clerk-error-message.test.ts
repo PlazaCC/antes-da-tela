@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 class FakeApiError {
-  constructor(public errors: { code: string }[]) {}
+  constructor(public errors: { code: string; message?: string; longMessage?: string }[]) {}
 }
 
 vi.mock('@clerk/nextjs/errors', () => ({
@@ -16,8 +16,16 @@ describe('clerkErrorMessage', () => {
     expect(clerkErrorMessage(new FakeApiError([{ code: 'form_identifier_exists' }]))).toMatch(/Já existe uma conta/)
   })
 
-  it('covers unknown password rules with a generic password message', () => {
-    expect(clerkErrorMessage(new FakeApiError([{ code: 'form_password_size_in_bytes_exceeded' }]))).toMatch(/Senha inválida/)
+  it('reads the instance minimum password length from Clerk', () => {
+    const error = new FakeApiError([
+      { code: 'form_password_length_too_short', longMessage: 'Passwords must be 15 characters or more.' },
+    ])
+    expect(clerkErrorMessage(error)).toBe('A senha precisa ter pelo menos 15 caracteres.')
+  })
+
+  it("shows Clerk's own message for unmapped codes", () => {
+    const error = new FakeApiError([{ code: 'form_password_not_strong_enough', message: 'Password is not strong enough.' }])
+    expect(clerkErrorMessage(error)).toBe('Password is not strong enough.')
   })
 
   it('falls back for anything else', () => {
