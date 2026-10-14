@@ -24,7 +24,7 @@ const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
     heading: 'Conta',
     items: [
       { label: 'Login', href: '/auth/login' },
-      { label: 'Criar conta', href: '/auth/login' },
+      { label: 'Criar conta', href: '/auth/sign-up' },
     ],
   },
   {

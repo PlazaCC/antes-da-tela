@@ -219,12 +219,12 @@ export function CommentsSidebar({
           </form>
         ) : (
           <p className="text-body-small text-text-muted">
-            <a
+            <Link
               href="/auth/login"
               className="text-brand-accent underline underline-offset-4"
             >
               Entre
-            </a>{' '}
+            </Link>{' '}
             para deixar um comentário.
           </p>
         )}

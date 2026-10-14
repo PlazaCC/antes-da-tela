@@ -4,7 +4,8 @@ import { Footer } from '@/components/footer/footer'
 import { NavBar } from '@/components/navbar'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
-import { ptBR } from '@clerk/localizations'
+import { clerkAppearance } from '@/lib/auth/clerk-appearance'
+import { clerkLocalization } from '@/lib/auth/clerk-localization'
 import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from 'next'
 import { DM_Mono, Inter } from 'next/font/google'
@@ -111,7 +112,7 @@ export default function RootLayout({
         className={`${inter.variable} ${clashGrotesk.variable} ${dmMono.variable} antialiased`}
       >
         <Suspense fallback={null}>
-          <ClerkProvider localization={ptBR} signInUrl="/auth/login" signUpUrl="/auth/login">
+          <ClerkProvider localization={clerkLocalization} appearance={clerkAppearance} signInUrl="/auth/login" signUpUrl="/auth/sign-up">
           <TRPCReactProvider>
             <ThemeProvider>
               <NavBar />

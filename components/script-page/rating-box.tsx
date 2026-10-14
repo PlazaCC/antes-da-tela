@@ -1,4 +1,5 @@
 import { StarRating } from '@/components/star-rating/star-rating'
+import Link from 'next/link'
 
 interface RatingBoxProps {
   isOwner: boolean
@@ -45,9 +46,9 @@ export function RatingBox({ isOwner, ratingData, userRating, isRatingPending, cu
       ) : null}
       {!currentUserId ? (
         <span className='font-mono text-label-mono-small text-text-muted'>
-          <a href='/auth/login' className='text-brand-accent hover:underline'>
+          <Link href='/auth/login' className='text-brand-accent hover:underline'>
             Avaliar
-          </a>
+          </Link>
         </span>
       ) : null}
     </div>

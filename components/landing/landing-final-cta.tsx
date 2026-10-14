@@ -22,7 +22,7 @@ export function LandingFinalCta() {
           data-delay="2"
         >
           <Link
-            href="/auth/login"
+            href="/auth/sign-up"
             className="group inline-flex h-[52px] items-center justify-center gap-2.5 rounded-[2px] bg-brand-cream px-[28px] text-[14px] font-semibold tracking-[0.01em] text-[#161616] no-underline transition-[transform_0.2s_ease,box-shadow_0.2s_ease] hover:-translate-y-[2px] hover:shadow-[0_12px_32px_-10px_rgba(0,0,0,0.3)]"
           >
             Começar agora{' '}
