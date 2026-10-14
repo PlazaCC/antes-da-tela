@@ -53,38 +53,17 @@ Common failure points that require immediate stop:
 
 ## Client Creation & Auth
 
-- **Server Components / Route Handlers / Server Actions**: use `createServerClient` from `@supabase/ssr`.
+Auth is Clerk with Supabase third-party auth (RFC-005). There is no Supabase Auth session and `@supabase/ssr` is not installed.
 
-  ```ts
-  import { createServerClient } from '@supabase/ssr'
-  import { cookies } from 'next/headers'
-
-  export const createClient = async () =>
-    createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
-      cookies: { getAll: () => (await cookies()).getAll() },
-    })
-  ```
-
-- **Client Components**: use `createBrowserClient` from `@supabase/ssr`.
-
-  ```ts
-  import { createBrowserClient } from '@supabase/ssr'
-
-  export const createClient = () =>
-    createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!)
-  ```
+- **Server** (Server Components, Route Handlers, tRPC): `createClient()` from `@/lib/supabase/server` — a `@supabase/supabase-js` client that sends the Clerk session token (`accessToken`). In tRPC, use `ctx.supabase`.
+- **Client Components**: no direct Supabase data client — go through tRPC (`useTRPC()`). Uploads use presigned URLs from `app/api/upload/presign/route.ts`.
 
 ## Session Handling
 
-- The session is refreshed automatically in `middleware.ts` — never skip or disable the middleware.
-- Always call `supabase.auth.getUser()` (not `getSession()`) in server-side code — `getSession()` is not validated server-side.
-- For protected tRPC procedures, verify auth inside the context or a middleware:
-  ```ts
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
-  ```
+- Clerk owns the session (`clerkMiddleware` in `proxy.ts`). Never call `supabase.auth.*`.
+- Current user: `getAppUser()` (`lib/auth/app-user.ts`, server) or `useCurrentUser()` (client). `user.id` is `users.id` (uuid), not the Clerk `user_...` id.
+- Protected tRPC procedures use `authenticatedProcedure`; `ctx.user` is resolved lazily.
+- RLS policies use `(select public.current_user_id())`, never `auth.uid()` — `auth.uid()` errors on Clerk tokens.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for all server auth clients (tRPC context, callback, middleware).
 - `SUPABASE_SERVICE_ROLE_KEY` only for privileged server operations that bypass RLS — never in auth flows or client code.
 - Never expose `SERVICE_ROLE_KEY` or `SUPABASE_SECRET_KEY` in client-side code or `NEXT_PUBLIC_*` env vars.
@@ -94,7 +73,7 @@ Common failure points that require immediate stop:
 - All buckets (`scripts`, `audio`, `avatars`) must be `public: true` — files are served via `getPublicUrl()`.
 - **Always resolve PDF/media URLs server-side** in Server Components using `ctx.supabase.storage.from(bucket).getPublicUrl(path)` and pass the URL as a prop to Client Components. Never call `getPublicUrl` client-side.
 - Uploads must be **client-side only** — Vercel server functions time out at 10 s, which is insufficient for files up to 50 MB.
-- Upload path convention: `{userId}/{timestamp}_{sanitized_filename}` — enforced by the INSERT policy (`storage.foldername(name)[1] = auth.uid()`).
+- Upload path convention: `{userId}/{timestamp}_{sanitized_filename}` — enforced by the INSERT policy (`storage.foldername(name)[1] = (select public.current_user_id())::text`).
 - PDFs and audio files go to Supabase Storage; serve heavy files through Cloudflare CDN proxy.
 - Storage bucket policies should enforce authentication before upload.
 

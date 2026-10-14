@@ -4305,17 +4305,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@supabase/ssr@npm:^0.10.2":
-  version: 0.10.3
-  resolution: "@supabase/ssr@npm:0.10.3"
-  dependencies:
-    cookie: "npm:^1.0.2"
-  peerDependencies:
-    "@supabase/supabase-js": ^2.105.3
-  checksum: 10c0/c143197c4dc6d90b917ac992a9e1bc077e586a4cd78c2da9b31c390a760bed2bc224a8ea2852aaf234a104c86c6839e2e4dc0c47f6d274d933e91d9455b48def
-  languageName: node
-  linkType: hard
-
 "@supabase/storage-js@npm:2.108.2":
   version: 2.108.2
   resolution: "@supabase/storage-js@npm:2.108.2"
@@ -5164,7 +5153,6 @@ __metadata:
     "@radix-ui/react-slot": "npm:^1.2.2"
     "@radix-ui/react-tabs": "npm:^1.1.13"
     "@sentry/nextjs": "npm:10"
-    "@supabase/ssr": "npm:^0.10.2"
     "@supabase/supabase-js": "npm:^2.103.2"
     "@tanstack/react-query": "npm:^5.99.0"
     "@testing-library/dom": "npm:^10.4.1"
@@ -5853,13 +5841,6 @@ __metadata:
   version: 0.4.2
   resolution: "cookie@npm:0.4.2"
   checksum: 10c0/beab41fbd7c20175e3a2799ba948c1dcc71ef69f23fe14eeeff59fc09f50c517b0f77098db87dbb4c55da802f9d86ee86cdc1cd3efd87760341551838d53fca2
-  languageName: node
-  linkType: hard
-
-"cookie@npm:^1.0.2":
-  version: 1.1.1
-  resolution: "cookie@npm:1.1.1"
-  checksum: 10c0/79c4ddc0fcad9c4f045f826f42edf54bcc921a29586a4558b0898277fa89fb47be95bc384c2253f493af7b29500c830da28341274527328f18eba9f58afa112c
   languageName: node
   linkType: hard
 

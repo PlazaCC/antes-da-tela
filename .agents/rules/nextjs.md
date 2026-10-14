@@ -23,13 +23,15 @@ paths:
 - API routes: `app/api/<path>/route.ts`.
 
 ## Auth-Protected Routes
-- Middleware (`middleware.ts`) refreshes the Supabase session and redirects unauthenticated users.
-- Keep the `matcher` config in `middleware.ts` up to date when adding new protected routes.
-- Protected page pattern:
+- Auth is Clerk (RFC-005). `proxy.ts` runs `clerkMiddleware`; it does not protect routes.
+- Route protection lives in `app/(authenticated)/layout.tsx` — put protected pages under that route group.
+- Never use `supabase.auth.*` — there is no Supabase Auth session.
+- Protected page pattern (server):
   ```ts
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/sign-in")
+  import { getAppUser } from '@/lib/auth/app-user'
+
+  const user = await getAppUser() // user.id is users.id (uuid)
+  if (!user) redirect('/auth/login')
   ```
 
 ## Performance

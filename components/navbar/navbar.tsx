@@ -1,6 +1,7 @@
 import { GoogleAuthButton } from '@/components/auth/google-auth-button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getAppUser, type AppUser } from '@/lib/auth/app-user'
+import { captureException } from '@/lib/sentry'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -55,8 +56,9 @@ async function NavBarRightSection() {
   let user: AppUser | null = null
   try {
     user = await getAppUser()
-  } catch {
-    // Auth check failed — show login view as fallback
+  } catch (err) {
+    // Auth check failed — show login view as fallback, but keep the error visible
+    captureException(err, { where: 'NavBarRightSection' })
   }
 
   if (!user) {

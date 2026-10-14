@@ -32,7 +32,7 @@ Repositório → Único (single repo Next.js)
 Deploy      → Vercel (free tier)
 Frontend    → Next.js 14 App Router
 API         → tRPC + Zod
-Auth        → Supabase Auth (@supabase/ssr)
+Auth        → Clerk + Supabase third-party auth (RFC-005)
 ORM         → Drizzle
 Banco       → Supabase Postgres
 Storage     → Supabase Storage + Cloudflare CDN
@@ -103,11 +103,13 @@ Estrutura de pastas:
 
 ---
 
-### Auth — Supabase Auth (@supabase/ssr)
+### Auth — Clerk + Supabase third-party auth
 
-**Escolha:** Supabase Auth (@supabase/ssr)
-**Rejeitados:** Auth.js (NextAuth), Clerk, Lucia, Better Auth
-**Motivo:** Já faz parte da infraestrutura do Supabase utilizada no projeto. Evita uma camada redundante de autenticação, reduz latência e simplifica a gestão de usuários e permissões (RLS) diretamente no Postgres. Suporta SSR nativamente através do pacote oficial `@supabase/ssr`.
+> **Revisado em 2026-10 (RFC-005).** A escolha original era Supabase Auth (`@supabase/ssr`); foi substituída pelo Clerk. Ver `docs/rfc/RFC-005-clerk-auth-e-documentos.md`.
+
+**Escolha:** Clerk (`@clerk/nextjs`) para login e sessão; o token do Clerk é aceito pelo Supabase como third-party auth, então o RLS continua no Postgres.
+**Rejeitados:** Supabase Auth (escolha original), Auth.js (NextAuth), Lucia, Better Auth
+**Motivo:** Tela de login com marca e domínio próprios (sem `supabase.co` no consentimento do Google) e gestão de usuários pronta. A identidade da app continua sendo `users.id` (uuid): `public.current_user_id()` mapeia o `sub` do JWT do Clerk para a linha em `users`.
 
 ---
 

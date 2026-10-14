@@ -2,7 +2,7 @@
 
 | Campo   | Valor                    |
 | :------ | :----------------------- |
-| Status  | Em execução — fases 0, 2 e 3 em produção (2026-10-13) |
+| Status  | Em execução — fases 0, 2, 3 e 4 (código) em produção (2026-10-14); falta a Fase 1 e as pendências manuais da Fase 4 |
 | Data    | 2026-10-12               |
 | Escopo  | Auth, schema `users`, perfil, publicação |
 
@@ -200,7 +200,7 @@ Cada fase é uma entrega independente, na ordem.
 | **1 — Documentos** | Tabela `user_documents` + backfill do CPF + validadores + UI + guard de publicação. Policies e RPCs usam `(select public.current_user_id())` (o Clerk já está em produção; `auth.uid()` falha com o token do Clerk). | Médio (migração de dados) | Manter `users.cpf` até o "contract" |
 | **2 — Base do Clerk (sem trocar login)** ✅ | Migrations `0015`–`0017`: `users.clerk_id`, função `current_user_id()` com dois ramos, todas as policies migradas. Login continua Supabase — a função cobre os dois tokens. | Médio (RLS) — testar cada policy com token real | Migration reversa restaura `auth.uid()` |
 | **3 — Corte para o Clerk** ✅ (2026-10-13, #33) | Config externa (§2.4), `@clerk/nextjs`, webhook, `proxy.ts`, clients Supabase com `accessToken`, todos os call-sites. Avatar passa para o S3; remoção de arquivos substituídos apaga do S3 ou do Supabase conforme a origem. Deploy em preview com Clerk dev antes. | Alto | Supabase Google provider continua ligado por ~2 semanas; revert do deploy volta o login antigo, dados intactos |
-| **4 — Limpeza** 🔨 (`0018_clerk_cleanup`: `email` revogado, ramo legado removido, escrita em `users` restrita a nome/imagem/bio/cpf/desativação, policies antigas do Storage com `auth.uid()` removidas) | Revogar SELECT de `users.email` (nenhum upsert do cliente usa mais `EXCLUDED.email`; `getAppUser` passa a ler o e-mail do Clerk), ramo legado da função, `@supabase/ssr` (se nada mais usar), desligar Google no Supabase Auth e pedir ao parceiro para excluir o OAuth Client antigo (projeto GCP dele, usado só pelo Supabase Auth), `drop column users.cpf` (depois do backfill da Fase 1), atualizar docs/ADR. Revogar `email` e remover o ramo legado encerram o rollback da Fase 3. | Baixo | — |
+| **4 — Limpeza** ✅ código e banco (2026-10-14: `0018_clerk_cleanup` aplicada; `@supabase/ssr` removido; `syncClerkUser` revincula pelo e-mail verificado quando o `clerk_id` salvo não existe na instância do Clerk, como em logins com o Clerk dev contra o banco de produção; ADR e rules atualizados). ⏳ Pendências manuais: desligar o Google no Supabase Auth, pedir a exclusão do OAuth Client antigo. ⏳ `drop column users.cpf` fica para depois da Fase 1. | Revogar SELECT de `users.email` (nenhum upsert do cliente usa mais `EXCLUDED.email`; `getAppUser` passa a ler o e-mail do Clerk), ramo legado da função, `@supabase/ssr` (se nada mais usar), desligar Google no Supabase Auth e pedir ao parceiro para excluir o OAuth Client antigo (projeto GCP dele, usado só pelo Supabase Auth), `drop column users.cpf` (depois do backfill da Fase 1), atualizar docs/ADR. Revogar `email` e remover o ramo legado encerram o rollback da Fase 3. | Baixo | — |
 
 ### Critérios de aceite
 

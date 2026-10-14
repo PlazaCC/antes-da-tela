@@ -15,7 +15,7 @@
 
   "stack": {
     "framework": "Next.js App Router + TypeScript",
-    "auth": "@supabase/ssr (createServerClient / createBrowserClient)",
+    "auth": "Clerk (@clerk/nextjs) + Supabase third-party auth — see RFC-005",
     "api": "tRPC v11 + Zod",
     "orm": "Drizzle ORM + postgres driver (prepare: false)",
     "database": "Supabase Postgres — pooler transaction port 6543",
@@ -36,7 +36,7 @@
     "trpc_init": "trpc/init.ts",
     "trpc_client": "trpc/client.tsx",
     "trpc_server": "trpc/server.tsx",
-    "supabase_client": "lib/supabase/client.ts",
+    "app_user": "lib/auth/app-user.ts",
     "supabase_server": "lib/supabase/server.ts",
     "authenticated_layout": "app/(authenticated)/layout.tsx",
     "trpc_handler": "app/api/trpc/[trpc]/route.ts",
@@ -52,8 +52,8 @@
     "ssr_prefetch": "trpc + HydrateClient from @/trpc/server",
     "client_query": "useTRPC() from @/trpc/client",
     "validation": "Zod schema shared between tRPC input and zodResolver",
-    "server_component": "createServerClient from @supabase/ssr",
-    "client_component": "createBrowserClient from @supabase/ssr",
+    "server_component": "createClient() from @/lib/supabase/server (Clerk token) + getAppUser()",
+    "client_component": "tRPC via useTRPC(); useCurrentUser() for the session",
     "tailwind_version": "v3 — no v4 syntax",
     "package_install": "yarn add — never npm install",
     "tokens_format": "CSS vars use HSL channels (no hex), Tailwind wraps with hsl(var(...))",

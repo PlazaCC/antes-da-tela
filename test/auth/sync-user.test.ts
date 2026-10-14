@@ -48,6 +48,30 @@ vi.mock('@/lib/supabase/admin', () => ({
   }),
 }))
 
+// Clerk users that exist in "this" instance; anything else 404s.
+let clerkUsers = new Set<string>()
+
+class FakeClerkError extends Error {
+  constructor(public status: number) {
+    super(`clerk ${status}`)
+  }
+}
+
+vi.mock('@clerk/nextjs/server', () => ({
+  clerkClient: async () => ({
+    users: {
+      getUser: async (id: string) => {
+        if (!clerkUsers.has(id)) throw new FakeClerkError(404)
+        return { id }
+      },
+    },
+  }),
+}))
+
+vi.mock('@clerk/nextjs/errors', () => ({
+  isClerkAPIResponseError: (err: unknown) => err instanceof FakeClerkError,
+}))
+
 const { syncClerkUser } = await import('@/lib/auth/sync-user')
 
 const identity = {
@@ -61,6 +85,7 @@ const identity = {
 describe('syncClerkUser', () => {
   beforeEach(() => {
     rows = []
+    clerkUsers = new Set(['user_abc'])
   })
 
   it('links a pre-Clerk account with the same verified e-mail (keeps its id)', async () => {
@@ -89,8 +114,22 @@ describe('syncClerkUser', () => {
   })
 
   it('never re-links an account already linked to another Clerk user', async () => {
+    clerkUsers.add('user_other')
     rows.push({ id: 'other-uuid', email: identity.email, name: 'X', image: null, clerk_id: 'user_other' })
     await expect(syncClerkUser(identity)).rejects.toThrow()
     expect(rows[0].clerk_id).toBe('user_other')
+  })
+
+  it('re-links an account whose clerk_id does not exist in this Clerk instance', async () => {
+    rows.push({ id: 'linked-uuid', email: identity.email, name: 'X', image: null, clerk_id: 'user_dev' })
+    await expect(syncClerkUser(identity)).resolves.toBe('linked-uuid')
+    expect(rows).toHaveLength(1)
+    expect(rows[0].clerk_id).toBe('user_abc')
+  })
+
+  it('does not re-link a stale clerk_id when the e-mail is not verified', async () => {
+    rows.push({ id: 'linked-uuid', email: identity.email, name: 'X', image: null, clerk_id: 'user_dev' })
+    await expect(syncClerkUser({ ...identity, emailVerified: false })).rejects.toThrow()
+    expect(rows[0].clerk_id).toBe('user_dev')
   })
 })
