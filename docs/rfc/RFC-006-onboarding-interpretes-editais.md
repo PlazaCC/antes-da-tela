@@ -2,7 +2,7 @@
 
 | Campo  | Valor                                                                  |
 | :----- | :--------------------------------------------------------------------- |
-| Status | Rascunho — plano (wireframe + adaptação de front/back), nada implementado |
+| Status | Rascunho — wireframes low-fi no Figma; front/back ainda não implementados |
 | Data   | 2026-10-16                                                             |
 | Escopo | Onboarding, perfil, intérpretes, editais, casting, votação, admin      |
 | Figma  | [Antes da Tela — node 114-40](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=114-40) |
@@ -47,14 +47,13 @@ Admin cria edital ─► Roteirista inscreve roteiro + personagens ─► Admin 
 
 ## 2. Wireframes low-fi (Figma)
 
-> **Status da conexão:** o servidor MCP do Figma desta sessão **não está autenticado** — não consigo ler
-> nem escrever no arquivo. Depois de autorizar o conector Figma nas configurações de conectores do
-> claude.ai, os frames abaixo podem ser criados direto no arquivo (página nova "Fluxo Intérpretes &
-> Editais", ao lado do node 114-40).
+> **Wireframes criados** na página `wireframe` do Figma, frame
+> [Fluxo — Onboarding, Intérpretes & Editais (low-fi)](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=409-187).
 
-Convenções do wireframe: frames desktop 1440 e mobile 390, cinza/branco, sem tokens de cor; só
-tipografia base + caixas. Cada frame com nome `ID — Nome` para casar com esta tabela. Setas de
-protótipo ligando os frames na ordem dos fluxos da §1.
+Convenções do wireframe: mesmo estilo dos wireframes existentes da página (mobile 412, fundo escuro,
+blocos cinza, Inter); telas de admin em desktop 1280. Cada frame se chama `ID — Nome` para casar com
+esta tabela. Componentes locais `WF/*` (botão, input, chip, card, mídia, upload, stepper, nota) no
+grupo "Componentes WF". Notas amarelas indicam a próxima tela do fluxo e decisões em aberto.
 
 ### 2.1 Onboarding
 
