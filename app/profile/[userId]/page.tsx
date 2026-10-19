@@ -32,12 +32,12 @@ export async function generateMetadata({
     openGraph: {
       title: `${name} | Antes da Tela`,
       description: `Confira os roteiros e obras de ${name} na plataforma Antes da Tela.`,
-      images: [{ url: '/antes-da-tela-og.png', width: 1200, height: 630 }],
+      images: ['/opengraph-image.png'],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${name} | Antes da Tela`,
-      images: ['/antes-da-tela-og.png'],
+      images: ['/opengraph-image.png'],
     },
   }
 }

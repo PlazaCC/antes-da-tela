@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
 import { clerkAppearance } from '@/lib/auth/clerk-appearance'
 import { clerkLocalization } from '@/lib/auth/clerk-localization'
+import { getSiteUrl } from '@/lib/site-url'
 import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from 'next'
 import { DM_Mono, Inter } from 'next/font/google'
@@ -14,14 +15,8 @@ import localFont from 'next/font/local'
 import { Suspense } from 'react'
 import './globals.css'
 
-const defaultUrl =
-  process.env.NEXT_PUBLIC_APP_URL ??
-  (process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000')
-
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: 'Antes da Tela - Propriedades Intelectuais Audiovisuais',
     template: '%s | Antes da Tela',
