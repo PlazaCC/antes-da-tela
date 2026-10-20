@@ -61,6 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       // authors: script?.author?.name || '',
     },
     twitter: {
+      card: 'summary_large_image',
       title: script?.title,
       description: script?.logline || '',
     },
