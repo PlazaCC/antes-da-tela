@@ -141,6 +141,13 @@
       "when": 1791961481517,
       "tag": "0019_user_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792463162180,
+      "tag": "0020_script_characters",
+      "breakpoints": true
     }
   ]
 }

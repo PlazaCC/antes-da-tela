@@ -4,14 +4,16 @@ import { BnDisclaimerCallout } from "@/components/publish/bn-disclaimer-callout"
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatAgeRating } from "@/lib/constants/scripts";
 import type { AudioEntry } from "@/lib/hooks/use-audio-entries";
+import type { CharacterEntry } from "@/lib/hooks/use-character-entries";
 import type { PublishFormValues } from "@/lib/validators/publish";
-import { FileIcon, Info, Music, Tag } from "lucide-react";
+import { FileIcon, Info, Music, Tag, Users } from "lucide-react";
 import Image from "next/image";
 
 interface ReviewStepProps {
   values: PublishFormValues;
   pdfFile: File | null;
   audioEntries: AudioEntry[];
+  characterEntries: CharacterEntry[];
   coverPreviewUrl?: string | null;
   termsAccepted: boolean;
   onTermsAcceptedChange: (accepted: boolean) => void;
@@ -21,6 +23,7 @@ export function ReviewStep({
   values,
   pdfFile,
   audioEntries,
+  characterEntries,
   coverPreviewUrl,
   termsAccepted,
   onTermsAcceptedChange,
@@ -126,6 +129,23 @@ export function ReviewStep({
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Characters Summary */}
+        <div className="flex gap-4">
+          <div className="w-10 h-10 rounded-sm bg-brand-accent/10 flex items-center justify-center text-brand-accent shrink-0">
+            <Users size={20} />
+          </div>
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="text-xs font-mono text-text-muted uppercase tracking-wider">
+              Personagens
+            </span>
+            <p className="text-body-small text-text-secondary">
+              {characterEntries.length > 0
+                ? characterEntries.map((entry) => entry.name.trim()).join(", ")
+                : "Nenhum personagem cadastrado"}
+            </p>
           </div>
         </div>
       </div>

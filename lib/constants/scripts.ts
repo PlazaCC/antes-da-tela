@@ -133,6 +133,34 @@ export type AudioCategory = (typeof AUDIO_CATEGORIES)[number]
 /** Default category applied to audio rows created before the multi-audio migration (item 10). */
 export const DEFAULT_AUDIO_CATEGORY: AudioCategory = 'Roteiro falado'
 
+// ── Characters ───────────────────────────────────────────────────────────────
+
+export const CHARACTER_GENDERS = ['Feminino', 'Masculino', 'Não-binário', 'Outro'] as const
+
+export const MAX_CHARACTERS = 30
+export const MAX_CHARACTER_TRAITS = 10
+export const MAX_CHARACTER_TRAIT_LENGTH = 40
+
+/** Starter vocabulary shown while the community's own traits are still few. */
+export const SUGGESTED_CHARACTER_TRAITS = [
+  'Leal',
+  'Rebelde',
+  'Sensível',
+  'Inteligente',
+  'Impaciente',
+  'Persistente',
+  'Arrogante',
+  'Vulnerável',
+  'Idealista',
+  'Otimista',
+  'Pessimista',
+  'Gentil',
+  'Cruel',
+  'Valente',
+  'Carente',
+  'Imprevisível',
+] as const
+
 export function formatAgeRating(r: string): string {
   return r === 'livre' ? 'Livre' : `${r} anos`
 }

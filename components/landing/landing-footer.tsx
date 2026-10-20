@@ -1,6 +1,6 @@
 'use client'
 
-import { PlazaCredit } from '@/components/footer/plaza-credit'
+import { FooterCredits } from '@/components/footer/footer-credits'
 import { LEGAL_TABS } from '@/content/legal/legal-tabs'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -87,7 +87,7 @@ export function LandingFooter() {
           ))}
         </div>
 
-        <PlazaCredit />
+        <FooterCredits />
 
         {/* bottom bar */}
         <div className="flex flex-wrap items-center justify-between gap-3">

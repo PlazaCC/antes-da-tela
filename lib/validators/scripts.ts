@@ -2,6 +2,9 @@ import {
   AGE_RATINGS,
   AUDIO_CATEGORIES,
   GENRES,
+  MAX_CHARACTER_TRAIT_LENGTH,
+  MAX_CHARACTER_TRAITS,
+  MAX_CHARACTERS,
   MAX_SUBGENRES,
 } from "@/lib/constants/scripts";
 import { z } from "zod";
@@ -17,6 +20,20 @@ export const audioInputSchema = z.object({
 export type AudioInput = z.infer<typeof audioInputSchema>;
 
 export const MAX_AUDIOS = 8;
+
+/** A character of the script's cast (optional publish step). */
+export const characterInputSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  description: z.string().max(1000).optional(),
+  apparentAge: z.string().max(30).optional(),
+  gender: z.string().max(40).optional(),
+  traits: z
+    .array(z.string().trim().min(1).max(MAX_CHARACTER_TRAIT_LENGTH))
+    .max(MAX_CHARACTER_TRAITS)
+    .optional(),
+});
+
+export type CharacterInput = z.infer<typeof characterInputSchema>;
 
 export const scriptCreateSchema = z.object({
   title: z.string().min(1).max(200),
@@ -34,6 +51,7 @@ export const scriptCreateSchema = z.object({
   coverPath: z.string().nullable().optional(),
   pitchDeckPath: z.string().nullable().optional(),
   audios: z.array(audioInputSchema).max(MAX_AUDIOS).optional(),
+  characters: z.array(characterInputSchema).max(MAX_CHARACTERS).optional(),
   // authorId is read from the session — never accepted from client input
 });
 
@@ -57,6 +75,8 @@ export const scriptUpdateSchema = z.object({
   pageCount: z.number().int().positive().optional(),
   // Full desired set of audios (replace-set semantics on update).
   audios: z.array(audioInputSchema).max(MAX_AUDIOS).optional(),
+  // Full desired cast (replace-set semantics on update).
+  characters: z.array(characterInputSchema).max(MAX_CHARACTERS).optional(),
 });
 
 export type ScriptCreateInput = z.infer<typeof scriptCreateSchema>;
