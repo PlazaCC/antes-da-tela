@@ -1,3 +1,6 @@
+/** Brand name for metadata (og:site_name). */
+export const SITE_NAME = 'Antes da Tela'
+
 // Production must never fall back to VERCEL_URL: that is the per-deployment
 // host (*.vercel.app), which sits behind Deployment Protection, so crawlers
 // (WhatsApp, LinkedIn, X…) get a redirect instead of the OG image.

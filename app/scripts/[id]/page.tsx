@@ -1,5 +1,6 @@
 import { ScriptPageSkeleton } from '@/components/skeletons'
 import { getAppUser } from '@/lib/auth/app-user'
+import { SITE_NAME } from '@/lib/site-url'
 import { getAssetUrl } from '@/lib/storage/url'
 import { validateUUID } from '@/lib/validators/uuid'
 import { appRouter } from '@/server/api/root'
@@ -56,6 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: script?.logline ?? 'Leia e discuta roteiros audiovisuais.',
     openGraph: {
       type: 'website',
+      siteName: SITE_NAME,
       title: script?.title,
       description: script?.logline || '',
       // authors: script?.author?.name || '',
