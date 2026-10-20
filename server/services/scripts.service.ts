@@ -506,8 +506,6 @@ export class ScriptsService {
   }
 
   async listRecent(limit: number, cursor?: string) {
-    const cursorDate = cursor ? new Date(cursor) : null;
-
     let query = this.supabase
       .from("scripts")
       .select(
@@ -517,9 +515,10 @@ export class ScriptsService {
       .order("published_at", { ascending: false })
       .limit(limit + 1);
 
-    // Apply cursor filter if provided
-    if (cursorDate) {
-      query = query.lt("published_at", cursorDate.toISOString());
+    // Compare against the raw DB value: `new Date()` would read a tz-less
+    // timestamp as server-local time and drop microseconds.
+    if (cursor) {
+      query = query.lt("published_at", cursor);
     }
 
     const { data: rows, error } = await query;

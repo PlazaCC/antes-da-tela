@@ -27,7 +27,9 @@ export const scriptsRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().int().min(1).max(50).default(20),
-        cursor: z.string().datetime().optional(),
+        // published_at is `timestamp` (no tz): Postgres returns it without a
+        // `Z`, so the cursor echoed back by nextCursor must be accepted as-is.
+        cursor: z.string().datetime({ local: true, offset: true }).optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
