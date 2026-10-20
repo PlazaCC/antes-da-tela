@@ -1,4 +1,5 @@
 import { StarRating } from '@/components/star-rating/star-rating'
+import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
 interface RatingBoxProps {
@@ -8,47 +9,62 @@ interface RatingBoxProps {
   isRatingPending: boolean
   currentUserId: string | null
   onRate: (value: number) => void
+  className?: string
 }
 
-export function RatingBox({ isOwner, ratingData, userRating, isRatingPending, currentUserId, onRate }: RatingBoxProps) {
-  const ratingValue = userRating ?? ratingData?.average ?? 0
+function formatAverage(ratingData: RatingBoxProps['ratingData']) {
+  if (!ratingData || ratingData.total === 0) return null
+  return ratingData.average.toFixed(1).replace('.', ',')
+}
 
-  if (isOwner) {
-    return (
-      <div
-        className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'
-        aria-live='polite'>
-        <StarRating value={ratingValue} readOnly allowHalf />
-        {ratingData && ratingData.total > 0 ? (
-          <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-            {ratingData.average.toFixed(1)} <span className='text-text-muted'>({ratingData.total})</span>
-          </span>
-        ) : null}
-        <span className='font-mono text-label-mono-small text-text-muted hidden md:inline'>
-          Você não pode avaliar seu próprio roteiro
-        </span>
-      </div>
-    )
-  }
+export function RatingBox({
+  isOwner,
+  ratingData,
+  userRating,
+  isRatingPending,
+  currentUserId,
+  onRate,
+  className,
+}: RatingBoxProps) {
+  const average = formatAverage(ratingData)
+  const canRate = !!currentUserId && !isOwner
+  // Readers see their own score once they rated; everyone else sees the average.
+  const starsValue = (canRate ? userRating : null) ?? ratingData?.average ?? 0
 
   return (
-    <div className='flex items-center gap-2 h-[29px] px-2 bg-elevated rounded-sm border border-border-subtle w-fit'>
+    <div
+      className={cn('flex w-fit items-center gap-2', className)}
+      title={isOwner ? 'Você não pode avaliar seu próprio roteiro' : undefined}
+      aria-live='polite'>
       <StarRating
-        value={ratingValue}
-        allowHalf={!currentUserId}
-        readOnly={!currentUserId || isRatingPending}
+        value={starsValue}
+        size={16}
+        allowHalf={!canRate}
+        readOnly={!canRate || isRatingPending}
         onChange={onRate}
       />
-      {ratingData && ratingData.total > 0 ? (
-        <span className='font-mono text-label-mono-small text-text-secondary whitespace-nowrap'>
-          {ratingData.average.toFixed(1)} <span className='text-text-muted'>({ratingData.total})</span>
-        </span>
-      ) : null}
+
+      <span className='whitespace-nowrap font-mono text-label-mono-small text-text-secondary'>
+        {average ? (
+          <>
+            <span className='text-text-primary'>{average}</span>{' '}
+            <span className='text-text-muted'>({ratingData?.total})</span>
+          </>
+        ) : (
+          <span className='text-text-muted'>Sem avaliações</span>
+        )}
+      </span>
+
       {!currentUserId ? (
-        <span className='font-mono text-label-mono-small text-text-muted'>
-          <Link href='/auth/login' className='text-brand-accent hover:underline'>
-            Avaliar
-          </Link>
+        <Link
+          href='/auth/login'
+          className='whitespace-nowrap font-mono text-label-mono-small text-brand-accent hover:underline'>
+          Avaliar
+        </Link>
+      ) : null}
+      {canRate && !userRating ? (
+        <span className='hidden whitespace-nowrap font-mono text-label-mono-small text-text-muted xl:inline'>
+          · Dê sua nota
         </span>
       ) : null}
     </div>

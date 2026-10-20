@@ -14,6 +14,9 @@ export interface StarRatingProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   size?: number
 }
 
+// Outlined so empty stars stay visible on dark surfaces.
+const EMPTY_STAR_CLASSES = 'fill-transparent stroke-text-muted [stroke-linejoin:round] [stroke-width:1.25]'
+
 const STAR_POINTS = '10,2 12.59,7.36 18.51,8.09 14,12.26 15.18,18.09 10,15.27 4.82,18.09 6,12.26 1.49,8.09 7.41,7.36'
 
 function StarIcon({ fill, size = 20 }: { fill: 'full' | 'half' | 'empty'; size?: number }) {
@@ -28,7 +31,7 @@ function StarIcon({ fill, size = 20 }: { fill: 'full' | 'half' | 'empty'; size?:
             <rect x='0' y='0' width='10' height='20' />
           </clipPath>
         </defs>
-        <polygon points={STAR_POINTS} className='fill-border-default' />
+        <polygon points={STAR_POINTS} className={EMPTY_STAR_CLASSES} />
         <polygon points={STAR_POINTS} className='fill-brand-accent' clipPath={`url(#${clipId})`} />
       </svg>
     )
@@ -36,7 +39,7 @@ function StarIcon({ fill, size = 20 }: { fill: 'full' | 'half' | 'empty'; size?:
 
   return (
     <svg width={size} height={size} viewBox='0 0 20 20' aria-hidden='true'>
-      <polygon points={STAR_POINTS} className={fill === 'full' ? 'fill-brand-accent' : 'fill-border-default'} />
+      <polygon points={STAR_POINTS} className={fill === 'full' ? 'fill-brand-accent' : EMPTY_STAR_CLASSES} />
     </svg>
   )
 }
