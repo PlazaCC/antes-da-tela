@@ -1,6 +1,9 @@
+'use client'
+
 import { StarRating } from '@/components/star-rating/star-rating'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 interface RatingBoxProps {
   isOwner: boolean
@@ -26,6 +29,7 @@ export function RatingBox({
   onRate,
   className,
 }: RatingBoxProps) {
+  const pathname = usePathname()
   const average = formatAverage(ratingData)
   const canRate = !!currentUserId && !isOwner
   // Readers see their own score once they rated; everyone else sees the average.
@@ -57,7 +61,7 @@ export function RatingBox({
 
       {!currentUserId ? (
         <Link
-          href='/auth/login'
+          href={`/auth/login?next=${encodeURIComponent(pathname)}`}
           className='whitespace-nowrap font-mono text-label-mono-small text-brand-accent hover:underline'>
           Avaliar
         </Link>
