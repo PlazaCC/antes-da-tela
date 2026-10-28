@@ -1,6 +1,6 @@
 export function PlazaCredit() {
   return (
-    <div className="mb-5 flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-2">
       <span className="font-mono text-[11px] tracking-[0.1em] text-text-secondary">
         Desenvolvido por:
       </span>

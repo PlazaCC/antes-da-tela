@@ -1,5 +1,10 @@
 import { notifyError } from "@/lib/feedback";
 import { useAudioEntries, type AudioEntry, type UseAudioEntriesResult } from "@/lib/hooks/use-audio-entries";
+import {
+    useCharacterEntries,
+    type CharacterEntry,
+    type UseCharacterEntriesResult,
+} from "@/lib/hooks/use-character-entries";
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { usePublishFiles } from "@/lib/hooks/use-publish-files";
 import { usePublishUpload } from "@/lib/hooks/use-publish-upload";
@@ -17,6 +22,18 @@ import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, type UseFormSetValue } from "react-hook-form";
 import { toast } from "sonner";
+
+export const PUBLISH_TOTAL_STEPS = 5;
+/** Optional cast step (between Categorias and Revisão). */
+export const PUBLISH_CHARACTERS_STEP = 4;
+
+const toCharacterInput = (entry: CharacterEntry) => ({
+  name: entry.name.trim(),
+  description: entry.description.trim() || undefined,
+  apparentAge: entry.apparentAge.trim() || undefined,
+  gender: entry.gender || undefined,
+  traits: entry.traits,
+});
 
 const INITIAL_PUBLISH_FORM_VALUES: PublishFormValues = {
   title: "",
@@ -64,6 +81,10 @@ export interface UsePublishFormResult {
   addAudioEntry: UseAudioEntriesResult["addEntry"];
   removeAudioEntry: UseAudioEntriesResult["removeEntry"];
   updateAudioEntry: UseAudioEntriesResult["updateEntry"];
+  characterEntries: CharacterEntry[];
+  addCharacter: UseCharacterEntriesResult["addEntry"];
+  removeCharacter: UseCharacterEntriesResult["removeEntry"];
+  updateCharacter: UseCharacterEntriesResult["updateEntry"];
   isEditing: boolean;
   isLoadingScript: boolean;
   pdfProgress: number;
@@ -93,6 +114,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
   const files = usePublishFiles();
   const progress = usePublishUploadProgress();
   const audio = useAudioEntries();
+  const characters = useCharacterEntries();
 
   const [baselineValues, setBaselineValues] = useState<PublishFormValues>(
     INITIAL_PUBLISH_FORM_VALUES,
@@ -127,6 +149,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
     files.resetFiles();
     progress.resetProgress();
     audio.reset();
+    characters.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, scriptId]);
 
@@ -163,6 +186,16 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
         durationSeconds: af.duration_seconds ?? undefined,
         progress: 0,
         error: "",
+      })),
+    );
+    characters.setEntries(
+      (existingScript.script_characters ?? []).map((character) => ({
+        id: character.id,
+        name: character.name,
+        description: character.description ?? "",
+        apparentAge: character.apparent_age ?? "",
+        gender: character.gender ?? "",
+        traits: character.traits ?? [],
       })),
     );
   }, [existingScript, isEditing, reset, userId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -326,6 +359,8 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
 
       progress.setUploading(false);
 
+      const characterInputs = characters.entries.map(toCharacterInput);
+
       if (isEditing) {
         updateMutation.mutate({
           id: scriptId as string,
@@ -343,6 +378,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
           bannerPath: bannerPath === "" ? null : bannerPath,
           pitchDeckPath: pitchDeckPath === "" ? null : pitchDeckPath,
           audios,
+          characters: characterInputs,
         }, {
           onSuccess: (script) => {
             posthog.capture('script_updated', {
@@ -367,6 +403,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
           coverPath: coverPath || undefined,
           bannerPath: bannerPath || undefined,
           pitchDeckPath: pitchDeckPath || undefined,
+          characters: characterInputs,
         }, {
           onSuccess: (script) => {
             posthog.capture(desiredStatus === 'published' ? 'script_published' : 'script_draft_saved', {
@@ -396,10 +433,12 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
           values.pdfStoragePath.length > 0) &&
         !files.pdfError
       );
+    if (step === PUBLISH_CHARACTERS_STEP)
+      return characters.entries.every((entry) => entry.name.trim().length > 0);
     return true;
   };
 
-  const nextStep = () => setStep((value) => Math.min(value + 1, 4));
+  const nextStep = () => setStep((value) => Math.min(value + 1, PUBLISH_TOTAL_STEPS));
   const prevStep = () => setStep((value) => Math.max(value - 1, 1));
 
   return {
@@ -434,6 +473,10 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
     addAudioEntry: audio.addEntry,
     removeAudioEntry: audio.removeEntry,
     updateAudioEntry: audio.updateEntry,
+    characterEntries: characters.entries,
+    addCharacter: characters.addEntry,
+    removeCharacter: characters.removeEntry,
+    updateCharacter: characters.updateEntry,
     isEditing,
     isLoadingScript,
     pdfProgress: progress.pdfProgress,

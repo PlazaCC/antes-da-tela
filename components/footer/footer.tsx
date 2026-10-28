@@ -1,7 +1,7 @@
 import { LEGAL_TABS } from '@/content/legal/legal-tabs'
 import Image from 'next/image'
 import Link from 'next/link'
-import { PlazaCredit } from './plaza-credit'
+import { FooterCredits } from './footer-credits'
 
 const LEGAL_LINKS = Object.values(LEGAL_TABS).map((tab) => ({
   label: tab.navLabel,
@@ -72,7 +72,7 @@ export function Footer() {
           ))}
         </div>
 
-        <PlazaCredit />
+        <FooterCredits />
 
         {/* bottom bar */}
         <div className="flex flex-wrap items-center justify-between gap-3">

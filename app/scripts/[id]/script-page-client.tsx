@@ -7,9 +7,10 @@ import {
   PdfControls,
   PdfViewerProvider,
 } from '@/components/pdf-viewer'
-import { CommentsSidebar } from '@/components/pdf-viewer/comments-sidebar'
 import { PdfFullscreenDialog } from '@/components/pdf-viewer/pdf-fullscreen-dialog'
+import { CharactersSheet } from '@/components/script-page/characters-sheet'
 import { ScriptPageSubHeader } from '@/components/script-page/script-page-sub-header'
+import { ScriptSidePanels } from '@/components/script-page/script-side-panels'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,13 +21,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import type { AppRouter } from '@/server/api/root'
 import { useTRPC } from '@/trpc/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { inferRouterOutputs } from '@trpc/server'
-import { Film, MessageCircleMore } from 'lucide-react'
+import { Film } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import posthog from 'posthog-js'
 import { useState } from 'react'
@@ -58,7 +57,6 @@ export function ScriptPageClient({
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [pitchDeckOpen, setPitchDeckOpen] = useState(false)
-  const [commentsOpen, setCommentsOpen] = useState(true)
 
   const deleteMutation = useMutation(
     trpc.scripts.delete.mutationOptions({
@@ -135,6 +133,7 @@ export function ScriptPageClient({
 
   const isOwner = !!currentUserId && currentUserId === script.author?.id
   const hasAudio = audios.length > 0
+  const characters = script.script_characters ?? []
 
   const subHeaderProps = {
     scriptId: script!.id,
@@ -173,36 +172,11 @@ export function ScriptPageClient({
           <div className="relative flex min-h-0 flex-1 justify-center">
             <PdfCanvas className="h-full w-full lg:w-1/2" />
 
-            {/* Floating toggle — stays put so the panel can be reopened when closed */}
-            <Button
-              variant="secondary"
-              size="icon-sm"
-              className="absolute right-4 top-4 z-30 hidden rounded-full shadow-md lg:inline-flex"
-              aria-pressed={commentsOpen}
-              aria-label={
-                commentsOpen ? 'Fechar comentários' : 'Abrir comentários'
-              }
-              onClick={() => setCommentsOpen((open) => !open)}
-            >
-              <MessageCircleMore />
-            </Button>
-
-            {/* Comments — slides in/out from the right */}
-            <aside
-              aria-hidden={!commentsOpen}
-              className={cn(
-                'absolute right-0 top-0 z-40 hidden h-full min-h-0 w-[340px] shrink-0 overflow-hidden p-3 transition-transform duration-300 ease-in-out lg:block xl:w-1/4',
-                commentsOpen ? 'translate-x-0' : 'translate-x-full'
-              )}
-            >
-              <div className="h-full w-full overflow-hidden rounded-xl border border-border-subtle">
-                <CommentsSidebar
-                  scriptId={script.id}
-                  currentUserId={currentUserId}
-                  onClose={() => setCommentsOpen(false)}
-                />
-              </div>
-            </aside>
+            <ScriptSidePanels
+              scriptId={script.id}
+              currentUserId={currentUserId}
+              characters={characters}
+            />
           </div>
         </PdfViewerProvider>
       ) : (
@@ -229,6 +203,7 @@ export function ScriptPageClient({
       {/* Comments — mobile sheet (floating trigger + drawer) */}
       <div className="lg:hidden">
         <CommentsSheet scriptId={script.id} currentUserId={currentUserId} />
+        {characters.length > 0 && <CharactersSheet characters={characters} />}
       </div>
 
       {/* Pitch Deck — full-screen modal reader */}

@@ -27,6 +27,16 @@ export interface AudioFile {
   duration_seconds: number | null;
 }
 
+export interface ScriptCharacter {
+  id: string;
+  name: string;
+  description: string | null;
+  apparent_age: string | null;
+  gender: string | null;
+  traits: string[];
+  sort_order: number;
+}
+
 export interface ScriptDetail {
   id: string;
   title: string;
@@ -46,6 +56,7 @@ export interface ScriptDetail {
   cover_url?: string | null;
   script_files: ScriptFile[];
   audio_files: AudioFile[];
+  script_characters: ScriptCharacter[];
   author: {
     id: string;
     name: string | null;

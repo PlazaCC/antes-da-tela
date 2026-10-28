@@ -10,6 +10,7 @@ import type {
   ScriptUpdateInput,
 } from "@/lib/validators/scripts";
 import { getScriptPublishDefaults } from "@/server/domain/scripts";
+import { replaceScriptCharacters } from "@/server/services/script-characters";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError } from "@trpc/server";
 
@@ -52,6 +53,7 @@ export class ScriptsService {
       coverPath,
       pitchDeckPath,
       audios,
+      characters,
       ...scriptData
     } = input;
 
@@ -121,6 +123,16 @@ export class ScriptsService {
       );
     }
 
+    if (characters && characters.length > 0) {
+      try {
+        await replaceScriptCharacters(this.supabase, script.id, characters);
+      } catch (error) {
+        // Roll back so a retry doesn't leave a half-created script behind.
+        await this.supabase.from("scripts").delete().eq("id", script.id);
+        throw error;
+      }
+    }
+
     return script;
   }
 
@@ -165,6 +177,7 @@ export class ScriptsService {
       pageCount,
       pitchDeckPath,
       audios,
+      characters,
       ...updateData
     } = input;
 
@@ -377,6 +390,11 @@ export class ScriptsService {
       }
     }
 
+    // Characters (replace-set): omitting `characters` leaves them untouched.
+    if (characters !== undefined) {
+      await replaceScriptCharacters(this.supabase, id, characters);
+    }
+
     return { id };
   }
 
@@ -461,6 +479,7 @@ export class ScriptsService {
         "id, title, logline, synopsis, genre, subgenres, age_rating, bn_registration, is_featured, status, published_at, banner_path, cover_path, pitch_deck_path," +
           " script_files(id, storage_path, page_count, file_size)," +
           " audio_files(id, storage_path, title, description, sort_order, duration_seconds)," +
+          " script_characters(id, name, description, apparent_age, gender, traits, sort_order)," +
           " author:users!author_id(id, name, image, bio)",
       )
       .eq("id", id)
@@ -494,9 +513,16 @@ export class ScriptsService {
         )
       : scriptData.audio_files;
 
+    const characters = Array.isArray(scriptData.script_characters)
+      ? [...(scriptData.script_characters as Array<{ sort_order?: number }>)].sort(
+          (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+        )
+      : [];
+
     return {
       ...scriptData,
       audio_files: audioFiles,
+      script_characters: characters,
       author: Array.isArray(scriptData.author)
         ? scriptData.author[0]
         : (scriptData.author ?? null),
@@ -506,8 +532,6 @@ export class ScriptsService {
   }
 
   async listRecent(limit: number, cursor?: string) {
-    const cursorDate = cursor ? new Date(cursor) : null;
-
     let query = this.supabase
       .from("scripts")
       .select(
@@ -517,9 +541,10 @@ export class ScriptsService {
       .order("published_at", { ascending: false })
       .limit(limit + 1);
 
-    // Apply cursor filter if provided
-    if (cursorDate) {
-      query = query.lt("published_at", cursorDate.toISOString());
+    // Compare against the raw DB value: `new Date()` would read a tz-less
+    // timestamp as server-local time and drop microseconds.
+    if (cursor) {
+      query = query.lt("published_at", cursor);
     }
 
     const { data: rows, error } = await query;

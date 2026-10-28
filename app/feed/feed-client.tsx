@@ -56,6 +56,7 @@ export function FeedClient() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetchNextPageError,
   } = useInfiniteQuery({
     ...trpc.scripts.listRecent.infiniteQueryOptions(
       { limit: 20 },
@@ -81,22 +82,24 @@ export function FeedClient() {
   // Infinite scroll sentinel
   const loaderRef = useRef<HTMLDivElement>(null)
 
+  // A failed page stops the observer instead of re-requesting in a loop.
+  const canFetchMore =
+    hasNextPage && !isFetchingNextPage && !isFetchNextPageError && !isSearchActive
+
   useEffect(() => {
     const el = loaderRef.current
-    if (!el || !hasNextPage || isSearchActive) return
+    if (!el || !canFetchMore) return
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasNextPage) {
-          fetchNextPage()
-        }
+        if (entry.isIntersecting) fetchNextPage()
       },
       { threshold: 0.1 }
     )
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [hasNextPage, fetchNextPage, isSearchActive])
+  }, [canFetchMore, fetchNextPage])
 
   const scriptIds = displayedScripts.map((s) => s.id)
   const { data: ratingsMap } = useQuery({

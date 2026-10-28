@@ -1,6 +1,7 @@
 "use client";
 
 import { Progress } from "@/components/progress";
+import { CharactersStep } from "@/components/publish/characters-step";
 import { FileStep } from "@/components/publish/file-step";
 import { GenreStep } from "@/components/publish/genre-step";
 import { InfoStep } from "@/components/publish/info-step";
@@ -22,7 +23,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { usePublishForm } from "@/lib/hooks/use-publish-form";
+import {
+  PUBLISH_CHARACTERS_STEP,
+  PUBLISH_TOTAL_STEPS,
+  usePublishForm,
+} from "@/lib/hooks/use-publish-form";
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
@@ -33,25 +38,30 @@ const STEP_LABELS = [
   "Informações",
   "Arquivos",
   "Categorias",
+  "Personagens",
   "Revisão",
 ] as const;
 
 const STEP_META = [
   {
     title: "Informações básicas do roteiro",
-    subtitle: "Etapa 1 de 4 — Preencha os dados principais do seu projeto",
+    subtitle: "Etapa 1 de 5 — Preencha os dados principais do seu projeto",
   },
   {
     title: "Arquivos do projeto",
-    subtitle: "Etapa 2 de 4 — Faça o upload do PDF e arquivos opcionais",
+    subtitle: "Etapa 2 de 5 — Faça o upload do PDF e arquivos opcionais",
   },
   {
     title: "Categorização",
-    subtitle: "Etapa 3 de 4 — Defina o gênero e classificação do roteiro",
+    subtitle: "Etapa 3 de 5 — Defina o gênero e classificação do roteiro",
+  },
+  {
+    title: "Personagens",
+    subtitle: "Etapa 4 de 5 — Opcional: crie os personagens da sua obra",
   },
   {
     title: "Revisão e publicação",
-    subtitle: "Etapa 4 de 4 — Revise os dados antes de publicar",
+    subtitle: "Etapa 5 de 5 — Revise os dados antes de publicar",
   },
 ] as const;
 
@@ -95,6 +105,10 @@ export function PublishPage({ scriptId }: PublishPageProps) {
     addAudioEntry,
     removeAudioEntry,
     updateAudioEntry,
+    characterEntries,
+    addCharacter,
+    removeCharacter,
+    updateCharacter,
     isEditing,
     isLoadingScript,
     uploading,
@@ -182,7 +196,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
       <div className="flex flex-col gap-6 md:gap-8">
         <div className="flex md:hidden justify-between items-center">
           <span className="font-mono text-[10px] text-text-muted uppercase tracking-wider">
-            Etapa {step} de 4
+            Etapa {step} de {PUBLISH_TOTAL_STEPS}
           </span>
           <span className="font-mono text-[10px] text-text-muted uppercase tracking-wider truncate max-w-[60%]">
             {selectedStepMeta.title}
@@ -256,11 +270,20 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                   setValue={setValue}
                 />
               )}
-              {step === 4 && (
+              {step === PUBLISH_CHARACTERS_STEP && (
+                <CharactersStep
+                  entries={characterEntries}
+                  addEntry={addCharacter}
+                  removeEntry={removeCharacter}
+                  updateEntry={updateCharacter}
+                />
+              )}
+              {step === PUBLISH_TOTAL_STEPS && (
                 <ReviewStep
                   values={formValues}
                   pdfFile={pdfFile}
                   audioEntries={audioEntries}
+                  characterEntries={characterEntries}
                   coverPreviewUrl={coverPreviewUrl}
                   termsAccepted={termsAccepted}
                   onTermsAcceptedChange={setTermsAccepted}
@@ -288,7 +311,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
                   Voltar
                 </Button>
 
-                {step < 4 ? (
+                {step < PUBLISH_TOTAL_STEPS ? (
                   <Button
                     onClick={nextStep}
                     disabled={!canProceed()}
@@ -354,7 +377,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
             Voltar
           </Button>
         ) : null}
-        {step < 4 ? (
+        {step < PUBLISH_TOTAL_STEPS ? (
           <Button
             className="flex-1"
             onClick={nextStep}
@@ -378,7 +401,7 @@ export function PublishPage({ scriptId }: PublishPageProps) {
               ? isEditing
                 ? "Salvando..."
                 : "Publicando..."
-              : step === 4
+              : step === PUBLISH_TOTAL_STEPS
                 ? "Publicar"
                 : "Continuar"}
           </Button>

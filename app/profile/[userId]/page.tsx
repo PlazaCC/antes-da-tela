@@ -1,4 +1,5 @@
 import { appRouter } from '@/server/api/root'
+import { SITE_NAME } from '@/lib/site-url'
 import type { ScriptListItem, ProfileStats, UserProfile } from '@/lib/types'
 import { createTRPCContext } from '@/trpc/init'
 import type { Metadata } from 'next'
@@ -32,12 +33,13 @@ export async function generateMetadata({
     openGraph: {
       title: `${name} | Antes da Tela`,
       description: `Confira os roteiros e obras de ${name} na plataforma Antes da Tela.`,
-      images: [{ url: '/antes-da-tela-og.png', width: 1200, height: 630 }],
+      siteName: SITE_NAME,
+      images: ['/opengraph-image.png'],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${name} | Antes da Tela`,
-      images: ['/antes-da-tela-og.png'],
+      images: ['/opengraph-image.png'],
     },
   }
 }

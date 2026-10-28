@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm'
 import {
   boolean,
   check,
+  index,
   integer,
   pgEnum,
   pgPolicy,
@@ -201,6 +202,45 @@ export const audioFiles = pgTable(
   ],
 )
 
+// ── Script Characters ─────────────────────────────────────────────────────────
+// Optional cast of a script, created in the publish flow. Deleting the script
+// deletes its characters (cascade). `traits` are free-form tags; suggestions
+// come from the traits already in use (see search_character_traits RPC).
+
+export const scriptCharacters = pgTable(
+  'script_characters',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    scriptId: uuid('script_id')
+      .notNull()
+      .references(() => scripts.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    // Free text so authors can give ranges ("30–35") or approximations.
+    apparentAge: text('apparent_age'),
+    gender: text('gender'),
+    traits: text('traits').array().default(sql`'{}'::text[]`).notNull(),
+    sortOrder: integer('sort_order').default(0).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('script_characters_script_id_idx').on(table.scriptId),
+    pgPolicy('Script characters follow script visibility', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`exists(select 1 from scripts where id = script_id and (status = 'published' or (select public.current_user_id()) = author_id))`,
+    }),
+    pgPolicy('Authors manage their script characters', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`(select public.current_user_id()) = (select author_id from scripts where id = script_id)`,
+      withCheck: sql`(select public.current_user_id()) = (select author_id from scripts where id = script_id)`,
+    }),
+  ],
+)
+
 // ── Comments ──────────────────────────────────────────────────────────────────
 
 export const comments = pgTable(
@@ -352,6 +392,7 @@ export const scriptsRelations = relations(scripts, ({ one, many }) => ({
   author: one(users, { fields: [scripts.authorId], references: [users.id] }),
   scriptFiles: many(scriptFiles),
   audioFiles: many(audioFiles),
+  characters: many(scriptCharacters),
   comments: many(comments),
   ratings: many(ratings),
 }))
@@ -362,6 +403,10 @@ export const scriptFilesRelations = relations(scriptFiles, ({ one }) => ({
 
 export const audioFilesRelations = relations(audioFiles, ({ one }) => ({
   script: one(scripts, { fields: [audioFiles.scriptId], references: [scripts.id] }),
+}))
+
+export const scriptCharactersRelations = relations(scriptCharacters, ({ one }) => ({
+  script: one(scripts, { fields: [scriptCharacters.scriptId], references: [scripts.id] }),
 }))
 
 export const commentsRelations = relations(comments, ({ one, many }) => ({
@@ -386,6 +431,7 @@ export type User = typeof users.$inferSelect
 export type Script = typeof scripts.$inferSelect
 export type ScriptFile = typeof scriptFiles.$inferSelect
 export type AudioFile = typeof audioFiles.$inferSelect
+export type ScriptCharacter = typeof scriptCharacters.$inferSelect
 export type Comment = typeof comments.$inferSelect
 export type Rating = typeof ratings.$inferSelect
 export type CommentReaction = typeof commentReactions.$inferSelect
