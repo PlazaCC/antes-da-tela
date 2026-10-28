@@ -2,7 +2,7 @@
 
 | Campo  | Valor                                                                  |
 | :----- | :--------------------------------------------------------------------- |
-| Status | Rascunho — wireframes low-fi no Figma; front/back ainda não implementados |
+| Status | Decisões de produto fechadas (exceto Q1) — wireframes low-fi no Figma; implementação não iniciada |
 | Data   | 2026-10-16                                                             |
 | Escopo | Onboarding, perfil, intérpretes, editais, casting, votação, admin      |
 | Figma  | [Antes da Tela — node 114-40](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=114-40) |
@@ -201,7 +201,7 @@ Services em `server/services/*.service.ts` seguindo o padrão atual; validators 
 ### 5.2 Redirecionamento para o onboarding
 
 - Clerk: `signUpForceRedirectUrl="/onboarding"` nas páginas de sign-up.
-- Fallback: em `app/(authenticated)/layout.tsx` (e no `/feed`), se `onboarding_completed_at` é null → redirect para `/onboarding`. Usuários antigos: marcar `onboarding_completed_at = created_at` na migração e mostrar só um banner "complete seu perfil" (evita bloquear quem já usa).
+- Fallback: em `app/(authenticated)/layout.tsx` (e no `/feed`), se `onboarding_completed_at` é null → redirect para `/onboarding`. Usuários antigos também passam pelo onboarding (D2): `onboarding_completed_at` nasce nulo para todos.
 - Pular qualquer passo nunca bloqueia; o último passo sempre grava `onboarding_completed_at`.
 
 ### 5.3 Componentes (wrappers sobre `components/ui/`, ≤ 150 linhas/arquivo)
@@ -232,14 +232,51 @@ Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
 
 ---
 
-## 7. Perguntas em aberto
+## 7. Decisões (2026-10-28)
 
-1. **Intenção é escolha única ou múltipla?** Um produtor também pode ser intérprete. Proposta: multi-seleção, fluxo = união dos passos.
-2. **Áudio de cadastro para quem atua e narra:** só vídeo, ou vídeo + áudio opcional?
-3. **Quem pode criar edital?** Só admin (proposta) ou também parceiros (FRAPA/ABRA/EBAC)?
-4. **Roteiro inscrito precisa estar publicado?** O texto diz "já publicou (deixar opção de adicionar mais)" — inscrever vários roteiros por autor no mesmo edital?
-5. **Regras de voto:** 1 voto por edital ou 1 por roteiro? Precisa estar logado (proposta: sim, evita fraude)?
-6. **Escolha final do elenco:** o roteirista escolhe entre as 3 opções, ou o staff decide (rascunho 1: "Staff toma a decisão de qual ator vai fazer qual personagem")?
-7. **Autorização de uso de imagem/voz** dos intérpretes: precisa de termo de aceite no cadastro (LGPD + direitos de imagem).
-8. **Área de embaixadores/mentores e logos de parceiros** (rascunho 1): entram neste escopo ou na landing?
-9. **Intérprete menor de idade:** permitido? Exige responsável?
+| # | Tema | Decisão |
+| :- | :--- | :------ |
+| D1 | Intenção (`users.intents`) | **Em aberto** — escolha única ou múltipla (ver Q1) |
+| D2 | Usuários já existentes | Também passam pelo onboarding (não marcar `onboarding_completed_at` na migração) |
+| D3 | Mídia de quem atua e narra | Só o vídeo; áudio só para quem apenas narra |
+| D4 | Termo de imagem/voz | Checkbox obrigatório no O4b com texto provisório, trocável depois |
+| D5 | Menores de idade | Bloqueados como intérpretes na POC (data de nascimento obrigatória no O4b, 18+) |
+| D6 | Admin | `users.role` (`user \| admin`), marcado manualmente no banco por enquanto |
+| D7 | Criação de edital | Só admin |
+| D8 | Inscrições por autor | Sem limite de roteiros por edital |
+| D9 | Elenco | Staff seleciona até 3 opções por personagem (A4); o roteirista escolhe 1 entre elas (E6) |
+| D10 | Voto | 1 voto por edital; exige login, **e-mail confirmado e documento cadastrado** (`user_documents`) |
+| D11 | Compartilhamento | Participante (roteirista ou intérprete) compartilha um link que abre direto o edital/roteiro, com cadastro enxuto focado no voto (§8) |
+
+### Pergunta em aberto
+
+- **Q1 — Intenção é escolha única ou múltipla?** Recomendação: múltipla (um produtor também pode ser intérprete), fluxo = união dos passos.
+
+### Fora do escopo desta entrega
+
+- Pagamento da live e repasse ao elenco (RFC próprio).
+- Área de embaixadores/mentores e logos de parceiros (landing).
+
+---
+
+## 8. Link de compartilhamento e cadastro para votar
+
+**Objetivo:** quem participa de um edital divulga a própria participação e traz votos; quem chega pelo link vota com o mínimo de atrito.
+
+**Link**
+- Por roteiro inscrito: `/editais/[slug]/r/[entryId]` — página pública do roteiro no edital (logline, elenco, trecho) com CTA "Votar".
+- Opcional `?ref=<userId>` para atribuição (PostHog `share_link_opened` / `vote_cast` com `ref`). Sem ranking de quem trouxe mais votos na POC.
+- Botão "Compartilhar minha participação" em E5 (roteirista), P3/E8 (intérprete) e E10: Web Share API no mobile, copiar link no desktop, atalhos WhatsApp/Instagram.
+- Metadados Open Graph por roteiro (título, logline, imagem de capa/banner) para a prévia no WhatsApp.
+- Antes da votação abrir, o mesmo link mostra "votação abre em DD/MM" + "Me avise" (e-mail).
+
+**Cadastro para votar** (tela nova **V1–V3** no wireframe)
+1. **V1** — visitante clica em "Votar" → login/cadastro do Clerk com `?next=` de volta para o link (mesmo padrão do "Avaliar" em `components/script-page/rating-box.tsx`). Google ou e-mail com código (o código já confirma o e-mail).
+2. **V2** — se faltar documento: tela única "Para votar, confirme seu documento" reaproveitando `components/profile/document-fields.tsx` (CPF ou documento estrangeiro).
+3. **V3** — voto confirmado + "Compartilhe também" (mesmo link).
+- Quem chega por esse fluxo **pula o onboarding completo** no momento (intents = `reader`, sem perfil/pesquisa); o onboarding aparece depois, como convite, na próxima visita ao feed.
+- Regras no servidor (`calls.vote`): fase = `voting`, e-mail verificado (claim do Clerk), `user_documents` existente, `unique(call_id, user_id)`.
+
+**Impacto no plano**
+- Fase 5 (Votação) ganha: página pública do roteiro no edital, OG dinâmico, botão de compartilhar, fluxo V1–V3 e o "pular onboarding" para quem entra pelo link.
+- Fase 1 já deve prever o parâmetro `next` e a exceção de onboarding para o fluxo de voto.
