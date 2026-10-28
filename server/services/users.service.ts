@@ -10,6 +10,36 @@ import {
   type DocumentType,
 } from '@/lib/utils/documents'
 import type { DocumentFormValues } from '@/lib/validators/document'
+import type { UpdateProfileInput } from '@/lib/validators/profile'
+
+const PROFILE_COLUMNS = 'id, name, image, bio, display_name, pronouns, location, links, created_at'
+
+type ProfileRow = {
+  id: string
+  name: string
+  image: string | null
+  bio: string | null
+  display_name: string | null
+  pronouns: string | null
+  location: string | null
+  links: UserProfile['links']
+  created_at: string
+}
+
+function toUserProfile(row: ProfileRow): UserProfile {
+  return {
+    id: row.id,
+    name: row.name,
+    email: null,
+    image: row.image,
+    bio: row.bio,
+    displayName: row.display_name,
+    pronouns: row.pronouns,
+    location: row.location,
+    links: row.links,
+    createdAt: row.created_at,
+  }
+}
 
 export type MyDocument = { type: DocumentType; country: string; masked: string }
 
@@ -17,42 +47,22 @@ export class UsersService {
   constructor(private supabase: SupabaseClient) {}
 
   async getProfile(id: string): Promise<UserProfile | null> {
-    const { data: user } = await this.supabase
-      .from('users')
-      .select('id, name, image, bio, created_at')
-      .eq('id', id)
-      .maybeSingle()
-    if (!user) return null
-    return {
-      id: user.id,
-      name: user.name,
-      image: user.image,
-      bio: user.bio,
-      createdAt: user.created_at,
-    } as UserProfile
+    const { data: user } = await this.supabase.from('users').select(PROFILE_COLUMNS).eq('id', id).maybeSingle()
+    return user ? toUserProfile(user) : null
   }
 
-  async updateProfile(
-    id: string,
-    updates: { name?: string; bio?: string | null; image?: string },
-  ) {
+  async updateProfile(id: string, input: UpdateProfileInput) {
+    const { displayName, ...rest } = input
+    const updates = { ...rest, ...(displayName !== undefined ? { display_name: displayName } : {}) }
     const { data: updated, error } = await this.supabase
       .from('users')
       .update(updates)
       .eq('id', id)
-      .select('id, name, image, bio, created_at')
+      .select(PROFILE_COLUMNS)
       .single()
 
     if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-
-    if (!updated) return null
-    return {
-      id: updated.id,
-      name: updated.name,
-      image: updated.image,
-      bio: updated.bio,
-      createdAt: updated.created_at,
-    } as UserProfile
+    return updated ? toUserProfile(updated) : null
   }
 
   /**

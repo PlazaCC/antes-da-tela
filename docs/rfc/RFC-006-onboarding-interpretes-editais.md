@@ -2,7 +2,7 @@
 
 | Campo  | Valor                                                                  |
 | :----- | :--------------------------------------------------------------------- |
-| Status | Decisões de produto fechadas (exceto Q1) — wireframes low-fi no Figma; implementação não iniciada |
+| Status | Decisões fechadas — Fase 1 (onboarding) implementada; fases 2–6 pendentes |
 | Data   | 2026-10-16                                                             |
 | Escopo | Onboarding, perfil, intérpretes, editais, casting, votação, admin      |
 | Figma  | [Antes da Tela — node 114-40](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=114-40) |
@@ -236,7 +236,7 @@ Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
 
 | # | Tema | Decisão |
 | :- | :--- | :------ |
-| D1 | Intenção (`users.intents`) | **Em aberto** — escolha única ou múltipla (ver Q1) |
+| D1 | Intenção | Múltipla. Só **Intérprete** muda o fluxo (cadastro obrigatório para casting, adiável); **Produtor** = fluxo do leitor + convite opcional para publicar |
 | D2 | Usuários já existentes | Também passam pelo onboarding (não marcar `onboarding_completed_at` na migração) |
 | D3 | Mídia de quem atua e narra | Só o vídeo; áudio só para quem apenas narra |
 | D4 | Termo de imagem/voz | Checkbox obrigatório no O4b com texto provisório, trocável depois |
@@ -247,10 +247,6 @@ Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
 | D9 | Elenco | Staff seleciona até 3 opções por personagem (A4); o roteirista escolhe 1 entre elas (E6) |
 | D10 | Voto | 1 voto por edital; exige login, **e-mail confirmado e documento cadastrado** (`user_documents`) |
 | D11 | Compartilhamento | Participante (roteirista ou intérprete) compartilha um link que abre direto o edital/roteiro, com cadastro enxuto focado no voto (§8) |
-
-### Pergunta em aberto
-
-- **Q1 — Intenção é escolha única ou múltipla?** Recomendação: múltipla (um produtor também pode ser intérprete), fluxo = união dos passos.
 
 ### Fora do escopo desta entrega
 
@@ -280,3 +276,21 @@ Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
 **Impacto no plano**
 - Fase 5 (Votação) ganha: página pública do roteiro no edital, OG dinâmico, botão de compartilhar, fluxo V1–V3 e o "pular onboarding" para quem entra pelo link.
 - Fase 1 já deve prever o parâmetro `next` e a exceção de onboarding para o fluxo de voto.
+
+---
+
+## 9. Implementação
+
+### Fase 1 — Onboarding (feita)
+
+- **Banco** (`drizzle/0021_onboarding.sql`): `users.display_name / pronouns / location / links` (públicos, com GRANT de coluna); tabelas privadas `user_onboarding` (intents, gênero, `completed_at`) e `user_preferences` (gêneros, formatos, temas, objetivos), RLS só do dono. Intenções e gênero ficam fora de `users` porque `users` é público.
+- **API**: router `onboarding` (`getState`, `setIntents`, `setGender`, `complete`, `getPreferences`, `upsertPreferences`); `users.updateProfile` aceita os campos novos.
+- **Redirecionamento**: `redirectToOnboardingIfNeeded` (`lib/auth/onboarding.ts`) no layout autenticado e no `/feed`; leva o `?next=` adiante. Se a consulta falhar (ex.: migração não aplicada), deixa passar.
+- **Telas**: `/onboarding` (O1 intenção → O2 perfil → O4 intérprete* → O3 preferências → O5 publicar* → O6 pronto). O4 é um placeholder até a Fase 2.
+- **Perfil**: `/profile/edit` ganhou os campos novos e a seção "Preferências de conteúdo" (P2 ficou dentro da página de configurações, não em rota própria). Perfil público mostra nome de exibição, pronomes e cidade.
+- **Analytics**: `onboarding_step_viewed/completed/skipped`, `onboarding_intents_selected`, `onboarding_completed`, `preferences_saved`.
+
+### Notas para as próximas fases
+
+- **Personagens**: `script_characters` (migração 0020, etapa opcional da publicação) já guarda nome, descrição, idade aparente, gênero e características. A Fase 3 deve reaproveitá-la em vez de criar `call_characters`; falta só a modalidade (atuar/narrar) e a cena de referência.
+- **Fluxo de voto (§8)**: precisa de uma exceção no `redirectToOnboardingIfNeeded` para quem chega pelo link de compartilhamento.
