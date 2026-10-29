@@ -30,6 +30,7 @@ export function EntryManager({ callId, phase }: EntryManagerProps) {
             <MyEntry
               key={entry.id}
               entry={entry}
+              phase={phase}
               canEdit={isOpen}
               isSaving={isSaving}
               onSaveCharacters={(drafts, onDone) => updateCharacters(entry.id, drafts, onDone)}

@@ -12,6 +12,7 @@ import { ScriptsService } from '@/server/services/scripts.service'
 import { CommentsService } from '@/server/services/comments.service'
 import { CallsAdminService } from '@/server/services/calls-admin.service'
 import { CallsService } from '@/server/services/calls.service'
+import { CastingService } from '@/server/services/casting.service'
 import { InterpretersService } from '@/server/services/interpreters.service'
 import { OnboardingService } from '@/server/services/onboarding.service'
 
@@ -37,6 +38,7 @@ export const createTRPCContext = async (opts: {
   interpretersService: InterpretersService
   callsService: CallsService
   callsAdminService: CallsAdminService
+  castingService: CastingService
 }> => {
   const headersObj = await opts.headers
 
@@ -57,6 +59,7 @@ export const createTRPCContext = async (opts: {
     interpretersService: new InterpretersService(supabase),
     callsService: new CallsService(supabase),
     callsAdminService: new CallsAdminService(supabase),
+    castingService: new CastingService(supabase),
   }
 }
 
