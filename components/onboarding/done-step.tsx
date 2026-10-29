@@ -9,6 +9,7 @@ interface DoneStepProps {
 
 const SHORTCUTS: ReadonlyArray<{ href: string; title: string; description: string; intent?: UserIntent }> = [
   { href: '/feed', title: 'Explorar roteiros', description: 'Leia e avalie roteiros da comunidade.' },
+  { href: '/editais', title: 'Editais', description: 'Inscreva roteiros, participe do casting ou vote.' },
   { href: '/publish', title: 'Publicar roteiro', description: 'Receba leituras e feedback.', intent: 'producer' },
   { href: '/profile/edit', title: 'Seu perfil', description: 'Complete ou ajuste quando quiser.' },
 ]
