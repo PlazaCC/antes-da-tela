@@ -197,8 +197,9 @@ export class UsersService {
       ])
     }
 
-    // 3. Delete avatar files: S3 avatars/{userId}/ and legacy avatars bucket {userId}/
+    // 3. Delete avatar and interpreter files: S3 avatars/ and interpreters/{userId}/, legacy avatars bucket {userId}/
     await removeS3Prefix(`avatars/${userId}/`)
+    await removeS3Prefix(`interpreters/${userId}/`)
     const { data: avatarFiles } = await this.supabase.storage.from('avatars').list(userId)
     if (avatarFiles?.length) {
       await removeAssets(this.supabase, 'avatars', avatarFiles.map((f) => `${userId}/${f.name}`))

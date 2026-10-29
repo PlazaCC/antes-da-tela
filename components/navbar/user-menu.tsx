@@ -8,7 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { USER_MENU_ITEMS } from '@/lib/constants/navigation'
+import { ADMIN_MENU_ITEM, USER_MENU_ITEMS } from '@/lib/constants/navigation'
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { useLogout } from '@/lib/hooks/use-logout'
 import { cn } from '@/lib/utils'
 import { LogOutIcon } from 'lucide-react'
@@ -22,6 +23,8 @@ interface UserMenuProps {
 
 export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
   const handleLogout = useLogout()
+  const { isAdmin } = useCurrentUser()
+  const items = isAdmin ? [...USER_MENU_ITEMS(userId), ADMIN_MENU_ITEM] : USER_MENU_ITEMS(userId)
 
   return (
     <DropdownMenu modal={false}>
@@ -39,7 +42,7 @@ export function UserMenu({ userId, userName, userImage }: UserMenuProps) {
           <p className='text-xs font-medium text-text-primary truncate'>{userName}</p>
         </div>
         <DropdownMenuSeparator className='bg-border-default mx-1' />
-        {USER_MENU_ITEMS(userId).map((item) => {
+        {items.map((item) => {
           const Icon = item.icon
           const isHighlighted = 'highlighted' in item && item.highlighted
 

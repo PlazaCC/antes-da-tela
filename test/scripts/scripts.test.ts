@@ -8,6 +8,7 @@ import { UsersService } from '@/server/services/users.service'
 import { ScriptsService } from '@/server/services/scripts.service'
 import { CommentsService } from '@/server/services/comments.service'
 import { OnboardingService } from '@/server/services/onboarding.service'
+import { InterpretersService } from '@/server/services/interpreters.service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -96,6 +97,7 @@ function makeCtx(supabase: SupabaseClient, user = MOCK_USER) {
     scriptsService: new ScriptsService(supabase),
     commentsService: new CommentsService(supabase),
     onboardingService: new OnboardingService(supabase),
+    interpretersService: new InterpretersService(supabase),
   }
 }
 

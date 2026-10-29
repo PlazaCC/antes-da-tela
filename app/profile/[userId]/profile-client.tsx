@@ -1,5 +1,6 @@
 'use client'
 
+import { InterpreterBadge } from '@/components/interpreter/interpreter-badge'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import type { ProfileStats, ScriptListItem, UserProfile } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -39,6 +40,7 @@ export function ProfileClient({ user, scripts, stats }: Props) {
   return (
     <div className='min-h-screen bg-bg-base'>
       <ProfileHeader user={user} stats={stats} isOwnProfile={isOwnProfile} />
+      <InterpreterBadge userId={user.id} />
 
       {/* Tabs Navigation */}
       <div className='bg-surface border-b border-border-default'>

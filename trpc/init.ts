@@ -10,6 +10,7 @@ import { RatingsService } from '@/server/services/ratings.service'
 import { UsersService } from '@/server/services/users.service'
 import { ScriptsService } from '@/server/services/scripts.service'
 import { CommentsService } from '@/server/services/comments.service'
+import { InterpretersService } from '@/server/services/interpreters.service'
 import { OnboardingService } from '@/server/services/onboarding.service'
 
 export type TRPCUser = {
@@ -31,6 +32,7 @@ export const createTRPCContext = async (opts: {
   scriptsService: ScriptsService
   commentsService: CommentsService
   onboardingService: OnboardingService
+  interpretersService: InterpretersService
 }> => {
   const headersObj = await opts.headers
 
@@ -48,6 +50,7 @@ export const createTRPCContext = async (opts: {
     scriptsService: new ScriptsService(supabase),
     commentsService: new CommentsService(supabase),
     onboardingService: new OnboardingService(supabase),
+    interpretersService: new InterpretersService(supabase),
   }
 }
 
@@ -125,4 +128,17 @@ export const authenticatedProcedure = t.procedure.use(appErrorMiddleware).use(as
 
   const user: TRPCUser = { id: appUser.id, clerkId: appUser.clerkId, email: appUser.email, name: appUser.name }
   return next({ ctx: { ...ctx, user } })
+})
+
+/**
+ * Staff-only procedure (RFC-006 D6): an authenticated user listed in
+ * `admins`, checked through the SECURITY DEFINER `is_admin()` RPC. RLS checks
+ * the same function, so this is the friendly error, not the only guard.
+ */
+export const adminProcedure = authenticatedProcedure.use(async ({ ctx, next }) => {
+  const { data: isAdmin, error } = await ctx.supabase.rpc('is_admin')
+  if (error || isAdmin !== true) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Acesso restrito à equipe.' })
+  }
+  return next()
 })

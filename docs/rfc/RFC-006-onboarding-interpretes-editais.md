@@ -2,7 +2,7 @@
 
 | Campo  | Valor                                                                  |
 | :----- | :--------------------------------------------------------------------- |
-| Status | Decisões fechadas — Fase 1 (onboarding) implementada; fases 2–6 pendentes |
+| Status | Decisões fechadas — Fases 1 (onboarding) e 2 (intérpretes) implementadas; fases 3–6 pendentes |
 | Data   | 2026-10-16                                                             |
 | Escopo | Onboarding, perfil, intérpretes, editais, casting, votação, admin      |
 | Figma  | [Antes da Tela — node 114-40](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=114-40) |
@@ -289,6 +289,22 @@ Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
 - **Telas**: `/onboarding` (O1 intenção → O2 perfil → O4 intérprete* → O3 preferências → O5 publicar* → O6 pronto). O4 é um placeholder até a Fase 2.
 - **Perfil**: `/profile/edit` ganhou os campos novos e a seção "Preferências de conteúdo" (P2 ficou dentro da página de configurações, não em rota própria). Perfil público mostra nome de exibição, pronomes e cidade.
 - **Analytics**: `onboarding_step_viewed/completed/skipped`, `onboarding_intents_selected`, `onboarding_completed`, `preferences_saved`.
+
+### Fase 2 — Intérpretes e admin (feita)
+
+- **Banco** (`drizzle/0022_interpreters.sql`):
+  - `admins` (user_id) — sem privilégios para anon/authenticated; lido só por `public.is_admin()` (SECURITY DEFINER). Admin é marcado à mão: `insert into admins (user_id) values ('<users.id>')`. Não é coluna de `users` porque o dono pode editar a própria linha e se promoveria.
+  - `interpreter_profiles`: modalidades, status (`pending/approved/rejected`), mídia, duração (1–30 s), data de nascimento, experiência, faixa etária, idiomas, DRT, aceite do termo, dados da revisão. RLS: o dono lê e (re)envia sempre como `pending` e só com 18+; admin lê e revisa tudo.
+  - `public.get_interpreter_badge(user_id)`: selo público só de aprovados (modalidades + mídia).
+- **Mídia**: prefixo privado `interpreters/{userId}/` no S3, upload direto do navegador (presign aceita vídeo/áudio e assina o `Content-Length`: vídeo ≤ 80 MB, áudio ≤ 10 MB). Leitura só por URL assinada (1 h) gerada no servidor.
+- **API**: router `interpreters` (`getMine`, `submit`, `getBadge`) e `admin` (`listInterpreters`, `reviewInterpreter`) com `adminProcedure`; `users.me` devolve `isAdmin`.
+- **Telas**: passo O4 real no onboarding (com "Fazer depois"), `/profile/interpreter` (status + reenviar), `/admin/interpretes` (fila A1 com player, aprovar/reprovar com motivo; 404 para quem não é admin), selo no perfil público, itens "Área do intérprete" e "Admin" no menu do usuário.
+- **E-mail**: aprovação/reprovação via Resend (`lib/email`), remetente em `RESEND_FROM_EMAIL`; sem a variável o e-mail é pulado sem erro.
+- **Termo de imagem/voz**: texto provisório em `lib/constants/interpreters.ts` (`CONSENT_TEXT`).
+
+**Pendências de infraestrutura**
+- O bucket S3 é servido publicamente (CDN). Restringir a leitura pública do prefixo `interpreters/` (policy do bucket / CloudFront), senão quem descobrir a chave do arquivo acessa sem a URL assinada.
+- Configurar `RESEND_FROM_EMAIL` com um domínio verificado no Resend.
 
 ### Notas para as próximas fases
 
