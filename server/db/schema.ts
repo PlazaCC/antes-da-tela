@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm'
 import {
   boolean,
   check,
+  date,
   index,
   integer,
   jsonb,
@@ -146,6 +147,88 @@ export const userPreferences = pgTable(
       for: 'all',
       using: sql`(select public.current_user_id()) = user_id`,
       withCheck: sql`(select public.current_user_id()) = user_id`,
+    }),
+  ],
+)
+
+// ── Admins (RFC-006 D6) ──────────────────────────────────────────────────────
+// Staff accounts, inserted manually in the database. Not a `users` column:
+// users can UPDATE their own row, so a flag there could be self-granted. No
+// privileges for anon/authenticated — read only through public.is_admin()
+// (SECURITY DEFINER, drizzle/0022_interpreters.sql).
+
+export const admins = pgTable('admins', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}).enableRLS()
+
+// ── Interpreter profiles (RFC-006 phase 2) ───────────────────────────────────
+// Actor/narrator registration, reviewed by the staff before it counts. The
+// owner submits (always back to `pending`); only admins approve or reject.
+// The presentation media lives under the private `interpreters/` S3 prefix and
+// is served through presigned GET URLs.
+
+export const interpreterModalityEnum = pgEnum('interpreter_modality', ['acting', 'narration'])
+export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 'rejected'])
+
+export const interpreterProfiles = pgTable(
+  'interpreter_profiles',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    modalities: interpreterModalityEnum('modalities').array().notNull(),
+    status: reviewStatusEnum('status').default('pending').notNull(),
+    // S3 key `interpreters/{userId}/...`; video when acting, audio when only narrating.
+    mediaPath: text('media_path').notNull(),
+    mediaType: text('media_type').notNull(),
+    durationSeconds: integer('duration_seconds').notNull(),
+    birthDate: date('birth_date').notNull(),
+    experience: text('experience'),
+    ageRange: text('age_range'),
+    languages: text('languages'),
+    drt: text('drt'),
+    // Image/voice use consent (RFC-006 D4); provisional wording, see lib/constants/interpreters.ts.
+    consentAt: timestamp('consent_at').notNull(),
+    reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+    reviewedAt: timestamp('reviewed_at'),
+    rejectionReason: text('rejection_reason'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('interpreter_profiles_status_idx').on(table.status),
+    check('interpreter_profiles_media_type_check', sql`${table.mediaType} in ('video', 'audio')`),
+    check('interpreter_profiles_duration_check', sql`${table.durationSeconds} between 1 and 30`),
+    check('interpreter_profiles_modalities_check', sql`cardinality(${table.modalities}) between 1 and 2`),
+    pgPolicy('Owners and admins read interpreter profiles', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'select',
+      using: sql`(select public.current_user_id()) = user_id or (select public.is_admin())`,
+    }),
+    // Submitting (insert or resubmit) always lands in review, by an adult (RFC-006 D5).
+    pgPolicy('Owners submit their interpreter profile', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'insert',
+      withCheck: sql`(select public.current_user_id()) = user_id and status = 'pending' and reviewed_by is null and birth_date <= current_date - interval '18 years'`,
+    }),
+    pgPolicy('Owners resubmit their interpreter profile', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id and status = 'pending' and reviewed_by is null and birth_date <= current_date - interval '18 years'`,
+    }),
+    pgPolicy('Admins review interpreter profiles', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.is_admin())`,
+      withCheck: sql`(select public.is_admin())`,
     }),
   ],
 )

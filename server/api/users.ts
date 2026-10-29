@@ -5,10 +5,12 @@ import { updateProfileSchema } from '@/lib/validators/profile'
 import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
-  // The signed-in user's `users.id` (uuid), or null when signed out.
-  me: publicProcedure.query(async () => {
+  // The signed-in user's `users.id` (uuid) and staff flag, or null when signed out.
+  me: publicProcedure.query(async ({ ctx }) => {
     const me = await getAppUser()
-    return me ? { id: me.id, email: me.email } : null
+    if (!me) return null
+    const { data: isAdmin } = await ctx.supabase.rpc('is_admin')
+    return { id: me.id, email: me.email, isAdmin: isAdmin === true }
   }),
 
   getProfile: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input, ctx }) => {
