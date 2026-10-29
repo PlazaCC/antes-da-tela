@@ -12,6 +12,7 @@ import { InterpretersService } from '@/server/services/interpreters.service'
 import { CallsService } from '@/server/services/calls.service'
 import { CallsAdminService } from '@/server/services/calls-admin.service'
 import { CastingService } from '@/server/services/casting.service'
+import { VotesService } from '@/server/services/votes.service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -104,6 +105,7 @@ function makeCtx(supabase: SupabaseClient, user = MOCK_USER) {
     callsService: new CallsService(supabase),
     callsAdminService: new CallsAdminService(supabase),
     castingService: new CastingService(supabase),
+    votesService: new VotesService(supabase),
   }
 }
 

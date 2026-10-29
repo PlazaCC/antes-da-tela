@@ -14,7 +14,29 @@ export type CallSummary = {
   votingEndAt: string | null
 }
 
-export type Call = CallSummary & { description: string | null; rules: string | null }
+/** Result and live (phases 5–6); the live and ticket are external links for now. */
+export type CallResult = {
+  winnerEntryId: string | null
+  liveAt: string | null
+  liveUrl: string | null
+  ticketUrl: string | null
+  ticketPriceCents: number | null
+  castSharePercent: number | null
+  recordingUrl: string | null
+}
+
+export type Call = CallSummary & { description: string | null; rules: string | null; result: CallResult }
+
+/** A selected interpreter of an entry, public from the voting phase on. */
+export type CastMember = {
+  entryId: string
+  characterId: string
+  characterName: string
+  interpreterId: string
+  interpreterName: string
+  mediaUrl: string | null
+  mediaType: 'video' | 'audio'
+}
 
 export type CallCharacter = {
   id: string

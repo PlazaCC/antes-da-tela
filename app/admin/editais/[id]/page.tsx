@@ -2,6 +2,7 @@
 
 import { CallForm } from '@/components/admin/call-form'
 import { CallPhaseControl } from '@/components/admin/call-phase-control'
+import { CallResultsForm } from '@/components/admin/call-results-form'
 import { EntryReviewList } from '@/components/admin/entry-review-list'
 import { LoadingState } from '@/components/shared/loading-state'
 import { PageShell } from '@/components/shared/page-shell'
@@ -18,7 +19,8 @@ export default function AdminCallPage({ params }: { params: Promise<{ id: string
   const trpc = useTRPC()
   const { data: call, isLoading } = useQuery(trpc.admin.getCall.queryOptions({ id }))
   const { data: entries } = useQuery(trpc.admin.listEntries.queryOptions({ callId: id }))
-  const { saveCall, setPhase, reviewEntry, isSaving } = useAdminCallMutations()
+  const { data: counts } = useQuery(trpc.admin.callResults.queryOptions({ callId: id }))
+  const { saveCall, setPhase, reviewEntry, saveResult, isSaving } = useAdminCallMutations()
 
   if (isLoading) return <LoadingState label='edital' />
   if (!call) return <PageShell title='Edital não encontrado'>{null}</PageShell>
@@ -39,6 +41,13 @@ export default function AdminCallPage({ params }: { params: Promise<{ id: string
         <SectionHeading>Inscrições</SectionHeading>
         <EntryReviewList entries={entries ?? []} isSaving={isSaving} onReview={reviewEntry} />
       </section>
+
+      {(call.phase === 'voting' || call.phase === 'finished') && (
+        <section className='flex flex-col gap-4 max-w-[720px]'>
+          <SectionHeading>Resultado e live</SectionHeading>
+          <CallResultsForm key={call.id} call={call} entries={entries ?? []} counts={counts ?? null} isSaving={isSaving} onSave={saveResult} />
+        </section>
+      )}
 
       <section className='flex flex-col gap-4 max-w-[720px]'>
         <SectionHeading>Dados do edital</SectionHeading>
