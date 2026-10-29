@@ -15,17 +15,12 @@ export default function AccountPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const { userId } = useCurrentUser()
   const { upload, isUploading } = useAvatarUpload()
+  const { profile, isLoadingProfile, form, isPending, submitProfile } = useProfileForm(userId ?? '')
   const {
-    profile,
-    isLoadingProfile,
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    isPending,
-    submitProfile,
-  } = useProfileForm(userId ?? '')
-
-  const onSubmit = submitProfile
+  } = form
 
   if (isLoadingProfile) {
     return (
@@ -75,7 +70,7 @@ export default function AccountPage() {
         </div>
       </section>
 
-      <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-6'>
+      <form onSubmit={handleSubmit(submitProfile)} className='flex flex-col gap-6'>
         <FormField label='Nome' error={errors.name?.message as string | undefined}>
           <Input {...register('name')} placeholder='Seu nome' />
         </FormField>

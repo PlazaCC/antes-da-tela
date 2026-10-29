@@ -1,6 +1,7 @@
 import { getAppUser } from '@/lib/auth/app-user'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { documentSchema } from '@/lib/validators/document'
+import { updateProfileSchema } from '@/lib/validators/profile'
 import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
@@ -24,13 +25,7 @@ export const usersRouter = createTRPCRouter({
   }),
 
   updateProfile: authenticatedProcedure
-    .input(
-      z.object({
-        name: z.string().min(2).max(100).optional(),
-        bio: z.string().max(500).nullable().optional(),
-        image: z.string().url().optional(),
-      }),
-    )
+    .input(updateProfileSchema)
     .mutation(async ({ input, ctx }) => {
       return ctx.usersService.updateProfile(ctx.user!.id, input)
     }),
