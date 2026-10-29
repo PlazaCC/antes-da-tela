@@ -162,6 +162,13 @@
       "when": 1793233413521,
       "tag": "0022_interpreters",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793236718628,
+      "tag": "0023_calls",
+      "breakpoints": true
     }
   ]
 }
