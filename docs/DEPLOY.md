@@ -68,4 +68,5 @@ Só locais (não vão para a Vercel): `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `
 devolve valores marcados como *Sensitive*. Por isso:
 - **Nunca** marque `NEXT_PUBLIC_*` como Sensitive: elas entram no código do navegador durante o build e ficariam vazias.
 - Segredos de servidor (Clerk, Supabase, AWS, Resend) podem ser Sensitive: a Vercel os injeta em tempo de execução.
-- `SENTRY_AUTH_TOKEN` (upload de source maps no build) fica como **secret do GitHub** (repositório), não na Vercel.
+- `SENTRY_AUTH_TOKEN` (upload de source maps no build) fica como **secret do GitHub** (repositório), não na Vercel;
+  `SENTRY_ORG` e `SENTRY_PROJECT` (slugs) ficam como **variables do GitHub** (repositório).

@@ -52,6 +52,8 @@ jobs:
         # Sentry source-map upload token comes from GitHub secrets instead.
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
         run: npx --yes $VERCEL_CLI build $PROD_FLAG --token=$VERCEL_TOKEN
 
       - name: Deploy
