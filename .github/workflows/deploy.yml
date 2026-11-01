@@ -27,7 +27,9 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+    # GitHub environments (already created by the Vercel integration): secrets can
+    # live there or at repository level; Production can require reviewers.
+    environment: ${{ github.ref_name == 'main' && 'Production' || 'Preview' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
