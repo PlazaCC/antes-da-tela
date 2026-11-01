@@ -29,6 +29,8 @@ CREATE POLICY "Owners manage their own preferences" ON "user_preferences" AS PER
 
 -- New public profile columns: SELECT on users is granted per column (0014).
 GRANT SELECT ("display_name", "pronouns", "location", "links") ON TABLE "public"."users" TO anon, authenticated;--> statement-breakpoint
+-- UPDATE on users is also granted per column (0018): owners edit these fields.
+GRANT UPDATE ("display_name", "pronouns", "location", "links") ON TABLE "public"."users" TO authenticated;--> statement-breakpoint
 
 -- Private tables: nothing for anon; the owner policies above scope authenticated.
 REVOKE ALL ON TABLE "public"."user_onboarding" FROM anon, authenticated;--> statement-breakpoint
