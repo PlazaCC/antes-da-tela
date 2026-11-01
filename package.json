@@ -20,6 +20,7 @@
     "lint": "eslint .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:verbose": "node scripts/db-migrate-verbose.mjs",
     "test": "vitest",
     "test:run": "vitest run",
     "test:watch": "vitest",
