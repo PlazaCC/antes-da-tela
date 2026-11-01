@@ -66,3 +66,8 @@ skills-lock.json
 graphify-out/cache/
 graphify-out/manifest.json
 graphify-out/cost.json
+
+# Playwright (e2e)
+/e2e/.auth/
+/playwright-report/
+/test-results/

@@ -63,25 +63,25 @@ export function CallForm({ call, isSaving, onSave }: CallFormProps) {
 
   return (
     <div className='flex flex-col gap-5'>
-      <FormField label='Título' error={errors.title}>
-        <Input value={values.title} onChange={(e) => set('title', e.target.value)} />
+      <FormField label='Título' htmlFor='call-title' error={errors.title}>
+        <Input id='call-title' value={values.title} onChange={(e) => set('title', e.target.value)} />
       </FormField>
-      <FormField label='Endereço (slug)' helperText={`/editais/${values.slug || 'meu-edital'}`} error={errors.slug}>
-        <Input value={values.slug} onChange={(e) => set('slug', e.target.value.toLowerCase())} placeholder='frapa-2026' />
+      <FormField label='Endereço (slug)' htmlFor='call-slug' helperText={`/editais/${values.slug || 'meu-edital'}`} error={errors.slug}>
+        <Input id='call-slug' value={values.slug} onChange={(e) => set('slug', e.target.value.toLowerCase())} placeholder='frapa-2026' />
       </FormField>
-      <FormField label='Parceiro / organizador' labelInfo='Opcional'>
-        <Input value={values.partner} onChange={(e) => set('partner', e.target.value)} placeholder='FRAPA' />
+      <FormField label='Parceiro / organizador' htmlFor='call-partner' labelInfo='Opcional'>
+        <Input id='call-partner' value={values.partner} onChange={(e) => set('partner', e.target.value)} placeholder='FRAPA' />
       </FormField>
-      <FormField label='Descrição' labelInfo='Opcional'>
-        <Textarea rows={4} value={values.description} onChange={(e) => set('description', e.target.value)} />
+      <FormField label='Descrição' htmlFor='call-description' labelInfo='Opcional'>
+        <Textarea id='call-description' rows={4} value={values.description} onChange={(e) => set('description', e.target.value)} />
       </FormField>
-      <FormField label='Regulamento' labelInfo='Opcional'>
-        <Textarea rows={6} value={values.rules} onChange={(e) => set('rules', e.target.value)} />
+      <FormField label='Regulamento' htmlFor='call-rules' labelInfo='Opcional'>
+        <Textarea id='call-rules' rows={6} value={values.rules} onChange={(e) => set('rules', e.target.value)} />
       </FormField>
       <div className='grid gap-4 md:grid-cols-2'>
         {DATE_FIELDS.map(([key, label]) => (
-          <FormField key={key} label={label} labelInfo='Opcional'>
-            <Input type='datetime-local' value={values[key]} onChange={(e) => set(key, e.target.value)} />
+          <FormField key={key} label={label} htmlFor={`call-${key}`} labelInfo='Opcional'>
+            <Input id={`call-${key}`} type='datetime-local' value={values[key]} onChange={(e) => set(key, e.target.value)} />
           </FormField>
         ))}
       </div>
