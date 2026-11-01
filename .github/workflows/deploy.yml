@@ -1,0 +1,61 @@
+name: Deploy (Vercel)
+
+# Deploys are made here, with a Vercel token, instead of Vercel's Git
+# integration: commits authored by people/bots outside the Vercel team are
+# refused there. Only `dev` (preview, dev services) and `main` (production)
+# deploy; PR and feature branches never do (git.deploymentEnabled=false in
+# vercel.json).
+
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_CLI: vercel@64.3.1
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  # main → Production env vars; dev → Preview env vars of the `dev` branch.
+  VERCEL_TARGET: ${{ github.ref_name == 'main' && 'production' || 'preview' }}
+  PROD_FLAG: ${{ github.ref_name == 'main' && '--prod' || '' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Enable Corepack and pin Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@4.13.0 --activate
+
+      - name: Pull Vercel settings and env vars
+        run: npx --yes $VERCEL_CLI pull --yes --environment=$VERCEL_TARGET --git-branch=${{ github.ref_name }} --token=$VERCEL_TOKEN
+
+      - name: Build
+        run: npx --yes $VERCEL_CLI build $PROD_FLAG --token=$VERCEL_TOKEN
+
+      - name: Deploy
+        id: deploy
+        run: echo "url=$(npx --yes $VERCEL_CLI deploy --prebuilt $PROD_FLAG --token=$VERCEL_TOKEN)" >> "$GITHUB_OUTPUT"
+
+      # Preview deployments get a random URL: point the fixed dev domain at it.
+      - name: Alias dev domain
+        if: github.ref_name == 'dev' && vars.VERCEL_DEV_DOMAIN != ''
+        run: npx --yes $VERCEL_CLI alias set ${{ steps.deploy.outputs.url }} ${{ vars.VERCEL_DEV_DOMAIN }} --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+
+      - name: Summary
+        run: echo "Deployed ${{ github.ref_name }} → ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
