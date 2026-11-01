@@ -48,6 +48,10 @@ jobs:
         run: npx --yes $VERCEL_CLI pull --yes --environment=$VERCEL_TARGET --git-branch=${{ github.ref_name }} --token=$VERCEL_TOKEN
 
       - name: Build
+        # Vercel "Sensitive" variables are not returned by `vercel pull`: the
+        # Sentry source-map upload token comes from GitHub secrets instead.
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: npx --yes $VERCEL_CLI build $PROD_FLAG --token=$VERCEL_TOKEN
 
       - name: Deploy

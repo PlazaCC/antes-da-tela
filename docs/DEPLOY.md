@@ -32,7 +32,7 @@ Migrações **não** rodam no deploy: aplique com `yarn db:migrate:verbose` no b
 
 **GitHub**
 - O job usa os ambientes do GitHub **`Production`** (branch `main`) e **`Preview`** (branch `dev`).
-- Secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`: no nível do repositório
+- Secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` e `SENTRY_AUTH_TOKEN`: no nível do repositório
   (*Settings → Secrets and variables → Actions*) ou repetidos em cada ambiente (*Settings → Environments*).
 - Variable (não secret) `VERCEL_DEV_DOMAIN` = `dev.antesdatela.com.br` (o deploy de `dev` é apontado para ele).
 - Recomendado: *Environments → Production* com **Required reviewers** e *Deployment branches* = `main`.
@@ -40,3 +40,32 @@ Migrações **não** rodam no deploy: aplique com `yarn db:migrate:verbose` no b
 ## Deploy manual
 
 *Actions → Deploy (Vercel) → Run workflow* na branch desejada (`dev` ou `main`).
+
+## Variáveis por ambiente (Vercel → Settings → Environment Variables)
+
+Cadastre cada uma duas vezes: **Production** (valor de prod) e **Preview → branch `dev`** (valor de dev).
+
+| Variável | Production | Preview (`dev`) | Onde pegar |
+| :-- | :-- | :-- | :-- |
+| `NEXT_PUBLIC_APP_URL` | `https://www.antesdatela.com` | `https://dev.antesdatela.com.br` | — |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | projeto de prod | projeto de dev | Supabase → Project Settings → API Keys / Data API |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | instância Production | instância Development | Clerk → Configure → API keys |
+| `CLERK_WEBHOOK_SIGNING_SECRET` | webhook de prod | webhook de dev | Clerk → Configure → Webhooks |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `_SIGN_UP_URL` | `/auth/login` / `/auth/sign-up` | igual | — |
+| `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`, `NEXT_PUBLIC_S3_PUBLIC_URL` | bucket/IAM de prod | bucket/IAM de dev | AWS → S3 / IAM |
+| `NEXT_PUBLIC_POSTHOG_TOKEN` | projeto PostHog de prod | projeto PostHog de dev | PostHog → Project settings → Project API key |
+| `NEXT_PUBLIC_POSTHOG_HOST` | `https://us.i.posthog.com` | igual | — |
+| `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` | DSN do projeto | o mesmo DSN | Sentry → Project settings → Client Keys (DSN) |
+| `NEXT_PUBLIC_SENTRY_ENVIRONMENT` | `production` | `dev` | — (separa os eventos no Sentry) |
+| `SENTRY_TRACES_SAMPLE_RATE`, `NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE` | `0.1` | `1` (opcional) | — |
+| `RESEND_API_KEY` | chave de prod | chave de dev (ou a mesma) | Resend → API Keys |
+| `RESEND_FROM_EMAIL` | `Antes da Tela <nao-responda@antesdatela.com>` | `Antes da Tela (dev) <nao-responda@antesdatela.com>` | domínio verificado no Resend |
+| `ENABLE_EXPERIMENTAL_COREPACK` | `1` | `1` | — |
+
+Só locais (não vão para a Vercel): `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `E2E_*`, `TEST_RESEND_TO`.
+
+**Atenção — variáveis "Sensitive":** o build roda no GitHub Actions e recebe as variáveis por `vercel pull`, que **não**
+devolve valores marcados como *Sensitive*. Por isso:
+- **Nunca** marque `NEXT_PUBLIC_*` como Sensitive: elas entram no código do navegador durante o build e ficariam vazias.
+- Segredos de servidor (Clerk, Supabase, AWS, Resend) podem ser Sensitive: a Vercel os injeta em tempo de execução.
+- `SENTRY_AUTH_TOKEN` (upload de source maps no build) fica como **secret do GitHub** (repositório), não na Vercel.
