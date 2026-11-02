@@ -1,6 +1,16 @@
 # Embaixadores — conteúdo
 
 Conteúdo sintetizado para a página de embaixadores (personalidades + prova humana).
+
+**Wireframe (Figma, página `wireframe`):**
+[desktop 1440](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=530-582) ·
+[mobile 412](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=531-651) ·
+[componentes](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=528-579)
+
+Conceito: a página é escrita como um roteiro. Abre com cabeçalho de cena (`EXT. MERCADO AUDIOVISUAL — DIA`),
+os embaixadores são o "elenco", os depoimentos são falas formatadas como diálogo (personagem, rubrica, fala,
+em Courier) e os apoiadores entram como créditos finais. Fecha com `FADE OUT.`.
+No Figma o display usa Bricolage Grotesque no lugar da Clash Grotesk (não disponível lá); no código vale a Clash.
 Cada perfil tem três tamanhos de texto: frase curta (card), bio média (detalhe) e destaques.
 
 Fotos em `fotos/`: `*-original.jpg` (referência), `*-retrato.jpg` (4:5, card) e `*-quadrado.jpg` (1:1, avatar).
