@@ -43,6 +43,7 @@ export function useScriptManagement() {
     avgRating: data?.avgRating ?? null,
     ratingCount: data?.ratingCount ?? 0,
     totalComments: data?.totalComments ?? 0,
+    readers: data?.readers ?? { unique: 0, newLast30: 0, newPrev30: 0 },
     isLoading,
     isDeleting,
     deleteScriptId,

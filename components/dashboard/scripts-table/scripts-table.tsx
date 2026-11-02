@@ -12,9 +12,12 @@ export function ScriptsTable({ scripts, onDeleteClick }: ScriptsTableProps) {
   return (
     <div className='bg-surface border border-border-default rounded-sm overflow-x-auto shadow-sm'>
       {/* Table header */}
-      <div className='flex items-center px-5 h-10 bg-elevated/30 border-b border-border-default min-w-[600px]'>
+      <div className='flex items-center px-5 h-10 bg-elevated/30 border-b border-border-default min-w-[720px]'>
         <span className='flex-1 font-mono text-[10px] font-medium text-text-muted uppercase tracking-[0.04em]'>
           Roteiro
+        </span>
+        <span className='w-[120px] font-mono text-[10px] font-medium text-text-muted uppercase tracking-[0.04em]'>
+          Leitores
         </span>
         <span className='w-[100px] font-mono text-[10px] font-medium text-text-muted uppercase tracking-[0.04em]'>
           Avaliação

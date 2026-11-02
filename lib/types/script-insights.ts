@@ -1,4 +1,5 @@
 import type { ReactionEmoji } from '@/lib/constants/reactions'
+import type { ScriptReadStats } from '@/lib/types/script-reads'
 
 /** Per-script metrics shown to the author on /profile/scripts/[id]. */
 export interface ScriptInsights {
@@ -24,4 +25,5 @@ export interface ScriptInsights {
     byPage: Array<{ page: number; count: number }>
   }
   reactions: Array<{ emoji: ReactionEmoji; count: number }>
+  reads: ScriptReadStats
 }

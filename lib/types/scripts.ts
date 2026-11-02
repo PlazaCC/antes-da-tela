@@ -74,6 +74,9 @@ export interface DashboardScriptMetrics {
   ratingCount: number;
   /** Comments by other people; the author's own comments are not counted. */
   commentCount: number;
+  /** Signed-in readers (the author excluded) and how many reached the last page. */
+  readers: number;
+  completedReads: number;
 }
 
 export interface DashboardMetrics {
@@ -84,4 +87,6 @@ export interface DashboardMetrics {
   /** Includes drafts. */
   totalScripts: number;
   publishedScripts: number;
+  /** Distinct readers across all scripts; new ones by first read in each 30-day window. */
+  readers: { unique: number; newLast30: number; newPrev30: number };
 }

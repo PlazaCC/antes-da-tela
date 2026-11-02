@@ -55,6 +55,18 @@ export const scriptsRouter = createTRPCRouter({
     return ctx.scriptInsightsService.getForAuthor(input.id, ctx.user!.id)
   }),
 
+  recordRead: authenticatedProcedure
+    .input(
+      z.object({
+        scriptId: z.string().uuid(),
+        page: z.number().int().min(1),
+        pagesTotal: z.number().int().min(1).max(5000),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return ctx.scriptsService.recordRead(input.scriptId, input.page, input.pagesTotal)
+    }),
+
   search: publicProcedure
     .input(
       z.object({
