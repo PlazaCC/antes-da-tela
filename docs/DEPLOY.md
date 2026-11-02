@@ -55,8 +55,8 @@ Cadastre cada uma duas vezes: **Production** (valor de prod) e **Preview → bra
 | `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`, `NEXT_PUBLIC_S3_PUBLIC_URL` | bucket/IAM de prod | bucket/IAM de dev | AWS → S3 / IAM |
 | `NEXT_PUBLIC_POSTHOG_TOKEN` | projeto PostHog de prod | projeto PostHog de dev | PostHog → Project settings → Project API key |
 | `NEXT_PUBLIC_POSTHOG_HOST` | `https://us.i.posthog.com` | igual | — |
-| `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` | DSN do projeto | o mesmo DSN | Sentry → Project settings → Client Keys (DSN) |
-| `NEXT_PUBLIC_SENTRY_ENVIRONMENT` | `production` | `dev` | — (separa os eventos no Sentry) |
+| `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` | DSN do projeto de prod | DSN do projeto de dev | Sentry → Settings → Projects → (projeto) → Client Keys (DSN) |
+| `NEXT_PUBLIC_SENTRY_ENVIRONMENT` | `production` | `dev` | — (marca o ambiente dos eventos) |
 | `SENTRY_TRACES_SAMPLE_RATE`, `NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE` | `0.1` | `1` (opcional) | — |
 | `RESEND_API_KEY` | chave de prod | chave de dev (ou a mesma) | Resend → API Keys |
 | `RESEND_FROM_EMAIL` | `Antes da Tela <nao-responda@antesdatela.com>` | `Antes da Tela (dev) <nao-responda@antesdatela.com>` | domínio verificado no Resend |
@@ -68,5 +68,6 @@ Só locais (não vão para a Vercel): `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `
 devolve valores marcados como *Sensitive*. Por isso:
 - **Nunca** marque `NEXT_PUBLIC_*` como Sensitive: elas entram no código do navegador durante o build e ficariam vazias.
 - Segredos de servidor (Clerk, Supabase, AWS, Resend) podem ser Sensitive: a Vercel os injeta em tempo de execução.
-- `SENTRY_AUTH_TOKEN` (upload de source maps no build) fica como **secret do GitHub** (repositório), não na Vercel;
-  `SENTRY_ORG` e `SENTRY_PROJECT` (slugs) ficam como **variables do GitHub** (repositório).
+- `SENTRY_AUTH_TOKEN` (upload de source maps no build) fica como **secret do GitHub** (repositório), não na Vercel.
+- Sentry com **um projeto por ambiente**: `SENTRY_ORG` é variable do repositório; `SENTRY_PROJECT` é variable
+  **de cada ambiente do GitHub** (*Environments → Production* = projeto de prod; *Environments → Preview* = projeto de dev).
