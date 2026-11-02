@@ -33,7 +33,7 @@ export function AmbassadorCard({ ambassador, className }: AmbassadorCardProps) {
             />
           </span>
           <span className='flex flex-1 flex-col gap-3 px-5 pb-6 pt-5'>
-            <span className='font-mono text-label-mono-caps uppercase tracking-[0.08em] text-brand-lime'>{ambassador.role}</span>
+            <span className='font-mono text-label-mono-caps uppercase tracking-[0.08em] text-brand-blue'>{ambassador.role}</span>
             <span className='[font-family:var(--font-display)] text-[28px] font-medium leading-[1.05] tracking-[-0.02em] text-text-primary'>
               {ambassador.name}
             </span>

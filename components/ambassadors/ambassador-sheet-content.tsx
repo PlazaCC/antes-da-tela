@@ -35,7 +35,7 @@ export function AmbassadorSheetContent({ ambassador }: AmbassadorSheetContentPro
       </div>
       <div className='flex flex-col gap-8 px-6 pb-10 pt-6'>
         <SheetHeader className='gap-2 p-0'>
-          <p className='font-mono text-label-mono-caps uppercase tracking-[0.08em] text-brand-lime'>{ambassador.role}</p>
+          <p className='font-mono text-label-mono-caps uppercase tracking-[0.08em] text-brand-blue'>{ambassador.role}</p>
           <SheetTitle className='[font-family:var(--font-display)] text-[32px] font-medium leading-none tracking-[-0.02em] text-text-primary'>
             {ambassador.name}
           </SheetTitle>

@@ -1,5 +1,4 @@
 import { AmbassadorCard } from '@/components/ambassadors/ambassador-card'
-import { AmbassadorsCta } from '@/components/ambassadors/ambassadors-cta'
 import { AmbassadorsHero } from '@/components/ambassadors/ambassadors-hero'
 import { AmbassadorsSectionHeading } from '@/components/ambassadors/section-heading'
 import { SupportersCredits } from '@/components/ambassadors/supporters-credits'
@@ -62,7 +61,6 @@ export default function AmbassadorsPage() {
         </div>
       </section>
 
-      <AmbassadorsCta />
     </main>
   )
 }

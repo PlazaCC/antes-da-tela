@@ -23,7 +23,7 @@ export function SupportersCredits({ supporters }: SupportersCreditsProps) {
                   alt={supporter.name}
                   width={supporter.logo.width}
                   height={supporter.logo.height}
-                  className='opacity-90 transition-opacity group-hover:opacity-100'
+                  className='opacity-90 brightness-0 invert transition-opacity group-hover:opacity-100'
                 />
               ) : (
                 <span className='[font-family:var(--font-display)] text-[40px] font-semibold leading-none tracking-[-0.02em] text-text-primary'>

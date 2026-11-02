@@ -135,8 +135,18 @@ export const TESTIMONIALS: Testimonial[] = [
 ]
 
 export const SUPPORTERS: Supporter[] = [
-  { name: 'ABRA', fullName: 'Associação Brasileira de Autores Roteiristas', href: 'https://www.abra.art.br/' },
-  { name: 'FRAPA', fullName: 'Festival de Roteiro Audiovisual de Porto Alegre', href: 'https://frapa.art.br/' },
+  {
+    name: 'ABRA',
+    fullName: 'Associação Brasileira de Autores Roteiristas',
+    href: 'https://www.abra.art.br/',
+    logo: { src: '/embaixadores/abra.png', width: 133, height: 72 },
+  },
+  {
+    name: 'FRAPA',
+    fullName: 'Festival de Roteiro Audiovisual de Porto Alegre',
+    href: 'https://frapa.art.br/',
+    logo: { src: '/embaixadores/frapa.png', width: 160, height: 63 },
+  },
   {
     name: 'Pomodoro Studios',
     fullName: 'Pomodoro Studios',
