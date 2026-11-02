@@ -103,3 +103,33 @@ Fotos em `fotos/`: `*-original.jpg` (referência), `*-retrato.jpg` (4:5, card) e
 - [ ] Depoimento sobre o Antes da Tela
 - [ ] URL da Scriptonita e redes
 - [ ] Autorização de uso de imagem e fala
+
+---
+
+## Camila Luppi
+
+**Papel:** Desenvolvimento de projetos para TV e streaming (ex-National Geographic / Disney / FOX)
+
+**Frase curta:**
+> Quase 10 anos entre FOX e Disney, supervisionou a criação das produções originais da National Geographic no Brasil.
+
+**Bio média:**
+> Especialista em desenvolvimento de projetos para TV e streaming, Camila atuou por quase 10 anos na FOX e na Disney. Supervisionou criativamente as produções originais da National Geographic no Brasil, da curadoria e prospecção de conteúdos à avaliação de novos projetos e ao acompanhamento de séries em desenvolvimento e produção. Formada em Audiovisual pela ECA-USP, passou também por curadoria de conteúdo, assistência de direção e edição de vídeo.
+
+**Destaques:**
+- Quase 10 anos em FOX e Disney
+- Supervisão criativa das produções originais da National Geographic no Brasil: curadoria, prospecção, avaliação de projetos e acompanhamento de séries
+- No grupo FOX, editora de vídeo no Digital: planejamento e produção de short-form para redes e plataformas
+- Audiovisual pela ECA-USP
+- Também atuou em curadoria de conteúdo e assistência de direção
+
+**Links:** faltam (LinkedIn?).
+
+**Foto:** `fotos/camila-luppi-retrato.jpg` (680×850, 4:5) e `fotos/camila-luppi-quadrado.jpg` (800×800). Já vem em P&B.
+
+**Pendências:**
+- [ ] Confirmar a grafia do nome: "Camila" (como na bio) ou "Camilla"
+- [ ] Depoimento sobre o Antes da Tela
+- [ ] Crédito da foto
+- [ ] Links
+- [ ] Autorização de uso de imagem e fala
