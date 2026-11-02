@@ -35,14 +35,15 @@ export default function DevelopmentIntegrationsPage() {
     setIsSentryLoading(true)
 
     try {
-      const response = await fetch('/api/sentry-example-api')
+      const response = await fetch('/api/development/sentry', { method: 'POST' })
+      const body = await response.json().catch(() => ({}))
       if (!response.ok) {
-        showFeedback('Sentry', 'Sentry error was triggered and sent to monitoring.')
+        showFeedback('Sentry', `Sentry check failed: ${body.error ?? response.statusText}`)
         return
       }
-      showFeedback('Sentry', 'Unexpected Sentry endpoint success.')
-    } catch {
-      showFeedback('Sentry', 'Sentry request failed as expected.')
+      showFeedback('Sentry', `Server error sent to Sentry (event ${body.eventId}, flushed: ${body.flushed}).`)
+    } catch (error) {
+      showFeedback('Sentry', `Sentry request failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsSentryLoading(false)
     }
