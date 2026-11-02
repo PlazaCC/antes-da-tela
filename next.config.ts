@@ -63,9 +63,11 @@ export default withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-  org: 'plaza-ri',
+  // Sentry organization and project slugs (Settings → Organization / Projects).
+  // Without them the source-map upload is skipped; error reporting still works via the DSN.
+  org: process.env.SENTRY_ORG,
 
-  project: 'antes-da-tela',
+  project: process.env.SENTRY_PROJECT,
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,

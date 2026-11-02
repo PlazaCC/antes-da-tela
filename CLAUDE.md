@@ -96,7 +96,7 @@ See `docs/rfc/RFC-005-clerk-auth-e-documentos.md`.
 
 - All runtime data queries go through `ctx.supabase` in tRPC routers — never instantiate a raw DB connection.
 - There is no Drizzle runtime client (`server/db/index.ts` was removed). Drizzle is used only for schema management and migrations.
-- `DATABASE_URL_UNPOOLED` is only needed for running `yarn drizzle-kit migrate` locally — it is not an application runtime env var.
+- `DATABASE_URL_UNPOOLED` is only used for migrations (`yarn db:migrate:verbose` locally; the deploy workflow runs it per GitHub environment) — it is not an application runtime env var.
 - Schema lives in `server/db/schema.ts`; migrations output to `drizzle/`.
 
 ### Database Migrations
