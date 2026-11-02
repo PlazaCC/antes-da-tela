@@ -65,14 +65,23 @@ export interface ScriptDetail {
   } | null;
 }
 
-export interface DashboardMetrics {
-  scripts: Array<{
-    id: string;
-    title: string;
-    status: string;
-    avgRating: number;
-    commentCount: number;
-  }>;
+export interface DashboardScriptMetrics {
+  id: string;
+  title: string;
+  status: string;
+  /** null when the script has no ratings yet. */
   avgRating: number | null;
+  ratingCount: number;
+  /** Comments by other people; the author's own comments are not counted. */
+  commentCount: number;
+}
+
+export interface DashboardMetrics {
+  scripts: DashboardScriptMetrics[];
+  avgRating: number | null;
+  ratingCount: number;
+  totalComments: number;
+  /** Includes drafts. */
   totalScripts: number;
+  publishedScripts: number;
 }

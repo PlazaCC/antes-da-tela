@@ -1,15 +1,10 @@
 'use client'
 
+import type { DashboardScriptMetrics } from '@/lib/types/scripts'
 import { ScriptMetricsRow } from './row'
 
 interface ScriptsTableProps {
-  scripts: Array<{
-    id: string
-    title: string
-    avgRating: number | null
-    commentCount: number
-    status: string
-  }>
+  scripts: DashboardScriptMetrics[]
   onDeleteClick: (id: string) => void
 }
 

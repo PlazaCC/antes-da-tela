@@ -19,6 +19,8 @@ test("tRPC createCaller works with a simple router", async () => {
       {} as unknown as import("@/server/services/users.service").UsersService,
     scriptsService:
       {} as unknown as import("@/server/services/scripts.service").ScriptsService,
+    scriptInsightsService:
+      {} as unknown as import("@/server/services/script-insights.service").ScriptInsightsService,
     commentsService:
       {} as unknown as import("@/server/services/comments.service").CommentsService,
     onboardingService:

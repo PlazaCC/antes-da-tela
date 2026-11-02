@@ -51,6 +51,10 @@ export const scriptsRouter = createTRPCRouter({
     return ctx.scriptsService.getDashboardMetrics(ctx.user!.id)
   }),
 
+  getInsights: authenticatedProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input, ctx }) => {
+    return ctx.scriptInsightsService.getForAuthor(input.id, ctx.user!.id)
+  }),
+
   search: publicProcedure
     .input(
       z.object({

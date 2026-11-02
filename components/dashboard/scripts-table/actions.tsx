@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { ExternalLink, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface ScriptActionsDropdownProps {
@@ -23,6 +23,12 @@ export function ScriptActionsDropdown({ scriptId, onDeleteClick }: ScriptActions
           <Link href={`/publish?id=${scriptId}`} className='flex items-center'>
             <Pencil className='mr-2 h-4 w-4' />
             <span>Editar</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className='focus:bg-elevated cursor-pointer'>
+          <Link href={`/scripts/${scriptId}`} className='flex items-center'>
+            <ExternalLink className='mr-2 h-4 w-4' />
+            <span>Ver página pública</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
