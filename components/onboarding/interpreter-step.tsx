@@ -1,26 +1,43 @@
+'use client'
+
+import { InterpreterForm } from '@/components/interpreter/interpreter-form'
+import { InterpreterStatusCard } from '@/components/interpreter/interpreter-status-card'
 import { StepActions } from '@/components/onboarding/step-actions'
+import { LoadingState } from '@/components/shared/loading-state'
+import { Button } from '@/components/ui/button'
+import { useTRPC } from '@/trpc/client'
+import { useQuery } from '@tanstack/react-query'
 
 interface InterpreterStepProps {
-  onContinue: () => void
+  onSubmitted: () => void
+  onSkip: () => void
 }
 
-/**
- * O4 — interpreter registration. Placeholder until RFC-006 phase 2 (modalities,
- * 30s video/audio, curation) replaces it; the intent is already saved.
- */
-export function InterpreterStep({ onContinue }: InterpreterStepProps) {
-  return (
-    <div className='flex flex-col gap-6'>
-      <div className='rounded-sm border border-border-subtle bg-elevated p-5 flex flex-col gap-3 text-body-small text-text-secondary'>
-        <p>Para participar dos castings dos editais, você vai:</p>
-        <ul className='list-disc pl-5 flex flex-col gap-1'>
-          <li>escolher se quer atuar, narrar ou os dois;</li>
-          <li>enviar um vídeo (atuação) ou áudio (narração) de até 30 segundos;</li>
-          <li>passar pela curadoria da equipe do Antes da Tela.</li>
-        </ul>
-        <p className='text-text-primary'>O cadastro de intérprete abre em breve — avisaremos você por e-mail.</p>
+/** O4 — interpreter registration; "Fazer depois" skips it (finish in /profile/interpreter). */
+export function InterpreterStep({ onSubmitted, onSkip }: InterpreterStepProps) {
+  const trpc = useTRPC()
+  const { data: profile, isLoading } = useQuery(trpc.interpreters.getMine.queryOptions())
+
+  if (isLoading) return <LoadingState label='cadastro de intérprete' />
+
+  if (profile) {
+    return (
+      <div className='flex flex-col gap-6'>
+        <InterpreterStatusCard profile={profile} />
+        <StepActions primaryLabel='Continuar' onPrimary={onSkip} />
       </div>
-      <StepActions primaryLabel='Continuar' onPrimary={onContinue} />
-    </div>
+    )
+  }
+
+  return (
+    <InterpreterForm
+      current={null}
+      onSubmitted={onSubmitted}
+      secondaryAction={
+        <Button type='button' variant='ghost' onClick={onSkip} className='h-10 w-full text-text-muted'>
+          Fazer depois
+        </Button>
+      }
+    />
   )
 }

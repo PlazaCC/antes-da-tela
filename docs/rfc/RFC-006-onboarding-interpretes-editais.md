@@ -2,7 +2,7 @@
 
 | Campo  | Valor                                                                  |
 | :----- | :--------------------------------------------------------------------- |
-| Status | Decisões fechadas — Fase 1 (onboarding) implementada; fases 2–6 pendentes |
+| Status | Decisões fechadas — Fases 1 a 5 implementadas; Fase 6 (pagamento) no RFC-007 |
 | Data   | 2026-10-16                                                             |
 | Escopo | Onboarding, perfil, intérpretes, editais, casting, votação, admin      |
 | Figma  | [Antes da Tela — node 114-40](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=114-40) |
@@ -290,7 +290,82 @@ Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
 - **Perfil**: `/profile/edit` ganhou os campos novos e a seção "Preferências de conteúdo" (P2 ficou dentro da página de configurações, não em rota própria). Perfil público mostra nome de exibição, pronomes e cidade.
 - **Analytics**: `onboarding_step_viewed/completed/skipped`, `onboarding_intents_selected`, `onboarding_completed`, `preferences_saved`.
 
-### Notas para as próximas fases
+### Fase 2 — Intérpretes e admin (feita)
 
-- **Personagens**: `script_characters` (migração 0020, etapa opcional da publicação) já guarda nome, descrição, idade aparente, gênero e características. A Fase 3 deve reaproveitá-la em vez de criar `call_characters`; falta só a modalidade (atuar/narrar) e a cena de referência.
-- **Fluxo de voto (§8)**: precisa de uma exceção no `redirectToOnboardingIfNeeded` para quem chega pelo link de compartilhamento.
+- **Banco** (`drizzle/0022_interpreters.sql`):
+  - `admins` (user_id) — sem privilégios para anon/authenticated; lido só por `public.is_admin()` (SECURITY DEFINER). Admin é marcado à mão: `insert into admins (user_id) values ('<users.id>')`. Não é coluna de `users` porque o dono pode editar a própria linha e se promoveria.
+  - `interpreter_profiles`: modalidades, status (`pending/approved/rejected`), mídia, duração (1–30 s), data de nascimento, experiência, faixa etária, idiomas, DRT, aceite do termo, dados da revisão. RLS: o dono lê e (re)envia sempre como `pending` e só com 18+; admin lê e revisa tudo.
+  - `public.get_interpreter_badge(user_id)`: selo público só de aprovados (modalidades + mídia).
+- **Mídia**: prefixo privado `interpreters/{userId}/` no S3, upload direto do navegador (presign aceita vídeo/áudio e assina o `Content-Length`: vídeo ≤ 80 MB, áudio ≤ 10 MB). Leitura só por URL assinada (1 h) gerada no servidor.
+- **API**: router `interpreters` (`getMine`, `submit`, `getBadge`) e `admin` (`listInterpreters`, `reviewInterpreter`) com `adminProcedure`; `users.me` devolve `isAdmin`.
+- **Telas**: passo O4 real no onboarding (com "Fazer depois"), `/profile/interpreter` (status + reenviar), `/admin/interpretes` (fila A1 com player, aprovar/reprovar com motivo; 404 para quem não é admin), selo no perfil público, itens "Área do intérprete" e "Admin" no menu do usuário.
+- **E-mail**: aprovação/reprovação via Resend (`lib/email`), remetente em `RESEND_FROM_EMAIL`; sem a variável o e-mail é pulado sem erro.
+- **Termo de imagem/voz**: texto provisório em `lib/constants/interpreters.ts` (`CONSENT_TEXT`).
+
+**Pendências de infraestrutura**
+- O bucket S3 é servido publicamente (CDN). Restringir a leitura pública do prefixo `interpreters/` (policy do bucket / CloudFront), senão quem descobrir a chave do arquivo acessa sem a URL assinada.
+- Configurar `RESEND_FROM_EMAIL` com um domínio verificado no Resend.
+
+### Fase 3 — Editais e inscrição (feita)
+
+- **Banco** (`drizzle/0023_calls.sql`):
+  - `calls` (slug, título, parceiro, descrição, regulamento, fase, datas informativas). Fase manual: `draft → submissions → casting → curation → voting → finished`. Rascunho só para admin.
+  - `call_entries` (roteiro publicado inscrito; `pending/approved/rejected`). RLS: o autor inscreve só roteiro próprio publicado e só com o edital em `submissions`; retira enquanto pendente; aprovadas são públicas; admin revisa.
+  - `call_characters`: **cópia** dos personagens por inscrição (com modalidade e cena de referência), preenchida a partir de `script_characters`. Não reaproveita `script_characters` porque essa tabela é regravada a cada edição do roteiro (ids novos), o que apagaria os castings. Editável pelo autor só durante `submissions`.
+- **API**: router `calls` (`list`, `getBySlug`, `myEntries`, `eligibleScripts`, `enter`, `updateCharacters`, `withdraw`); `admin` ganhou `listCalls`, `getCall`, `upsertCall`, `setCallPhase`, `listEntries`, `reviewEntry`.
+- **Telas**: `/editais` (E1), `/editais/[slug]` (E2: cronograma, regulamento, roteiros aprovados, ação da fase), `/editais/[slug]/inscricao` (E3–E5: escolher roteiro, personagens, acompanhar, editar, retirar), `/admin/editais` (A2: lista, criar, editar, avançar fase) e `/admin/editais/[id]` (A3: aprovar/recusar inscrições). Link "Editais" no rodapé e no fim do onboarding.
+
+### Fase 4 — Casting (feita)
+
+- **Banco** (`drizzle/0024_casting.sql`): `casting_submissions` (personagem, intérprete, mídia ≤ 30 s, observação, status `submitted/shortlisted/selected/rejected`, único por personagem + intérprete).
+  - RLS: intérprete **aprovado** envia, troca e retira o próprio take só com o edital em `casting` e a inscrição aprovada; admin vê e cura tudo; o autor da inscrição só vê os takes `shortlisted/selected`.
+  - `public.select_cast(submission_id)` (SECURITY DEFINER): o autor escolhe 1 finalista por personagem, só na fase `curation`.
+  - Até 3 finalistas por personagem (checado no serviço do admin).
+- **Mídia**: o intérprete reaproveita a apresentação do cadastro ou envia um take novo (mesmo prefixo privado `interpreters/{userId}/`).
+- **API**: router `casting` (`openCharacters`, `submit`, `withdraw`, `shortlist`, `selectCast`); `admin.listCastings` e `admin.setCastingStatus`.
+- **Telas**: `/editais/[slug]/casting` (E7/E8: personagens compatíveis com as modalidades do intérprete, filtro, envio/troca/retirada), escolha de elenco na página de inscrição (E6, fase `curation`), `/admin/editais/[id]/casting` (A4: finalistas e recusa). Ações do edital por fase atualizadas.
+
+### Fase 5 — Votação, compartilhamento e vencedor (feita)
+
+- **Banco** (`drizzle/0025_votes.sql`):
+  - `call_votes` (chave `call_id + user_id` = 1 voto por edital). RLS: só com o edital em `voting`, em inscrição aprovada do edital e com documento cadastrado (`user_documents`); cada um lê só o próprio voto.
+  - `calls` ganhou vencedor (`winner_entry_id`) e dados da live: data, link da transmissão, link do ingresso, preço, % do elenco, link da gravação.
+  - `public.call_vote_counts(call_id)`: totais públicos só com o edital encerrado (admin vê antes). `public.get_call_cast(call_id)`: elenco escolhido, público a partir da votação.
+- **E-mail confirmado** (D10): checado na API pelo Clerk (`lib/auth/email-verified.ts`).
+- **API**: router `votes` (`getEntry`, `results`, `myVote`, `vote`); `admin.callResults` e `admin.setCallResult`.
+- **Telas**:
+  - `/editais/[slug]/r/[entryId]`: link compartilhável de cada roteiro, com prévia (Open Graph: título, logline, capa), elenco com players e o voto em até 3 passos (V1 cadastro/login com volta para a página → V2 documento, se faltar → V3 voto + "chame mais gente"). Fica fora da área logada, então quem chega pelo link não cai no onboarding.
+  - Botão "Compartilhar minha participação" (compartilhamento nativo no celular, copiar link e WhatsApp) para o roteirista (inscrição aprovada) e para o intérprete escolhido no elenco.
+  - Página do edital: na votação, cada roteiro leva ao voto; encerrado, bloco do vencedor (E10) com elenco, live, ingresso e gravação, e os votos por roteiro.
+  - Admin (A5): votos por roteiro, escolha do vencedor e dados da live/gravação.
+- **Fase 6 (pagamento)**: a live, o ingresso e a gravação são links externos por enquanto. Opções e decisões em `docs/rfc/RFC-007-pagamento-live.md`.
+
+---
+
+## 10. Pendências
+
+Lista única do que ficou para resolver, atualizada a cada fase.
+
+| # | Fase | Pendência | Quem |
+| :- | :--- | :-------- | :--- |
+| P1 | 1–3 | Aplicar as migrações `0021`, `0022`, `0023` (`yarn db:migrate`) | Time (acesso ao banco) |
+| P2 | 2 | Restringir a leitura pública do prefixo `interpreters/` no S3/CloudFront (o bucket é público via CDN) | Infra |
+| P3 | 2 | Configurar `RESEND_FROM_EMAIL` com domínio verificado no Resend | Infra |
+| P4 | 2 | Texto definitivo do termo de imagem e voz (`CONSENT_TEXT`) | Jurídico / produto |
+| P5 | 2 | Cadastrar os admins: `insert into admins (user_id) values ('<users.id>')` | Time |
+| P6 | 3 | Entrada para "Editais" na navegação principal (hoje só rodapé, fim do onboarding e menu do admin) — decidir no design | Design |
+| P7 | 3 | E-mails de inscrição aprovada/recusada para o roteirista (hoje só o status na página) | Dev (próxima rodada) |
+| P8 | 3 | Upload de banner/logos do edital (parceiros FRAPA/ABRA/EBAC) — hoje só texto | Dev + design |
+| P9 | 3 | Fases mudam só manualmente; avaliar avanço automático pelas datas | Produto |
+| P10 | 1–5 | Validar os fluxos no app rodando (este ambiente não tem chaves do Clerk/Supabase/S3) | Time / QA |
+| P11 | 4 | Aplicar a migração `0024` | Time (acesso ao banco) |
+| P12 | 4 | E-mails de casting: finalista, escolhido(a) no elenco, não selecionado | Dev (próxima rodada) |
+| P13 | 4 | Tipo de mídia do take é livre (vídeo ou áudio); decidir se personagem só de atuação exige vídeo | Produto |
+| P14 | 4 | Takes e apresentações substituídos continuam no S3 (não há limpeza dos arquivos antigos) | Dev |
+| P15 | 5 | Aplicar a migração `0025` | Time (acesso ao banco) |
+| P16 | 5 | Desenhar no Figma as telas do voto (V1–V3), o botão de compartilhar e a página do roteiro no edital | Design |
+| P17 | 5 | Exigir e-mail confirmado no cadastro do Clerk (Email verification "required") para quem vota por e-mail; conferir no painel do Clerk | Time (Clerk) |
+| P18 | 5 | Atribuição de compartilhamento (`?ref=`) e ranking de quem trouxe votos — não implementado | Produto |
+| P19 | 5 | Quem entra pelo link de voto vê o onboarding completo na próxima visita ao feed (redirect), não um convite leve | Produto / dev |
+| P20 | 5 | Antifraude além de "1 voto por documento + e-mail": captcha, limite por IP | Produto / dev |
+| P21 | 6 | Decidir provedor de pagamento, nota fiscal e repasse (RFC-007) | Negócio |

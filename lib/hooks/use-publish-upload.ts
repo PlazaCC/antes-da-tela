@@ -6,11 +6,11 @@
  * Auth is enforced server-side in /api/upload/presign.
  */
 export function usePublishUpload() {
-  async function getPresignedUrl(key: string, contentType: string): Promise<string> {
+  async function getPresignedUrl(key: string, contentType: string, size: number): Promise<string> {
     const res = await fetch('/api/upload/presign', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, contentType }),
+      body: JSON.stringify({ key, contentType, size }),
     })
 
     if (!res.ok) {
@@ -34,7 +34,7 @@ export function usePublishUpload() {
     return new Promise(async (resolve, reject) => {
       let presignedUrl: string
       try {
-        presignedUrl = await getPresignedUrl(key, file.type || 'application/octet-stream')
+        presignedUrl = await getPresignedUrl(key, file.type || 'application/octet-stream', file.size)
       } catch (err) {
         reject(err)
         return

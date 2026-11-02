@@ -8,6 +8,11 @@ import { UsersService } from '@/server/services/users.service'
 import { ScriptsService } from '@/server/services/scripts.service'
 import { CommentsService } from '@/server/services/comments.service'
 import { OnboardingService } from '@/server/services/onboarding.service'
+import { InterpretersService } from '@/server/services/interpreters.service'
+import { CallsService } from '@/server/services/calls.service'
+import { CallsAdminService } from '@/server/services/calls-admin.service'
+import { CastingService } from '@/server/services/casting.service'
+import { VotesService } from '@/server/services/votes.service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -96,6 +101,11 @@ function makeCtx(supabase: SupabaseClient, user = MOCK_USER) {
     scriptsService: new ScriptsService(supabase),
     commentsService: new CommentsService(supabase),
     onboardingService: new OnboardingService(supabase),
+    interpretersService: new InterpretersService(supabase),
+    callsService: new CallsService(supabase),
+    callsAdminService: new CallsAdminService(supabase),
+    castingService: new CastingService(supabase),
+    votesService: new VotesService(supabase),
   }
 }
 
