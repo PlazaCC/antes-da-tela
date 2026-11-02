@@ -6,6 +6,7 @@ import { DocumentSection } from '@/components/profile/document-section'
 import { PageShell } from '@/components/shared/page-shell'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { EditProfileForm } from './_components/edit-profile-form'
+import { PreferencesSection } from './_components/preferences-section'
 
 export default function EditProfilePage() {
   const { userId, email } = useCurrentUser()
@@ -16,6 +17,7 @@ export default function EditProfilePage() {
     <PageShell title='Configurações do perfil' className='px-5 md:px-8 py-7'>
       <div className='max-w-[800px] flex flex-col gap-10'>
         <EditProfileForm userId={userId} />
+        <PreferencesSection />
         <DocumentSection />
 
         <section className='flex flex-col gap-3 border-t border-border-subtle pt-6'>

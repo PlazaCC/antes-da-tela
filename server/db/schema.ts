@@ -4,6 +4,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgPolicy,
   pgTable,
@@ -28,6 +29,13 @@ export const users = pgTable(
     email: text('email').notNull().unique(),
     image: text('image'),
     bio: text('bio'),
+    // Public profile fields collected in onboarding (RFC-006). How the user
+    // wants to be called, shown instead of `name` when set.
+    displayName: text('display_name'),
+    pronouns: text('pronouns'),
+    location: text('location'),
+    // { instagram?, website?, portfolio? } — see lib/validators/profile.ts.
+    links: jsonb('links').$type<{ instagram?: string; website?: string; portfolio?: string }>(),
     // Deprecated: replaced by user_documents (RFC-005 §3). Kept until the
     // contract migration drops it; the app no longer reads or writes it.
     cpf: text('cpf').unique(),
@@ -77,6 +85,62 @@ export const userDocuments = pgTable(
   (table) => [
     uniqueIndex('user_documents_type_country_number_unique').on(table.type, table.country, table.number),
     pgPolicy('Owners manage their own document', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id`,
+    }),
+  ],
+)
+
+// ── Onboarding (RFC-006) ─────────────────────────────────────────────────────
+// Private per-user data: what the user came to do (intents), private profile
+// fields and whether the first-login onboarding is done. Owner-only, like
+// user_documents — `users` is publicly readable.
+
+export const userIntentEnum = pgEnum('user_intent', ['reader', 'producer', 'interpreter'])
+
+export const userOnboarding = pgTable(
+  'user_onboarding',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    intents: userIntentEnum('intents').array().default(sql`'{}'::user_intent[]`).notNull(),
+    // Private: never part of the public profile.
+    gender: text('gender'),
+    // Null until the user finishes (or skips through) the onboarding.
+    completedAt: timestamp('completed_at'),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  () => [
+    pgPolicy('Owners manage their own onboarding', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id`,
+    }),
+  ],
+)
+
+// Content preferences (onboarding survey, editable in /profile/preferences).
+// Values come from lib/constants/preferences.ts.
+export const userPreferences = pgTable(
+  'user_preferences',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    genres: text('genres').array().default(sql`'{}'::text[]`).notNull(),
+    formats: text('formats').array().default(sql`'{}'::text[]`).notNull(),
+    themes: text('themes').array().default(sql`'{}'::text[]`).notNull(),
+    goals: text('goals').array().default(sql`'{}'::text[]`).notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  () => [
+    pgPolicy('Owners manage their own preferences', {
       as: 'permissive',
       to: 'authenticated',
       for: 'all',

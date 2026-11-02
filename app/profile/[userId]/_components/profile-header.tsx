@@ -51,8 +51,10 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps) {
-  const userName = user.name?.trim() || 'Usuário'
-  const handle = `@${userName.toLowerCase().replace(/\s+/g, '')} · Roteirista`
+  const userName = user.displayName?.trim() || user.name?.trim() || 'Usuário'
+  const handle = [`@${userName.toLowerCase().replace(/\s+/g, '')} · Roteirista`, user.pronouns, user.location]
+    .filter(Boolean)
+    .join(' · ')
   const [followList, setFollowList] = useState<FollowListVariant | null>(null)
 
   return (
@@ -78,7 +80,7 @@ export function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps)
             <div className='flex flex-col md:flex-row md:items-start justify-between gap-4 w-full'>
               <div className='flex flex-col gap-1'>
                 <h1 className='font-display text-[26px] md:text-[28px] leading-tight text-text-primary break-words max-w-full'>
-                  {user.name}
+                  {userName}
                 </h1>
                 <p className='font-mono text-[11px] md:text-[12px] leading-tight text-text-muted'>
                   {handle}

@@ -1,5 +1,6 @@
 import { PostHogUserIdentifier } from '@/components/posthog-user-identifier'
 import { getAppUser } from '@/lib/auth/app-user'
+import { redirectToOnboardingIfNeeded } from '@/lib/auth/onboarding'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import React from 'react'
@@ -16,6 +17,8 @@ import React from 'react'
  *     linking it on first sign-in); signed out → redirect to login.
  *   - The proxy forwards the request pathname via `x-pathname` so we can build
  *     an accurate `?next=` redirect URL without usePathname().
+ *   - Users who have not finished the first-login onboarding go to
+ *     /onboarding first (RFC-006).
  */
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,12 +30,13 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 
 async function AuthCheck({ children }: { children: React.ReactNode }) {
   const user = await getAppUser()
+  const pathname = (await headers()).get('x-pathname') ?? '/'
 
   if (!user) {
-    const h = await headers()
-    const pathname = h.get('x-pathname') ?? '/'
     redirect(`/auth/login?next=${encodeURIComponent(pathname)}`)
   }
+
+  await redirectToOnboardingIfNeeded(user, pathname)
 
   return (
     <>

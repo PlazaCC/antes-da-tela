@@ -7,6 +7,7 @@ import { RatingsService } from '@/server/services/ratings.service'
 import { UsersService } from '@/server/services/users.service'
 import { ScriptsService } from '@/server/services/scripts.service'
 import { CommentsService } from '@/server/services/comments.service'
+import { OnboardingService } from '@/server/services/onboarding.service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -94,6 +95,7 @@ function makeCtx(supabase: SupabaseClient, user = MOCK_USER) {
     usersService: new UsersService(supabase),
     scriptsService: new ScriptsService(supabase),
     commentsService: new CommentsService(supabase),
+    onboardingService: new OnboardingService(supabase),
   }
 }
 

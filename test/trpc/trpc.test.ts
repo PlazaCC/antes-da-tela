@@ -21,6 +21,8 @@ test("tRPC createCaller works with a simple router", async () => {
       {} as unknown as import("@/server/services/scripts.service").ScriptsService,
     commentsService:
       {} as unknown as import("@/server/services/comments.service").CommentsService,
+    onboardingService:
+      {} as unknown as import("@/server/services/onboarding.service").OnboardingService,
   });
   const res = await caller.hello();
   expect(res).toEqual({ ok: true });

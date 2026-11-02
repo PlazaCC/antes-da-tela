@@ -91,6 +91,10 @@ Run the database migrations to set up the schema:
 yarn drizzle-kit migrate
 ```
 
+The database is chosen by `DATABASE_URL_UNPOOLED`, read from `.env.local` first and then `.env` — **`.env.local` wins**. Check which host you are about to migrate before running it.
+
+If it stops at "applying migrations..." with no message, run `yarn db:migrate:verbose`: same migrations, but it prints the host, the failing query and the Postgres error.
+
 ---
 
 ## 4. Start the Development Server
