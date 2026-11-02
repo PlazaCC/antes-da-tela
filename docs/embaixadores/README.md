@@ -42,15 +42,15 @@ Fotos em `fotos/`: `*-original.jpg` (referência), `*-retrato.jpg` (4:5, card) e
 **Papel:** Realizador, roteirista e professor
 
 **Frase curta:**
-> Realizador e roteirista há quase 20 anos, já ensinou roteiro a mais de 12 mil alunos e hoje filma a Amazônia a partir de Alter do Chão.
+> Realizador e roteirista há quase 20 anos, já ensinou roteiro a mais de 10 mil alunos e hoje filma a Amazônia a partir de Alter do Chão.
 
 **Bio média:**
-> Formado em Audiovisual pela ECA-USP, com mestrado na Universidade do Algarve e pós em Desenvolvimento de Projeto Cinematográfico na ESTC, em Lisboa, Pedro dirigiu filmes para Netflix, Greenpeace e WWF e oito curtas autorais premiados em festivais. Desde 2022 vive em Alter do Chão (PA), onde desenvolve projetos sobre cultura, território e as disputas da Amazônia. Seu primeiro longa, *11 Sinais*, foi contemplado pela Lei Paulo Gustavo.
+> Formado em Audiovisual pela ECA-USP, com mestrado na Universidade do Algarve e pós em Desenvolvimento de Projeto Cinematográfico na ESTC, em Lisboa, Pedro dirigiu filmes para Netflix, Greenpeace e WWF e oito curtas autorais, entre eles o premiado *Popókas*. Desde 2022 vive em Alter do Chão (PA), onde desenvolve projetos sobre cultura, território e as disputas da Amazônia. Seu primeiro longa, *11 Sinais*, foi contemplado pela Lei Paulo Gustavo.
 
 **Destaques:**
 - Audiovisual pela ECA-USP; mestrado em Comunicação (Estudos da Imagem) na Universidade do Algarve; pós em Desenvolvimento de Projeto Cinematográfico na ESTC, Lisboa
 - Filmes para Netflix, Greenpeace, WWF, Lancôme, Coca-Cola e São Paulo Fashion Week; pilotos para a TV Cultura e série animada para Discovery Kids
-- Curtas premiados: *Popókas* (2009), *O Gosto do Cigarro* (2018), *Boto Sereia* (2025)
+- Oito curtas autorais, entre eles *Popókas* (2009, premiado em festivais), *O Gosto do Cigarro* (2018) e *Boto Sereia* (2025)
 - Professor: Curso de Roteiro na Udemy (10 mil+ alunos) e Quimera na Vídeo PRO (2.600 alunos), que ensina roteiro pelas etapas reais de trabalho do roteirista
 - Em andamento: longa *11 Sinais* (Lei Paulo Gustavo, em captação) e o doc *33 Dias*, sobre a ocupação do terminal da Cargill em Santarém por povos indígenas do Tapajós
 
