@@ -163,3 +163,19 @@ Aspas para a seção "O que dizem". Correções mínimas de grafia, sem mudar o 
 - [ ] Cargo de Victor Lemos na Galo Bravo e de Nelson Sato na Sato Company
 - [ ] Fotos (ou logos das empresas) para Zico, Victor e Nelson, se os cards tiverem imagem
 - [ ] Depoimentos de Fabiano, Pedro e Camila (ainda não há aspas deles)
+
+---
+
+# Parceiros
+
+Empresas parceiras para divulgar na página (logo + nome + link).
+
+| Nome | Link | Logo | Descrição |
+| :--- | :--- | :--- | :--- |
+| Pomodoro Studios | https://www.instagram.com/pomodorostudios | pendente | pendente |
+
+**Pendências:**
+- [ ] Nome oficial: "Pomodoro Estúdio" ou "Pomodoro Studios" (o @ é pomodorostudios)
+- [ ] Logo em SVG ou PNG transparente, versões clara e escura
+- [ ] Site próprio, se houver (preferível ao Instagram como link principal)
+- [ ] Uma linha sobre o que fazem e qual é a parceria
