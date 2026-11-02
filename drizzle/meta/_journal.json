@@ -218,6 +218,13 @@
       "when": 1793658090183,
       "tag": "0030_script_reads_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793658648883,
+      "tag": "0031_lock_script_files_for_anon",
+      "breakpoints": true
     }
   ]
 }
