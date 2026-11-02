@@ -11,6 +11,9 @@ Sentry.init({
   // Edge runtime uses the same server DSN
   dsn,
 
+  // Separates dev from production events in the same Sentry project (production | dev).
+  environment: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT,
+
   // Sampling rate for edge traces
   tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? 0.1),
 

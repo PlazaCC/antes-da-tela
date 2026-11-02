@@ -10,6 +10,9 @@ Sentry.init({
   // Use server-side DSN; keep secrets out of the repository and in environment variables.
   dsn,
 
+  // Separates dev from production events in the same Sentry project (production | dev).
+  environment: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT,
+
   // Sampling rate for server-side traces. Tune in production.
   tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? 0.1),
 
