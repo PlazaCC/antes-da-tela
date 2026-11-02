@@ -168,7 +168,25 @@ Aspas para a seção "O que dizem". Correções mínimas de grafia, sem mudar o 
 
 # Parceiros
 
-Empresas parceiras para divulgar na página (logo + nome + link).
+Três grupos na página, cada item com logo + nome + link:
+
+1. **Apoio institucional** (quem apoia o Antes da Tela)
+2. **Apoiamos** (iniciativas que o Antes da Tela apoia)
+3. **Parceiros** (empresas)
+
+## Apoio institucional
+
+| Nome | Link | Logo |
+| :--- | :--- | :--- |
+| ABRA — Associação Brasileira de Autores Roteiristas | pendente | pendente |
+
+## Apoiamos
+
+| Nome | Link | Logo |
+| :--- | :--- | :--- |
+| FRAPA — Festival de Roteiro Audiovisual de Porto Alegre | pendente | pendente |
+
+## Parceiros (empresas)
 
 | Nome | Link | Logo | Descrição |
 | :--- | :--- | :--- | :--- |
@@ -179,3 +197,6 @@ Empresas parceiras para divulgar na página (logo + nome + link).
 - [ ] Logo em SVG ou PNG transparente, versões clara e escura
 - [ ] Site próprio, se houver (preferível ao Instagram como link principal)
 - [ ] Uma linha sobre o que fazem e qual é a parceria
+- [ ] Confirmar os nomes por extenso de ABRA e FRAPA
+- [ ] Logos oficiais de ABRA e FRAPA (pedir às próprias instituições, com as regras de uso)
+- [ ] Autorização de ABRA e FRAPA para o uso do nome e da marca na página
