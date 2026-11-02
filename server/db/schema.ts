@@ -529,7 +529,10 @@ export const scripts = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     publishedAt: timestamp('published_at'),
   },
-  () => [
+  (table) => [
+    // Author dashboard / profile lists, and the published feed ordered by date.
+    index('scripts_author_idx').on(table.authorId),
+    index('scripts_status_published_at_idx').on(table.status, table.publishedAt),
     pgPolicy('Published scripts are publicly readable', {
       as: 'permissive',
       to: 'public',
@@ -671,7 +674,9 @@ export const comments = pgTable(
     updatedAt: timestamp('updated_at'),
     deletedAt: timestamp('deleted_at'), // soft delete
   },
-  () => [
+  (table) => [
+    // Page-scoped comment lists in the reader and per-page counts for authors.
+    index('comments_script_page_idx').on(table.scriptId, table.pageNumber).where(sql`deleted_at is null`),
     pgPolicy('Comments on published scripts are publicly readable', {
       as: 'permissive',
       to: 'public',
@@ -743,6 +748,8 @@ export const userFollows = pgTable(
   },
   (table) => [
     primaryKey({ columns: [table.followerId, table.followeeId] }),
+    // Follower counts look up by followee; the primary key only covers follower first.
+    index('user_follows_followee_idx').on(table.followeeId),
     pgPolicy('Follow relationships are publicly readable', {
       as: 'permissive',
       to: 'public',

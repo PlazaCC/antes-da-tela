@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { RatingsService } from '@/server/services/ratings.service'
 import { UsersService } from '@/server/services/users.service'
 import { ScriptsService } from '@/server/services/scripts.service'
+import { ScriptInsightsService } from '@/server/services/script-insights.service'
 import { CommentsService } from '@/server/services/comments.service'
 import { OnboardingService } from '@/server/services/onboarding.service'
 import { InterpretersService } from '@/server/services/interpreters.service'
@@ -99,6 +100,7 @@ function makeCtx(supabase: SupabaseClient, user = MOCK_USER) {
     ratingsService: new RatingsService(supabase),
     usersService: new UsersService(supabase),
     scriptsService: new ScriptsService(supabase),
+    scriptInsightsService: new ScriptInsightsService(supabase),
     commentsService: new CommentsService(supabase),
     onboardingService: new OnboardingService(supabase),
     interpretersService: new InterpretersService(supabase),
