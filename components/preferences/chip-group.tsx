@@ -6,11 +6,13 @@ interface ChipGroupProps {
   options: readonly string[]
   selected: readonly string[]
   onToggle: (option: string) => void
+  /** Display text for an option; defaults to the option itself. */
+  getLabel?: (option: string) => string
   className?: string
 }
 
 /** Toggleable option chips (multi- or single-select, decided by the caller's onToggle). */
-export function ChipGroup({ options, selected, onToggle, className }: ChipGroupProps) {
+export function ChipGroup({ options, selected, onToggle, getLabel, className }: ChipGroupProps) {
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       {options.map((option) => {
@@ -27,7 +29,7 @@ export function ChipGroup({ options, selected, onToggle, className }: ChipGroupP
                 ? 'border-brand-accent bg-brand-accent/10 text-brand-accent ring-1 ring-brand-accent'
                 : 'border-border-subtle bg-elevated text-text-muted hover:border-text-muted hover:text-text-secondary',
             )}>
-            {option}
+            {getLabel ? getLabel(option) : option}
           </button>
         )
       })}

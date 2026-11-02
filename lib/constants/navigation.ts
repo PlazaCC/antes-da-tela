@@ -1,4 +1,4 @@
-import { LayoutDashboard, BookOpen, Star, Settings, UserCircle2, FileUpIcon } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Star, Settings, UserCircle2, FileUpIcon, Clapperboard, ShieldCheck } from 'lucide-react'
 
 export const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/profile/dashboard', icon: LayoutDashboard, disabled: false, highlighted: false },
@@ -13,8 +13,11 @@ export const USER_MENU_ITEMS = (userId: string) => [
   { id: 'scripts', label: 'Meus roteiros', href: '/profile/scripts', icon: BookOpen, highlighted: false },
   { id: 'publish', label: 'Publicar Roteiro', href: '/publish', icon: FileUpIcon, highlighted: true },
   { id: 'profile', label: 'Ver perfil', href: `/profile/${userId}`, icon: UserCircle2, highlighted: false },
+  { id: 'interpreter', label: 'Área do intérprete', href: '/profile/interpreter', icon: Clapperboard, highlighted: false },
   { id: 'settings', label: 'Configurações', href: '/profile/edit', icon: Settings, highlighted: false },
 ] as const
 
 
 
+
+export const ADMIN_MENU_ITEM = { id: 'admin', label: 'Admin', href: '/admin/interpretes', icon: ShieldCheck, highlighted: false } as const

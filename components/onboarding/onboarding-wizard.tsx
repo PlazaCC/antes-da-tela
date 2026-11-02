@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
 const COPY: Record<OnboardingStep, { title: string; description?: string }> = {
   intent: { title: 'Boas-vindas ao Antes da Tela!', description: 'O que você quer fazer por aqui? Pode escolher mais de uma opção.' },
   profile: { title: 'Conte um pouco sobre você', description: 'Tudo opcional — dá para editar depois no seu perfil.' },
-  interpreter: { title: 'Cadastro de intérprete', description: 'Atores e narradores dão voz aos roteiros dos editais.' },
+  interpreter: { title: 'Cadastro de intérprete', description: 'Escolha como quer interpretar e envie uma apresentação de até 30 segundos.' },
   preferences: { title: 'O que você gosta de ver?', description: 'Usamos isso para recomendar roteiros. Ajustável no seu perfil.' },
   publish: { title: 'Publique seu primeiro roteiro' },
   done: { title: 'Tudo pronto!', description: 'Alguns atalhos para começar:' },
@@ -78,7 +78,7 @@ export function OnboardingWizard({ userId, next }: OnboardingWizardProps) {
         <IntentStep selected={selected} onToggle={toggleIntent} onContinue={continueFromIntents} isSaving={isSaving} />
       )}
       {step === 'profile' && <ProfileStep userId={userId} onDone={() => advance()} onSkip={() => advance(true)} />}
-      {step === 'interpreter' && <InterpreterStep onContinue={() => advance(true)} />}
+      {step === 'interpreter' && <InterpreterStep onSubmitted={() => advance()} onSkip={() => advance(true)} />}
       {step === 'preferences' && <PreferencesStep onDone={() => advance()} onSkip={() => advance(true)} />}
       {step === 'publish' && <PublishStep onPublish={publishNow} onSkip={() => advance(true)} disabled={isSaving} />}
       {step === 'done' && <DoneStep intents={selected} next={next} />}
