@@ -7,9 +7,10 @@ Conteúdo sintetizado para a página de embaixadores (personalidades + prova hum
 [mobile 412](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=531-651) ·
 [componentes](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=528-579)
 
-Conceito: a página é escrita como um roteiro. Abre com cabeçalho de cena (`EXT. MERCADO AUDIOVISUAL — DIA`),
-os embaixadores são o "elenco", os depoimentos são falas formatadas como diálogo (personagem, rubrica, fala,
-em Courier) e os apoiadores entram como créditos finais. Fecha com `FADE OUT.`.
+Conceito: a página remete a um roteiro. Os depoimentos são falas formatadas como diálogo (personagem,
+rubrica, fala, em Courier), a chamada final é um V.O. e a página fecha com `FADE OUT.`.
+Sem cabeçalho de cena, sem numeração de seções, sem contadores no hero e sem rótulos de função nos logos
+(removidos na revisão do wireframe).
 No Figma o display usa Bricolage Grotesque no lugar da Clash Grotesk (não disponível lá); no código vale a Clash.
 Cada perfil tem três tamanhos de texto: frase curta (card), bio média (detalhe) e destaques.
 
