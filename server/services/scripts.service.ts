@@ -9,7 +9,9 @@ import type {
   ScriptCreateInput,
   ScriptUpdateInput,
 } from "@/lib/validators/scripts";
+import type { AuthorReadCounts } from "@/lib/types/script-reads";
 import { getScriptPublishDefaults } from "@/server/domain/scripts";
+import { withReadCounts } from "@/server/services/script-insights.mappers";
 import { replaceScriptCharacters } from "@/server/services/script-characters";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError } from "@trpc/server";
@@ -664,13 +666,11 @@ export class ScriptsService {
   }
 
   async getDashboardMetrics(authorId: string): Promise<DashboardMetrics> {
-    const { data, error } = await this.supabase.rpc(
-      "get_author_dashboard_metrics",
-      {
-        p_author_id: authorId,
-      },
-    );
-
+    const [metrics, reads] = await Promise.all([
+      this.supabase.rpc("get_author_dashboard_metrics", { p_author_id: authorId }),
+      this.supabase.rpc("get_author_read_counts"),
+    ]);
+    const error = metrics.error ?? reads.error;
     if (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -678,7 +678,19 @@ export class ScriptsService {
       });
     }
 
-    return data as DashboardMetrics;
+    return withReadCounts(metrics.data, reads.data as AuthorReadCounts);
+  }
+
+  /** Records how far the signed-in reader got; ignored for drafts and the script's author. */
+  async recordRead(scriptId: string, page: number, pagesTotal: number): Promise<void> {
+    const { error } = await this.supabase.rpc("record_script_read", {
+      p_script_id: scriptId,
+      p_page: page,
+      p_pages_total: pagesTotal,
+    });
+    if (error) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: error.message });
+    }
   }
 
   async search(

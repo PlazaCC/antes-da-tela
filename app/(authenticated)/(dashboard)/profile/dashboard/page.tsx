@@ -5,6 +5,7 @@ import { MetricCard } from '@/components/dashboard/metric-card'
 import { ScriptsTable } from '@/components/dashboard/scripts-table'
 import { DeleteScriptDialog } from '@/components/dashboard/delete-script-dialog'
 import { formatCount } from '@/lib/utils/format-count'
+import { newReadersTrend } from '@/lib/utils/read-rate'
 
 export default function DashboardPage() {
   const {
@@ -13,6 +14,7 @@ export default function DashboardPage() {
     avgRating,
     ratingCount,
     totalComments,
+    readers,
     isLoading,
     isDeleting,
     deleteScriptId,
@@ -39,7 +41,12 @@ export default function DashboardPage() {
           trendColor='neutral'
         />
         <MetricCard value={String(totalComments)} label='Comentários recebidos' />
-        <MetricCard value='--' label='Leituras únicas' trend='em breve' trendColor='neutral' />
+        <MetricCard
+          value={String(readers.unique)}
+          label='Leitores'
+          trend={newReadersTrend(readers.newLast30)}
+          trendColor='neutral'
+        />
       </div>
 
       {/* Scripts performance table */}

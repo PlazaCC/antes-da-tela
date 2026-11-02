@@ -162,7 +162,7 @@ export function ScriptPageClient({
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden bg-bg-base">
       {pdfUrl ? (
         <PdfViewerProvider url={pdfUrl} syncToStore>
-          <ScriptReadTracker scriptId={script.id} genre={script.genre} isOwner={isOwner} />
+          <ScriptReadTracker scriptId={script.id} genre={script.genre} isOwner={isOwner} isSignedIn={!!currentUserId} />
           <ScriptPageSubHeader
             {...subHeaderProps}
             extra={

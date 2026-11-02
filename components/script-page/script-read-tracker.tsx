@@ -1,6 +1,7 @@
 'use client'
 
 import { usePdfViewer } from '@/components/pdf-viewer'
+import { useRecordRead } from '@/lib/hooks/use-record-read'
 import posthog from 'posthog-js'
 import { useEffect, useRef } from 'react'
 
@@ -10,17 +11,21 @@ interface ScriptReadTrackerProps {
   scriptId: string
   genre: string | null
   isOwner: boolean
+  /** Signed in: progress is also saved for the author's dashboard. */
+  isSignedIn: boolean
 }
 
 /**
  * Reading analytics for the PDF on the script page: `script_read_started` once
  * the document loads, then `script_read_progress` the first time the reader
- * reaches 25/50/75/100% of the pages. Renders nothing; must sit inside a
- * <PdfViewerProvider>.
+ * reaches 25/50/75/100% of the pages. Signed-in readers other than the author
+ * also have their furthest page saved (script_reads). Renders nothing; must
+ * sit inside a <PdfViewerProvider>.
  */
-export function ScriptReadTracker({ scriptId, genre, isOwner }: ScriptReadTrackerProps) {
+export function ScriptReadTracker({ scriptId, genre, isOwner, isSignedIn }: ScriptReadTrackerProps) {
   const { currentPage, totalPages, isDocumentReady } = usePdfViewer()
   const sent = useRef(new Set<number>())
+  const recordRead = useRecordRead(scriptId, isSignedIn && !isOwner)
 
   useEffect(() => {
     sent.current = new Set()
@@ -32,6 +37,7 @@ export function ScriptReadTracker({ scriptId, genre, isOwner }: ScriptReadTracke
 
   useEffect(() => {
     if (!isDocumentReady || totalPages === 0) return
+    recordRead(currentPage, totalPages)
     const percent = Math.floor((currentPage / totalPages) * 100)
     for (const milestone of MILESTONES) {
       if (percent < milestone || sent.current.has(milestone)) continue
@@ -45,7 +51,7 @@ export function ScriptReadTracker({ scriptId, genre, isOwner }: ScriptReadTracke
         is_owner: isOwner,
       })
     }
-  }, [currentPage, totalPages, isDocumentReady, scriptId, genre, isOwner])
+  }, [currentPage, totalPages, isDocumentReady, scriptId, genre, isOwner, recordRead])
 
   return null
 }
