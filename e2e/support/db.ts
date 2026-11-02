@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { SEEDED_SCRIPT_TITLE, TEST_USERS, type TestRole } from './users'
+import type { ClerkIds } from './clerk-users'
+import { INTERPRETER_INBOX, SEEDED_SCRIPT_TITLE, TEST_USERS, type TestRole } from './users'
 
 /** Service-role client for seeding/cleanup only (dev database, see env.ts). */
 export function adminDb(): SupabaseClient {
@@ -10,13 +11,12 @@ export function adminDb(): SupabaseClient {
 
 export type UserIds = Record<TestRole, string>
 
-/** `users.id` of every test account (rows are created on their first visit). */
-export async function getUserIds(db: SupabaseClient): Promise<UserIds> {
-  const emails = Object.values(TEST_USERS).map((u) => u.email)
-  const { data, error } = await db.from('users').select('id, email').in('email', emails)
+/** `users.id` of every test account, by Clerk id (rows are created on their first visit). */
+export async function getUserIds(db: SupabaseClient, clerkIds: ClerkIds): Promise<UserIds> {
+  const { data, error } = await db.from('users').select('id, clerk_id').in('clerk_id', Object.values(clerkIds))
   if (error) throw error
   const ids = Object.fromEntries(
-    (Object.keys(TEST_USERS) as TestRole[]).map((role) => [role, data?.find((row) => row.email === TEST_USERS[role].email)?.id]),
+    (Object.keys(TEST_USERS) as TestRole[]).map((role) => [role, data?.find((row) => row.clerk_id === clerkIds[role])?.id]),
   )
   const missing = Object.entries(ids).filter(([, id]) => !id)
   if (missing.length) throw new Error(`E2E: usuários sem linha em users: ${missing.map(([role]) => role).join(', ')}`)
@@ -44,6 +44,10 @@ export async function resetAndSeed(db: SupabaseClient, ids: UserIds): Promise<vo
     ),
   )
   check(await db.from('admins').upsert({ user_id: ids.admin }, { onConflict: 'user_id' }))
+
+  // The interpreter's review e-mail goes to Resend's test inbox: no bounce from
+  // example.com hurting the sending domain's reputation.
+  check(await db.from('users').update({ email: INTERPRETER_INBOX }).eq('id', ids.interpreter))
 
   const { data: script } = await db.from('scripts').select('id').eq('author_id', ids.admin).eq('title', SEEDED_SCRIPT_TITLE).maybeSingle()
   if (!script) {

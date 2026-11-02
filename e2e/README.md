@@ -18,6 +18,19 @@ Criam usuários de teste, editais, castings e votos — por isso **nunca** apont
 4. Para os uploads (apresentação do intérprete), as variáveis `AWS_*` precisam existir — o envio ao S3 é
    interceptado pelo teste, mas o app ainda assina a URL de upload.
 
+5. Opcional — confirmação do lado de cada serviço (sem elas, os testes de integração confirmam que o app enviou e o
+   serviço aceitou):
+   ```bash
+   E2E_SENTRY_API_TOKEN=   # token pessoal do Sentry com event:read (confere o evento no projeto SENTRY_PROJECT)
+   E2E_SENTRY_API_URL=     # padrão https://sentry.io (use https://us.sentry.io ou de.sentry.io conforme a região)
+   SENTRY_ORG=             # slug da organização
+   SENTRY_PROJECT=         # slug do projeto de DEV
+   E2E_RESEND_API_KEY=     # chave Resend "Full access" (confere a entrega); as chaves do app são só de envio
+   ```
+
+E-mails: os testes só enviam para os endereços de teste do Resend (`delivered@resend.dev`, e o intérprete de teste
+recebe em `delivered+e2e-interprete@resend.dev`), que simulam entrega sem tráfego real.
+
 ## Rodar
 
 ```bash
@@ -38,6 +51,9 @@ Contra um endereço já publicado (ex.: o domínio de dev): `E2E_BASE_URL=https:
   - `editais.spec.ts` — ciclo completo: cadastro e aprovação do intérprete → edital → inscrição → casting →
     finalista → escolha do elenco → voto pelo link compartilhado (com documento) → vencedor.
   - `publico.spec.ts` — páginas públicas e rotas protegidas para visitante.
+  - `integrations.spec.ts` — serviços externos do ambiente: erro do navegador e do servidor chegando ao **Sentry**,
+    eventos chegando ao **PostHog**, e-mail aceito (e, opcionalmente, entregue) pelo **Resend**. Cada teste é pulado,
+    com o motivo, quando o serviço não está configurado.
 - **Teardown** (`global.teardown.ts`): apaga os editais `e2e-*` (e, em cascata, inscrições, castings e votos).
 
 ## Contas de teste

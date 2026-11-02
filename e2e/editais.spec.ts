@@ -33,6 +33,23 @@ test('intérprete se cadastra (narração, áudio de apresentação)', async ({ 
   await expect(page.getByText('Em curadoria')).toBeVisible()
 })
 
+test('admin reprova com motivo; intérprete vê o motivo e reenvia', async ({ browser }) => {
+  const admin = await pageAs(browser, 'admin')
+  await admin.goto('/admin/interpretes')
+  const card = admin.locator('article').filter({ hasText: 'E2E Intérprete' })
+  await card.getByPlaceholder(/Motivo da reprovação/).fill('Áudio muito baixo — e2e')
+  await card.getByRole('button', { name: 'Reprovar' }).click()
+  await expect(admin.getByText('Cadastro reprovado.')).toBeVisible()
+
+  const interpreter = await pageAs(browser, 'interpreter')
+  await interpreter.goto('/profile/interpreter')
+  await expect(interpreter.getByText('Não aprovado')).toBeVisible()
+  await expect(interpreter.getByText('Motivo: Áudio muito baixo — e2e')).toBeVisible()
+  await interpreter.getByRole('checkbox').check() // consent is asked again on every submission
+  await interpreter.getByRole('button', { name: 'Enviar para curadoria' }).click()
+  await expect(interpreter.getByText('Em curadoria')).toBeVisible()
+})
+
 test('admin aprova o intérprete', async ({ browser }) => {
   const page = await pageAs(browser, 'admin')
   await page.goto('/admin/interpretes')
@@ -102,6 +119,13 @@ test('admin abre a votação', async ({ browser }) => {
   await page.goto(`/editais/${slug}`)
   entryUrl = (await page.getByRole('link', { name: /Ver elenco e votar/ }).getAttribute('href'))!
   expect(entryUrl).toMatch(new RegExp(`/editais/${slug}/r/`))
+})
+
+test('visitante sem login no link compartilhado é convidado a se cadastrar', async ({ browser }) => {
+  const page = await browser.newPage()
+  await page.goto(entryUrl)
+  await expect(page.getByRole('link', { name: 'Cadastrar e votar' })).toHaveAttribute('href', /\/auth\/sign-up\?next=/)
+  await page.close()
 })
 
 test('link compartilhado: prévia e voto com documento', async ({ browser }) => {

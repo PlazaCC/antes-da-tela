@@ -11,14 +11,23 @@ async function clerkApi<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T
 }
 
-/** Creates the test accounts in the Clerk Development instance when missing (verified e-mail, no password). */
-export async function ensureClerkUsers(): Promise<void> {
+export type ClerkIds = Record<TestRole, string>
+
+/**
+ * Creates the test accounts in the Clerk Development instance when missing
+ * (verified e-mail, no password) and returns their Clerk ids.
+ */
+export async function ensureClerkUsers(): Promise<ClerkIds> {
+  const ids: Partial<ClerkIds> = {}
   for (const role of Object.keys(TEST_USERS) as TestRole[]) {
     const { email, name } = TEST_USERS[role]
-    const found = await clerkApi<unknown[]>(`/users?email_address=${encodeURIComponent(email)}`)
-    if (found.length > 0) continue
+    const found = await clerkApi<Array<{ id: string }>>(`/users?email_address=${encodeURIComponent(email)}`)
+    if (found.length > 0) {
+      ids[role] = found[0].id
+      continue
+    }
     const [firstName, ...rest] = name.split(' ')
-    await clerkApi('/users', {
+    const created = await clerkApi<{ id: string }>('/users', {
       method: 'POST',
       body: JSON.stringify({
         email_address: [email],
@@ -27,5 +36,7 @@ export async function ensureClerkUsers(): Promise<void> {
         skip_password_requirement: true,
       }),
     })
+    ids[role] = created.id
   }
+  return ids as ClerkIds
 }

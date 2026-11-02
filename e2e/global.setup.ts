@@ -10,7 +10,7 @@ setup.describe.configure({ mode: 'serial' })
 setup('ambiente de dev e usuários de teste', async ({ browser }) => {
   assertDevEnvironment()
   await clerkSetup()
-  await ensureClerkUsers()
+  const clerkIds = await ensureClerkUsers()
 
   // Sign every account in once and keep the session; the first authenticated
   // request also creates its `users` row (getAppUser → syncClerkUser).
@@ -26,5 +26,5 @@ setup('ambiente de dev e usuários de teste', async ({ browser }) => {
   }
 
   const db = adminDb()
-  await resetAndSeed(db, await getUserIds(db))
+  await resetAndSeed(db, await getUserIds(db, clerkIds))
 })

@@ -15,3 +15,6 @@ export const storageStatePath = (role: TestRole) => `e2e/.auth/${role}.json`
 
 /** The admin is also the author of the seeded script. */
 export const SEEDED_SCRIPT_TITLE = 'E2E — Roteiro de teste'
+
+/** Resend test address (simulates delivery): where the interpreter's review e-mail is sent. */
+export const INTERPRETER_INBOX = 'delivered+e2e-interprete@resend.dev'
