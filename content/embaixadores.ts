@@ -147,10 +147,4 @@ export const SUPPORTERS: Supporter[] = [
     href: 'https://frapa.art.br/',
     logo: { src: '/embaixadores/frapa.png', width: 160, height: 63 },
   },
-  {
-    name: 'Pomodoro Studios',
-    fullName: 'Pomodoro Studios',
-    href: 'https://www.pomodorostudios.art/',
-    logo: { src: '/embaixadores/pomodoro-studios.png', width: 196, height: 46 },
-  },
 ]

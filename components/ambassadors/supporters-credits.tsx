@@ -7,7 +7,7 @@ interface SupportersCreditsProps {
 
 export function SupportersCredits({ supporters }: SupportersCreditsProps) {
   return (
-    <ul className='grid gap-10 md:grid-cols-3 md:gap-16'>
+    <ul className='mx-auto grid max-w-[720px] gap-10 md:grid-cols-2 md:gap-16'>
       {supporters.map((supporter) => (
         <li key={supporter.name}>
           <a

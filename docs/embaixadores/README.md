@@ -205,6 +205,7 @@ Três grupos na página, cada item com logo + nome + link:
 
 **Pendências:**
 - [x] Nome oficial: Pomodoro Studios (como no logo)
+- [ ] Confirmar se a Pomodoro quer aparecer na página (retirada por enquanto; logo continua em `public/embaixadores/pomodoro-studios.png`)
 - [ ] Logo da Pomodoro em SVG ou PNG maior, e versão para fundo claro
 - [x] Site próprio: pomodorostudios.art (Instagram: @pomodorostudios)
 - [ ] Uma linha sobre o que fazem e qual é a parceria
