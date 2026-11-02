@@ -169,6 +169,13 @@
       "when": 1793236718628,
       "tag": "0023_calls",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793237262581,
+      "tag": "0024_casting",
+      "breakpoints": true
     }
   ]
 }

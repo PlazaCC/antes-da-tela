@@ -1,10 +1,12 @@
 'use client'
 
 import { CallCharacterEditor } from '@/components/calls/call-character-editor'
+import { CastPicker } from '@/components/casting/cast-picker'
 import { EntryCard } from '@/components/calls/entry-card'
 import { Tag, type TagVariant } from '@/components/tag/tag'
 import { Button } from '@/components/ui/button'
 import { toDrafts, useCallCharacters, type CallCharacterDraft } from '@/lib/hooks/use-call-characters'
+import type { CallPhase } from '@/lib/constants/calls'
 import type { CallEntry } from '@/lib/types/calls'
 import type { ReviewStatus } from '@/lib/types/interpreters'
 import { useState } from 'react'
@@ -17,6 +19,7 @@ const STATUS: Record<ReviewStatus, { label: string; variant: TagVariant }> = {
 
 interface MyEntryProps {
   entry: CallEntry
+  phase: CallPhase
   canEdit: boolean
   isSaving: boolean
   onSaveCharacters: (drafts: CallCharacterDraft[], onDone: () => void) => void
@@ -24,7 +27,7 @@ interface MyEntryProps {
 }
 
 /** E5 — one of the author's entries: status, characters (editable while open), withdraw. */
-export function MyEntry({ entry, canEdit, isSaving, onSaveCharacters, onWithdraw }: MyEntryProps) {
+export function MyEntry({ entry, phase, canEdit, isSaving, onSaveCharacters, onWithdraw }: MyEntryProps) {
   const [editing, setEditing] = useState(false)
   const characters = useCallCharacters(toDrafts(entry.characters))
   const status = STATUS[entry.status]
@@ -53,6 +56,9 @@ export function MyEntry({ entry, canEdit, isSaving, onSaveCharacters, onWithdraw
   return (
     <div className='flex flex-col gap-4'>
       <EntryCard entry={entry} footer={footer} />
+      {entry.status === 'approved' && ['curation', 'voting', 'finished'].includes(phase) && (
+        <CastPicker entryId={entry.id} canChoose={phase === 'curation'} />
+      )}
       {editing && (
         <div className='flex flex-col gap-4'>
           <CallCharacterEditor drafts={characters.drafts} onAdd={characters.add} onRemove={characters.remove} onUpdate={characters.update} />

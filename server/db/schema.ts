@@ -371,6 +371,82 @@ export const callCharacters = pgTable(
   ],
 )
 
+// ── Casting (RFC-006 phase 4) ─────────────────────────────────────────────────
+// Approved interpreters send a ≤30s take per character while the call is in
+// `casting`. The staff shortlists up to 3 per character; the entry's author
+// picks one of them during `curation` (select_cast RPC). Authors only ever see
+// shortlisted/selected takes.
+
+export const castingStatusEnum = pgEnum('casting_status', ['submitted', 'shortlisted', 'selected', 'rejected'])
+
+export const castingSubmissions = pgTable(
+  'casting_submissions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    characterId: uuid('character_id')
+      .notNull()
+      .references(() => callCharacters.id, { onDelete: 'cascade' }),
+    interpreterId: uuid('interpreter_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    // `interpreters/{interpreterId}/...` — a new take or the registration media.
+    mediaPath: text('media_path').notNull(),
+    mediaType: text('media_type').notNull(),
+    durationSeconds: integer('duration_seconds').notNull(),
+    note: text('note'),
+    status: castingStatusEnum('status').default('submitted').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('casting_submissions_character_interpreter_unique').on(table.characterId, table.interpreterId),
+    check('casting_submissions_media_type_check', sql`${table.mediaType} in ('video', 'audio')`),
+    check('casting_submissions_duration_check', sql`${table.durationSeconds} between 1 and 30`),
+    pgPolicy('Interpreters, admins and (shortlisted) authors read castings', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'select',
+      using: sql`(select public.current_user_id()) = interpreter_id or (select public.is_admin())
+        or (status in ('shortlisted', 'selected') and exists(select 1 from call_characters ch join call_entries e on e.id = ch.entry_id
+          where ch.id = character_id and e.author_id = (select public.current_user_id())))`,
+    }),
+    // Approved interpreter, approved entry, call in casting, take not yet reviewed.
+    pgPolicy('Approved interpreters send castings while the call is casting', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'insert',
+      withCheck: sql`(select public.current_user_id()) = interpreter_id and status = 'submitted'
+        and exists(select 1 from interpreter_profiles i where i.user_id = interpreter_id and i.status = 'approved')
+        and exists(select 1 from call_characters ch join call_entries e on e.id = ch.entry_id join calls c on c.id = e.call_id
+          where ch.id = character_id and e.status = 'approved' and c.phase = 'casting')`,
+    }),
+    pgPolicy('Interpreters replace their take while the call is casting', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.current_user_id()) = interpreter_id and status = 'submitted'`,
+      withCheck: sql`(select public.current_user_id()) = interpreter_id and status = 'submitted'
+        and exists(select 1 from call_characters ch join call_entries e on e.id = ch.entry_id join calls c on c.id = e.call_id
+          where ch.id = character_id and c.phase = 'casting')`,
+    }),
+    pgPolicy('Interpreters withdraw their take while the call is casting', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'delete',
+      using: sql`(select public.current_user_id()) = interpreter_id and status = 'submitted'
+        and exists(select 1 from call_characters ch join call_entries e on e.id = ch.entry_id join calls c on c.id = e.call_id
+          where ch.id = character_id and c.phase = 'casting')`,
+    }),
+    pgPolicy('Admins curate castings', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.is_admin())`,
+      withCheck: sql`(select public.is_admin())`,
+    }),
+  ],
+)
+
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
 export const scriptStatusEnum = pgEnum('script_status', ['draft', 'published'])

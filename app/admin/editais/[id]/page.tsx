@@ -25,9 +25,14 @@ export default function AdminCallPage({ params }: { params: Promise<{ id: string
 
   return (
     <PageShell title={call.title}>
-      <Link href={`/editais/${call.slug}`} className='text-xs text-text-muted underline underline-offset-2 self-start'>
-        Ver página pública
-      </Link>
+      <div className='flex gap-4 text-xs'>
+        <Link href={`/editais/${call.slug}`} className='text-text-muted underline underline-offset-2'>
+          Ver página pública
+        </Link>
+        <Link href={`/admin/editais/${call.id}/casting`} className='text-text-muted underline underline-offset-2'>
+          Curadoria de casting
+        </Link>
+      </div>
       <CallPhaseControl phase={call.phase} isSaving={isSaving} onChange={(phase) => setPhase(call.id, phase)} />
 
       <section className='flex flex-col gap-4'>

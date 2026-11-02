@@ -1,6 +1,7 @@
 import { createTRPCRouter } from '@/trpc/init'
 import { adminRouter } from './admin'
 import { callsRouter } from './calls'
+import { castingRouter } from './casting'
 import { charactersRouter } from './characters'
 import { commentsRouter } from './comments'
 import { interpretersRouter } from './interpreters'
@@ -19,6 +20,7 @@ export const appRouter = createTRPCRouter({
   interpreters: interpretersRouter,
   admin: adminRouter,
   calls: callsRouter,
+  casting: castingRouter,
 })
 
 export type AppRouter = typeof appRouter

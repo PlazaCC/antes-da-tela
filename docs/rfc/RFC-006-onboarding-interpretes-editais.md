@@ -2,7 +2,7 @@
 
 | Campo  | Valor                                                                  |
 | :----- | :--------------------------------------------------------------------- |
-| Status | Decisões fechadas — Fases 1 a 3 implementadas; fases 4–6 em andamento |
+| Status | Decisões fechadas — Fases 1 a 4 implementadas; fases 5–6 em andamento |
 | Data   | 2026-10-16                                                             |
 | Escopo | Onboarding, perfil, intérpretes, editais, casting, votação, admin      |
 | Figma  | [Antes da Tela — node 114-40](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=114-40) |
@@ -315,6 +315,16 @@ Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
 - **API**: router `calls` (`list`, `getBySlug`, `myEntries`, `eligibleScripts`, `enter`, `updateCharacters`, `withdraw`); `admin` ganhou `listCalls`, `getCall`, `upsertCall`, `setCallPhase`, `listEntries`, `reviewEntry`.
 - **Telas**: `/editais` (E1), `/editais/[slug]` (E2: cronograma, regulamento, roteiros aprovados, ação da fase), `/editais/[slug]/inscricao` (E3–E5: escolher roteiro, personagens, acompanhar, editar, retirar), `/admin/editais` (A2: lista, criar, editar, avançar fase) e `/admin/editais/[id]` (A3: aprovar/recusar inscrições). Link "Editais" no rodapé e no fim do onboarding.
 
+### Fase 4 — Casting (feita)
+
+- **Banco** (`drizzle/0024_casting.sql`): `casting_submissions` (personagem, intérprete, mídia ≤ 30 s, observação, status `submitted/shortlisted/selected/rejected`, único por personagem + intérprete).
+  - RLS: intérprete **aprovado** envia, troca e retira o próprio take só com o edital em `casting` e a inscrição aprovada; admin vê e cura tudo; o autor da inscrição só vê os takes `shortlisted/selected`.
+  - `public.select_cast(submission_id)` (SECURITY DEFINER): o autor escolhe 1 finalista por personagem, só na fase `curation`.
+  - Até 3 finalistas por personagem (checado no serviço do admin).
+- **Mídia**: o intérprete reaproveita a apresentação do cadastro ou envia um take novo (mesmo prefixo privado `interpreters/{userId}/`).
+- **API**: router `casting` (`openCharacters`, `submit`, `withdraw`, `shortlist`, `selectCast`); `admin.listCastings` e `admin.setCastingStatus`.
+- **Telas**: `/editais/[slug]/casting` (E7/E8: personagens compatíveis com as modalidades do intérprete, filtro, envio/troca/retirada), escolha de elenco na página de inscrição (E6, fase `curation`), `/admin/editais/[id]/casting` (A4: finalistas e recusa). Ações do edital por fase atualizadas.
+
 ---
 
 ## 10. Pendências
@@ -332,4 +342,8 @@ Lista única do que ficou para resolver, atualizada a cada fase.
 | P7 | 3 | E-mails de inscrição aprovada/recusada para o roteirista (hoje só o status na página) | Dev (próxima rodada) |
 | P8 | 3 | Upload de banner/logos do edital (parceiros FRAPA/ABRA/EBAC) — hoje só texto | Dev + design |
 | P9 | 3 | Fases mudam só manualmente; avaliar avanço automático pelas datas | Produto |
-| P10 | 1–3 | Validar os fluxos no app rodando (este ambiente não tem chaves do Clerk/Supabase/S3) | Time / QA |
+| P10 | 1–4 | Validar os fluxos no app rodando (este ambiente não tem chaves do Clerk/Supabase/S3) | Time / QA |
+| P11 | 4 | Aplicar a migração `0024` | Time (acesso ao banco) |
+| P12 | 4 | E-mails de casting: finalista, escolhido(a) no elenco, não selecionado | Dev (próxima rodada) |
+| P13 | 4 | Tipo de mídia do take é livre (vídeo ou áudio); decidir se personagem só de atuação exige vídeo | Produto |
+| P14 | 4 | Takes e apresentações substituídos continuam no S3 (não há limpeza dos arquivos antigos) | Dev |

@@ -13,6 +13,23 @@ export function CallActions({ call }: { call: CallSummary }) {
           <Link href={`${base}/inscricao`}>Inscrever meu roteiro</Link>
         </Button>
       )
+    case 'casting':
+      return (
+        <div className='flex flex-col gap-2'>
+          <Button asChild className='h-11'>
+            <Link href={`${base}/casting`}>Ver personagens (intérpretes)</Link>
+          </Button>
+          <Button asChild variant='outline' className='h-11'>
+            <Link href={`${base}/inscricao`}>Minhas inscrições</Link>
+          </Button>
+        </div>
+      )
+    case 'curation':
+      return (
+        <Button asChild variant='outline' className='h-11'>
+          <Link href={`${base}/inscricao`}>Escolher elenco (roteiristas)</Link>
+        </Button>
+      )
     default:
       return (
         <Button asChild variant='outline' className='h-11'>
