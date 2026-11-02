@@ -14,6 +14,8 @@ test.describe('página de embaixadores (pública)', () => {
     const creditos = page.getByRole('region', { name: 'Quem está com a gente' })
     await expect(creditos.getByRole('link', { name: /ABRA/ })).toHaveAttribute('href', 'https://www.abra.art.br/')
     await expect(creditos.getByRole('link', { name: /FRAPA/ })).toHaveAttribute('href', 'https://frapa.art.br/')
+    await expect(creditos.getByRole('link', { name: /Pomodoro Studios/ })).toHaveAttribute('href', 'https://www.pomodorostudios.art/')
+    await expect(creditos.getByRole('link', { name: /Red Cave Audiovisual/ })).toHaveAttribute('href', 'https://www.instagram.com/redcaveprodutora/')
   })
 
   test('card abre a bio completa no painel lateral', async ({ page }) => {
