@@ -98,9 +98,9 @@ Fotos em `fotos/`: `*-original.jpg` (referência), `*-retrato.jpg` (4:5, card) e
 **Foto:** `fotos/luca-paiva-mello-retrato.jpg` (330×400, P&B, recortada de um print). Baixa resolução: serve só como placeholder.
 
 **Pendências:**
-- [ ] Confirmar a grafia do nome: "Luca" (como no material) ou "Lucca"
+- [x] Grafia do nome: "Luca" (confirmada pelas aspas)
 - [ ] Foto original em alta resolução (e crédito; esta veio do material de um evento)
-- [ ] Depoimento sobre o Antes da Tela
+- [x] Depoimento sobre o Antes da Tela (ver Depoimentos)
 - [ ] URL da Scriptonita e redes
 - [ ] Autorização de uso de imagem e fala
 
@@ -133,3 +133,33 @@ Fotos em `fotos/`: `*-original.jpg` (referência), `*-retrato.jpg` (4:5, card) e
 - [ ] Crédito da foto
 - [ ] Links
 - [ ] Autorização de uso de imagem e fala
+
+---
+
+# Depoimentos (prova humana)
+
+Aspas para a seção "O que dizem". Correções mínimas de grafia, sem mudar o sentido.
+
+> "Antes da Tela tem um quê de Tinder ao aproximar criadores de agentes do mercado. Mas, em essência, é um lugar de encontros e colaboração. Muito bem sacado! Deu match!"
+>
+> **Zico Goes**, Produtor Criativo na Kromaki Filmes
+
+> "O Antes da Tela vem para dar voz a novos autores e roteiristas, ao mesmo tempo que permite aos players alcançar um patamar de diversidade de temas e histórias nunca antes visto no Brasil."
+>
+> **Victor Lemos**, Galo Bravo
+
+> "Excelente iniciativa e formato! Apoio e acredito que será uma interessante forma de organizar e expandir o mercado como um todo. Parabéns!"
+>
+> **Nelson Sato**, Sato Company
+
+> "Um lugar para descobrir novas narrativas e se conectar com histórias, personagens e outros amantes de filmes e séries. No Antes da Tela, você pode ser o curador do próximo sucesso do cinema ou do streaming."
+>
+> **Luca Paiva Mello**, Scriptonita Films (também embaixador)
+
+**Correções aplicadas ao texto original:** "um que de tinder" → "um quê de Tinder"; vírgulas em "Mas, em essência,"; "no todo" → "como um todo"; "Parabens!!!" → "Parabéns!".
+
+**Pendências:**
+- [ ] Autores aprovarem as aspas com essas correções
+- [ ] Cargo de Victor Lemos na Galo Bravo e de Nelson Sato na Sato Company
+- [ ] Fotos (ou logos das empresas) para Zico, Victor e Nelson, se os cards tiverem imagem
+- [ ] Depoimentos de Fabiano, Pedro e Camila (ainda não há aspas deles)
