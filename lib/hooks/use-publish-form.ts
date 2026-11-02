@@ -180,7 +180,7 @@ export function usePublishForm(scriptId?: string): UsePublishFormResult {
       (existingScript.audio_files ?? []).map((af) => ({
         id: af.id,
         file: null,
-        storagePath: af.storage_path,
+        storagePath: af.storage_path ?? "",
         title: af.title as AudioCategory,
         description: af.description ?? "",
         durationSeconds: af.duration_seconds ?? undefined,

@@ -475,12 +475,20 @@ export class ScriptsService {
   }
 
   async getById(id: string) {
+    // Reading requires an account: signed-out visitors cannot select the file
+    // keys (PDF, audio, pitch deck — column privileges in 0031), so ask only
+    // for what they may see. Their script page shows a sign-in prompt instead.
+    const { data: viewerId } = await this.supabase.rpc("current_user_id");
+    const keys = viewerId
+      ? { script: ", pitch_deck_path", file: "storage_path, " }
+      : { script: "", file: "" };
+
     const { data: script } = await this.supabase
       .from("scripts")
       .select(
-        "id, title, logline, synopsis, genre, subgenres, age_rating, bn_registration, is_featured, status, published_at, banner_path, cover_path, pitch_deck_path," +
-          " script_files(id, storage_path, page_count, file_size)," +
-          " audio_files(id, storage_path, title, description, sort_order, duration_seconds)," +
+        `id, title, logline, synopsis, genre, subgenres, age_rating, bn_registration, is_featured, status, published_at, banner_path, cover_path${keys.script},` +
+          ` script_files(id, ${keys.file}page_count, file_size),` +
+          ` audio_files(id, ${keys.file}title, description, sort_order, duration_seconds),` +
           " script_characters(id, name, description, apparent_age, gender, traits, sort_order)," +
           " author:users!author_id(id, name, image, bio)",
       )
