@@ -1,7 +1,7 @@
 import { clerk, clerkSetup } from '@clerk/testing/playwright'
 import { test as setup } from '@playwright/test'
 import { ensureClerkUsers } from './support/clerk-users'
-import { adminDb, getUserIds, resetAndSeed } from './support/db'
+import { adminDb, getUserIds, resetAndSeed, saveUserIds } from './support/db'
 import { assertDevEnvironment } from './support/env'
 import { storageStatePath, TEST_USERS, type TestRole } from './support/users'
 
@@ -26,5 +26,7 @@ setup('ambiente de dev e usuários de teste', async ({ browser }) => {
   }
 
   const db = adminDb()
-  await resetAndSeed(db, await getUserIds(db, clerkIds))
+  const ids = await getUserIds(db, clerkIds)
+  saveUserIds(ids)
+  await resetAndSeed(db, ids)
 })

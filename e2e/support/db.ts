@@ -1,3 +1,4 @@
+import { readFileSync, writeFileSync } from 'node:fs'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { ClerkIds } from './clerk-users'
 import { INTERPRETER_INBOX, SEEDED_SCRIPT_TITLE, TEST_USERS, type TestRole } from './users'
@@ -27,13 +28,31 @@ const check = ({ error }: { error: unknown }) => {
   if (error) throw error
 }
 
+const USER_IDS_PATH = 'e2e/.auth/user-ids.json'
+
+/** Saved by the setup so specs can reset an account between tests. */
+export function saveUserIds(ids: UserIds): void {
+  writeFileSync(USER_IDS_PATH, JSON.stringify(ids))
+}
+
+export function loadUserIds(): UserIds {
+  return JSON.parse(readFileSync(USER_IDS_PATH, 'utf8')) as UserIds
+}
+
+/** The newcomer as a brand-new account: no onboarding, preferences, profile fields or interpreter registration. */
+export async function resetNewcomer(db: SupabaseClient, userId: string): Promise<void> {
+  check(await db.from('user_onboarding').delete().eq('user_id', userId))
+  check(await db.from('user_preferences').delete().eq('user_id', userId))
+  check(await db.from('interpreter_profiles').delete().eq('user_id', userId))
+  check(await db.from('users').update({ display_name: null, pronouns: null, location: null, links: null }).eq('id', userId))
+}
+
 /** Removes what previous runs left and puts every account in its starting state. */
 export async function resetAndSeed(db: SupabaseClient, ids: UserIds): Promise<void> {
   check(await db.from('calls').delete().like('slug', 'e2e-%'))
   check(await db.from('interpreter_profiles').delete().eq('user_id', ids.interpreter))
   check(await db.from('user_documents').delete().eq('user_id', ids.voter))
-  check(await db.from('user_onboarding').delete().eq('user_id', ids.newcomer))
-  check(await db.from('user_preferences').delete().eq('user_id', ids.newcomer))
+  await resetNewcomer(db, ids.newcomer)
 
   // Everyone but the newcomer has finished the onboarding.
   const done = new Date().toISOString()
