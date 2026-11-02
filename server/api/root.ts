@@ -9,6 +9,7 @@ import { onboardingRouter } from './onboarding'
 import { ratingsRouter } from './ratings'
 import { scriptsRouter } from './scripts'
 import { usersRouter } from './users'
+import { votesRouter } from './votes'
 
 export const appRouter = createTRPCRouter({
   users: usersRouter,
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
   admin: adminRouter,
   calls: callsRouter,
   casting: castingRouter,
+  votes: votesRouter,
 })
 
 export type AppRouter = typeof appRouter

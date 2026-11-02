@@ -1,5 +1,6 @@
 import { relations, sql } from 'drizzle-orm'
 import {
+  type AnyPgColumn,
   boolean,
   check,
   date,
@@ -255,6 +256,15 @@ export const calls = pgTable(
     castingEndAt: timestamp('casting_end_at'),
     votingStartAt: timestamp('voting_start_at'),
     votingEndAt: timestamp('voting_end_at'),
+    // Result and live (RFC-006 phases 5–6). The live and its ticket are external
+    // for now (no payment integration); the recording link is shown to everyone.
+    winnerEntryId: uuid('winner_entry_id').references((): AnyPgColumn => callEntries.id, { onDelete: 'set null' }),
+    liveAt: timestamp('live_at'),
+    liveUrl: text('live_url'),
+    ticketUrl: text('ticket_url'),
+    ticketPriceCents: integer('ticket_price_cents'),
+    castSharePercent: integer('cast_share_percent'),
+    recordingUrl: text('recording_url'),
     createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -443,6 +453,47 @@ export const castingSubmissions = pgTable(
       for: 'update',
       using: sql`(select public.is_admin())`,
       withCheck: sql`(select public.is_admin())`,
+    }),
+  ],
+)
+
+// ── Votes (RFC-006 phase 5, D10) ─────────────────────────────────────────────
+// One vote per user per call, only while the call is `voting`, for an approved
+// entry of that call, by a user with an identity document. The verified e-mail
+// (Clerk) is checked in the API. Users only read their own vote; totals come
+// from call_vote_counts() once the call is finished (or for admins).
+
+export const callVotes = pgTable(
+  'call_votes',
+  {
+    callId: uuid('call_id')
+      .notNull()
+      .references(() => calls.id, { onDelete: 'cascade' }),
+    entryId: uuid('entry_id')
+      .notNull()
+      .references(() => callEntries.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.callId, table.userId] }),
+    index('call_votes_entry_idx').on(table.entryId),
+    pgPolicy('Users read their own votes', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'select',
+      using: sql`(select public.current_user_id()) = user_id`,
+    }),
+    pgPolicy('Documented users vote once while the call is voting', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'insert',
+      withCheck: sql`(select public.current_user_id()) = user_id
+        and exists(select 1 from user_documents d where d.user_id = call_votes.user_id)
+        and exists(select 1 from call_entries e join calls c on c.id = e.call_id
+          where e.id = entry_id and e.call_id = call_votes.call_id and e.status = 'approved' and c.phase = 'voting')`,
     }),
   ],
 )

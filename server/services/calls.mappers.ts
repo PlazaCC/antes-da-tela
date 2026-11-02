@@ -4,7 +4,7 @@ import type { CallCharacterInput } from '@/lib/validators/calls'
 import { TRPCError } from '@trpc/server'
 
 export const CALL_SUMMARY_COLUMNS = 'id, slug, title, partner, phase, submissions_end_at, casting_end_at, voting_start_at, voting_end_at'
-export const CALL_COLUMNS = `${CALL_SUMMARY_COLUMNS}, description, rules`
+export const CALL_COLUMNS = `${CALL_SUMMARY_COLUMNS}, description, rules, winner_entry_id, live_at, live_url, ticket_url, ticket_price_cents, cast_share_percent, recording_url`
 
 export const ENTRY_COLUMNS =
   'id, call_id, status, review_reason, created_at, ' +
@@ -31,7 +31,20 @@ export function toCallSummary(row: Row): CallSummary {
 }
 
 export function toCall(row: Row): Call {
-  return { ...toCallSummary(row), description: row.description, rules: row.rules }
+  return {
+    ...toCallSummary(row),
+    description: row.description,
+    rules: row.rules,
+    result: {
+      winnerEntryId: row.winner_entry_id ?? null,
+      liveAt: row.live_at ?? null,
+      liveUrl: row.live_url ?? null,
+      ticketUrl: row.ticket_url ?? null,
+      ticketPriceCents: row.ticket_price_cents ?? null,
+      castSharePercent: row.cast_share_percent ?? null,
+      recordingUrl: row.recording_url ?? null,
+    },
+  }
 }
 
 export function toCallCharacter(row: Row): CallCharacter {

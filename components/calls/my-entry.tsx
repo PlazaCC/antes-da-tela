@@ -3,6 +3,7 @@
 import { CallCharacterEditor } from '@/components/calls/call-character-editor'
 import { CastPicker } from '@/components/casting/cast-picker'
 import { EntryCard } from '@/components/calls/entry-card'
+import { ShareButton } from '@/components/calls/share-button'
 import { Tag, type TagVariant } from '@/components/tag/tag'
 import { Button } from '@/components/ui/button'
 import { toDrafts, useCallCharacters, type CallCharacterDraft } from '@/lib/hooks/use-call-characters'
@@ -19,6 +20,7 @@ const STATUS: Record<ReviewStatus, { label: string; variant: TagVariant }> = {
 
 interface MyEntryProps {
   entry: CallEntry
+  slug: string
   phase: CallPhase
   canEdit: boolean
   isSaving: boolean
@@ -27,7 +29,7 @@ interface MyEntryProps {
 }
 
 /** E5 — one of the author's entries: status, characters (editable while open), withdraw. */
-export function MyEntry({ entry, phase, canEdit, isSaving, onSaveCharacters, onWithdraw }: MyEntryProps) {
+export function MyEntry({ entry, slug, phase, canEdit, isSaving, onSaveCharacters, onWithdraw }: MyEntryProps) {
   const [editing, setEditing] = useState(false)
   const characters = useCallCharacters(toDrafts(entry.characters))
   const status = STATUS[entry.status]
@@ -38,6 +40,13 @@ export function MyEntry({ entry, phase, canEdit, isSaving, onSaveCharacters, onW
         {status.label}
       </Tag>
       {entry.reviewReason && <p className='text-body-small text-text-secondary'>Motivo: {entry.reviewReason}</p>}
+      {entry.status === 'approved' && (
+        <ShareButton
+          path={`/editais/${slug}/r/${entry.id}`}
+          text={`Meu roteiro “${entry.script.title}” está no edital do Antes da Tela!`}
+          label='Compartilhar minha participação'
+        />
+      )}
       {canEdit && !editing && (
         <div className='flex flex-wrap gap-2'>
           <Button type='button' size='sm' variant='outline' onClick={() => setEditing(true)}>

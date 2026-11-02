@@ -30,6 +30,14 @@ export function CallActions({ call }: { call: CallSummary }) {
           <Link href={`${base}/inscricao`}>Escolher elenco (roteiristas)</Link>
         </Button>
       )
+    case 'voting':
+      return (
+        <Button asChild className='h-11'>
+          <Link href={`${base}#roteiros`}>Ver roteiros e votar</Link>
+        </Button>
+      )
+    case 'finished':
+      return null
     default:
       return (
         <Button asChild variant='outline' className='h-11'>

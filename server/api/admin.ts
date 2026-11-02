@@ -1,5 +1,6 @@
 import { notifyInterpreterReview } from '@/lib/email/interpreter-review'
 import { setCastingStatusSchema } from '@/lib/validators/casting'
+import { callResultSchema } from '@/lib/validators/votes'
 import { callUpsertSchema, reviewEntrySchema, setCallPhaseSchema } from '@/lib/validators/calls'
 import { interpreterReviewSchema } from '@/lib/validators/interpreter'
 import { adminProcedure, createTRPCRouter } from '@/trpc/init'
@@ -49,5 +50,13 @@ export const adminRouter = createTRPCRouter({
 
   setCastingStatus: adminProcedure.input(setCastingStatusSchema).mutation(async ({ input, ctx }) => {
     return ctx.castingService.setStatus(input.submissionId, input.status)
+  }),
+
+  callResults: adminProcedure.input(z.object({ callId: z.uuid() })).query(async ({ input, ctx }) => {
+    return ctx.votesService.getCounts(input.callId)
+  }),
+
+  setCallResult: adminProcedure.input(callResultSchema).mutation(async ({ input, ctx }) => {
+    return ctx.votesService.setResult(input)
   }),
 })

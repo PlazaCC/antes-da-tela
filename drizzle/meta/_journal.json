@@ -176,6 +176,20 @@
       "when": 1793237262581,
       "tag": "0024_casting",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793237622283,
+      "tag": "0025_votes",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793569287595,
+      "tag": "0026_users_profile_update_grant",
+      "breakpoints": true
     }
   ]
 }

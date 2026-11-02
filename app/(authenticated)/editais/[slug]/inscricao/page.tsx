@@ -21,7 +21,7 @@ export default async function CallEntryPage({ params }: Props) {
         ← Voltar ao edital
       </Link>
       <div className='max-w-[720px]'>
-        <EntryManager callId={data.call.id} phase={data.call.phase} />
+        <EntryManager callId={data.call.id} slug={slug} phase={data.call.phase} />
       </div>
     </PageShell>
   )

@@ -3,14 +3,13 @@ import { CallPhaseTag } from '@/components/calls/call-phase-tag'
 import { CallTimeline } from '@/components/calls/call-timeline'
 import { EntryCard } from '@/components/calls/entry-card'
 import { SectionHeading } from '@/components/shared/section-heading'
-import { getQueryClient, trpc } from '@/trpc/server'
+import { WinnerBlock } from '@/components/calls/winner-block'
+import { loadCall, loadResults } from '@/lib/calls/load'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { cache } from 'react'
 
 type Props = { params: Promise<{ slug: string }> }
-
-const loadCall = cache((slug: string) => getQueryClient().fetchQuery(trpc.calls.getBySlug.queryOptions({ slug })))
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await loadCall((await params).slug)
@@ -23,6 +22,9 @@ export default async function CallPage({ params }: Props) {
   const data = await loadCall((await params).slug)
   if (!data) notFound()
   const { call, entries } = data
+  const showResults = call.phase === 'voting' || call.phase === 'finished'
+  const { cast, counts } = showResults ? await loadResults(call.id) : { cast: [], counts: null }
+  const winner = call.phase === 'finished' ? entries.find((e) => e.id === call.result.winnerEntryId) : undefined
 
   return (
     <main className='max-w-5xl mx-auto px-5 py-12 grid gap-10 md:grid-cols-[1fr_280px]'>
@@ -34,12 +36,29 @@ export default async function CallPage({ params }: Props) {
           {call.description && <p className='text-body text-text-secondary whitespace-pre-line'>{call.description}</p>}
         </header>
 
-        <section className='flex flex-col gap-4'>
+        {winner && <WinnerBlock slug={call.slug} winner={winner} cast={cast} result={call.result} />}
+
+        <section id='roteiros' className='flex flex-col gap-4'>
           <SectionHeading>Roteiros inscritos ({entries.length})</SectionHeading>
           {entries.length === 0 ? (
             <p className='text-body-small text-text-muted'>Os roteiros aprovados aparecem aqui.</p>
           ) : (
-            entries.map((entry) => <EntryCard key={entry.id} entry={entry} />)
+            entries.map((entry) => (
+              <EntryCard
+                key={entry.id}
+                entry={entry}
+                href={showResults ? `/editais/${call.slug}/r/${entry.id}` : undefined}
+                footer={
+                  call.phase === 'voting' ? (
+                    <Link href={`/editais/${call.slug}/r/${entry.id}`} className='text-sm font-semibold text-brand-accent'>
+                      Ver elenco e votar →
+                    </Link>
+                  ) : (
+                    counts && <p className='text-xs text-text-muted'>{counts[entry.id] ?? 0} votos</p>
+                  )
+                }
+              />
+            ))
           )}
         </section>
 

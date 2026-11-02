@@ -9,11 +9,12 @@ import { useCallEntries } from '@/lib/hooks/use-call-entries'
 
 interface EntryManagerProps {
   callId: string
+  slug: string
   phase: CallPhase
 }
 
 /** E3–E5 — the author's entries in a call and, while open, the form to enter another script. */
-export function EntryManager({ callId, phase }: EntryManagerProps) {
+export function EntryManager({ callId, slug, phase }: EntryManagerProps) {
   const isOpen = phase === 'submissions'
   const { eligibleScripts, entries, isLoading, isSaving, enter, updateCharacters, withdraw } = useCallEntries(callId, {
     canSubmit: isOpen,
@@ -30,6 +31,7 @@ export function EntryManager({ callId, phase }: EntryManagerProps) {
             <MyEntry
               key={entry.id}
               entry={entry}
+              slug={slug}
               phase={phase}
               canEdit={isOpen}
               isSaving={isSaving}

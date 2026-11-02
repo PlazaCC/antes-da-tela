@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type { Call } from '@/lib/types/calls'
+import { toDateTimeLocal } from '@/lib/utils/format-date'
 import { callUpsertSchema, type CallUpsertInput } from '@/lib/validators/calls'
 import { useState } from 'react'
 
@@ -18,8 +19,6 @@ const DATE_FIELDS = [
 type DateKey = (typeof DATE_FIELDS)[number][0]
 type Values = { slug: string; title: string; partner: string; description: string; rules: string } & Record<DateKey, string>
 
-// <input type="datetime-local"> works in local time without a zone.
-const toLocalInput = (iso: string | null) => (iso ? new Date(new Date(iso).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '')
 
 function initialValues(call: Call | null): Values {
   return {
@@ -28,10 +27,10 @@ function initialValues(call: Call | null): Values {
     partner: call?.partner ?? '',
     description: call?.description ?? '',
     rules: call?.rules ?? '',
-    submissionsEndAt: toLocalInput(call?.submissionsEndAt ?? null),
-    castingEndAt: toLocalInput(call?.castingEndAt ?? null),
-    votingStartAt: toLocalInput(call?.votingStartAt ?? null),
-    votingEndAt: toLocalInput(call?.votingEndAt ?? null),
+    submissionsEndAt: toDateTimeLocal(call?.submissionsEndAt ?? null),
+    castingEndAt: toDateTimeLocal(call?.castingEndAt ?? null),
+    votingStartAt: toDateTimeLocal(call?.votingStartAt ?? null),
+    votingEndAt: toDateTimeLocal(call?.votingEndAt ?? null),
   }
 }
 

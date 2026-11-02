@@ -21,7 +21,7 @@ export default async function CastingPage({ params }: Props) {
         ← Voltar ao edital
       </Link>
       <div className='max-w-[720px]'>
-        <CastingBoard callId={data.call.id} phase={data.call.phase} />
+        <CastingBoard callId={data.call.id} slug={slug} phase={data.call.phase} />
       </div>
     </PageShell>
   )

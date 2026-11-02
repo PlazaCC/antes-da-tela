@@ -15,6 +15,7 @@ import { CallsService } from '@/server/services/calls.service'
 import { CastingService } from '@/server/services/casting.service'
 import { InterpretersService } from '@/server/services/interpreters.service'
 import { OnboardingService } from '@/server/services/onboarding.service'
+import { VotesService } from '@/server/services/votes.service'
 
 export type TRPCUser = {
   /** `users.id` (uuid) — not the Clerk user id. */
@@ -39,6 +40,7 @@ export const createTRPCContext = async (opts: {
   callsService: CallsService
   callsAdminService: CallsAdminService
   castingService: CastingService
+  votesService: VotesService
 }> => {
   const headersObj = await opts.headers
 
@@ -60,6 +62,7 @@ export const createTRPCContext = async (opts: {
     callsService: new CallsService(supabase),
     callsAdminService: new CallsAdminService(supabase),
     castingService: new CastingService(supabase),
+    votesService: new VotesService(supabase),
   }
 }
 

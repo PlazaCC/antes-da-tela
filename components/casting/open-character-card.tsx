@@ -1,6 +1,7 @@
 'use client'
 
 import { CastingForm } from '@/components/casting/casting-form'
+import { ShareButton } from '@/components/calls/share-button'
 import { CharacterDetails } from '@/components/casting/character-details'
 import { MediaPlayer } from '@/components/interpreter/media-player'
 import { Tag } from '@/components/tag/tag'
@@ -12,6 +13,7 @@ import { useState } from 'react'
 
 interface OpenCharacterCardProps {
   character: OpenCharacter
+  slug: string
   isOpen: boolean
   isSaving: boolean
   onSubmit: (input: CastingSubmitInput, onDone: () => void) => void
@@ -19,7 +21,7 @@ interface OpenCharacterCardProps {
 }
 
 /** E7 — a character open for casting and the interpreter's own take. */
-export function OpenCharacterCard({ character, isOpen, isSaving, onSubmit, onWithdraw }: OpenCharacterCardProps) {
+export function OpenCharacterCard({ character, slug, isOpen, isSaving, onSubmit, onWithdraw }: OpenCharacterCardProps) {
   const [editing, setEditing] = useState(false)
   const take = character.myTake
   const canChange = isOpen && (!take || take.status === 'submitted')
@@ -33,6 +35,13 @@ export function OpenCharacterCard({ character, isOpen, isSaving, onSubmit, onWit
             Seu casting · {CASTING_STATUS_LABELS[take.status]}
           </Tag>
           <MediaPlayer src={take.mediaUrl} kind={take.mediaType} className='md:max-w-[420px]' />
+          {take.status === 'selected' && (
+            <ShareButton
+              path={`/editais/${slug}/r/${character.entryId}`}
+              text={`Vou interpretar ${character.name} em “${character.scriptTitle}” no Antes da Tela!`}
+              label='Compartilhar minha participação'
+            />
+          )}
         </div>
       )}
       {editing ? (

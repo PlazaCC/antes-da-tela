@@ -16,7 +16,7 @@ const NOT_APPROVED = {
 } as const
 
 /** E7 — characters of a call open to the interpreter, filterable by modality. */
-export function CastingBoard({ callId, phase }: { callId: string; phase: CallPhase }) {
+export function CastingBoard({ callId, slug, phase }: { callId: string; slug: string; phase: CallPhase }) {
   const { interpreterStatus, characters, isLoading, isSaving, submit, withdraw } = useCasting(callId)
   const [filter, setFilter] = useState<InterpreterModality | null>(null)
 
@@ -49,7 +49,7 @@ export function CastingBoard({ callId, phase }: { callId: string; phase: CallPha
       />
       {visible.length === 0 && <p className='text-body-small text-text-muted'>Nenhum personagem compatível com suas modalidades.</p>}
       {visible.map((character) => (
-        <OpenCharacterCard key={character.id} character={character} isOpen={isOpen} isSaving={isSaving} onSubmit={submit} onWithdraw={withdraw} />
+        <OpenCharacterCard key={character.id} character={character} slug={slug} isOpen={isOpen} isSaving={isSaving} onSubmit={submit} onWithdraw={withdraw} />
       ))}
     </div>
   )
