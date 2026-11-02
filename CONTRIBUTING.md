@@ -15,8 +15,9 @@ See [docs/SETUP.md](docs/SETUP.md) for environment setup instructions.
 ## How to Contribute
 
 1. **Fork and clone the repository**
-2. **Create a descriptive branch**
+2. **Create a descriptive branch from `dev`**
    - Use clear names, e.g., `feature/pdf-reader-zoom`, `fix/auth-middleware`
+   - Flow: `feature/*` / `fix/*` → PR to `dev` (dev environment) → PR `dev` → `main` (production). See [docs/DEPLOY.md](docs/DEPLOY.md)
 3. **Implement your contribution**
    - Follow the code and architecture standards below
 4. **Ensure all tests and lints pass**
