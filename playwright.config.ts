@@ -7,7 +7,8 @@ config({ path: '.env.e2e', quiet: true })
 config({ path: '.env.local', quiet: true })
 config({ path: '.env', quiet: true })
 
-const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000'
+// `||`, not `??`: the example file leaves E2E_BASE_URL= empty, which dotenv loads as ''.
+const baseURL = process.env.E2E_BASE_URL || 'http://localhost:3000'
 
 /**
  * End-to-end tests against the DEV environment (Clerk Development + dev

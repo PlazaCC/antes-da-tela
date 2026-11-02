@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { pageAs } from './support/fixtures'
+import { closePages, pageAs } from './support/fixtures'
 import { silentWav } from './support/media'
 import { SEEDED_SCRIPT_TITLE } from './support/users'
 
@@ -10,6 +10,7 @@ import { SEEDED_SCRIPT_TITLE } from './support/users'
  * serially and stops at the first failure.
  */
 test.describe.configure({ mode: 'serial' })
+test.beforeEach(closePages)
 
 const slug = `e2e-${Date.now()}`
 let adminCallUrl = ''

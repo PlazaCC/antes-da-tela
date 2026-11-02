@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
-import { pageAs } from './support/fixtures'
+import { closePages, pageAs } from './support/fixtures'
+
+test.beforeEach(closePages)
 
 test('primeiro login: onboarding de leitor até o feed', async ({ browser }) => {
   const page = await pageAs(browser, 'newcomer')

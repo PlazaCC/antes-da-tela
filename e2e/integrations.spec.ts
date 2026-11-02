@@ -1,5 +1,6 @@
-import { expect, test } from '@playwright/test'
-import { pageAs } from './support/fixtures'
+import { expect, test, type Browser, type Page } from '@playwright/test'
+import { closePages, pageAs } from './support/fixtures'
+import type { TestRole } from './support/users'
 
 /**
  * The app's external services in the current environment: errors reach
@@ -19,7 +20,20 @@ async function poll<T>(fn: () => Promise<T | null>, timeoutMs = 45_000): Promise
   return null
 }
 
+/**
+ * A page whose `page.request` carries a fresh Clerk session: the saved
+ * `__session` cookie lasts ~60s and an API request can't run Clerk's handshake,
+ * so a page load refreshes it first.
+ */
+async function signedInPage(browser: Browser, role: TestRole): Promise<Page> {
+  const page = await pageAs(browser, role)
+  await page.goto('/editais')
+  return page
+}
+
 test.describe('integrações', () => {
+  test.beforeEach(closePages)
+
   test('Sentry recebe erro do navegador', async ({ browser }) => {
     test.skip(!process.env.NEXT_PUBLIC_SENTRY_DSN, 'NEXT_PUBLIC_SENTRY_DSN não configurado')
     const page = await pageAs(browser, 'admin')
@@ -34,7 +48,7 @@ test.describe('integrações', () => {
 
   test('Sentry recebe erro do servidor', async ({ browser }) => {
     test.skip(!process.env.SENTRY_DSN, 'SENTRY_DSN não configurado')
-    const page = await pageAs(browser, 'admin')
+    const page = await signedInPage(browser, 'admin')
     const response = await page.request.post('/api/development/sentry', { data: { marker } })
     expect(response.status(), await response.text()).toBe(200)
     const { eventId, flushed } = await response.json()
@@ -63,7 +77,7 @@ test.describe('integrações', () => {
 
   test('Resend envia e-mail com o remetente do ambiente', async ({ browser }) => {
     test.skip(!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL, 'RESEND_API_KEY / RESEND_FROM_EMAIL não configurados')
-    const page = await pageAs(browser, 'admin')
+    const page = await signedInPage(browser, 'admin')
     const response = await page.request.post('/api/development/email', { data: { marker } })
     expect(response.status(), await response.text()).toBe(200)
     const { id } = await response.json()
@@ -80,7 +94,7 @@ test.describe('integrações', () => {
   })
 
   test('rotas de verificação são invisíveis para quem não é admin', async ({ browser }) => {
-    const page = await pageAs(browser, 'voter')
+    const page = await signedInPage(browser, 'voter')
     expect((await page.request.post('/api/development/sentry')).status()).toBe(404)
     expect((await page.request.post('/api/development/email')).status()).toBe(404)
   })

@@ -13,8 +13,11 @@ test.describe('visitante sem login', () => {
     await expect(page).toHaveURL(/\/auth\/login/)
   })
 
-  test('edital inexistente devolve 404', async ({ page }) => {
+  // With cacheComponents the shell streams before notFound(), so the status is
+  // 200: Next marks the page noindex and renders app/not-found.tsx instead.
+  test('edital inexistente mostra a página 404 (noindex)', async ({ page }) => {
     const response = await page.goto('/editais/edital-que-nao-existe')
-    expect(response?.status()).toBe(404)
+    expect(await response?.text()).toContain('<meta name="robots" content="noindex"/>')
+    await expect(page.getByRole('heading', { name: '404 — Página não encontrada' })).toBeVisible()
   })
 })

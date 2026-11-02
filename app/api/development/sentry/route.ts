@@ -9,6 +9,10 @@ import { NextResponse } from 'next/server'
 export async function POST(request: Request) {
   if (!(await canUseIntegrationChecks())) return new NextResponse('Not Found', { status: 404 })
   if (!process.env.SENTRY_DSN) return NextResponse.json({ error: 'SENTRY_DSN não configurado' }, { status: 503 })
+  // Sentry.init runs once at startup: a DSN added to .env later is only picked up after a restart.
+  if (!Sentry.getClient()?.getDsn()) {
+    return NextResponse.json({ error: 'Sentry iniciou sem DSN no servidor — reinicie o servidor (yarn dev)' }, { status: 503 })
+  }
 
   const { marker } = (await request.json().catch(() => ({}))) as { marker?: string }
   const eventId = Sentry.captureException(new Error(`Integration check (server) ${marker ?? ''}`.trim()))

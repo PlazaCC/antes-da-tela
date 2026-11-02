@@ -36,6 +36,17 @@ yarn playwright show-report   # relatório da última execução (com vídeo/tra
 ```
 
 Contra um endereço já publicado (ex.: o domínio de dev): `E2E_BASE_URL=https://dev.<dominio> yarn test:e2e`.
+Se o `.env.e2e` tiver `E2E_BASE_URL` preenchido e você quiser rodar local, deixe a linha vazia (`E2E_BASE_URL=`) —
+o domínio de dev só tem o código já mergeado na `dev`.
+
+**Uma execução por vez.** O setup e o teardown apagam todos os editais `e2e-*` e reiniciam as contas de teste, e todas
+as execuções usam o mesmo banco de dev e as mesmas contas. Duas ao mesmo tempo (`yarn test:e2e` com o modo `--ui`
+aberto, ou duas máquinas) apagam os dados uma da outra no meio do ciclo — os sintomas são 404 na página do edital ou
+"inscrições encerradas" sem as inscrições do autor.
+
+Depois de mudar o `.env`, reinicie o `yarn dev`: o Sentry do servidor é iniciado uma vez, na subida (sem isso o teste
+"Sentry recebe erro do servidor" avisa que o servidor iniciou sem DSN). Os relatórios ficam em `test-results/`; se o
+OneDrive estiver sincronizando a pasta e aparecer `ENOENT`, use `--output` apontando para fora dela.
 
 ## O que acontece
 
