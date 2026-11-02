@@ -1,6 +1,8 @@
 import { createTRPCRouter } from '@/trpc/init'
+import { adminRouter } from './admin'
 import { charactersRouter } from './characters'
 import { commentsRouter } from './comments'
+import { interpretersRouter } from './interpreters'
 import { onboardingRouter } from './onboarding'
 import { ratingsRouter } from './ratings'
 import { scriptsRouter } from './scripts'
@@ -13,6 +15,8 @@ export const appRouter = createTRPCRouter({
   ratings: ratingsRouter,
   characters: charactersRouter,
   onboarding: onboardingRouter,
+  interpreters: interpretersRouter,
+  admin: adminRouter,
 })
 
 export type AppRouter = typeof appRouter
