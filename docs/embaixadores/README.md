@@ -71,3 +71,35 @@ Fotos em `fotos/`: `*-original.jpg` (referência), `*-retrato.jpg` (4:5, card) e
 - [ ] URLs dos cursos e redes
 - [ ] Autorização de uso de imagem e fala
 - Não publicar o e-mail e o telefone que aparecem no portfólio
+
+---
+
+## Luca Paiva Mello
+
+**Papel:** Fundador da Scriptonita Films
+
+**Frase curta:**
+> Roteirista e produtor duas vezes indicado ao Emmy Internacional, criador da primeira sitcom infantil brasileira, *Bugados*.
+
+**Bio média:**
+> Duas vezes indicado ao Emmy® Internacional, Luca é roteirista e produtor de sucessos como *Bugados*, *Julie e os Fantasmas*, *Descolados* e *O Negócio*. Já desenvolveu mais de 400 episódios de ficção e adaptou para o cinema obras de Pedro Bandeira e Camilo Castelo Branco, como *A Droga da Obediência* e *Memórias do Cárcere*. Hoje adapta os quadrinhos *Necromorfus*, de Gabriel Arrais, para o mercado internacional e assina o longa *Gatilhos*.
+
+**Destaques:**
+- Duas indicações ao Emmy® Internacional
+- 400+ episódios de ficção desenvolvidos
+- Criou *Bugados*, a primeira sitcom infantil brasileira
+- Séries: *Julie e os Fantasmas*, *Descolados*, *O Negócio*
+- Adaptações literárias: *A Droga da Obediência* (Pedro Bandeira), *Memórias do Cárcere* (Camilo Castelo Branco)
+- Em andamento: *Necromorfus* (quadrinhos de Gabriel Arrais, para o mercado internacional) e o longa *Gatilhos*
+- Palestrante no painel "Da página para as telas: como grandes histórias viram filmes e conquistam novas audiências"
+
+**Links:** Scriptonita Films; falta a URL.
+
+**Foto:** `fotos/luca-paiva-mello-retrato.jpg` (330×400, P&B, recortada de um print). Baixa resolução: serve só como placeholder.
+
+**Pendências:**
+- [ ] Confirmar a grafia do nome: "Luca" (como no material) ou "Lucca"
+- [ ] Foto original em alta resolução (e crédito; esta veio do material de um evento)
+- [ ] Depoimento sobre o Antes da Tela
+- [ ] URL da Scriptonita e redes
+- [ ] Autorização de uso de imagem e fala
