@@ -54,7 +54,8 @@ OneDrive estiver sincronizando a pasta e aparecer `ENOENT`, use `--output` apont
   sem e-mail real), faz login de cada um (sessões em `e2e/.auth/`, fora do git), zera o estado da última execução
   e prepara os dados: admin, roteiro publicado do autor, onboarding concluído (menos para o "novato").
 - **Testes**
-  - `onboarding.spec.ts` — primeiro login de um leitor até o feed.
+  - `onboarding.spec.ts` — primeiro login de cada tipo de onboarding (leitor, roteirista, intérprete com e sem cadastro,
+    todas as intenções), com a conta "novato" zerada antes de cada teste.
   - `editais.spec.ts` — ciclo completo: cadastro e aprovação do intérprete → edital → inscrição → casting →
     finalista → escolha do elenco → voto pelo link compartilhado (com documento) → vencedor.
   - `publico.spec.ts` — páginas públicas e rotas protegidas para visitante.
