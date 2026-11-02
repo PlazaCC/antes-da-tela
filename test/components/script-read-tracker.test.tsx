@@ -8,7 +8,13 @@ vi.mock('posthog-js', () => ({ default: { capture: vi.fn() } }))
 const viewer = { currentPage: 1, totalPages: 0, isDocumentReady: false }
 vi.mock('@/components/pdf-viewer', () => ({ usePdfViewer: () => viewer }))
 
-const PROPS = { scriptId: 's1', genre: 'drama', isOwner: false }
+const recordRead = vi.fn()
+const useRecordRead = vi.fn<(scriptId: string, enabled: boolean) => typeof recordRead>(() => recordRead)
+vi.mock('@/lib/hooks/use-record-read', () => ({
+  useRecordRead: (scriptId: string, enabled: boolean) => useRecordRead(scriptId, enabled),
+}))
+
+const PROPS = { scriptId: 's1', genre: 'drama', isOwner: false, isSignedIn: true }
 
 function events(name: string) {
   return vi.mocked(posthog.capture).mock.calls.filter(([event]) => event === name)
@@ -17,6 +23,8 @@ function events(name: string) {
 describe('ScriptReadTracker', () => {
   beforeEach(() => {
     vi.mocked(posthog.capture).mockClear()
+    recordRead.mockClear()
+    useRecordRead.mockClear()
     Object.assign(viewer, { currentPage: 1, totalPages: 0, isDocumentReady: false })
   })
 
@@ -56,5 +64,17 @@ describe('ScriptReadTracker', () => {
       pages_total: 100,
       is_owner: false,
     })
+  })
+
+  it('passes the current page to useRecordRead, enabled only for signed-in non-authors', () => {
+    Object.assign(viewer, { currentPage: 12, totalPages: 100, isDocumentReady: true })
+    render(<ScriptReadTracker {...PROPS} />)
+    expect(useRecordRead).toHaveBeenLastCalledWith('s1', true)
+    expect(recordRead).toHaveBeenCalledWith(12, 100)
+
+    render(<ScriptReadTracker {...PROPS} isOwner />)
+    expect(useRecordRead).toHaveBeenLastCalledWith('s1', false)
+    render(<ScriptReadTracker {...PROPS} isSignedIn={false} />)
+    expect(useRecordRead).toHaveBeenLastCalledWith('s1', false)
   })
 })
