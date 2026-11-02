@@ -10,6 +10,7 @@ import {
 import { PdfFullscreenDialog } from '@/components/pdf-viewer/pdf-fullscreen-dialog'
 import { CharactersSheet } from '@/components/script-page/characters-sheet'
 import { ScriptPageSubHeader } from '@/components/script-page/script-page-sub-header'
+import { ScriptReadTracker } from '@/components/script-page/script-read-tracker'
 import { ScriptSidePanels } from '@/components/script-page/script-side-panels'
 import {
   AlertDialog,
@@ -113,7 +114,7 @@ export function ScriptPageClient({
 
   const handleRate = (value: number) => {
     rateMutation.mutate({ scriptId: script!.id, score: value })
-    posthog.capture('script_rated', { script_id: script!.id, score: value })
+    posthog.capture('script_rated', { script_id: script!.id, genre: script!.genre, score: value })
   }
 
   const handleDelete = () => {
@@ -161,6 +162,7 @@ export function ScriptPageClient({
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden bg-bg-base">
       {pdfUrl ? (
         <PdfViewerProvider url={pdfUrl} syncToStore>
+          <ScriptReadTracker scriptId={script.id} genre={script.genre} isOwner={isOwner} />
           <ScriptPageSubHeader
             {...subHeaderProps}
             extra={
