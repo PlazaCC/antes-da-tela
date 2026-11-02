@@ -202,12 +202,15 @@ Três grupos na página, cada item com logo + nome + link:
 | Nome | Link | Logo | Descrição |
 | :--- | :--- | :--- | :--- |
 | Pomodoro Studios | https://www.pomodorostudios.art/ | `logos/pomodoro-studios-branco.png` (262×62, só versão para fundo escuro) | pendente |
+| Red Cave Audiovisual | https://www.instagram.com/redcaveprodutora/ | `logos/red-cave-branco.png` (890×211, só versão para fundo escuro) | pendente |
 
 **Pendências:**
 - [x] Nome oficial: Pomodoro Studios (como no logo)
-- [ ] Confirmar se a Pomodoro quer aparecer na página (retirada por enquanto; logo continua em `public/embaixadores/pomodoro-studios.png`)
+- [x] Pomodoro aprovou aparecer na página (02/11/2026)
 - [ ] Logo da Pomodoro em SVG ou PNG maior, e versão para fundo claro
 - [x] Site próprio: pomodorostudios.art (Instagram: @pomodorostudios)
+- [x] Red Cave Audiovisual aprovada (02/11/2026); link é o Instagram @redcaveprodutora
+- [ ] Site próprio da Red Cave, se houver
 - [ ] Uma linha sobre o que fazem e qual é a parceria
 - [ ] Confirmar os nomes por extenso de ABRA e FRAPA
 - [ ] Logos oficiais de ABRA e FRAPA (pedir às próprias instituições, com as regras de uso)

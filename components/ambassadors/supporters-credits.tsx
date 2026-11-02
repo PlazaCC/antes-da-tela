@@ -7,7 +7,7 @@ interface SupportersCreditsProps {
 
 export function SupportersCredits({ supporters }: SupportersCreditsProps) {
   return (
-    <ul className='mx-auto grid max-w-[720px] gap-10 md:grid-cols-2 md:gap-16'>
+    <ul className='grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4 lg:gap-12'>
       {supporters.map((supporter) => (
         <li key={supporter.name}>
           <a
@@ -23,7 +23,7 @@ export function SupportersCredits({ supporters }: SupportersCreditsProps) {
                   alt={supporter.name}
                   width={supporter.logo.width}
                   height={supporter.logo.height}
-                  className='opacity-90 brightness-0 invert transition-opacity group-hover:opacity-100'
+                  className='h-auto max-w-full opacity-90 brightness-0 invert transition-opacity group-hover:opacity-100'
                 />
               ) : (
                 <span className='[font-family:var(--font-display)] text-[40px] font-semibold leading-none tracking-[-0.02em] text-text-primary'>

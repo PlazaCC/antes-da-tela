@@ -24,6 +24,9 @@ env:
   # main → Production env vars; dev → Preview env vars of the `dev` branch.
   VERCEL_TARGET: ${{ github.ref_name == 'main' && 'production' || 'preview' }}
   PROD_FLAG: ${{ github.ref_name == 'main' && '--prod' || '' }}
+  # Branch-specific overrides exist only for Preview: the Vercel API refuses
+  # `--git-branch` with `--environment=production`.
+  GIT_BRANCH_FLAG: ${{ github.ref_name != 'main' && format('--git-branch={0}', github.ref_name) || '' }}
 
 jobs:
   deploy:
@@ -74,7 +77,7 @@ jobs:
           yarn db:migrate:verbose
 
       - name: Pull Vercel settings and env vars
-        run: npx --yes $VERCEL_CLI pull --yes --environment=$VERCEL_TARGET --git-branch=${{ github.ref_name }} --token=$VERCEL_TOKEN
+        run: npx --yes $VERCEL_CLI pull --yes --environment=$VERCEL_TARGET $GIT_BRANCH_FLAG --token=$VERCEL_TOKEN
 
       - name: Build
         # Vercel "Sensitive" variables are not returned by `vercel pull`: the
