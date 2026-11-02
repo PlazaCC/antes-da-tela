@@ -10,23 +10,19 @@ Criam usuários de teste, editais, castings e votos — por isso **nunca** apont
    ```bash
    yarn playwright install chromium
    ```
-3. No mesmo arquivo de ambiente, confirme o banco de dev (trava contra produção):
+3. Crie o arquivo dos testes a partir do modelo (ele é ignorado pelo git):
    ```bash
-   E2E_SUPABASE_URL=<mesmo valor de NEXT_PUBLIC_SUPABASE_URL do projeto de DEV>
+   cp .env.e2e.example .env.e2e
    ```
-   Também são necessárias `SUPABASE_SERVICE_ROLE_KEY` e `CLERK_SECRET_KEY` (de dev) para preparar os dados.
+   Preencha ao menos `E2E_SUPABASE_URL` = mesmo valor de `NEXT_PUBLIC_SUPABASE_URL` do projeto de **dev**
+   (trava contra produção). As variáveis do app (`SUPABASE_SERVICE_ROLE_KEY`, `CLERK_SECRET_KEY` de dev etc.)
+   continuam vindo do `.env.local` / `.env`.
 4. Para os uploads (apresentação do intérprete), as variáveis `AWS_*` precisam existir — o envio ao S3 é
    interceptado pelo teste, mas o app ainda assina a URL de upload.
 
-5. Opcional — confirmação do lado de cada serviço (sem elas, os testes de integração confirmam que o app enviou e o
-   serviço aceitou):
-   ```bash
-   E2E_SENTRY_API_TOKEN=   # token pessoal do Sentry com event:read (confere o evento no projeto SENTRY_PROJECT)
-   E2E_SENTRY_API_URL=     # padrão https://sentry.io (use https://us.sentry.io ou de.sentry.io conforme a região)
-   SENTRY_ORG=             # slug da organização
-   SENTRY_PROJECT=         # slug do projeto de DEV
-   E2E_RESEND_API_KEY=     # chave Resend "Full access" (confere a entrega); as chaves do app são só de envio
-   ```
+5. Opcional — no `.env.e2e`, as chaves que confirmam do lado de cada serviço (`E2E_SENTRY_API_TOKEN`,
+   `SENTRY_ORG`, `SENTRY_PROJECT`, `E2E_RESEND_API_KEY`). Sem elas, os testes de integração confirmam que o app
+   enviou e o serviço aceitou; com elas, também que o evento apareceu no Sentry e que o e-mail foi entregue.
 
 E-mails: os testes só enviam para os endereços de teste do Resend (`delivered@resend.dev`, e o intérprete de teste
 recebe em `delivered+e2e-interprete@resend.dev`), que simulam entrega sem tráfego real.

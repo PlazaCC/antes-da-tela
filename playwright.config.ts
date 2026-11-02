@@ -1,7 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 import { config } from 'dotenv'
 
-// Same precedence as the app: .env.local wins over .env.
+// E2E-only settings first (.env.e2e, gitignored; see .env.e2e.example), then the
+// app's own files with the same precedence as the app: .env.local wins over .env.
+config({ path: '.env.e2e', quiet: true })
 config({ path: '.env.local', quiet: true })
 config({ path: '.env', quiet: true })
 
