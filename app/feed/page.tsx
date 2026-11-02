@@ -1,4 +1,6 @@
 import { HomeSkeleton } from '@/components/skeletons'
+import { getAppUser } from '@/lib/auth/app-user'
+import { redirectToOnboardingIfNeeded } from '@/lib/auth/onboarding'
 import { HydrateClient, getQueryClient, trpc } from '@/trpc/server'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
@@ -10,6 +12,9 @@ export const metadata: Metadata = {
 }
 
 async function PrefetchedFeed() {
+  // Signed-in users land here after sign-up/login: first stop is the onboarding.
+  await redirectToOnboardingIfNeeded(await getAppUser(), '/feed')
+
   const queryClient = getQueryClient()
   await Promise.all([
     queryClient.prefetchQuery(trpc.scripts.listRecent.queryOptions({ limit: 12 })),

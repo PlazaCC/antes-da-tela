@@ -13,6 +13,8 @@ const LINKS: { heading: string; items: { label: string; href: string }[] }[] = [
     heading: 'Plataforma',
     items: [
       { label: 'Explorar', href: '/feed' },
+      { label: 'Editais', href: '/editais' },
+      { label: 'Embaixadores', href: '/embaixadores' },
       { label: 'Publicar roteiro', href: '/publish' },
       { label: 'Meus roteiros', href: '/profile/scripts' },
       { label: 'Configurações', href: '/profile/edit' },

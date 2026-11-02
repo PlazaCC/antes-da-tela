@@ -1,9 +1,12 @@
 import { relations, sql } from 'drizzle-orm'
 import {
+  type AnyPgColumn,
   boolean,
   check,
+  date,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgPolicy,
   pgTable,
@@ -28,6 +31,13 @@ export const users = pgTable(
     email: text('email').notNull().unique(),
     image: text('image'),
     bio: text('bio'),
+    // Public profile fields collected in onboarding (RFC-006). How the user
+    // wants to be called, shown instead of `name` when set.
+    displayName: text('display_name'),
+    pronouns: text('pronouns'),
+    location: text('location'),
+    // { instagram?, website?, portfolio? } — see lib/validators/profile.ts.
+    links: jsonb('links').$type<{ instagram?: string; website?: string; portfolio?: string }>(),
     // Deprecated: replaced by user_documents (RFC-005 §3). Kept until the
     // contract migration drops it; the app no longer reads or writes it.
     cpf: text('cpf').unique(),
@@ -82,6 +92,408 @@ export const userDocuments = pgTable(
       for: 'all',
       using: sql`(select public.current_user_id()) = user_id`,
       withCheck: sql`(select public.current_user_id()) = user_id`,
+    }),
+  ],
+)
+
+// ── Onboarding (RFC-006) ─────────────────────────────────────────────────────
+// Private per-user data: what the user came to do (intents), private profile
+// fields and whether the first-login onboarding is done. Owner-only, like
+// user_documents — `users` is publicly readable.
+
+export const userIntentEnum = pgEnum('user_intent', ['reader', 'producer', 'interpreter'])
+
+export const userOnboarding = pgTable(
+  'user_onboarding',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    intents: userIntentEnum('intents').array().default(sql`'{}'::user_intent[]`).notNull(),
+    // Private: never part of the public profile.
+    gender: text('gender'),
+    // Null until the user finishes (or skips through) the onboarding.
+    completedAt: timestamp('completed_at'),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  () => [
+    pgPolicy('Owners manage their own onboarding', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id`,
+    }),
+  ],
+)
+
+// Content preferences (onboarding survey, editable in /profile/preferences).
+// Values come from lib/constants/preferences.ts.
+export const userPreferences = pgTable(
+  'user_preferences',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    genres: text('genres').array().default(sql`'{}'::text[]`).notNull(),
+    formats: text('formats').array().default(sql`'{}'::text[]`).notNull(),
+    themes: text('themes').array().default(sql`'{}'::text[]`).notNull(),
+    goals: text('goals').array().default(sql`'{}'::text[]`).notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  () => [
+    pgPolicy('Owners manage their own preferences', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id`,
+    }),
+  ],
+)
+
+// ── Admins (RFC-006 D6) ──────────────────────────────────────────────────────
+// Staff accounts, inserted manually in the database. Not a `users` column:
+// users can UPDATE their own row, so a flag there could be self-granted. No
+// privileges for anon/authenticated — read only through public.is_admin()
+// (SECURITY DEFINER, drizzle/0022_interpreters.sql).
+
+export const admins = pgTable('admins', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}).enableRLS()
+
+// ── Interpreter profiles (RFC-006 phase 2) ───────────────────────────────────
+// Actor/narrator registration, reviewed by the staff before it counts. The
+// owner submits (always back to `pending`); only admins approve or reject.
+// The presentation media lives under the private `interpreters/` S3 prefix and
+// is served through presigned GET URLs.
+
+export const interpreterModalityEnum = pgEnum('interpreter_modality', ['acting', 'narration'])
+export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 'rejected'])
+
+export const interpreterProfiles = pgTable(
+  'interpreter_profiles',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    modalities: interpreterModalityEnum('modalities').array().notNull(),
+    status: reviewStatusEnum('status').default('pending').notNull(),
+    // S3 key `interpreters/{userId}/...`; video when acting, audio when only narrating.
+    mediaPath: text('media_path').notNull(),
+    mediaType: text('media_type').notNull(),
+    durationSeconds: integer('duration_seconds').notNull(),
+    birthDate: date('birth_date').notNull(),
+    experience: text('experience'),
+    ageRange: text('age_range'),
+    languages: text('languages'),
+    drt: text('drt'),
+    // Image/voice use consent (RFC-006 D4); provisional wording, see lib/constants/interpreters.ts.
+    consentAt: timestamp('consent_at').notNull(),
+    reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+    reviewedAt: timestamp('reviewed_at'),
+    rejectionReason: text('rejection_reason'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('interpreter_profiles_status_idx').on(table.status),
+    check('interpreter_profiles_media_type_check', sql`${table.mediaType} in ('video', 'audio')`),
+    check('interpreter_profiles_duration_check', sql`${table.durationSeconds} between 1 and 30`),
+    check('interpreter_profiles_modalities_check', sql`cardinality(${table.modalities}) between 1 and 2`),
+    pgPolicy('Owners and admins read interpreter profiles', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'select',
+      using: sql`(select public.current_user_id()) = user_id or (select public.is_admin())`,
+    }),
+    // Submitting (insert or resubmit) always lands in review, by an adult (RFC-006 D5).
+    pgPolicy('Owners submit their interpreter profile', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'insert',
+      withCheck: sql`(select public.current_user_id()) = user_id and status = 'pending' and reviewed_by is null and birth_date <= current_date - interval '18 years'`,
+    }),
+    pgPolicy('Owners resubmit their interpreter profile', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.current_user_id()) = user_id`,
+      withCheck: sql`(select public.current_user_id()) = user_id and status = 'pending' and reviewed_by is null and birth_date <= current_date - interval '18 years'`,
+    }),
+    pgPolicy('Admins review interpreter profiles', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.is_admin())`,
+      withCheck: sql`(select public.is_admin())`,
+    }),
+  ],
+)
+
+// ── Script calls / editais (RFC-006 phase 3) ─────────────────────────────────
+// Created by admins. A call moves through phases by hand (admin "advance
+// phase"); the phase gates what users can do (enter scripts, send castings,
+// vote). Drafts are visible to admins only.
+
+export const callPhaseEnum = pgEnum('call_phase', ['draft', 'submissions', 'casting', 'curation', 'voting', 'finished'])
+
+export const calls = pgTable(
+  'calls',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: text('slug').notNull().unique(),
+    title: text('title').notNull(),
+    description: text('description'),
+    partner: text('partner'),
+    rules: text('rules'),
+    phase: callPhaseEnum('phase').default('draft').notNull(),
+    // Informative schedule shown on the call page; phases still change by hand.
+    submissionsEndAt: timestamp('submissions_end_at'),
+    castingEndAt: timestamp('casting_end_at'),
+    votingStartAt: timestamp('voting_start_at'),
+    votingEndAt: timestamp('voting_end_at'),
+    // Result and live (RFC-006 phases 5–6). The live and its ticket are external
+    // for now (no payment integration); the recording link is shown to everyone.
+    winnerEntryId: uuid('winner_entry_id').references((): AnyPgColumn => callEntries.id, { onDelete: 'set null' }),
+    liveAt: timestamp('live_at'),
+    liveUrl: text('live_url'),
+    ticketUrl: text('ticket_url'),
+    ticketPriceCents: integer('ticket_price_cents'),
+    castSharePercent: integer('cast_share_percent'),
+    recordingUrl: text('recording_url'),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  () => [
+    pgPolicy('Published calls are publicly readable', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`phase <> 'draft' or (select public.is_admin())`,
+    }),
+    pgPolicy('Admins manage calls', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`(select public.is_admin())`,
+      withCheck: sql`(select public.is_admin())`,
+    }),
+  ],
+)
+
+// A published script entered in a call. Reviewed by admins; only approved
+// entries are public. Authors enter (pending) and withdraw while the call is
+// open for submissions.
+export const callEntries = pgTable(
+  'call_entries',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    callId: uuid('call_id')
+      .notNull()
+      .references(() => calls.id, { onDelete: 'cascade' }),
+    scriptId: uuid('script_id')
+      .notNull()
+      .references(() => scripts.id, { onDelete: 'cascade' }),
+    authorId: uuid('author_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: reviewStatusEnum('status').default('pending').notNull(),
+    reviewReason: text('review_reason'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('call_entries_call_script_unique').on(table.callId, table.scriptId),
+    index('call_entries_author_idx').on(table.authorId),
+    pgPolicy('Approved entries are public, own and admin always', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`status = 'approved' or (select public.current_user_id()) = author_id or (select public.is_admin())`,
+    }),
+    pgPolicy('Authors enter their published scripts while submissions are open', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'insert',
+      withCheck: sql`(select public.current_user_id()) = author_id and status = 'pending' and review_reason is null
+        and exists(select 1 from scripts s where s.id = script_id and s.author_id = call_entries.author_id and s.status = 'published')
+        and exists(select 1 from calls c where c.id = call_id and c.phase = 'submissions')`,
+    }),
+    pgPolicy('Authors withdraw pending entries while submissions are open', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'delete',
+      using: sql`(select public.current_user_id()) = author_id and status = 'pending'
+        and exists(select 1 from calls c where c.id = call_id and c.phase = 'submissions')`,
+    }),
+    pgPolicy('Admins review entries', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.is_admin())`,
+      withCheck: sql`(select public.is_admin())`,
+    }),
+  ],
+)
+
+// Characters to be cast for an entry. A snapshot seeded from the script's
+// characters: script_characters is rewritten on every script edit (new ids),
+// which would orphan castings. Editable by the author while submissions are open.
+export const callCharacters = pgTable(
+  'call_characters',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    entryId: uuid('entry_id')
+      .notNull()
+      .references(() => callEntries.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    apparentAge: text('apparent_age'),
+    gender: text('gender'),
+    traits: text('traits').array().default(sql`'{}'::text[]`).notNull(),
+    modalities: interpreterModalityEnum('modalities').array().notNull(),
+    // Where to find the character in the script (page/scene), for the casting.
+    reference: text('reference'),
+    sortOrder: integer('sort_order').default(0).notNull(),
+  },
+  (table) => [
+    index('call_characters_entry_idx').on(table.entryId),
+    check('call_characters_modalities_check', sql`cardinality(${table.modalities}) between 1 and 2`),
+    pgPolicy('Call characters follow entry visibility', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`exists(select 1 from call_entries e where e.id = entry_id)`,
+    }),
+    pgPolicy('Authors edit characters while submissions are open', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`exists(select 1 from call_entries e join calls c on c.id = e.call_id
+        where e.id = entry_id and e.author_id = (select public.current_user_id()) and c.phase = 'submissions')`,
+      withCheck: sql`exists(select 1 from call_entries e join calls c on c.id = e.call_id
+        where e.id = entry_id and e.author_id = (select public.current_user_id()) and c.phase = 'submissions')`,
+    }),
+  ],
+)
+
+// ── Casting (RFC-006 phase 4) ─────────────────────────────────────────────────
+// Approved interpreters send a ≤30s take per character while the call is in
+// `casting`. The staff shortlists up to 3 per character; the entry's author
+// picks one of them during `curation` (select_cast RPC). Authors only ever see
+// shortlisted/selected takes.
+
+export const castingStatusEnum = pgEnum('casting_status', ['submitted', 'shortlisted', 'selected', 'rejected'])
+
+export const castingSubmissions = pgTable(
+  'casting_submissions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    characterId: uuid('character_id')
+      .notNull()
+      .references(() => callCharacters.id, { onDelete: 'cascade' }),
+    interpreterId: uuid('interpreter_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    // `interpreters/{interpreterId}/...` — a new take or the registration media.
+    mediaPath: text('media_path').notNull(),
+    mediaType: text('media_type').notNull(),
+    durationSeconds: integer('duration_seconds').notNull(),
+    note: text('note'),
+    status: castingStatusEnum('status').default('submitted').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('casting_submissions_character_interpreter_unique').on(table.characterId, table.interpreterId),
+    check('casting_submissions_media_type_check', sql`${table.mediaType} in ('video', 'audio')`),
+    check('casting_submissions_duration_check', sql`${table.durationSeconds} between 1 and 30`),
+    pgPolicy('Interpreters, admins and (shortlisted) authors read castings', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'select',
+      using: sql`(select public.current_user_id()) = interpreter_id or (select public.is_admin())
+        or (status in ('shortlisted', 'selected') and exists(select 1 from call_characters ch join call_entries e on e.id = ch.entry_id
+          where ch.id = character_id and e.author_id = (select public.current_user_id())))`,
+    }),
+    // Approved interpreter, approved entry, call in casting, take not yet reviewed.
+    pgPolicy('Approved interpreters send castings while the call is casting', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'insert',
+      withCheck: sql`(select public.current_user_id()) = interpreter_id and status = 'submitted'
+        and exists(select 1 from interpreter_profiles i where i.user_id = interpreter_id and i.status = 'approved')
+        and exists(select 1 from call_characters ch join call_entries e on e.id = ch.entry_id join calls c on c.id = e.call_id
+          where ch.id = character_id and e.status = 'approved' and c.phase = 'casting')`,
+    }),
+    pgPolicy('Interpreters replace their take while the call is casting', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.current_user_id()) = interpreter_id and status = 'submitted'`,
+      withCheck: sql`(select public.current_user_id()) = interpreter_id and status = 'submitted'
+        and exists(select 1 from call_characters ch join call_entries e on e.id = ch.entry_id join calls c on c.id = e.call_id
+          where ch.id = character_id and c.phase = 'casting')`,
+    }),
+    pgPolicy('Interpreters withdraw their take while the call is casting', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'delete',
+      using: sql`(select public.current_user_id()) = interpreter_id and status = 'submitted'
+        and exists(select 1 from call_characters ch join call_entries e on e.id = ch.entry_id join calls c on c.id = e.call_id
+          where ch.id = character_id and c.phase = 'casting')`,
+    }),
+    pgPolicy('Admins curate castings', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.is_admin())`,
+      withCheck: sql`(select public.is_admin())`,
+    }),
+  ],
+)
+
+// ── Votes (RFC-006 phase 5, D10) ─────────────────────────────────────────────
+// One vote per user per call, only while the call is `voting`, for an approved
+// entry of that call, by a user with an identity document. The verified e-mail
+// (Clerk) is checked in the API. Users only read their own vote; totals come
+// from call_vote_counts() once the call is finished (or for admins).
+
+export const callVotes = pgTable(
+  'call_votes',
+  {
+    callId: uuid('call_id')
+      .notNull()
+      .references(() => calls.id, { onDelete: 'cascade' }),
+    entryId: uuid('entry_id')
+      .notNull()
+      .references(() => callEntries.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.callId, table.userId] }),
+    index('call_votes_entry_idx').on(table.entryId),
+    pgPolicy('Users read their own votes', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'select',
+      using: sql`(select public.current_user_id()) = user_id`,
+    }),
+    pgPolicy('Documented users vote once while the call is voting', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'insert',
+      withCheck: sql`(select public.current_user_id()) = user_id
+        and exists(select 1 from user_documents d where d.user_id = call_votes.user_id)
+        and exists(select 1 from call_entries e join calls c on c.id = e.call_id
+          where e.id = entry_id and e.call_id = call_votes.call_id and e.status = 'approved' and c.phase = 'voting')`,
     }),
   ],
 )

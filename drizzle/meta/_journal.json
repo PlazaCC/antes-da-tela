@@ -148,6 +148,48 @@
       "when": 1792463162180,
       "tag": "0020_script_characters",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793229535600,
+      "tag": "0021_onboarding",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793233413521,
+      "tag": "0022_interpreters",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793236718628,
+      "tag": "0023_calls",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793237262581,
+      "tag": "0024_casting",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793237622283,
+      "tag": "0025_votes",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793569287595,
+      "tag": "0026_users_profile_update_grant",
+      "breakpoints": true
     }
   ]
 }

@@ -1,13 +1,16 @@
 import { getAppUser } from '@/lib/auth/app-user'
 import { authenticatedProcedure, createTRPCRouter, publicProcedure } from '@/trpc/init'
 import { documentSchema } from '@/lib/validators/document'
+import { updateProfileSchema } from '@/lib/validators/profile'
 import { z } from 'zod'
 
 export const usersRouter = createTRPCRouter({
-  // The signed-in user's `users.id` (uuid), or null when signed out.
-  me: publicProcedure.query(async () => {
+  // The signed-in user's `users.id` (uuid) and staff flag, or null when signed out.
+  me: publicProcedure.query(async ({ ctx }) => {
     const me = await getAppUser()
-    return me ? { id: me.id, email: me.email } : null
+    if (!me) return null
+    const { data: isAdmin } = await ctx.supabase.rpc('is_admin')
+    return { id: me.id, email: me.email, isAdmin: isAdmin === true }
   }),
 
   getProfile: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ input, ctx }) => {
@@ -24,13 +27,7 @@ export const usersRouter = createTRPCRouter({
   }),
 
   updateProfile: authenticatedProcedure
-    .input(
-      z.object({
-        name: z.string().min(2).max(100).optional(),
-        bio: z.string().max(500).nullable().optional(),
-        image: z.string().url().optional(),
-      }),
-    )
+    .input(updateProfileSchema)
     .mutation(async ({ input, ctx }) => {
       return ctx.usersService.updateProfile(ctx.user!.id, input)
     }),

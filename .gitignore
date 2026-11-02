@@ -33,7 +33,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*.local
 .env
-
+.env.prod
 # vercel
 .vercel
 
@@ -66,3 +66,9 @@ skills-lock.json
 graphify-out/cache/
 graphify-out/manifest.json
 graphify-out/cost.json
+
+# Playwright (e2e)
+/.env.e2e
+/e2e/.auth/
+/playwright-report/
+/test-results/

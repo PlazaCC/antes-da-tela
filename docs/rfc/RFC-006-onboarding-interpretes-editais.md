@@ -1,0 +1,371 @@
+# RFC-006 — Onboarding por perfil, Intérpretes e Editais de Roteiro
+
+| Campo  | Valor                                                                  |
+| :----- | :--------------------------------------------------------------------- |
+| Status | Decisões fechadas — Fases 1 a 5 implementadas; Fase 6 (pagamento) no RFC-007 |
+| Data   | 2026-10-16                                                             |
+| Escopo | Onboarding, perfil, intérpretes, editais, casting, votação, admin      |
+| Figma  | [Antes da Tela — node 114-40](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=114-40) |
+
+Reconstrói os dois rascunhos informais (fluxo FRAPA/ABRA e lista de páginas) num fluxo único e
+mapeia o que muda na plataforma. Ordem de trabalho proposta: **1) wireframe low-fi no Figma →
+2) validação com o time → 3) backend → 4) frontend**, em fases que entregam valor isoladas (§6).
+
+---
+
+## 1. Visão geral dos fluxos
+
+```
+                         ┌──────────── primeiro login ────────────┐
+                         ▼                                        │
+                  [O1] Qual a sua intenção?                       │
+          ┌──────────────┼───────────────────┐                    │
+       Leitor        Produtor            Intérprete               │
+          │              │                   │                    │
+   [O2] Completar   [O2] Completar     [O2] Completar perfil      │
+     perfil (opc.)    perfil (opc.)          │                    │
+          │              │             [O4] Cadastro de intérprete│
+          │              │               (opc. — "fazer depois")  │
+   [O3] Pesquisa    [O3] Pesquisa            │                    │
+     (opc.)           (opc.)           [O3] Pesquisa (opc.)       │
+          │              │                   │                    │
+          │         [O5] Publicar            │                    │
+          │           roteiro (opc.)         │                    │
+          ▼              ▼                   ▼                    │
+                       /feed  ◄──────────────────────────────────-┘
+```
+
+Edital (depois que o onboarding existe):
+
+```
+Admin cria edital ─► Roteirista inscreve roteiro + personagens ─► Admin aprova inscrições
+   ─► Intérpretes aprovados enviam casting por personagem ─► Admin faz curadoria (até 3 por personagem)
+   ─► Roteirista escolhe/confirma elenco ─► Votação pública ─► Vencedor ─► Live paga ─► Gravação paga na plataforma
+```
+
+---
+
+## 2. Wireframes low-fi (Figma)
+
+> **Wireframes criados** na página `wireframe` do Figma, frame
+> [Fluxo — Onboarding, Intérpretes & Editais (low-fi)](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=409-187).
+
+Convenções do wireframe: mesmo estilo dos wireframes existentes da página (mobile 412, fundo escuro,
+blocos cinza, Inter); telas de admin em desktop 1280. Cada frame se chama `ID — Nome` para casar com
+esta tabela. Componentes locais `WF/*` (botão, input, chip, card, mídia, upload, stepper, nota) no
+grupo "Componentes WF". Notas amarelas indicam a próxima tela do fluxo e decisões em aberto.
+
+### 2.1 Onboarding
+
+| ID  | Tela | Conteúdo mínimo |
+| :-- | :--- | :-------------- |
+| O1  | Escolha de intenção | 3 cards selecionáveis (Leitor / Produtor / Intérprete) com 1 linha de descrição; **multi-seleção** (ver Q1); CTA "Continuar"; progresso (stepper) |
+| O2  | Completar perfil | Foto, nome, "como quer ser chamado" (nome artístico), pronomes (select + livre), gênero (opcional, "prefiro não dizer"), data de nascimento (opc.), cidade/UF, bio, links (Instagram, site, IMDb/portfolio); "Pular" e "Salvar e continuar" |
+| O3  | Pesquisa de preferências | Chips de gêneros (reaproveita `GENRES` de `lib/constants/scripts.ts`), formatos (longa, curta, série, podcast/áudio), temas/afinidades, faixa etária de interesse, "o que você quer fazer aqui" (ler, dar feedback, descobrir talentos…); "Pular" |
+| O4a | Intérprete — modalidades | Checkbox Atuar / Narrar (um ou os dois); "Fazer depois" leva direto ao O3 |
+| O4b | Intérprete — material | Atuar (ou ambos): upload de **vídeo** até 30 s. Só Narrar: upload de **áudio** até 30 s. Prévia do arquivo, contador de duração, dicas de gravação; campos extras: experiência, DRT (opc.), faixa etária de atuação, sotaques/idiomas |
+| O4c | Intérprete — enviado | "Seu cadastro está em curadoria" + status; CTA seguir para pesquisa |
+| O5  | Produtor — primeiro roteiro | Convite para publicar (leva ao `/publish` existente) ou "Depois" |
+| O6  | Fim | Boas-vindas + atalhos por perfil (feed, editais abertos, perfil) |
+
+### 2.2 Perfil e configurações
+
+| ID  | Tela | Conteúdo mínimo |
+| :-- | :--- | :-------------- |
+| P1  | Editar perfil (estendido) | Campos novos do O2 dentro de `/profile/edit` |
+| P2  | Preferências | O mesmo formulário do O3, editável a qualquer momento (`/profile/preferences`) |
+| P3  | Área do intérprete | Status (pendente / aprovado / reprovado + motivo), modalidades, mídia de apresentação, reenviar; atalho para editais abertos |
+| P4  | Perfil público (selo) | Badge "Intérprete — Ator/Narrador" e player da apresentação (só se aprovado) |
+
+### 2.3 Edital
+
+| ID  | Tela | Conteúdo mínimo |
+| :-- | :--- | :-------------- |
+| E1  | Lista de editais | Cards: nome, organizador/parceiro (FRAPA, ABRA, EBAC), fase atual, prazos |
+| E2  | Página do edital | Regras, cronograma (inscrição → casting → votação → live), roteiros inscritos, CTA por perfil |
+| E3  | Inscrever roteiro | Selecionar roteiro já publicado (lista do autor) + "publicar novo roteiro"; aceite do regulamento |
+| E4  | Personagens | Lista editável: nome, descrição, idade aparente, gênero, características, modalidade (atuar/narrar), cena/trecho de referência (página do PDF ou texto) |
+| E5  | Acompanhamento da inscrição | Status por fase, personagens, nº de castings recebidos, finalistas da curadoria |
+| E6  | Escolha de elenco (roteirista) | Por personagem: até 3 opções curadas (player + perfil) → escolher 1 |
+| E7  | Casting — página do intérprete | Personagens abertos filtrados pela modalidade do intérprete; cards com características |
+| E8  | Casting — envio | Personagem + descrição; opção "usar minha mídia de cadastro" ou enviar nova (≤ 30 s); observação |
+| E9  | Votação | Grid dos roteiros finalistas (logline, elenco, preview), botão votar (1 voto por usuário por edital — Q5), contagem ao fim |
+| E10 | Página do vencedor | Roteiro, elenco, data da live, compra de ingresso / acesso à gravação |
+
+### 2.4 Admin
+
+| ID  | Tela | Conteúdo mínimo |
+| :-- | :--- | :-------------- |
+| A1  | Fila de intérpretes | Tabela: nome, modalidades, data; player; aprovar / reprovar com motivo |
+| A2  | Gestão de editais | Criar/editar edital, datas de cada fase, avançar fase manualmente |
+| A3  | Inscrições do edital | Aprovar/recusar roteiros inscritos |
+| A4  | Curadoria de casting | Por personagem: castings recebidos, marcar até 3 como finalistas |
+| A5  | Resultados | Contagem de votos, declarar vencedor, cadastrar live/gravação |
+
+---
+
+## 3. Estado atual da plataforma (o que já existe)
+
+- **Auth:** Clerk + `users` (id, name, email, image, bio, clerkId, deactivatedAt). `getAppUser()` cria/vincula o usuário no primeiro acesso — é o gancho natural para detectar "primeiro login".
+- **Roteiros:** `scripts`, `script_files`, `audio_files`, publicação em `components/publish/*` (wizard em steps — padrão reaproveitável para o onboarding).
+- **Social:** comentários, reações, ratings, follows.
+- **Não existe:** papel de admin, preferências, campos de perfil estendidos, mídia de vídeo, pagamentos, nenhum conceito de edital/fase.
+
+---
+
+## 4. Backend
+
+### 4.1 Schema (Drizzle — `server/db/schema.ts` + `yarn db:generate`)
+
+**Alterações em `users`**
+
+| Coluna | Tipo | Nota |
+| :----- | :--- | :--- |
+| `display_name` | text | "como quer ser chamado" |
+| `pronouns` | text | |
+| `gender` | text | opcional; **não** expor publicamente sem opt-in (LGPD — dado sensível em alguns contextos) |
+| `location` | text | |
+| `links` | jsonb | `{ instagram, website, portfolio }` |
+| `intents` | `user_intent[]` | enum `reader \| producer \| interpreter` |
+| `role` | enum `user_role` | `user \| admin`, default `user` |
+| `onboarding_completed_at` | timestamp | null = mostrar onboarding |
+
+> `users` é publicamente legível (policy `Users are publicly readable`). Campos privados (gênero,
+> data de nascimento) devem ir para uma tabela própria com RLS só do dono, como foi feito com
+> `user_documents` no RFC-005. Proposta: `user_private_profile`.
+
+**Tabelas novas**
+
+| Tabela | Colunas principais | RLS |
+| :----- | :----------------- | :-- |
+| `user_preferences` | user_id (PK/FK), genres text[], formats text[], themes text[], goals text[], updated_at | dono lê/escreve |
+| `interpreter_profiles` | user_id (PK), modalities `interpreter_modality[]` (`acting \| narration`), status `review_status` (`pending \| approved \| rejected`), media_path, media_type (`video \| audio`), duration_seconds, experience, reviewed_by, reviewed_at, rejection_reason | dono lê/escreve (sem mudar status); público lê se `approved`; admin tudo |
+| `calls` (editais) | id, slug, title, description, partner, phase `call_phase` (`draft \| submissions \| casting \| curation \| voting \| finished`), datas por fase, created_by | público lê se ≠ draft; admin escreve |
+| `call_entries` | id, call_id, script_id, author_id, status `review_status`, created_at; unique(call_id, script_id) | autor cria/lê os seus; público lê aprovados; admin tudo |
+| `call_characters` | id, entry_id, name, description, traits jsonb, modality, reference_page, sort_order | autor da entry escreve; público lê |
+| `casting_submissions` | id, character_id, interpreter_id, media_path, reuses_profile_media bool, note, status (`submitted \| shortlisted \| selected \| rejected`), created_at; unique(character_id, interpreter_id) | intérprete cria/lê os seus; autor do roteiro lê só `shortlisted/selected`; admin tudo |
+| `call_votes` | call_id, entry_id, user_id, created_at; unique(call_id, user_id) | usuário cria o seu; contagem via RPC |
+
+**Migrações custom** (`yarn db:generate --custom <nome>`):
+- `public.is_admin()` (SQL `security definer`, baseada em `current_user_id()`), usada nas policies acima.
+- RPC `call_vote_counts(call_id)` — contagem agregada sem expor quem votou.
+- Policies de storage para os buckets novos.
+- Trigger/constraint para só aceitar voto com `calls.phase = 'voting'` e casting com `phase = 'casting'`.
+
+### 4.2 Storage
+
+| Bucket | Visibilidade | Caminho | Nota |
+| :----- | :----------- | :------ | :--- |
+| `interpreter-media` | privado | `{userId}/{timestamp}_{filename}` | apresentação do intérprete; signed URL no servidor |
+| `casting-media` | privado | `{userId}/{characterId}/{timestamp}_{filename}` | só intérprete dono, admin e (se shortlisted) autor |
+
+- Upload **client-side** (limite de 10 s da Vercel), como já é feito para PDF/áudio.
+- Duração ≤ 30 s validada no client (`HTMLMediaElement.duration`) **e** gravada em `duration_seconds`; limite de tamanho no bucket (ex.: vídeo 50 MB, áudio 5 MB).
+- Formatos: vídeo `mp4/webm/mov`, áudio `mp3/m4a/wav/webm`. Gravar direto pelo navegador (MediaRecorder) fica como melhoria.
+
+### 4.3 tRPC
+
+Novo `adminProcedure` em `trpc/init.ts` (estende `authenticatedProcedure`, exige `ctx.user.role === 'admin'`).
+
+| Router | Procedures |
+| :----- | :--------- |
+| `users` (existente) | `updateProfile` estendido; `setIntents`; `completeOnboarding`; `getPreferences` / `upsertPreferences` |
+| `interpreters` (novo) | `getMine`, `upsert` (modalidades + mídia → status volta a `pending`), `getPublic(userId)` |
+| `calls` (novo) | `list`, `getBySlug`, `createEntry`, `updateEntry`, `upsertCharacters`, `listMyEntries`, `listOpenCharacters` (filtra pela modalidade do intérprete), `submitCasting`, `listMyCastings`, `getShortlist(entryId)` (autor), `selectCast`, `vote`, `getResults` |
+| `admin` (novo) | `listInterpreters`, `reviewInterpreter`, `upsertCall`, `setCallPhase`, `reviewEntry`, `listCastings(characterId)`, `shortlistCasting`, `declareWinner` |
+
+Services em `server/services/*.service.ts` seguindo o padrão atual; validators Zod em `lib/validators`.
+
+### 4.4 Outros serviços
+
+- **Resend:** e-mails de "cadastro de intérprete aprovado/reprovado", "você foi pré-selecionado", "votação aberta", "resultado".
+- **PostHog:** eventos `onboarding_step_viewed/completed/skipped`, `intent_selected`, `interpreter_submitted`, `casting_submitted`, `vote_cast` — mede exatamente o que a POC quer validar.
+- **Pagamentos (live R$ 1,99 + repasse X% para intérpretes):** fora deste RFC. Exige escolher provedor (Stripe / Mercado Pago / Pix), split de pagamento e questões fiscais. Proposta para a POC: live via plataforma externa com ingresso externo e cadastro manual da gravação (A5); integrar pagamento num RFC próprio.
+
+---
+
+## 5. Frontend
+
+### 5.1 Rotas novas
+
+| Rota | Grupo | Telas |
+| :--- | :---- | :---- |
+| `/onboarding` (+ `?step=`) | `(authenticated)` | O1–O6 |
+| `/profile/preferences` | `(authenticated)/(dashboard)` | P2 |
+| `/profile/interpreter` | `(authenticated)/(dashboard)` | P3 |
+| `/editais`, `/editais/[slug]` | público | E1, E2, E9, E10 |
+| `/editais/[slug]/inscricao` | `(authenticated)` | E3, E4, E5, E6 |
+| `/editais/[slug]/casting` | `(authenticated)` | E7, E8 |
+| `/admin/*` | novo grupo `(admin)` com layout que checa `role` | A1–A5 |
+
+### 5.2 Redirecionamento para o onboarding
+
+- Clerk: `signUpForceRedirectUrl="/onboarding"` nas páginas de sign-up.
+- Fallback: em `app/(authenticated)/layout.tsx` (e no `/feed`), se `onboarding_completed_at` é null → redirect para `/onboarding`. Usuários antigos também passam pelo onboarding (D2): `onboarding_completed_at` nasce nulo para todos.
+- Pular qualquer passo nunca bloqueia; o último passo sempre grava `onboarding_completed_at`.
+
+### 5.3 Componentes (wrappers sobre `components/ui/`, ≤ 150 linhas/arquivo)
+
+- `components/onboarding/` — `onboarding-wizard`, `intent-step`, `profile-step`, `preferences-step`, `interpreter-step`, `stepper`; estado do wizard em Zustand (igual ao publish).
+- `components/preferences/preferences-form` — compartilhado entre O3 e P2.
+- `components/interpreter/` — `media-upload-field` (valida duração, preview de vídeo/áudio), `interpreter-status-card`, `interpreter-badge`.
+- `components/calls/` — `call-card`, `call-timeline`, `character-editor`, `character-card`, `casting-form`, `shortlist-picker`, `vote-card`.
+- `components/admin/` — `review-queue-table`, `media-review-player`.
+- shadcn possivelmente necessários (via CLI): `checkbox`, `toggle-group`, `table`, `progress`, `stepper` (se houver no registry).
+- Reaproveitar: `components/drag-zone`, `components/audio-player`, `components/publish/file-upload-field`, `components/tag`.
+
+---
+
+## 6. Fases de entrega
+
+| Fase | Entrega | Depende de |
+| :--- | :------ | :--------- |
+| 0 | Wireframes low-fi no Figma (§2) + validação com o time; fechar as perguntas da §7 | conector Figma autorizado |
+| 1 | Onboarding: intents, perfil estendido, preferências, redirect de primeiro login, analytics | — |
+| 2 | Intérpretes: cadastro + mídia, papel admin, fila de aprovação (A1), badge no perfil | 1 |
+| 3 | Editais: criação (admin), inscrição de roteiro + personagens, acompanhamento | 2 (admin) |
+| 4 | Casting: página orientada a personagens, envio, curadoria (A4), escolha do roteirista | 3 |
+| 5 | Votação + vencedor | 4 |
+| 6 | Live/gravação paga e repasse — RFC separado | 5 |
+
+Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
+
+---
+
+## 7. Decisões (2026-10-28)
+
+| # | Tema | Decisão |
+| :- | :--- | :------ |
+| D1 | Intenção | Múltipla. Só **Intérprete** muda o fluxo (cadastro obrigatório para casting, adiável); **Produtor** = fluxo do leitor + convite opcional para publicar |
+| D2 | Usuários já existentes | Também passam pelo onboarding (não marcar `onboarding_completed_at` na migração) |
+| D3 | Mídia de quem atua e narra | Só o vídeo; áudio só para quem apenas narra |
+| D4 | Termo de imagem/voz | Checkbox obrigatório no O4b com texto provisório, trocável depois |
+| D5 | Menores de idade | Bloqueados como intérpretes na POC (data de nascimento obrigatória no O4b, 18+) |
+| D6 | Admin | `users.role` (`user \| admin`), marcado manualmente no banco por enquanto |
+| D7 | Criação de edital | Só admin |
+| D8 | Inscrições por autor | Sem limite de roteiros por edital |
+| D9 | Elenco | Staff seleciona até 3 opções por personagem (A4); o roteirista escolhe 1 entre elas (E6) |
+| D10 | Voto | 1 voto por edital; exige login, **e-mail confirmado e documento cadastrado** (`user_documents`) |
+| D11 | Compartilhamento | Participante (roteirista ou intérprete) compartilha um link que abre direto o edital/roteiro, com cadastro enxuto focado no voto (§8) |
+
+### Fora do escopo desta entrega
+
+- Pagamento da live e repasse ao elenco (RFC próprio).
+- Área de embaixadores/mentores e logos de parceiros (landing).
+
+---
+
+## 8. Link de compartilhamento e cadastro para votar
+
+**Objetivo:** quem participa de um edital divulga a própria participação e traz votos; quem chega pelo link vota com o mínimo de atrito.
+
+**Link**
+- Por roteiro inscrito: `/editais/[slug]/r/[entryId]` — página pública do roteiro no edital (logline, elenco, trecho) com CTA "Votar".
+- Opcional `?ref=<userId>` para atribuição (PostHog `share_link_opened` / `vote_cast` com `ref`). Sem ranking de quem trouxe mais votos na POC.
+- Botão "Compartilhar minha participação" em E5 (roteirista), P3/E8 (intérprete) e E10: Web Share API no mobile, copiar link no desktop, atalhos WhatsApp/Instagram.
+- Metadados Open Graph por roteiro (título, logline, imagem de capa/banner) para a prévia no WhatsApp.
+- Antes da votação abrir, o mesmo link mostra "votação abre em DD/MM" + "Me avise" (e-mail).
+
+**Cadastro para votar** (tela nova **V1–V3** no wireframe)
+1. **V1** — visitante clica em "Votar" → login/cadastro do Clerk com `?next=` de volta para o link (mesmo padrão do "Avaliar" em `components/script-page/rating-box.tsx`). Google ou e-mail com código (o código já confirma o e-mail).
+2. **V2** — se faltar documento: tela única "Para votar, confirme seu documento" reaproveitando `components/profile/document-fields.tsx` (CPF ou documento estrangeiro).
+3. **V3** — voto confirmado + "Compartilhe também" (mesmo link).
+- Quem chega por esse fluxo **pula o onboarding completo** no momento (intents = `reader`, sem perfil/pesquisa); o onboarding aparece depois, como convite, na próxima visita ao feed.
+- Regras no servidor (`calls.vote`): fase = `voting`, e-mail verificado (claim do Clerk), `user_documents` existente, `unique(call_id, user_id)`.
+
+**Impacto no plano**
+- Fase 5 (Votação) ganha: página pública do roteiro no edital, OG dinâmico, botão de compartilhar, fluxo V1–V3 e o "pular onboarding" para quem entra pelo link.
+- Fase 1 já deve prever o parâmetro `next` e a exceção de onboarding para o fluxo de voto.
+
+---
+
+## 9. Implementação
+
+### Fase 1 — Onboarding (feita)
+
+- **Banco** (`drizzle/0021_onboarding.sql`): `users.display_name / pronouns / location / links` (públicos, com GRANT de coluna); tabelas privadas `user_onboarding` (intents, gênero, `completed_at`) e `user_preferences` (gêneros, formatos, temas, objetivos), RLS só do dono. Intenções e gênero ficam fora de `users` porque `users` é público.
+- **API**: router `onboarding` (`getState`, `setIntents`, `setGender`, `complete`, `getPreferences`, `upsertPreferences`); `users.updateProfile` aceita os campos novos.
+- **Redirecionamento**: `redirectToOnboardingIfNeeded` (`lib/auth/onboarding.ts`) no layout autenticado e no `/feed`; leva o `?next=` adiante. Se a consulta falhar (ex.: migração não aplicada), deixa passar.
+- **Telas**: `/onboarding` (O1 intenção → O2 perfil → O4 intérprete* → O3 preferências → O5 publicar* → O6 pronto). O4 é um placeholder até a Fase 2.
+- **Perfil**: `/profile/edit` ganhou os campos novos e a seção "Preferências de conteúdo" (P2 ficou dentro da página de configurações, não em rota própria). Perfil público mostra nome de exibição, pronomes e cidade.
+- **Analytics**: `onboarding_step_viewed/completed/skipped`, `onboarding_intents_selected`, `onboarding_completed`, `preferences_saved`.
+
+### Fase 2 — Intérpretes e admin (feita)
+
+- **Banco** (`drizzle/0022_interpreters.sql`):
+  - `admins` (user_id) — sem privilégios para anon/authenticated; lido só por `public.is_admin()` (SECURITY DEFINER). Admin é marcado à mão: `insert into admins (user_id) values ('<users.id>')`. Não é coluna de `users` porque o dono pode editar a própria linha e se promoveria.
+  - `interpreter_profiles`: modalidades, status (`pending/approved/rejected`), mídia, duração (1–30 s), data de nascimento, experiência, faixa etária, idiomas, DRT, aceite do termo, dados da revisão. RLS: o dono lê e (re)envia sempre como `pending` e só com 18+; admin lê e revisa tudo.
+  - `public.get_interpreter_badge(user_id)`: selo público só de aprovados (modalidades + mídia).
+- **Mídia**: prefixo privado `interpreters/{userId}/` no S3, upload direto do navegador (presign aceita vídeo/áudio e assina o `Content-Length`: vídeo ≤ 80 MB, áudio ≤ 10 MB). Leitura só por URL assinada (1 h) gerada no servidor.
+- **API**: router `interpreters` (`getMine`, `submit`, `getBadge`) e `admin` (`listInterpreters`, `reviewInterpreter`) com `adminProcedure`; `users.me` devolve `isAdmin`.
+- **Telas**: passo O4 real no onboarding (com "Fazer depois"), `/profile/interpreter` (status + reenviar), `/admin/interpretes` (fila A1 com player, aprovar/reprovar com motivo; 404 para quem não é admin), selo no perfil público, itens "Área do intérprete" e "Admin" no menu do usuário.
+- **E-mail**: aprovação/reprovação via Resend (`lib/email`), remetente em `RESEND_FROM_EMAIL`; sem a variável o e-mail é pulado sem erro.
+- **Termo de imagem/voz**: texto provisório em `lib/constants/interpreters.ts` (`CONSENT_TEXT`).
+
+**Pendências de infraestrutura**
+- O bucket S3 é servido publicamente (CDN). Restringir a leitura pública do prefixo `interpreters/` (policy do bucket / CloudFront), senão quem descobrir a chave do arquivo acessa sem a URL assinada.
+- Configurar `RESEND_FROM_EMAIL` com um domínio verificado no Resend.
+
+### Fase 3 — Editais e inscrição (feita)
+
+- **Banco** (`drizzle/0023_calls.sql`):
+  - `calls` (slug, título, parceiro, descrição, regulamento, fase, datas informativas). Fase manual: `draft → submissions → casting → curation → voting → finished`. Rascunho só para admin.
+  - `call_entries` (roteiro publicado inscrito; `pending/approved/rejected`). RLS: o autor inscreve só roteiro próprio publicado e só com o edital em `submissions`; retira enquanto pendente; aprovadas são públicas; admin revisa.
+  - `call_characters`: **cópia** dos personagens por inscrição (com modalidade e cena de referência), preenchida a partir de `script_characters`. Não reaproveita `script_characters` porque essa tabela é regravada a cada edição do roteiro (ids novos), o que apagaria os castings. Editável pelo autor só durante `submissions`.
+- **API**: router `calls` (`list`, `getBySlug`, `myEntries`, `eligibleScripts`, `enter`, `updateCharacters`, `withdraw`); `admin` ganhou `listCalls`, `getCall`, `upsertCall`, `setCallPhase`, `listEntries`, `reviewEntry`.
+- **Telas**: `/editais` (E1), `/editais/[slug]` (E2: cronograma, regulamento, roteiros aprovados, ação da fase), `/editais/[slug]/inscricao` (E3–E5: escolher roteiro, personagens, acompanhar, editar, retirar), `/admin/editais` (A2: lista, criar, editar, avançar fase) e `/admin/editais/[id]` (A3: aprovar/recusar inscrições). Link "Editais" no rodapé e no fim do onboarding.
+
+### Fase 4 — Casting (feita)
+
+- **Banco** (`drizzle/0024_casting.sql`): `casting_submissions` (personagem, intérprete, mídia ≤ 30 s, observação, status `submitted/shortlisted/selected/rejected`, único por personagem + intérprete).
+  - RLS: intérprete **aprovado** envia, troca e retira o próprio take só com o edital em `casting` e a inscrição aprovada; admin vê e cura tudo; o autor da inscrição só vê os takes `shortlisted/selected`.
+  - `public.select_cast(submission_id)` (SECURITY DEFINER): o autor escolhe 1 finalista por personagem, só na fase `curation`.
+  - Até 3 finalistas por personagem (checado no serviço do admin).
+- **Mídia**: o intérprete reaproveita a apresentação do cadastro ou envia um take novo (mesmo prefixo privado `interpreters/{userId}/`).
+- **API**: router `casting` (`openCharacters`, `submit`, `withdraw`, `shortlist`, `selectCast`); `admin.listCastings` e `admin.setCastingStatus`.
+- **Telas**: `/editais/[slug]/casting` (E7/E8: personagens compatíveis com as modalidades do intérprete, filtro, envio/troca/retirada), escolha de elenco na página de inscrição (E6, fase `curation`), `/admin/editais/[id]/casting` (A4: finalistas e recusa). Ações do edital por fase atualizadas.
+
+### Fase 5 — Votação, compartilhamento e vencedor (feita)
+
+- **Banco** (`drizzle/0025_votes.sql`):
+  - `call_votes` (chave `call_id + user_id` = 1 voto por edital). RLS: só com o edital em `voting`, em inscrição aprovada do edital e com documento cadastrado (`user_documents`); cada um lê só o próprio voto.
+  - `calls` ganhou vencedor (`winner_entry_id`) e dados da live: data, link da transmissão, link do ingresso, preço, % do elenco, link da gravação.
+  - `public.call_vote_counts(call_id)`: totais públicos só com o edital encerrado (admin vê antes). `public.get_call_cast(call_id)`: elenco escolhido, público a partir da votação.
+- **E-mail confirmado** (D10): checado na API pelo Clerk (`lib/auth/email-verified.ts`).
+- **API**: router `votes` (`getEntry`, `results`, `myVote`, `vote`); `admin.callResults` e `admin.setCallResult`.
+- **Telas**:
+  - `/editais/[slug]/r/[entryId]`: link compartilhável de cada roteiro, com prévia (Open Graph: título, logline, capa), elenco com players e o voto em até 3 passos (V1 cadastro/login com volta para a página → V2 documento, se faltar → V3 voto + "chame mais gente"). Fica fora da área logada, então quem chega pelo link não cai no onboarding.
+  - Botão "Compartilhar minha participação" (compartilhamento nativo no celular, copiar link e WhatsApp) para o roteirista (inscrição aprovada) e para o intérprete escolhido no elenco.
+  - Página do edital: na votação, cada roteiro leva ao voto; encerrado, bloco do vencedor (E10) com elenco, live, ingresso e gravação, e os votos por roteiro.
+  - Admin (A5): votos por roteiro, escolha do vencedor e dados da live/gravação.
+- **Fase 6 (pagamento)**: a live, o ingresso e a gravação são links externos por enquanto. Opções e decisões em `docs/rfc/RFC-007-pagamento-live.md`.
+
+---
+
+## 10. Pendências
+
+Lista única do que ficou para resolver, atualizada a cada fase.
+
+| # | Fase | Pendência | Quem |
+| :- | :--- | :-------- | :--- |
+| P1 | 1–3 | Aplicar as migrações `0021`, `0022`, `0023` (`yarn db:migrate`) | Time (acesso ao banco) |
+| P2 | 2 | Restringir a leitura pública do prefixo `interpreters/` no S3/CloudFront (o bucket é público via CDN) | Infra |
+| P3 | 2 | Configurar `RESEND_FROM_EMAIL` com domínio verificado no Resend | Infra |
+| P4 | 2 | Texto definitivo do termo de imagem e voz (`CONSENT_TEXT`) | Jurídico / produto |
+| P5 | 2 | Cadastrar os admins: `insert into admins (user_id) values ('<users.id>')` | Time |
+| P6 | 3 | Entrada para "Editais" na navegação principal (hoje só rodapé, fim do onboarding e menu do admin) — decidir no design | Design |
+| P7 | 3 | E-mails de inscrição aprovada/recusada para o roteirista (hoje só o status na página) | Dev (próxima rodada) |
+| P8 | 3 | Upload de banner/logos do edital (parceiros FRAPA/ABRA/EBAC) — hoje só texto | Dev + design |
+| P9 | 3 | Fases mudam só manualmente; avaliar avanço automático pelas datas | Produto |
+| P10 | 1–5 | Validar os fluxos no app rodando (este ambiente não tem chaves do Clerk/Supabase/S3) | Time / QA |
+| P11 | 4 | Aplicar a migração `0024` | Time (acesso ao banco) |
+| P12 | 4 | E-mails de casting: finalista, escolhido(a) no elenco, não selecionado | Dev (próxima rodada) |
+| P13 | 4 | Tipo de mídia do take é livre (vídeo ou áudio); decidir se personagem só de atuação exige vídeo | Produto |
+| P14 | 4 | Takes e apresentações substituídos continuam no S3 (não há limpeza dos arquivos antigos) | Dev |
+| P15 | 5 | Aplicar a migração `0025` | Time (acesso ao banco) |
+| P16 | 5 | Desenhar no Figma as telas do voto (V1–V3), o botão de compartilhar e a página do roteiro no edital | Design |
+| P17 | 5 | Exigir e-mail confirmado no cadastro do Clerk (Email verification "required") para quem vota por e-mail; conferir no painel do Clerk | Time (Clerk) |
+| P18 | 5 | Atribuição de compartilhamento (`?ref=`) e ranking de quem trouxe votos — não implementado | Produto |
+| P19 | 5 | Quem entra pelo link de voto vê o onboarding completo na próxima visita ao feed (redirect), não um convite leve | Produto / dev |
+| P20 | 5 | Antifraude além de "1 voto por documento + e-mail": captcha, limite por IP | Produto / dev |
+| P21 | 6 | Decidir provedor de pagamento, nota fiscal e repasse (RFC-007) | Negócio |
