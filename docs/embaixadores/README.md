@@ -178,24 +178,24 @@ Três grupos na página, cada item com logo + nome + link:
 
 | Nome | Link | Logo |
 | :--- | :--- | :--- |
-| ABRA — Associação Brasileira de Autores Roteiristas | pendente | pendente |
+| ABRA — Associação Brasileira de Autores Roteiristas | https://www.abra.art.br/ | pendente |
 
 ## Apoiamos
 
 | Nome | Link | Logo |
 | :--- | :--- | :--- |
-| FRAPA — Festival de Roteiro Audiovisual de Porto Alegre | pendente | pendente |
+| FRAPA — Festival de Roteiro Audiovisual de Porto Alegre | https://frapa.art.br/ | pendente |
 
 ## Parceiros (empresas)
 
 | Nome | Link | Logo | Descrição |
 | :--- | :--- | :--- | :--- |
-| Pomodoro Studios | https://www.instagram.com/pomodorostudios | pendente | pendente |
+| Pomodoro Studios | https://www.pomodorostudios.art/ | `logos/pomodoro-studios-branco.png` (262×62, só versão para fundo escuro) | pendente |
 
 **Pendências:**
-- [ ] Nome oficial: "Pomodoro Estúdio" ou "Pomodoro Studios" (o @ é pomodorostudios)
-- [ ] Logo em SVG ou PNG transparente, versões clara e escura
-- [ ] Site próprio, se houver (preferível ao Instagram como link principal)
+- [x] Nome oficial: Pomodoro Studios (como no logo)
+- [ ] Logo da Pomodoro em SVG ou PNG maior, e versão para fundo claro
+- [x] Site próprio: pomodorostudios.art (Instagram: @pomodorostudios)
 - [ ] Uma linha sobre o que fazem e qual é a parceria
 - [ ] Confirmar os nomes por extenso de ABRA e FRAPA
 - [ ] Logos oficiais de ABRA e FRAPA (pedir às próprias instituições, com as regras de uso)
