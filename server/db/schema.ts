@@ -233,6 +233,144 @@ export const interpreterProfiles = pgTable(
   ],
 )
 
+// ── Script calls / editais (RFC-006 phase 3) ─────────────────────────────────
+// Created by admins. A call moves through phases by hand (admin "advance
+// phase"); the phase gates what users can do (enter scripts, send castings,
+// vote). Drafts are visible to admins only.
+
+export const callPhaseEnum = pgEnum('call_phase', ['draft', 'submissions', 'casting', 'curation', 'voting', 'finished'])
+
+export const calls = pgTable(
+  'calls',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: text('slug').notNull().unique(),
+    title: text('title').notNull(),
+    description: text('description'),
+    partner: text('partner'),
+    rules: text('rules'),
+    phase: callPhaseEnum('phase').default('draft').notNull(),
+    // Informative schedule shown on the call page; phases still change by hand.
+    submissionsEndAt: timestamp('submissions_end_at'),
+    castingEndAt: timestamp('casting_end_at'),
+    votingStartAt: timestamp('voting_start_at'),
+    votingEndAt: timestamp('voting_end_at'),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  () => [
+    pgPolicy('Published calls are publicly readable', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`phase <> 'draft' or (select public.is_admin())`,
+    }),
+    pgPolicy('Admins manage calls', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`(select public.is_admin())`,
+      withCheck: sql`(select public.is_admin())`,
+    }),
+  ],
+)
+
+// A published script entered in a call. Reviewed by admins; only approved
+// entries are public. Authors enter (pending) and withdraw while the call is
+// open for submissions.
+export const callEntries = pgTable(
+  'call_entries',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    callId: uuid('call_id')
+      .notNull()
+      .references(() => calls.id, { onDelete: 'cascade' }),
+    scriptId: uuid('script_id')
+      .notNull()
+      .references(() => scripts.id, { onDelete: 'cascade' }),
+    authorId: uuid('author_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: reviewStatusEnum('status').default('pending').notNull(),
+    reviewReason: text('review_reason'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('call_entries_call_script_unique').on(table.callId, table.scriptId),
+    index('call_entries_author_idx').on(table.authorId),
+    pgPolicy('Approved entries are public, own and admin always', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`status = 'approved' or (select public.current_user_id()) = author_id or (select public.is_admin())`,
+    }),
+    pgPolicy('Authors enter their published scripts while submissions are open', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'insert',
+      withCheck: sql`(select public.current_user_id()) = author_id and status = 'pending' and review_reason is null
+        and exists(select 1 from scripts s where s.id = script_id and s.author_id = call_entries.author_id and s.status = 'published')
+        and exists(select 1 from calls c where c.id = call_id and c.phase = 'submissions')`,
+    }),
+    pgPolicy('Authors withdraw pending entries while submissions are open', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'delete',
+      using: sql`(select public.current_user_id()) = author_id and status = 'pending'
+        and exists(select 1 from calls c where c.id = call_id and c.phase = 'submissions')`,
+    }),
+    pgPolicy('Admins review entries', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'update',
+      using: sql`(select public.is_admin())`,
+      withCheck: sql`(select public.is_admin())`,
+    }),
+  ],
+)
+
+// Characters to be cast for an entry. A snapshot seeded from the script's
+// characters: script_characters is rewritten on every script edit (new ids),
+// which would orphan castings. Editable by the author while submissions are open.
+export const callCharacters = pgTable(
+  'call_characters',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    entryId: uuid('entry_id')
+      .notNull()
+      .references(() => callEntries.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    apparentAge: text('apparent_age'),
+    gender: text('gender'),
+    traits: text('traits').array().default(sql`'{}'::text[]`).notNull(),
+    modalities: interpreterModalityEnum('modalities').array().notNull(),
+    // Where to find the character in the script (page/scene), for the casting.
+    reference: text('reference'),
+    sortOrder: integer('sort_order').default(0).notNull(),
+  },
+  (table) => [
+    index('call_characters_entry_idx').on(table.entryId),
+    check('call_characters_modalities_check', sql`cardinality(${table.modalities}) between 1 and 2`),
+    pgPolicy('Call characters follow entry visibility', {
+      as: 'permissive',
+      to: 'public',
+      for: 'select',
+      using: sql`exists(select 1 from call_entries e where e.id = entry_id)`,
+    }),
+    pgPolicy('Authors edit characters while submissions are open', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'all',
+      using: sql`exists(select 1 from call_entries e join calls c on c.id = e.call_id
+        where e.id = entry_id and e.author_id = (select public.current_user_id()) and c.phase = 'submissions')`,
+      withCheck: sql`exists(select 1 from call_entries e join calls c on c.id = e.call_id
+        where e.id = entry_id and e.author_id = (select public.current_user_id()) and c.phase = 'submissions')`,
+    }),
+  ],
+)
+
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
 export const scriptStatusEnum = pgEnum('script_status', ['draft', 'published'])

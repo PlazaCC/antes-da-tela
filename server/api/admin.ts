@@ -1,4 +1,5 @@
 import { notifyInterpreterReview } from '@/lib/email/interpreter-review'
+import { callUpsertSchema, reviewEntrySchema, setCallPhaseSchema } from '@/lib/validators/calls'
 import { interpreterReviewSchema } from '@/lib/validators/interpreter'
 import { adminProcedure, createTRPCRouter } from '@/trpc/init'
 import { z } from 'zod'
@@ -15,5 +16,29 @@ export const adminRouter = createTRPCRouter({
     const result = await ctx.interpretersService.review(ctx.user!.id, input)
     await notifyInterpreterReview({ userId: input.userId, status: input.decision, reason: input.reason })
     return result
+  }),
+
+  listCalls: adminProcedure.query(async ({ ctx }) => {
+    return ctx.callsAdminService.listCalls()
+  }),
+
+  getCall: adminProcedure.input(z.object({ id: z.uuid() })).query(async ({ input, ctx }) => {
+    return ctx.callsAdminService.getCall(input.id)
+  }),
+
+  upsertCall: adminProcedure.input(callUpsertSchema).mutation(async ({ input, ctx }) => {
+    return ctx.callsAdminService.upsertCall(ctx.user!.id, input)
+  }),
+
+  setCallPhase: adminProcedure.input(setCallPhaseSchema).mutation(async ({ input, ctx }) => {
+    return ctx.callsAdminService.setPhase(input.callId, input.phase)
+  }),
+
+  listEntries: adminProcedure.input(z.object({ callId: z.uuid() })).query(async ({ input, ctx }) => {
+    return ctx.callsAdminService.listEntries(input.callId)
+  }),
+
+  reviewEntry: adminProcedure.input(reviewEntrySchema).mutation(async ({ input, ctx }) => {
+    return ctx.callsAdminService.reviewEntry(input)
   }),
 })

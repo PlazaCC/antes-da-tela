@@ -2,7 +2,7 @@
 
 | Campo  | Valor                                                                  |
 | :----- | :--------------------------------------------------------------------- |
-| Status | Decisões fechadas — Fases 1 (onboarding) e 2 (intérpretes) implementadas; fases 3–6 pendentes |
+| Status | Decisões fechadas — Fases 1 a 3 implementadas; fases 4–6 em andamento |
 | Data   | 2026-10-16                                                             |
 | Escopo | Onboarding, perfil, intérpretes, editais, casting, votação, admin      |
 | Figma  | [Antes da Tela — node 114-40](https://www.figma.com/design/zStThNjhc7D549LiLBx1Pp/Antes-da-tela?node-id=114-40) |
@@ -306,7 +306,30 @@ Cada fase vira uma task em `docs/poc/tasks/` via `/create-poc-task`.
 - O bucket S3 é servido publicamente (CDN). Restringir a leitura pública do prefixo `interpreters/` (policy do bucket / CloudFront), senão quem descobrir a chave do arquivo acessa sem a URL assinada.
 - Configurar `RESEND_FROM_EMAIL` com um domínio verificado no Resend.
 
-### Notas para as próximas fases
+### Fase 3 — Editais e inscrição (feita)
 
-- **Personagens**: `script_characters` (migração 0020, etapa opcional da publicação) já guarda nome, descrição, idade aparente, gênero e características. A Fase 3 deve reaproveitá-la em vez de criar `call_characters`; falta só a modalidade (atuar/narrar) e a cena de referência.
-- **Fluxo de voto (§8)**: precisa de uma exceção no `redirectToOnboardingIfNeeded` para quem chega pelo link de compartilhamento.
+- **Banco** (`drizzle/0023_calls.sql`):
+  - `calls` (slug, título, parceiro, descrição, regulamento, fase, datas informativas). Fase manual: `draft → submissions → casting → curation → voting → finished`. Rascunho só para admin.
+  - `call_entries` (roteiro publicado inscrito; `pending/approved/rejected`). RLS: o autor inscreve só roteiro próprio publicado e só com o edital em `submissions`; retira enquanto pendente; aprovadas são públicas; admin revisa.
+  - `call_characters`: **cópia** dos personagens por inscrição (com modalidade e cena de referência), preenchida a partir de `script_characters`. Não reaproveita `script_characters` porque essa tabela é regravada a cada edição do roteiro (ids novos), o que apagaria os castings. Editável pelo autor só durante `submissions`.
+- **API**: router `calls` (`list`, `getBySlug`, `myEntries`, `eligibleScripts`, `enter`, `updateCharacters`, `withdraw`); `admin` ganhou `listCalls`, `getCall`, `upsertCall`, `setCallPhase`, `listEntries`, `reviewEntry`.
+- **Telas**: `/editais` (E1), `/editais/[slug]` (E2: cronograma, regulamento, roteiros aprovados, ação da fase), `/editais/[slug]/inscricao` (E3–E5: escolher roteiro, personagens, acompanhar, editar, retirar), `/admin/editais` (A2: lista, criar, editar, avançar fase) e `/admin/editais/[id]` (A3: aprovar/recusar inscrições). Link "Editais" no rodapé e no fim do onboarding.
+
+---
+
+## 10. Pendências
+
+Lista única do que ficou para resolver, atualizada a cada fase.
+
+| # | Fase | Pendência | Quem |
+| :- | :--- | :-------- | :--- |
+| P1 | 1–3 | Aplicar as migrações `0021`, `0022`, `0023` (`yarn db:migrate`) | Time (acesso ao banco) |
+| P2 | 2 | Restringir a leitura pública do prefixo `interpreters/` no S3/CloudFront (o bucket é público via CDN) | Infra |
+| P3 | 2 | Configurar `RESEND_FROM_EMAIL` com domínio verificado no Resend | Infra |
+| P4 | 2 | Texto definitivo do termo de imagem e voz (`CONSENT_TEXT`) | Jurídico / produto |
+| P5 | 2 | Cadastrar os admins: `insert into admins (user_id) values ('<users.id>')` | Time |
+| P6 | 3 | Entrada para "Editais" na navegação principal (hoje só rodapé, fim do onboarding e menu do admin) — decidir no design | Design |
+| P7 | 3 | E-mails de inscrição aprovada/recusada para o roteirista (hoje só o status na página) | Dev (próxima rodada) |
+| P8 | 3 | Upload de banner/logos do edital (parceiros FRAPA/ABRA/EBAC) — hoje só texto | Dev + design |
+| P9 | 3 | Fases mudam só manualmente; avaliar avanço automático pelas datas | Produto |
+| P10 | 1–3 | Validar os fluxos no app rodando (este ambiente não tem chaves do Clerk/Supabase/S3) | Time / QA |

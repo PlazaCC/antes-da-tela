@@ -1,3 +1,4 @@
+import { AdminNav } from '@/components/admin/admin-nav'
 import { isCurrentUserAdmin } from '@/lib/auth/admin'
 import { getAppUser } from '@/lib/auth/app-user'
 import type { Metadata } from 'next'
@@ -19,5 +20,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
   if (!(await isCurrentUserAdmin())) notFound()
 
-  return <div className='flex-1 bg-bg-base'>{children}</div>
+  return (
+    <div className='flex-1 bg-bg-base'>
+      <AdminNav />
+      {children}
+    </div>
+  )
 }
