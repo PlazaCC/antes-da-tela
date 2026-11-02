@@ -11,12 +11,17 @@ Fluxo: `feature/*` → PR para `dev` → testa no domínio de dev → PR `dev` �
 ## Como o deploy acontece
 
 Pelo GitHub Actions (`.github/workflows/deploy.yml`), a cada push em `dev` ou `main`:
-`vercel pull` (variáveis do ambiente) → `vercel build` → `vercel deploy --prebuilt`.
+**migrações** (`yarn db:migrate:verbose` no banco do ambiente) → `vercel pull` (variáveis do ambiente) →
+`vercel build` → `vercel deploy --prebuilt`.
 
 A integração Git da Vercel está desligada (`vercel.json` → `git.deploymentEnabled: false`): ela recusa
 commits de autores que não são membros do time na Vercel. O deploy pelo token não depende do autor do commit.
 
-Migrações **não** rodam no deploy: aplique com `yarn db:migrate:verbose` no banco do ambiente antes do merge.
+**Migrações rodam no deploy**, antes do build, com o secret `DATABASE_URL_UNPOOLED` do ambiente do GitHub
+(`Production` → banco de prod, `Preview` → banco de dev). Se a migração falhar, o deploy para e nada é publicado:
+investigue com `yarn db:migrate:verbose` e corrija à mão (sem contornos — ver `CLAUDE.md`). Em produção, o run espera
+a aprovação do ambiente `Production` antes de migrar e publicar. Use a string **Session pooler** do Supabase
+(porta 5432): os runners do GitHub não têm IPv6, e a "Direct connection" do plano gratuito só funciona por IPv6.
 
 ## Configuração (uma vez)
 
@@ -34,6 +39,8 @@ Migrações **não** rodam no deploy: aplique com `yarn db:migrate:verbose` no b
 - O job usa os ambientes do GitHub **`Production`** (branch `main`) e **`Preview`** (branch `dev`).
 - Secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` e `SENTRY_AUTH_TOKEN`: no nível do repositório
   (*Settings → Secrets and variables → Actions*) ou repetidos em cada ambiente (*Settings → Environments*).
+- Secret `DATABASE_URL_UNPOOLED` **em cada ambiente** (*Environments → Production* = banco de prod;
+  *Environments → Preview* = banco de dev), com a string Session pooler do Supabase.
 - Variable (não secret) `VERCEL_DEV_DOMAIN` = `dev.antesdatela.com.br` (o deploy de `dev` é apontado para ele).
 - Recomendado: *Environments → Production* com **Required reviewers** e *Deployment branches* = `main`.
 
@@ -62,7 +69,8 @@ Cadastre cada uma duas vezes: **Production** (valor de prod) e **Preview → bra
 | `RESEND_FROM_EMAIL` | `Antes da Tela <nao-responda@antesdatela.com>` | `Antes da Tela (dev) <nao-responda@antesdatela.com>` | domínio verificado no Resend |
 | `ENABLE_EXPERIMENTAL_COREPACK` | `1` | `1` | — |
 
-Só locais (não vão para a Vercel): `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `E2E_*`, `TEST_RESEND_TO`.
+Não vão para a Vercel: `DATABASE_URL`, `DATABASE_URL_UNPOOLED` (local + secret de ambiente no GitHub), `E2E_*`, `TEST_RESEND_TO`.
+O `.env.example` lista todas as variáveis, agrupadas por serviço e marcadas com onde cada uma vive.
 
 **Atenção — variáveis "Sensitive":** o build roda no GitHub Actions e recebe as variáveis por `vercel pull`, que **não**
 devolve valores marcados como *Sensitive*. Por isso:

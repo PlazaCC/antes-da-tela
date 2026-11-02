@@ -1,5 +1,6 @@
 name: Deploy (Vercel)
 
+# Each run: database migrations → Vercel build → deploy.
 # Deploys are made here, with a Vercel token, instead of Vercel's Git
 # integration: commits authored by people/bots outside the Vercel team are
 # refused there. Only `dev` (preview, dev services) and `main` (production)
@@ -43,6 +44,34 @@ jobs:
         run: |
           corepack enable
           corepack prepare yarn@4.13.0 --activate
+
+      - name: Cache Yarn and node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            .yarn/cache
+            .yarn/install-state.gz
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      # Migrations run before the new code goes live (they are additive), against
+      # the database of this environment. A failure stops the deploy — fix by hand
+      # (CLAUDE.md: no workarounds). Secret DATABASE_URL_UNPOOLED lives in each
+      # GitHub environment (Production / Preview); use the Session pooler URL.
+      - name: Apply database migrations
+        env:
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+        run: |
+          if [ -z "$DATABASE_URL_UNPOOLED" ]; then
+            echo "::error::Secret DATABASE_URL_UNPOOLED is not set for the ${{ github.ref_name == 'main' && 'Production' || 'Preview' }} environment"
+            exit 1
+          fi
+          yarn db:migrate:verbose
 
       - name: Pull Vercel settings and env vars
         run: npx --yes $VERCEL_CLI pull --yes --environment=$VERCEL_TARGET --git-branch=${{ github.ref_name }} --token=$VERCEL_TOKEN
