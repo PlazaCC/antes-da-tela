@@ -529,7 +529,10 @@ export const scripts = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     publishedAt: timestamp('published_at'),
   },
-  () => [
+  (table) => [
+    // Author dashboard / profile lists, and the published feed ordered by date.
+    index('scripts_author_idx').on(table.authorId),
+    index('scripts_status_published_at_idx').on(table.status, table.publishedAt),
     pgPolicy('Published scripts are publicly readable', {
       as: 'permissive',
       to: 'public',
@@ -671,7 +674,9 @@ export const comments = pgTable(
     updatedAt: timestamp('updated_at'),
     deletedAt: timestamp('deleted_at'), // soft delete
   },
-  () => [
+  (table) => [
+    // Page-scoped comment lists in the reader and per-page counts for authors.
+    index('comments_script_page_idx').on(table.scriptId, table.pageNumber).where(sql`deleted_at is null`),
     pgPolicy('Comments on published scripts are publicly readable', {
       as: 'permissive',
       to: 'public',
@@ -690,6 +695,39 @@ export const comments = pgTable(
       for: 'all',
       using: sql`(select public.current_user_id()) = author_id`,
       withCheck: sql`(select public.current_user_id()) = author_id`,
+    }),
+  ],
+)
+
+// ── Script Reads ──────────────────────────────────────────────────────────────
+
+// One row per signed-in reader per script: how far they got in the PDF.
+// Written only through record_script_read() and read by the author only as
+// aggregates (get_script_read_stats / get_author_read_counts); readers never
+// see each other and authors never see who read.
+export const scriptReads = pgTable(
+  'script_reads',
+  {
+    scriptId: uuid('script_id')
+      .notNull()
+      .references(() => scripts.id, { onDelete: 'cascade' }),
+    readerId: uuid('reader_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    pagesTotal: integer('pages_total').notNull(),
+    maxPage: integer('max_page').notNull(),
+    firstReadAt: timestamp('first_read_at').defaultNow().notNull(),
+    lastReadAt: timestamp('last_read_at').defaultNow().notNull(),
+    completedAt: timestamp('completed_at'),
+  },
+  (table) => [
+    primaryKey({ columns: [table.scriptId, table.readerId] }),
+    check('script_reads_pages_range', sql`${table.maxPage} >= 1 AND ${table.maxPage} <= ${table.pagesTotal}`),
+    pgPolicy('Readers see their own reads', {
+      as: 'permissive',
+      to: 'authenticated',
+      for: 'select',
+      using: sql`(select public.current_user_id()) = reader_id`,
     }),
   ],
 )
@@ -743,6 +781,8 @@ export const userFollows = pgTable(
   },
   (table) => [
     primaryKey({ columns: [table.followerId, table.followeeId] }),
+    // Follower counts look up by followee; the primary key only covers follower first.
+    index('user_follows_followee_idx').on(table.followeeId),
     pgPolicy('Follow relationships are publicly readable', {
       as: 'permissive',
       to: 'public',

@@ -79,6 +79,17 @@ jobs:
       - name: Pull Vercel settings and env vars
         run: npx --yes $VERCEL_CLI pull --yes --environment=$VERCEL_TARGET $GIT_BRANCH_FLAG --token=$VERCEL_TOKEN
 
+      # `vercel pull` writes "[SENSITIVE]" for Sensitive variables. NEXT_PUBLIC_*
+      # are inlined in the bundle at build time, so the site would ship with
+      # that literal instead of the key: stop here and name the variables.
+      - name: Check public env vars
+        run: |
+          sensitive=$(grep -oE '^NEXT_PUBLIC_[A-Z0-9_]+="\[SENSITIVE\]"' ".vercel/.env.$VERCEL_TARGET.local" | cut -d= -f1 || true)
+          if [ -n "$sensitive" ]; then
+            echo "::error::Vercel ($VERCEL_TARGET) has NEXT_PUBLIC_* variables marked Sensitive, which the build cannot read: $(echo $sensitive). Recreate them without Sensitive (docs/DEPLOY.md)."
+            exit 1
+          fi
+
       - name: Build
         # Vercel "Sensitive" variables are not returned by `vercel pull`: the
         # Sentry source-map upload token comes from GitHub secrets instead.
@@ -90,7 +101,10 @@ jobs:
 
       - name: Deploy
         id: deploy
-        run: echo "url=$(npx --yes $VERCEL_CLI deploy --prebuilt $PROD_FLAG --token=$VERCEL_TOKEN)" >> "$GITHUB_OUTPUT"
+        # Assign first: inside `echo "$(...)"` a failed deploy did not fail the step.
+        run: |
+          url=$(npx --yes $VERCEL_CLI deploy --prebuilt $PROD_FLAG --token=$VERCEL_TOKEN)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
 
       # Preview deployments get a random URL: point the fixed dev domain at it.
       - name: Alias dev domain

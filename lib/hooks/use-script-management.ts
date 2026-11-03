@@ -36,15 +36,14 @@ export function useScriptManagement() {
   }
 
   const scripts = data?.scripts ?? []
-  const totalScripts = data?.totalScripts ?? 0
-  const avgRating = data?.avgRating ?? null
-  const totalComments = scripts.reduce((sum, s) => sum + s.commentCount, 0)
 
   return {
     scripts,
-    totalScripts,
-    avgRating,
-    totalComments,
+    publishedScripts: data?.publishedScripts ?? 0,
+    avgRating: data?.avgRating ?? null,
+    ratingCount: data?.ratingCount ?? 0,
+    totalComments: data?.totalComments ?? 0,
+    readers: data?.readers ?? { unique: 0, newLast30: 0, newPrev30: 0 },
     isLoading,
     isDeleting,
     deleteScriptId,

@@ -32,9 +32,9 @@ export function FeedClient() {
   const { genres, ageRatings, toggleGenre, clearFilters, apply } =
     useFilterParams()
 
-  const handlePreviewOpen = (scriptId: string) => {
+  const handlePreviewOpen = (scriptId: string, genre: string | null) => {
     setPreviewId(scriptId)
-    posthog.capture('script_preview_opened', { script_id: scriptId })
+    posthog.capture('script_preview_opened', { script_id: scriptId, genre })
   }
 
   const handleGenreFilter = (genre: Genre) => {
@@ -257,7 +257,7 @@ export function FeedClient() {
                   ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                   pages={script.script_files?.[0]?.page_count ?? null}
                   coverUrl={getStorageUrl('avatars', script.cover_path)}
-                  onPreview={() => handlePreviewOpen(script.id)}
+                  onPreview={() => handlePreviewOpen(script.id, script.genre)}
                 />
               ))}
             </div>
@@ -286,7 +286,7 @@ export function FeedClient() {
                     ratingTotal={ratingsMap?.[script.id]?.total ?? 0}
                     pages={script.script_files?.[0]?.page_count ?? null}
                     coverUrl={getStorageUrl('avatars', script.cover_path)}
-                    onPreview={() => handlePreviewOpen(script.id)}
+                    onPreview={() => handlePreviewOpen(script.id, script.genre)}
                   />
                 ))}
               </div>

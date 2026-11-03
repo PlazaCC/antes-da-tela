@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { RatingsService } from '@/server/services/ratings.service'
 import { UsersService } from '@/server/services/users.service'
 import { ScriptsService } from '@/server/services/scripts.service'
+import { ScriptInsightsService } from '@/server/services/script-insights.service'
 import { CommentsService } from '@/server/services/comments.service'
 import { OnboardingService } from '@/server/services/onboarding.service'
 import { InterpretersService } from '@/server/services/interpreters.service'
@@ -85,6 +86,8 @@ function makeSupabaseMock(overrides: Record<string, unknown> = {}, hasDocument =
 
   return {
     from: vi.fn((table: string) => fromMap[table] ?? {}),
+    // current_user_id(): signed in by default
+    rpc: vi.fn(async () => ({ data: USER_ID, error: null })),
     auth: {
       getUser: vi.fn(async () => ({ data: { user: MOCK_USER }, error: null })),
     },
@@ -99,6 +102,7 @@ function makeCtx(supabase: SupabaseClient, user = MOCK_USER) {
     ratingsService: new RatingsService(supabase),
     usersService: new UsersService(supabase),
     scriptsService: new ScriptsService(supabase),
+    scriptInsightsService: new ScriptInsightsService(supabase),
     commentsService: new CommentsService(supabase),
     onboardingService: new OnboardingService(supabase),
     interpretersService: new InterpretersService(supabase),
@@ -184,6 +188,7 @@ describe('scriptsRouter.getById', () => {
 
   it('returns null when the script does not exist', async () => {
     const supabase = {
+      rpc: vi.fn(async () => ({ data: USER_ID, error: null })),
       from: vi.fn(() => ({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -196,6 +201,36 @@ describe('scriptsRouter.getById', () => {
     // NIL UUID is a valid UUID format accepted by Zod and always returns no rows in DB
     const result = await caller.scripts.getById({ id: '00000000-0000-0000-0000-000000000000' })
     expect(result).toBeNull()
+  })
+
+  it('does not ask for file keys when signed out (reading requires an account)', async () => {
+    const select = vi.fn(() => ({
+      eq: vi.fn(() => ({ maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })) })),
+    }))
+    const supabase = {
+      rpc: vi.fn(async () => ({ data: null, error: null })),
+      from: vi.fn(() => ({ select })),
+    } as unknown as SupabaseClient
+    const caller = router.createCaller(makeCtx(supabase, null as never))
+    await caller.scripts.getById({ id: SCRIPT_ID })
+    const columns = (select.mock.calls[0] as unknown as [string])[0]
+    expect(columns).not.toMatch(/storage_path|pitch_deck_path/)
+    expect(columns).toMatch(/script_files\(id, page_count/)
+  })
+
+  it('asks for file keys when signed in', async () => {
+    const select = vi.fn(() => ({
+      eq: vi.fn(() => ({ maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })) })),
+    }))
+    const supabase = {
+      rpc: vi.fn(async () => ({ data: USER_ID, error: null })),
+      from: vi.fn(() => ({ select })),
+    } as unknown as SupabaseClient
+    const caller = router.createCaller(makeCtx(supabase))
+    await caller.scripts.getById({ id: SCRIPT_ID })
+    const columns = (select.mock.calls[0] as unknown as [string])[0]
+    expect(columns).toMatch(/pitch_deck_path/)
+    expect(columns).toMatch(/script_files\(id, storage_path/)
   })
 })
 

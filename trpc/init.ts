@@ -9,6 +9,7 @@ import { ZodError } from 'zod'
 import { RatingsService } from '@/server/services/ratings.service'
 import { UsersService } from '@/server/services/users.service'
 import { ScriptsService } from '@/server/services/scripts.service'
+import { ScriptInsightsService } from '@/server/services/script-insights.service'
 import { CommentsService } from '@/server/services/comments.service'
 import { CallsAdminService } from '@/server/services/calls-admin.service'
 import { CallsService } from '@/server/services/calls.service'
@@ -34,6 +35,7 @@ export const createTRPCContext = async (opts: {
   ratingsService: RatingsService
   usersService: UsersService
   scriptsService: ScriptsService
+  scriptInsightsService: ScriptInsightsService
   commentsService: CommentsService
   onboardingService: OnboardingService
   interpretersService: InterpretersService
@@ -56,6 +58,7 @@ export const createTRPCContext = async (opts: {
     ratingsService: new RatingsService(supabase),
     usersService: new UsersService(supabase),
     scriptsService: new ScriptsService(supabase),
+    scriptInsightsService: new ScriptInsightsService(supabase),
     commentsService: new CommentsService(supabase),
     onboardingService: new OnboardingService(supabase),
     interpretersService: new InterpretersService(supabase),

@@ -10,7 +10,9 @@ import {
 import { PdfFullscreenDialog } from '@/components/pdf-viewer/pdf-fullscreen-dialog'
 import { CharactersSheet } from '@/components/script-page/characters-sheet'
 import { ScriptPageSubHeader } from '@/components/script-page/script-page-sub-header'
+import { ScriptReadTracker } from '@/components/script-page/script-read-tracker'
 import { ScriptSidePanels } from '@/components/script-page/script-side-panels'
+import { SignInToRead } from '@/components/script-page/sign-in-to-read'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,7 +115,11 @@ export function ScriptPageClient({
 
   const handleRate = (value: number) => {
     rateMutation.mutate({ scriptId: script!.id, score: value })
-    posthog.capture('script_rated', { script_id: script!.id, score: value })
+    posthog.capture('script_rated', {
+      script_id: script!.id,
+      genre: script!.genre,
+      score: value,
+    })
   }
 
   const handleDelete = () => {
@@ -133,6 +139,8 @@ export function ScriptPageClient({
 
   const isOwner = !!currentUserId && currentUserId === script.author?.id
   const hasAudio = audios.length > 0
+  // Signed-out visitors get the file rows without storage keys (no pdfUrl), see ScriptsService.getById.
+  const hasPdf = (script.script_files?.length ?? 0) > 0
   const characters = script.script_characters ?? []
 
   const subHeaderProps = {
@@ -161,6 +169,12 @@ export function ScriptPageClient({
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden bg-bg-base">
       {pdfUrl ? (
         <PdfViewerProvider url={pdfUrl} syncToStore>
+          <ScriptReadTracker
+            scriptId={script.id}
+            genre={script.genre}
+            isOwner={isOwner}
+            isSignedIn={!!currentUserId}
+          />
           <ScriptPageSubHeader
             {...subHeaderProps}
             extra={
@@ -183,16 +197,23 @@ export function ScriptPageClient({
         <>
           <ScriptPageSubHeader {...subHeaderProps} />
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-5 py-12 text-center">
-              <Film className="h-12 w-12 text-text-muted" />
-              <p className="font-mono text-label-mono-caps uppercase tracking-wider text-text-muted">
-                PDF não disponível
-              </p>
-              <p className="max-w-sm text-body-small text-text-secondary">
-                O arquivo deste roteiro não está disponível para leitura no
-                momento.
-              </p>
-            </div>
+            {!currentUserId && hasPdf ? (
+              <SignInToRead
+                scriptId={script.id}
+                pageCount={script.script_files?.[0]?.page_count ?? null}
+              />
+            ) : (
+              <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-5 py-12 text-center">
+                <Film className="h-12 w-12 text-text-muted" />
+                <p className="font-mono text-label-mono-caps uppercase tracking-wider text-text-muted">
+                  PDF não disponível
+                </p>
+                <p className="max-w-sm text-body-small text-text-secondary">
+                  O arquivo deste roteiro não está disponível para leitura no
+                  momento.
+                </p>
+              </div>
+            )}
           </div>
         </>
       )}
