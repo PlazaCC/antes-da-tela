@@ -9,7 +9,9 @@ import type {
   ScriptCreateInput,
   ScriptUpdateInput,
 } from "@/lib/validators/scripts";
+import type { AuthorReadCounts } from "@/lib/types/script-reads";
 import { getScriptPublishDefaults } from "@/server/domain/scripts";
+import { withReadCounts } from "@/server/services/script-insights.mappers";
 import { replaceScriptCharacters } from "@/server/services/script-characters";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError } from "@trpc/server";
@@ -473,12 +475,20 @@ export class ScriptsService {
   }
 
   async getById(id: string) {
+    // Reading requires an account: signed-out visitors cannot select the file
+    // keys (PDF, audio, pitch deck — column privileges in 0031), so ask only
+    // for what they may see. Their script page shows a sign-in prompt instead.
+    const { data: viewerId } = await this.supabase.rpc("current_user_id");
+    const keys = viewerId
+      ? { script: ", pitch_deck_path", file: "storage_path, " }
+      : { script: "", file: "" };
+
     const { data: script } = await this.supabase
       .from("scripts")
       .select(
-        "id, title, logline, synopsis, genre, subgenres, age_rating, bn_registration, is_featured, status, published_at, banner_path, cover_path, pitch_deck_path," +
-          " script_files(id, storage_path, page_count, file_size)," +
-          " audio_files(id, storage_path, title, description, sort_order, duration_seconds)," +
+        `id, title, logline, synopsis, genre, subgenres, age_rating, bn_registration, is_featured, status, published_at, banner_path, cover_path${keys.script},` +
+          ` script_files(id, ${keys.file}page_count, file_size),` +
+          ` audio_files(id, ${keys.file}title, description, sort_order, duration_seconds),` +
           " script_characters(id, name, description, apparent_age, gender, traits, sort_order)," +
           " author:users!author_id(id, name, image, bio)",
       )
@@ -664,13 +674,11 @@ export class ScriptsService {
   }
 
   async getDashboardMetrics(authorId: string): Promise<DashboardMetrics> {
-    const { data, error } = await this.supabase.rpc(
-      "get_author_dashboard_metrics",
-      {
-        p_author_id: authorId,
-      },
-    );
-
+    const [metrics, reads] = await Promise.all([
+      this.supabase.rpc("get_author_dashboard_metrics", { p_author_id: authorId }),
+      this.supabase.rpc("get_author_read_counts"),
+    ]);
+    const error = metrics.error ?? reads.error;
     if (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -678,7 +686,19 @@ export class ScriptsService {
       });
     }
 
-    return data as DashboardMetrics;
+    return withReadCounts(metrics.data, reads.data as AuthorReadCounts);
+  }
+
+  /** Records how far the signed-in reader got; ignored for drafts and the script's author. */
+  async recordRead(scriptId: string, page: number, pagesTotal: number): Promise<void> {
+    const { error } = await this.supabase.rpc("record_script_read", {
+      p_script_id: scriptId,
+      p_page: page,
+      p_pages_total: pagesTotal,
+    });
+    if (error) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: error.message });
+    }
   }
 
   async search(

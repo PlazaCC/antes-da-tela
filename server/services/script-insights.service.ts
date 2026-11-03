@@ -1,4 +1,5 @@
 import type { ScriptInsights } from '@/lib/types/script-insights'
+import { EMPTY_SCRIPT_READ_STATS, type ScriptReadStats } from '@/lib/types/script-reads'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { TRPCError } from '@trpc/server'
 import { buildScriptInsights } from './script-insights.mappers'
@@ -21,15 +22,16 @@ export class ScriptInsightsService {
       throw new TRPCError({ code: 'NOT_FOUND', message: 'Roteiro não encontrado.' })
     }
 
-    const [ratings, comments, reactions] = await Promise.all([
+    const [ratings, comments, reactions, reads] = await Promise.all([
       this.supabase.from('ratings').select('score').eq('script_id', scriptId),
       this.supabase.from('comments').select('page_number, author_id').eq('script_id', scriptId).is('deleted_at', null),
       this.supabase
         .from('comment_reactions')
         .select('emoji, user_id, comment:comments!inner(script_id)')
         .eq('comment.script_id', scriptId),
+      this.supabase.rpc('get_script_read_stats', { p_script_id: scriptId }),
     ])
-    const failed = ratings.error ?? comments.error ?? reactions.error
+    const failed = ratings.error ?? comments.error ?? reactions.error ?? reads.error
     if (failed) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: failed.message })
 
     const files = (script as Row).script_files
@@ -45,6 +47,7 @@ export class ScriptInsightsService {
       ratings: (ratings.data as Row[]).map((r) => ({ score: Number(r.score) })),
       comments: (comments.data as Row[]).map((c) => ({ pageNumber: c.page_number, authorId: c.author_id })),
       reactions: (reactions.data as Row[]).map((r) => ({ emoji: r.emoji, userId: r.user_id })),
+      reads: (reads.data as ScriptReadStats | null) ?? EMPTY_SCRIPT_READ_STATS,
     })
   }
 }
