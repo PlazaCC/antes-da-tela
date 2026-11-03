@@ -1,3 +1,4 @@
+import { LandingAmbassadors } from '@/components/landing/landing-ambassadors'
 import { LandingAudience } from '@/components/landing/landing-audience'
 import { LandingClientShell } from '@/components/landing/landing-client-shell'
 import { LandingFeatured } from '@/components/landing/landing-featured'
@@ -54,6 +55,7 @@ export default async function HomePage() {
           <LandingAudience />
           <LandingHowItWorks />
           <LandingFeatured />
+          <LandingAmbassadors />
           <LandingFinalCta />
         </main>
         <LandingFooter />

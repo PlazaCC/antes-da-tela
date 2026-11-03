@@ -31,6 +31,11 @@ export function usePreferencesForm(options: { onSaved?: () => void; source: 'onb
           formats: saved.formats.length,
           themes: saved.themes.length,
           goals: saved.goals.length,
+          // Lists for "most chosen" breakdowns; the counts above stay for existing insights.
+          selected_genres: saved.genres,
+          selected_formats: saved.formats,
+          selected_themes: saved.themes,
+          selected_goals: saved.goals,
         })
         void queryClient.invalidateQueries(trpc.onboarding.getPreferences.queryFilter())
         if (options.source === 'profile') toast.success('Preferências salvas.')
